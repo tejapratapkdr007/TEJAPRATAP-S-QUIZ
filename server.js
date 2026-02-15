@@ -242,7 +242,22 @@ app.post("/admin/reset-all", (req, res) => {
 
 // Root endpoint - serve the HTML app
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    const indexPath = path.join(__dirname, 'index.html');
+    console.log('Attempting to serve index.html from:', indexPath);
+    
+    res.sendFile(indexPath, (err) => {
+        if (err) {
+            console.error('Error serving index.html:', err);
+            console.error('File exists?', require('fs').existsSync(indexPath));
+            console.error('Directory contents:', require('fs').readdirSync(__dirname));
+            res.status(500).send(`
+                <h1>Error Loading Application</h1>
+                <p>Could not find index.html</p>
+                <p>Path attempted: ${indexPath}</p>
+                <p>Please contact administrator.</p>
+            `);
+        }
+    });
 });
 
 // API info endpoint
