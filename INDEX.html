@@ -1,0 +1,1441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEJAPRATAP'S QUIZ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #1E5BFF, #A84DFF);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        h1 {
+            color: #1E5BFF;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        h2 {
+            color: #764ba2;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .pin-format-info {
+            background: #e7f3ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #0066cc;
+            border-left: 4px solid #0066cc;
+        }
+
+        .media-box {
+            background: #fff8e1;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #ff9800;
+        }
+
+        .media-box h4 {
+            color: #ff9800;
+            margin-bottom: 10px;
+        }
+
+        .opinion-box {
+            background: #e8f5e9;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 3px solid #4caf50;
+        }
+
+        .opinion-box strong {
+            color: #2e7d32;
+        }
+
+        .media-preview {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 8px;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .login-section, .student-section, .teacher-section, .password-change-section, .teacher-login-section {
+            display: none;
+        }
+
+        .login-section.active, .student-section.active, .teacher-section.active, .password-change-section.active, .teacher-login-section.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"], input[type="password"], input[type="tel"], input[type="file"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #1E5BFF;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(30, 91, 255, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .secondary-btn {
+            background: #6c757d;
+        }
+
+        .warning-btn {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .danger-btn {
+            background: #dc3545;
+        }
+
+        .question-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #1E5BFF;
+        }
+
+        .question-box h3 {
+            color: #1E5BFF;
+            margin-bottom: 10px;
+        }
+
+        .answer-box {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .student-answer {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #e0e0e0;
+        }
+
+        .link-button {
+            color: #1E5BFF;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 15px;
+        }
+
+        .link-button:hover {
+            text-decoration: underline;
+        }
+
+        .success-msg {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin: 10px 0;
+        }
+
+        .error-msg {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+            margin: 10px 0;
+        }
+
+        .warning-msg {
+            background: #fff3cd;
+            color: #856404;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #ffc107;
+            margin: 10px 0;
+        }
+
+        .phone-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .date-info {
+            color: #999;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .logo {
+            font-size: 40px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .media-answer-section {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #ff9800;
+        }
+
+        .mode-indicator {
+            background: #fff3cd;
+            padding: 8px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            text-align: center;
+            color: #856404;
+        }
+
+        .cooldown-info {
+            background: #e3f2fd;
+            padding: 10px 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            text-align: center;
+            color: #1565c0;
+            border-left: 4px solid #1976d2;
+        }
+
+        .leaderboard-container {
+            margin-top: 20px;
+        }
+
+        .leaderboard-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border-left: 4px solid #ffc107;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .leaderboard-item.rank-1 {
+            border-left-color: #ffd700;
+            background: linear-gradient(to right, #fff9e6, white);
+        }
+
+        .leaderboard-item.rank-2 {
+            border-left-color: #c0c0c0;
+            background: linear-gradient(to right, #f5f5f5, white);
+        }
+
+        .leaderboard-item.rank-3 {
+            border-left-color: #cd7f32;
+            background: linear-gradient(to right, #fff4e6, white);
+        }
+
+        .rank-badge {
+            font-size: 24px;
+            font-weight: 700;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .rank-badge.gold {
+            color: #ffd700;
+        }
+
+        .rank-badge.silver {
+            color: #c0c0c0;
+        }
+
+        .rank-badge.bronze {
+            color: #cd7f32;
+        }
+
+        .student-info {
+            flex: 1;
+        }
+
+        .student-info strong {
+            display: block;
+            color: #1E5BFF;
+            margin-bottom: 4px;
+        }
+
+        .student-info small {
+            color: #666;
+            font-size: 13px;
+        }
+
+        .streak-badge {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .streak-badge.high {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        .leaderboard-header {
+            background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .leaderboard-stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .leaderboard-stat {
+            text-align: center;
+        }
+
+        .leaderboard-stat .number {
+            font-size: 24px;
+            font-weight: 700;
+            display: block;
+        }
+
+        .leaderboard-stat .label {
+            font-size: 11px;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <div id="loginSection" class="login-section active">
+            <div class="logo">📚🏫</div>
+            <h1>TEJAPRATAP'S QUIZ</h1>
+            <p class="subtitle">Learn something new every day!</p>
+
+            <div class="mode-indicator">
+                📱 Standalone Mode - Data stored on this device only
+            </div>
+
+            <div class="cooldown-info">
+                ⏱️ Login Limit: One login per PIN every 6 hours
+            </div>
+
+            <div class="pin-format-info">
+                📌 <strong>PIN Format:</strong> YYYYY-BB-XXX<br>
+                <strong>YYYYY:</strong> Year (22007-30007) | <strong>BB:</strong> Branch (CS/EE/ME/EI/CE/EC) | <strong>XXX:</strong> Roll No. (001-999)<br>
+                Example: <strong>23007-CS-001</strong>
+            </div>
+
+            <div class="input-group">
+                <label>👤 Your Name:</label>
+                <input type="text" id="studentName" placeholder="Enter your full name">
+            </div>
+
+            <div class="input-group">
+                <label>📱 Phone Number:</label>
+                <input type="tel" id="studentPhone" placeholder="Enter 10-digit phone number" maxlength="10">
+            </div>
+
+            <div class="input-group">
+                <label>🔑 Your PIN (YYYYY-BB-XXX):</label>
+                <input type="text" id="studentPin" placeholder="e.g., 23007-CS-001">
+            </div>
+
+            <button onclick="loginStudent()">Login as Student</button>
+
+            <p style="text-align: center; margin-top: 20px; color: #666;">
+                Are you TEJAPRATAP? <a href="#" class="link-button" onclick="showTeacherLogin(); return false;">Login here</a>
+            </p>
+        </div>
+
+        <!-- Teacher Login Screen -->
+        <div id="teacherLoginSection" class="teacher-login-section">
+            <div class="logo">👨‍🏫🔒</div>
+            <h1>TEJAPRATAP Login</h1>
+            <p class="subtitle">Manage daily questions and view student responses</p>
+
+            <div class="input-group" style="background: #fff3cd; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+                ⚠️ <strong>This website is managed by TEJAPRATAP</strong>
+            </div>
+
+            <div class="input-group">
+                <label>🔐 TEJAPRATAP Password:</label>
+                <input type="password" id="teacherPassword" placeholder="Enter password">
+            </div>
+
+            <button onclick="loginTeacher()">Login as TEJAPRATAP</button>
+
+            <p style="text-align: center; margin-top: 15px;">
+                <a href="#" class="link-button" onclick="showForgotPassword(); return false;">Forgot Password?</a>
+            </p>
+
+            <p style="text-align: center; margin-top: 10px; color: #666;">
+                Are you a student? <a href="#" class="link-button" onclick="showStudentLogin(); return false;">Login here</a>
+            </p>
+        </div>
+
+        <!-- Student Dashboard -->
+        <div id="studentSection" class="student-section">
+            <div class="logo">📚</div>
+            <h2 id="studentWelcome">Welcome!</h2>
+
+            <div id="studentContent"></div>
+
+            <button class="secondary-btn" onclick="logoutStudent()">Logout</button>
+        </div>
+
+        <!-- Teacher Dashboard -->
+        <div id="teacherSection" class="teacher-section">
+            <div class="logo">👨‍🏫</div>
+            <h1>TEJAPRATAP'S QUIZ</h1>
+
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('questions')">Questions</button>
+                <button class="tab-btn" onclick="switchTab('leaderboard')">🏆 Leaderboard</button>
+                <button class="tab-btn" onclick="switchTab('media')">Media Files</button>
+                <button class="tab-btn" onclick="switchTab('phones')">Phone Numbers</button>
+            </div>
+
+            <!-- Questions Tab -->
+            <div id="questionsTab" class="tab-content active">
+                <h2>📝 Post New Question</h2>
+                
+                <div class="input-group">
+                    <label>Today's Question:</label>
+                    <textarea id="newQuestion" placeholder="Enter today's question..."></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label>Yesterday's Answer (Optional):</label>
+                    <textarea id="yesterdayAnswer" placeholder="Enter answer to yesterday's question..."></textarea>
+                </div>
+
+                <button onclick="postQuestion()">Post Question</button>
+
+                <div id="teacherContent"></div>
+            </div>
+
+            <!-- Leaderboard Tab -->
+            <div id="leaderboardTab" class="tab-content">
+                <h2>🏆 Student Leaderboard</h2>
+                <div id="leaderboardContent"></div>
+            </div>
+
+            <!-- Media Tab -->
+            <div id="mediaTab" class="tab-content">
+                <h2>🎵 Upload Media & Give Opinion</h2>
+                
+                <div class="input-group">
+                    <label>Upload Image or Audio:</label>
+                    <input type="file" id="mediaFile" accept="image/*,audio/*" onchange="previewMedia()">
+                    <div id="mediaPreview"></div>
+                </div>
+
+                <div class="input-group">
+                    <label>Your Opinion/Description:</label>
+                    <textarea id="mediaOpinion" placeholder="Share your opinion about this media..."></textarea>
+                </div>
+
+                <button onclick="uploadMedia()">Upload Media</button>
+
+                <div id="mediaList"></div>
+            </div>
+
+            <!-- Phone Numbers Tab -->
+            <div id="phonesTab" class="tab-content">
+                <h2>📞 Student Contact Information</h2>
+                <div id="phoneNumbersList"></div>
+            </div>
+
+            <button class="warning-btn" onclick="showChangePassword()">Change Password</button>
+            <button class="danger-btn" onclick="resetAllData()">Reset All Data</button>
+            <button class="secondary-btn" onclick="logoutTeacher()">Logout</button>
+        </div>
+
+        <!-- Password Change Section -->
+        <div id="passwordChangeSection" class="password-change-section">
+            <h2>🔐 Change Password</h2>
+            
+            <div class="input-group">
+                <label>Current Password:</label>
+                <input type="password" id="currentPassword" placeholder="Enter current password">
+            </div>
+
+            <div class="input-group">
+                <label>New Password:</label>
+                <input type="password" id="newPassword" placeholder="Enter new password">
+            </div>
+
+            <div class="input-group">
+                <label>Confirm New Password:</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm new password">
+            </div>
+
+            <button onclick="changePassword()">Change Password</button>
+            <button class="secondary-btn" onclick="backToTeacher()">Back to Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        // STANDALONE MODE - Uses localStorage
+        // 6-HOUR LOGIN COOLDOWN ENABLED
+
+        const LOGIN_COOLDOWN_HOURS = 6;
+        const COOLDOWN_MS = LOGIN_COOLDOWN_HOURS * 60 * 60 * 1000; // 6 hours in milliseconds
+
+        // State
+        let currentStudent = null;
+        let currentStudentName = null;
+        let isTeacher = false;
+        let teacherPassword = 'tejapratap123';
+
+        // Data storage
+        let questions = [];
+        let studentAnswers = [];
+        let mediaFiles = [];
+        let studentPhones = {};
+        let loginCooldowns = {}; // Track last login time for each PIN
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAllData();
+
+            const savedStudent = localStorage.getItem('currentStudent');
+            const savedName = localStorage.getItem('currentStudentName');
+            const savedTeacher = localStorage.getItem('isTeacher');
+
+            if (savedStudent && savedName) {
+                currentStudent = savedStudent;
+                currentStudentName = savedName;
+                showStudentDashboard();
+                displayStudentView();
+            } else if (savedTeacher === 'true') {
+                isTeacher = true;
+                showTeacherDashboard();
+                displayTeacherView();
+            }
+
+            const savedPassword = localStorage.getItem('teacherPassword');
+            if (savedPassword) {
+                teacherPassword = savedPassword;
+            }
+        });
+
+        // Data Management
+        function loadAllData() {
+            questions = JSON.parse(localStorage.getItem('questions') || '[]');
+            studentAnswers = JSON.parse(localStorage.getItem('studentAnswers') || '[]');
+            mediaFiles = JSON.parse(localStorage.getItem('mediaFiles') || '[]');
+            studentPhones = JSON.parse(localStorage.getItem('studentPhones') || '{}');
+            loginCooldowns = JSON.parse(localStorage.getItem('loginCooldowns') || '{}');
+        }
+
+        function saveAllData() {
+            localStorage.setItem('questions', JSON.stringify(questions));
+            localStorage.setItem('studentAnswers', JSON.stringify(studentAnswers));
+            localStorage.setItem('mediaFiles', JSON.stringify(mediaFiles));
+            localStorage.setItem('studentPhones', JSON.stringify(studentPhones));
+            localStorage.setItem('loginCooldowns', JSON.stringify(loginCooldowns));
+        }
+
+        // Cooldown Functions
+        function checkLoginCooldown(pin) {
+            const lastLogin = loginCooldowns[pin];
+            
+            if (!lastLogin) {
+                return { allowed: true, timeRemaining: 0 };
+            }
+
+            const now = Date.now();
+            const timeSinceLogin = now - lastLogin;
+            
+            if (timeSinceLogin >= COOLDOWN_MS) {
+                return { allowed: true, timeRemaining: 0 };
+            }
+
+            const timeRemaining = COOLDOWN_MS - timeSinceLogin;
+            return { allowed: false, timeRemaining: timeRemaining };
+        }
+
+        function formatTimeRemaining(ms) {
+            const hours = Math.floor(ms / (1000 * 60 * 60));
+            const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+            
+            if (hours > 0) {
+                return `${hours} hour${hours > 1 ? 's' : ''} and ${minutes} minute${minutes > 1 ? 's' : ''}`;
+            }
+            return `${minutes} minute${minutes > 1 ? 's' : ''}`;
+        }
+
+        function recordLogin(pin) {
+            loginCooldowns[pin] = Date.now();
+            saveAllData();
+        }
+
+        // Login Functions
+        function loginStudent() {
+            const name = document.getElementById('studentName').value.trim();
+            const phone = document.getElementById('studentPhone').value.trim();
+            const pin = document.getElementById('studentPin').value.trim();
+
+            if (!name) {
+                alert('Please enter your name!');
+                return;
+            }
+
+            if (!phone || phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+                alert('Please enter a valid 10-digit phone number!');
+                return;
+            }
+
+            if (!pin) {
+                alert('Please enter your PIN!');
+                return;
+            }
+
+            const pinRegex = /^(2[2-9]|30)\d{3}-(CS|EE|ME|EI|CE|EC)-\d{3}$/;
+            if (!pinRegex.test(pin)) {
+                alert('Invalid PIN format! Please use YYYYY-BB-XXX format.\nExample: 23007-CS-001');
+                return;
+            }
+
+            // Check cooldown
+            const cooldownCheck = checkLoginCooldown(pin);
+            if (!cooldownCheck.allowed) {
+                const timeLeft = formatTimeRemaining(cooldownCheck.timeRemaining);
+                alert(`⏱️ Login Cooldown Active!\n\nThis PIN was used recently. You can login again after ${timeLeft}.\n\nThis prevents multiple logins from the same student.`);
+                return;
+            }
+
+            currentStudent = pin;
+            currentStudentName = name;
+            
+            localStorage.setItem('currentStudent', pin);
+            localStorage.setItem('currentStudentName', name);
+
+            // Register phone
+            studentPhones[pin] = {
+                name: name,
+                phone: phone,
+                lastLogin: new Date().toLocaleString()
+            };
+
+            // Record login time for cooldown
+            recordLogin(pin);
+
+            saveAllData();
+
+            showStudentDashboard();
+            displayStudentView();
+        }
+
+        function loginTeacher() {
+            const password = document.getElementById('teacherPassword').value;
+
+            if (password === teacherPassword) {
+                isTeacher = true;
+                localStorage.setItem('isTeacher', 'true');
+                showTeacherDashboard();
+                displayTeacherView();
+            } else {
+                alert('Incorrect password!');
+            }
+        }
+
+        function logoutStudent() {
+            currentStudent = null;
+            currentStudentName = null;
+            localStorage.removeItem('currentStudent');
+            localStorage.removeItem('currentStudentName');
+            showStudentLogin();
+        }
+
+        function logoutTeacher() {
+            isTeacher = false;
+            localStorage.removeItem('isTeacher');
+            showStudentLogin();
+        }
+
+        // Navigation Functions
+        function showStudentLogin() {
+            document.getElementById('loginSection').classList.add('active');
+            document.getElementById('teacherLoginSection').classList.remove('active');
+            document.getElementById('studentSection').classList.remove('active');
+            document.getElementById('teacherSection').classList.remove('active');
+            document.getElementById('passwordChangeSection').classList.remove('active');
+        }
+
+        function showTeacherLogin() {
+            document.getElementById('loginSection').classList.remove('active');
+            document.getElementById('teacherLoginSection').classList.add('active');
+            document.getElementById('studentSection').classList.remove('active');
+            document.getElementById('teacherSection').classList.remove('active');
+            document.getElementById('passwordChangeSection').classList.remove('active');
+        }
+
+        function showStudentDashboard() {
+            document.getElementById('loginSection').classList.remove('active');
+            document.getElementById('teacherLoginSection').classList.remove('active');
+            document.getElementById('studentSection').classList.add('active');
+            document.getElementById('teacherSection').classList.remove('active');
+            document.getElementById('passwordChangeSection').classList.remove('active');
+            
+            document.getElementById('studentWelcome').textContent = `Welcome, ${currentStudentName}!`;
+        }
+
+        function showTeacherDashboard() {
+            document.getElementById('loginSection').classList.remove('active');
+            document.getElementById('teacherLoginSection').classList.remove('active');
+            document.getElementById('studentSection').classList.remove('active');
+            document.getElementById('teacherSection').classList.add('active');
+            document.getElementById('passwordChangeSection').classList.remove('active');
+        }
+
+        function showChangePassword() {
+            document.getElementById('teacherSection').classList.remove('active');
+            document.getElementById('passwordChangeSection').classList.add('active');
+        }
+
+        function backToTeacher() {
+            document.getElementById('passwordChangeSection').classList.remove('active');
+            document.getElementById('teacherSection').classList.add('active');
+        }
+
+        function showForgotPassword() {
+            alert('Default password is: tejapratap123\n\nYou can change it after logging in.');
+        }
+
+        function switchTab(tab) {
+            document.getElementById('questionsTab').classList.remove('active');
+            document.getElementById('leaderboardTab').classList.remove('active');
+            document.getElementById('mediaTab').classList.remove('active');
+            document.getElementById('phonesTab').classList.remove('active');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            if (tab === 'questions') {
+                document.getElementById('questionsTab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                displayTeacherView();
+            } else if (tab === 'leaderboard') {
+                document.getElementById('leaderboardTab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                displayLeaderboard();
+            } else if (tab === 'media') {
+                document.getElementById('mediaTab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                displayMediaList();
+            } else if (tab === 'phones') {
+                document.getElementById('phonesTab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[3].classList.add('active');
+                displayPhoneNumbers();
+            }
+        }
+
+        // Student Functions
+        function displayStudentView() {
+            const content = document.getElementById('studentContent');
+            let html = '';
+
+            // Display latest media
+            if (mediaFiles.length > 0) {
+                const latestMedia = mediaFiles[mediaFiles.length - 1];
+                const hasAnsweredMedia = studentAnswers.some(a => 
+                    a.questionId === latestMedia.id && 
+                    a.studentPin === currentStudent &&
+                    a.type === 'media'
+                );
+
+                html += '<div class="media-box">';
+                html += '<h3>🎵 Latest Media from TEJAPRATAP</h3>';
+                html += '<div style="color: #999; font-size: 13px; margin: 8px 0;">📅 ' + latestMedia.date + '</div>';
+                html += '<h4>📎 ' + latestMedia.fileName + '</h4>';
+                
+                if (latestMedia.type === 'image') {
+                    html += '<img src="' + latestMedia.data + '" class="media-preview" alt="' + latestMedia.fileName + '">';
+                } else {
+                    html += '<audio controls><source src="' + latestMedia.data + '"></audio>';
+                }
+                
+                html += '<div class="opinion-box">';
+                html += '<strong>TEJAPRATAP\'s Opinion:</strong><br>';
+                html += latestMedia.opinion;
+                html += '</div>';
+
+                if (hasAnsweredMedia) {
+                    const myAnswer = studentAnswers.find(a => 
+                        a.questionId === latestMedia.id && 
+                        a.studentPin === currentStudent &&
+                        a.type === 'media'
+                    );
+                    html += '<div class="success-msg" style="margin-top: 15px;">✓ You already responded to this media!<br><strong>Your response:</strong> ' + myAnswer.answer + '</div>';
+                } else {
+                    html += '<div class="media-answer-section">';
+                    html += '<label style="display: block; margin-bottom: 8px; font-weight: 600; color: #ff9800;">💬 Your Response to this Media:</label>';
+                    html += '<textarea id="mediaAnswer-' + latestMedia.id + '" placeholder="Share your thoughts about this media..." style="width: 100%; padding: 10px; border: 2px solid #ff9800; border-radius: 6px; min-height: 80px;"></textarea>';
+                    html += '<button onclick="submitMediaAnswer(' + latestMedia.id + ')" style="margin-top: 10px; background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">Submit Response</button>';
+                    html += '</div>';
+                }
+
+                html += '</div>';
+            }
+
+            // Display questions
+            if (questions.length === 0) {
+                html += '<p style="color: #999; text-align: center; margin: 30px 0;">No questions available yet. Check back tomorrow!</p>';
+                content.innerHTML = html;
+                return;
+            }
+
+            const latestQuestion = questions[questions.length - 1];
+            const hasAnswered = studentAnswers.some(a => 
+                a.questionId === latestQuestion.id && 
+                a.studentPin === currentStudent &&
+                (!a.type || a.type === 'question')
+            );
+
+            html += '<div class="question-box">';
+            html += '<div style="color: #999; font-size: 13px; margin-bottom: 8px;">📅 ' + latestQuestion.date + '</div>';
+            html += '<h3>Today\'s Question:</h3>';
+            html += '<p style="font-size: 16px; margin-top: 10px;">' + latestQuestion.question + '</p>';
+
+            if (hasAnswered) {
+                const myAnswer = studentAnswers.find(a => 
+                    a.questionId === latestQuestion.id && 
+                    a.studentPin === currentStudent &&
+                    (!a.type || a.type === 'question')
+                );
+                html += '<div class="success-msg" style="margin-top: 15px;">✓ You already answered this question!<br><strong>Your answer:</strong> ' + myAnswer.answer + '</div>';
+            } else {
+                html += '<div class="input-group" style="margin-top: 15px;">';
+                html += '<label>Your Answer:</label>';
+                html += '<textarea id="studentAnswer" placeholder="Type your answer here..."></textarea>';
+                html += '</div>';
+                html += '<button onclick="submitAnswer(' + latestQuestion.id + ')">Submit Answer</button>';
+            }
+
+            html += '</div>';
+
+            // Show previous question's answer
+            if (questions.length > 1) {
+                const previousQuestion = questions[questions.length - 2];
+                if (previousQuestion.answer) {
+                    html += '<div class="answer-box">';
+                    html += '<div style="color: #666; font-size: 13px; margin-bottom: 8px;">📅 ' + previousQuestion.date + '</div>';
+                    html += '<h4>Previous Question:</h4>';
+                    html += '<p style="margin: 8px 0;">' + previousQuestion.question + '</p>';
+                    html += '<h4 style="margin-top: 15px;">✓ Answer:</h4>';
+                    html += '<p style="background: white; padding: 12px; border-radius: 6px; margin-top: 8px;">' + previousQuestion.answer + '</p>';
+                    html += '</div>';
+                }
+            }
+
+            content.innerHTML = html;
+        }
+
+        function submitAnswer(questionId) {
+            const answerText = document.getElementById('studentAnswer').value.trim();
+
+            if (!answerText) {
+                alert('Please write your answer!');
+                return;
+            }
+
+            studentAnswers.push({
+                id: Date.now(),
+                questionId: questionId,
+                studentPin: currentStudent,
+                studentName: currentStudentName,
+                answer: answerText,
+                type: 'question',
+                date: new Date().toLocaleString()
+            });
+
+            saveAllData();
+            alert('Answer submitted successfully!');
+            displayStudentView();
+        }
+
+        function submitMediaAnswer(mediaId) {
+            const answerText = document.getElementById('mediaAnswer-' + mediaId).value.trim();
+
+            if (!answerText) {
+                alert('Please write your response!');
+                return;
+            }
+
+            studentAnswers.push({
+                id: Date.now(),
+                questionId: mediaId,
+                studentPin: currentStudent,
+                studentName: currentStudentName,
+                answer: answerText,
+                type: 'media',
+                date: new Date().toLocaleString()
+            });
+
+            saveAllData();
+            alert('Response submitted successfully!');
+            displayStudentView();
+        }
+
+        // Teacher Functions
+        function displayTeacherView() {
+            const content = document.getElementById('teacherContent');
+
+            if (questions.length === 0) {
+                content.innerHTML = '<p style="color: #999; text-align: center; margin: 20px 0;">No questions posted yet.</p>';
+                return;
+            }
+
+            let html = '<h3 style="margin-top: 20px; color: #1E5BFF;">📊 Student Responses</h3>';
+
+            const latestQuestion = questions[questions.length - 1];
+            const answersForQuestion = studentAnswers.filter(a => 
+                a.questionId === latestQuestion.id && (!a.type || a.type === 'question')
+            );
+
+            html += '<div class="question-box">';
+            html += '<div style="color: #999; font-size: 13px; margin-bottom: 8px;">📅 ' + latestQuestion.date + '</div>';
+            html += '<h3>Current Question:</h3>';
+            html += '<p style="font-size: 16px; margin-top: 8px;">' + latestQuestion.question + '</p>';
+            html += '<p style="margin-top: 12px; color: #1E5BFF; font-weight: 600;">Total Responses: ' + answersForQuestion.length + '</p>';
+            html += '</div>';
+
+            if (answersForQuestion.length > 0) {
+                answersForQuestion.forEach(answer => {
+                    html += '<div class="student-answer">';
+                    html += '<strong style="color: #1E5BFF;">👤 ' + answer.studentName + '</strong>';
+                    html += '<br><span style="color: #999; font-size: 14px;">PIN: ' + answer.studentPin + '</span>';
+
+                    if (studentPhones[answer.studentPin]) {
+                        html += '<br><span style="color: #999; font-size: 14px;">📱 ' + studentPhones[answer.studentPin].phone + '</span>';
+                    }
+
+                    html += '<div style="color: #999; font-size: 13px; margin: 5px 0;">Submitted: ' + answer.date + '</div>';
+                    html += '<p style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 6px;">' + answer.answer + '</p>';
+                    html += '</div>';
+                });
+            } else {
+                html += '<p style="color: #999; text-align: center; margin: 20px 0;">No student responses yet.</p>';
+            }
+
+            content.innerHTML = html;
+        }
+
+        function postQuestion() {
+            const question = document.getElementById('newQuestion').value.trim();
+            const answer = document.getElementById('yesterdayAnswer').value.trim();
+
+            if (!question) {
+                alert('Please enter a question!');
+                return;
+            }
+
+            if (answer && questions.length > 0) {
+                questions[questions.length - 1].answer = answer;
+            }
+
+            questions.push({
+                id: Date.now(),
+                question: question,
+                answer: null,
+                date: new Date().toLocaleString()
+            });
+
+            saveAllData();
+
+            document.getElementById('newQuestion').value = '';
+            document.getElementById('yesterdayAnswer').value = '';
+
+            alert('Question posted successfully!');
+            displayTeacherView();
+        }
+
+        // Media Functions
+        function previewMedia() {
+            const fileInput = document.getElementById('mediaFile');
+            const preview = document.getElementById('mediaPreview');
+
+            if (!fileInput.files || !fileInput.files[0]) {
+                preview.innerHTML = '';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                if (file.type.startsWith('image/')) {
+                    preview.innerHTML = '<img src="' + e.target.result + '" class="media-preview">';
+                } else if (file.type.startsWith('audio/')) {
+                    preview.innerHTML = '<audio controls><source src="' + e.target.result + '"></audio>';
+                } else {
+                    preview.innerHTML = '<p>File selected: ' + file.name + '</p>';
+                }
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function uploadMedia() {
+            const fileInput = document.getElementById('mediaFile');
+            const opinion = document.getElementById('mediaOpinion').value.trim();
+
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('Please select a media file!');
+                return;
+            }
+
+            if (!opinion) {
+                alert('Please write your opinion about this media!');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File is too large! Please choose a file smaller than 10MB.');
+                return;
+            }
+
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                mediaFiles.push({
+                    id: Date.now(),
+                    type: file.type.startsWith('image/') ? 'image' : 'audio',
+                    data: e.target.result,
+                    fileName: file.name,
+                    opinion: opinion,
+                    date: new Date().toLocaleString()
+                });
+
+                saveAllData();
+
+                fileInput.value = '';
+                document.getElementById('mediaOpinion').value = '';
+                document.getElementById('mediaPreview').innerHTML = '';
+
+                alert('Media uploaded successfully!');
+                displayMediaList();
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function displayMediaList() {
+            const container = document.getElementById('mediaList');
+
+            if (mediaFiles.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; margin-top: 20px;">No media files uploaded yet.</p>';
+                return;
+            }
+
+            let html = '<h3 style="margin-top: 30px; color: #ff9800;">📁 Uploaded Media & Student Responses</h3>';
+
+            const reversedMedia = [...mediaFiles].reverse();
+
+            reversedMedia.forEach(media => {
+                const mediaAnswers = studentAnswers.filter(a => a.questionId === media.id && a.type === 'media');
+                
+                html += '<div class="media-box">';
+                html += '<div style="color: #999; font-size: 13px; margin-bottom: 8px;">📅 ' + media.date + '</div>';
+                html += '<h4>📎 ' + media.fileName + '</h4>';
+
+                if (media.type === 'image') {
+                    html += '<img src="' + media.data + '" class="media-preview" alt="' + media.fileName + '">';
+                } else {
+                    html += '<audio controls><source src="' + media.data + '"></audio>';
+                }
+
+                html += '<div class="opinion-box">';
+                html += '<strong>Your Opinion:</strong><br>';
+                html += media.opinion;
+                html += '</div>';
+
+                if (mediaAnswers.length > 0) {
+                    html += '<div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 6px;">';
+                    html += '<strong style="color: #1976d2;">👥 Student Responses (' + mediaAnswers.length + '):</strong>';
+                    mediaAnswers.forEach(ans => {
+                        html += '<div style="margin-top: 10px; padding: 8px; background: white; border-radius: 4px;">';
+                        html += '<strong>' + ans.studentName + '</strong> (' + ans.studentPin + '):<br>';
+                        html += '<span style="font-size: 14px;">' + ans.answer + '</span>';
+                        html += '</div>';
+                    });
+                    html += '</div>';
+                }
+
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        function displayLeaderboard() {
+            const container = document.getElementById('leaderboardContent');
+
+            // Calculate student statistics
+            const studentStats = {};
+            
+            // Count answers per student
+            studentAnswers.forEach(answer => {
+                if (!studentStats[answer.studentPin]) {
+                    studentStats[answer.studentPin] = {
+                        pin: answer.studentPin,
+                        name: answer.studentName,
+                        totalAnswers: 0,
+                        questionAnswers: 0,
+                        mediaAnswers: 0,
+                        phone: studentPhones[answer.studentPin]?.phone || 'N/A',
+                        lastActivity: answer.date
+                    };
+                }
+                
+                studentStats[answer.studentPin].totalAnswers++;
+                
+                if (answer.type === 'media') {
+                    studentStats[answer.studentPin].mediaAnswers++;
+                } else {
+                    studentStats[answer.studentPin].questionAnswers++;
+                }
+                
+                // Update last activity to most recent
+                if (new Date(answer.date) > new Date(studentStats[answer.studentPin].lastActivity)) {
+                    studentStats[answer.studentPin].lastActivity = answer.date;
+                }
+            });
+
+            // Convert to array and sort by total answers
+            const rankedStudents = Object.values(studentStats).sort((a, b) => {
+                if (b.totalAnswers !== a.totalAnswers) {
+                    return b.totalAnswers - a.totalAnswers;
+                }
+                // If same answers, sort by most recent activity
+                return new Date(b.lastActivity) - new Date(a.lastActivity);
+            });
+
+            if (rankedStudents.length === 0) {
+                container.innerHTML = '<p style="color: #999; text-align: center; margin: 20px 0;">No student activity yet. Students will appear here once they start answering questions.</p>';
+                return;
+            }
+
+            // Calculate stats for header
+            const totalStudents = rankedStudents.length;
+            const totalAnswers = rankedStudents.reduce((sum, s) => sum + s.totalAnswers, 0);
+            const avgAnswers = (totalAnswers / totalStudents).toFixed(1);
+            const mostActive = rankedStudents[0];
+
+            let html = '<div class="leaderboard-header">';
+            html += '<h3 style="margin: 0;">🏆 Top Performers</h3>';
+            html += '<div class="leaderboard-stats">';
+            html += '<div class="leaderboard-stat"><span class="number">' + totalStudents + '</span><span class="label">Total Students</span></div>';
+            html += '<div class="leaderboard-stat"><span class="number">' + totalAnswers + '</span><span class="label">Total Responses</span></div>';
+            html += '<div class="leaderboard-stat"><span class="number">' + avgAnswers + '</span><span class="label">Avg per Student</span></div>';
+            html += '</div>';
+            html += '</div>';
+
+            html += '<div class="leaderboard-container">';
+
+            rankedStudents.forEach((student, index) => {
+                const rank = index + 1;
+                let rankClass = '';
+                let rankBadgeClass = '';
+                let rankEmoji = rank;
+
+                if (rank === 1) {
+                    rankClass = 'rank-1';
+                    rankBadgeClass = 'gold';
+                    rankEmoji = '🥇';
+                } else if (rank === 2) {
+                    rankClass = 'rank-2';
+                    rankBadgeClass = 'silver';
+                    rankEmoji = '🥈';
+                } else if (rank === 3) {
+                    rankClass = 'rank-3';
+                    rankBadgeClass = 'bronze';
+                    rankEmoji = '🥉';
+                }
+
+                html += '<div class="leaderboard-item ' + rankClass + '">';
+                
+                // Rank badge
+                html += '<div class="rank-badge ' + rankBadgeClass + '">';
+                if (rank <= 3) {
+                    html += rankEmoji;
+                } else {
+                    html += '#' + rank;
+                }
+                html += '</div>';
+
+                // Student info
+                html += '<div class="student-info">';
+                html += '<strong>' + student.name + '</strong>';
+                html += '<small>PIN: ' + student.pin + ' | 📱 ' + student.phone + '</small><br>';
+                html += '<small style="color: #999;">Last active: ' + student.lastActivity + '</small>';
+                html += '</div>';
+
+                // Streak badge
+                let streakClass = student.totalAnswers >= 5 ? 'high' : '';
+                html += '<div class="streak-badge ' + streakClass + '">';
+                html += '🔥 ' + student.totalAnswers + ' response' + (student.totalAnswers > 1 ? 's' : '');
+                html += '<br><small style="font-size: 10px;">Q: ' + student.questionAnswers + ' | M: ' + student.mediaAnswers + '</small>';
+                html += '</div>';
+
+                html += '</div>';
+            });
+
+            html += '</div>';
+
+            // Add insights section
+            if (rankedStudents.length >= 3) {
+                html += '<div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #4CAF50;">';
+                html += '<h4 style="color: #4CAF50; margin-bottom: 10px;">📊 Insights</h4>';
+                html += '<p style="font-size: 14px; margin: 5px 0;"><strong>🌟 Top Performer:</strong> ' + mostActive.name + ' (' + mostActive.totalAnswers + ' responses)</p>';
+                
+                const activeStudents = rankedStudents.filter(s => s.totalAnswers >= 3).length;
+                html += '<p style="font-size: 14px; margin: 5px 0;"><strong>💪 Highly Active:</strong> ' + activeStudents + ' students (3+ responses)</p>';
+                
+                const questionOnlyStudents = rankedStudents.filter(s => s.mediaAnswers === 0 && s.questionAnswers > 0).length;
+                if (questionOnlyStudents > 0) {
+                    html += '<p style="font-size: 14px; margin: 5px 0;"><strong>💡 Tip:</strong> ' + questionOnlyStudents + ' students haven\'t responded to media yet</p>';
+                }
+                html += '</div>';
+            }
+
+            container.innerHTML = html;
+        }
+
+        function displayPhoneNumbers() {
+            const container = document.getElementById('phoneNumbersList');
+            const phoneList = Object.entries(studentPhones);
+
+            if (phoneList.length === 0) {
+                container.innerHTML = '<p class="date-info">No student phone numbers available yet.</p>';
+                return;
+            }
+
+            let html = '<div style="margin-bottom: 10px; color: #666;"><strong>Total Students: ' + phoneList.length + '</strong></div>';
+
+            phoneList.forEach(([pin, data]) => {
+                // Check cooldown status
+                const cooldownCheck = checkLoginCooldown(pin);
+                const cooldownStatus = cooldownCheck.allowed 
+                    ? '✅ Can login' 
+                    : '⏱️ Cooldown: ' + formatTimeRemaining(cooldownCheck.timeRemaining);
+
+                html += '<div class="phone-item">';
+                html += '<div>';
+                html += '<strong>' + data.name + '</strong><br>';
+                html += '<span style="color: #666; font-size: 14px;">PIN: ' + pin + '</span><br>';
+                html += '<span style="color: #666; font-size: 13px;">Last Login: ' + data.lastLogin + '</span><br>';
+                html += '<span style="color: ' + (cooldownCheck.allowed ? '#28a745' : '#ffc107') + '; font-size: 12px;">' + cooldownStatus + '</span>';
+                html += '</div>';
+                html += '<div style="font-size: 18px; color: #1E5BFF; font-weight: 600;">';
+                html += '📱 ' + data.phone;
+                html += '</div>';
+                html += '</div>';
+            });
+
+            container.innerHTML = html;
+        }
+
+        // Password Functions
+        function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+
+            if (!current || !newPass || !confirm) {
+                alert('Please fill all fields!');
+                return;
+            }
+
+            if (current !== teacherPassword) {
+                alert('Current password is incorrect!');
+                return;
+            }
+
+            if (newPass !== confirm) {
+                alert('New passwords do not match!');
+                return;
+            }
+
+            if (newPass.length < 6) {
+                alert('Password must be at least 6 characters long!');
+                return;
+            }
+
+            teacherPassword = newPass;
+            localStorage.setItem('teacherPassword', newPass);
+
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+
+            alert('Password changed successfully!');
+            backToTeacher();
+        }
+
+        function resetAllData() {
+            if (!confirm('Are you sure you want to reset ALL data? This action cannot be undone!')) {
+                return;
+            }
+
+            if (!confirm('This will delete all questions, answers, media, phone numbers, AND login cooldowns. Are you absolutely sure?')) {
+                return;
+            }
+
+            questions = [];
+            studentAnswers = [];
+            mediaFiles = [];
+            studentPhones = {};
+            loginCooldowns = {};
+            
+            saveAllData();
+
+            alert('All data has been reset!');
+            displayTeacherView();
+            displayMediaList();
+            displayPhoneNumbers();
+        }
+    </script>
+</body>
+</html>
