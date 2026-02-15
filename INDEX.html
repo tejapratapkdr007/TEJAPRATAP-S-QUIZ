@@ -199,6 +199,7 @@
 
         .secondary-btn {
             background: #6c757d;
+            margin-top: 10px;
         }
 
         .warning-btn {
@@ -269,15 +270,6 @@
             margin: 10px 0;
         }
 
-        .warning-msg {
-            background: #fff3cd;
-            color: #856404;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 4px solid #ffc107;
-            margin: 10px 0;
-        }
-
         .phone-item {
             background: white;
             padding: 15px;
@@ -301,143 +293,18 @@
             margin-bottom: 10px;
         }
 
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
         .media-answer-section {
             background: #fff3e0;
             padding: 15px;
             border-radius: 8px;
             margin-top: 15px;
             border-left: 4px solid #ff9800;
-        }
-
-        .mode-indicator {
-            background: #fff3cd;
-            padding: 8px 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 12px;
-            text-align: center;
-            color: #856404;
-        }
-
-        .cooldown-info {
-            background: #e3f2fd;
-            padding: 10px 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            font-size: 12px;
-            text-align: center;
-            color: #1565c0;
-            border-left: 4px solid #1976d2;
-        }
-
-        .leaderboard-container {
-            margin-top: 20px;
-        }
-
-        .leaderboard-item {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border-left: 4px solid #ffc107;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        .leaderboard-item.rank-1 {
-            border-left-color: #ffd700;
-            background: linear-gradient(to right, #fff9e6, white);
-        }
-
-        .leaderboard-item.rank-2 {
-            border-left-color: #c0c0c0;
-            background: linear-gradient(to right, #f5f5f5, white);
-        }
-
-        .leaderboard-item.rank-3 {
-            border-left-color: #cd7f32;
-            background: linear-gradient(to right, #fff4e6, white);
-        }
-
-        .rank-badge {
-            font-size: 24px;
-            font-weight: 700;
-            min-width: 40px;
-            text-align: center;
-        }
-
-        .rank-badge.gold {
-            color: #ffd700;
-        }
-
-        .rank-badge.silver {
-            color: #c0c0c0;
-        }
-
-        .rank-badge.bronze {
-            color: #cd7f32;
-        }
-
-        .student-info {
-            flex: 1;
-        }
-
-        .student-info strong {
-            display: block;
-            color: #1E5BFF;
-            margin-bottom: 4px;
-        }
-
-        .student-info small {
-            color: #666;
-            font-size: 13px;
-        }
-
-        .streak-badge {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
-            color: white;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .streak-badge.high {
-            background: linear-gradient(135deg, #4CAF50, #45a049);
-        }
-
-        .leaderboard-header {
-            background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-
-        .leaderboard-stats {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255,255,255,0.3);
-        }
-
-        .leaderboard-stat {
-            text-align: center;
-        }
-
-        .leaderboard-stat .number {
-            font-size: 24px;
-            font-weight: 700;
-            display: block;
-        }
-
-        .leaderboard-stat .label {
-            font-size: 11px;
-            opacity: 0.9;
         }
     </style>
 </head>
@@ -448,14 +315,6 @@
             <div class="logo">📚🏫</div>
             <h1>TEJAPRATAP'S QUIZ</h1>
             <p class="subtitle">Learn something new every day!</p>
-
-            <div class="mode-indicator">
-                📱 Standalone Mode - Data stored on this device only
-            </div>
-
-            <div class="cooldown-info">
-                ⏱️ Login Limit: One login per PIN every 6 hours
-            </div>
 
             <div class="pin-format-info">
                 📌 <strong>PIN Format:</strong> YYYYY-BB-XXX<br>
@@ -524,11 +383,10 @@
         <!-- Teacher Dashboard -->
         <div id="teacherSection" class="teacher-section">
             <div class="logo">👨‍🏫</div>
-            <h1>TEJAPRATAP'S QUIZ</h1>
+            <h1>TEJAPRATAP Dashboard</h1>
 
             <div class="tab-buttons">
                 <button class="tab-btn active" onclick="switchTab('questions')">Questions</button>
-                <button class="tab-btn" onclick="switchTab('leaderboard')">🏆 Leaderboard</button>
                 <button class="tab-btn" onclick="switchTab('media')">Media Files</button>
                 <button class="tab-btn" onclick="switchTab('phones')">Phone Numbers</button>
             </div>
@@ -550,12 +408,6 @@
                 <button onclick="postQuestion()">Post Question</button>
 
                 <div id="teacherContent"></div>
-            </div>
-
-            <!-- Leaderboard Tab -->
-            <div id="leaderboardTab" class="tab-content">
-                <h2>🏆 Student Leaderboard</h2>
-                <div id="leaderboardContent"></div>
             </div>
 
             <!-- Media Tab -->
@@ -614,11 +466,9 @@
     </div>
 
     <script>
-        // STANDALONE MODE - Uses localStorage
-        // 6-HOUR LOGIN COOLDOWN ENABLED
-
-        const LOGIN_COOLDOWN_HOURS = 6;
-        const COOLDOWN_MS = LOGIN_COOLDOWN_HOURS * 60 * 60 * 1000; // 6 hours in milliseconds
+        // CONFIGURATION
+        const API_URL = 'https://tejapratap-s-quiz.onrender.com';
+        // Backend is deployed on Render - all devices connect to this server
 
         // State
         let currentStudent = null;
@@ -626,17 +476,8 @@
         let isTeacher = false;
         let teacherPassword = 'tejapratap123';
 
-        // Data storage
-        let questions = [];
-        let studentAnswers = [];
-        let mediaFiles = [];
-        let studentPhones = {};
-        let loginCooldowns = {}; // Track last login time for each PIN
-
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            loadAllData();
-
             const savedStudent = localStorage.getItem('currentStudent');
             const savedName = localStorage.getItem('currentStudentName');
             const savedTeacher = localStorage.getItem('isTeacher');
@@ -645,11 +486,11 @@
                 currentStudent = savedStudent;
                 currentStudentName = savedName;
                 showStudentDashboard();
-                displayStudentView();
+                loadStudentData();
             } else if (savedTeacher === 'true') {
                 isTeacher = true;
                 showTeacherDashboard();
-                displayTeacherView();
+                loadTeacherData();
             }
 
             const savedPassword = localStorage.getItem('teacherPassword');
@@ -658,55 +499,41 @@
             }
         });
 
-        // Data Management
-        function loadAllData() {
-            questions = JSON.parse(localStorage.getItem('questions') || '[]');
-            studentAnswers = JSON.parse(localStorage.getItem('studentAnswers') || '[]');
-            mediaFiles = JSON.parse(localStorage.getItem('mediaFiles') || '[]');
-            studentPhones = JSON.parse(localStorage.getItem('studentPhones') || '{}');
-            loginCooldowns = JSON.parse(localStorage.getItem('loginCooldowns') || '{}');
-        }
-
-        function saveAllData() {
-            localStorage.setItem('questions', JSON.stringify(questions));
-            localStorage.setItem('studentAnswers', JSON.stringify(studentAnswers));
-            localStorage.setItem('mediaFiles', JSON.stringify(mediaFiles));
-            localStorage.setItem('studentPhones', JSON.stringify(studentPhones));
-            localStorage.setItem('loginCooldowns', JSON.stringify(loginCooldowns));
-        }
-
-        // Cooldown Functions
-        function checkLoginCooldown(pin) {
-            const lastLogin = loginCooldowns[pin];
-            
-            if (!lastLogin) {
-                return { allowed: true, timeRemaining: 0 };
+        // API Helper Functions
+        async function apiGet(endpoint) {
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        return null;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API GET Error:', error);
+                return null;
             }
-
-            const now = Date.now();
-            const timeSinceLogin = now - lastLogin;
-            
-            if (timeSinceLogin >= COOLDOWN_MS) {
-                return { allowed: true, timeRemaining: 0 };
-            }
-
-            const timeRemaining = COOLDOWN_MS - timeSinceLogin;
-            return { allowed: false, timeRemaining: timeRemaining };
         }
 
-        function formatTimeRemaining(ms) {
-            const hours = Math.floor(ms / (1000 * 60 * 60));
-            const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
-            
-            if (hours > 0) {
-                return `${hours} hour${hours > 1 ? 's' : ''} and ${minutes} minute${minutes > 1 ? 's' : ''}`;
+        async function apiPost(endpoint, data) {
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API POST Error:', error);
+                throw error;
             }
-            return `${minutes} minute${minutes > 1 ? 's' : ''}`;
-        }
-
-        function recordLogin(pin) {
-            loginCooldowns[pin] = Date.now();
-            saveAllData();
         }
 
         // Login Functions
@@ -736,34 +563,17 @@
                 return;
             }
 
-            // Check cooldown
-            const cooldownCheck = checkLoginCooldown(pin);
-            if (!cooldownCheck.allowed) {
-                const timeLeft = formatTimeRemaining(cooldownCheck.timeRemaining);
-                alert(`⏱️ Login Cooldown Active!\n\nThis PIN was used recently. You can login again after ${timeLeft}.\n\nThis prevents multiple logins from the same student.`);
-                return;
-            }
-
             currentStudent = pin;
             currentStudentName = name;
             
             localStorage.setItem('currentStudent', pin);
             localStorage.setItem('currentStudentName', name);
 
-            // Register phone
-            studentPhones[pin] = {
-                name: name,
-                phone: phone,
-                lastLogin: new Date().toLocaleString()
-            };
-
-            // Record login time for cooldown
-            recordLogin(pin);
-
-            saveAllData();
+            apiPost('/phones', { pin, name, phone })
+                .catch(error => console.error('Error registering phone:', error));
 
             showStudentDashboard();
-            displayStudentView();
+            loadStudentData();
         }
 
         function loginTeacher() {
@@ -773,7 +583,7 @@
                 isTeacher = true;
                 localStorage.setItem('isTeacher', 'true');
                 showTeacherDashboard();
-                displayTeacherView();
+                loadTeacherData();
             } else {
                 alert('Incorrect password!');
             }
@@ -839,12 +649,11 @@
         }
 
         function showForgotPassword() {
-            alert('Default password is: tejapratap123\n\nYou can change it after logging in.');
+            alert('Please contact the administrator to reset your password.');
         }
 
         function switchTab(tab) {
             document.getElementById('questionsTab').classList.remove('active');
-            document.getElementById('leaderboardTab').classList.remove('active');
             document.getElementById('mediaTab').classList.remove('active');
             document.getElementById('phonesTab').classList.remove('active');
 
@@ -853,31 +662,41 @@
             if (tab === 'questions') {
                 document.getElementById('questionsTab').classList.add('active');
                 document.querySelectorAll('.tab-btn')[0].classList.add('active');
-                displayTeacherView();
-            } else if (tab === 'leaderboard') {
-                document.getElementById('leaderboardTab').classList.add('active');
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-                displayLeaderboard();
+                loadTeacherQuestions();
             } else if (tab === 'media') {
                 document.getElementById('mediaTab').classList.add('active');
-                document.querySelectorAll('.tab-btn')[2].classList.add('active');
-                displayMediaList();
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                loadMediaList();
             } else if (tab === 'phones') {
                 document.getElementById('phonesTab').classList.add('active');
-                document.querySelectorAll('.tab-btn')[3].classList.add('active');
-                displayPhoneNumbers();
+                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                loadPhoneNumbers();
             }
         }
 
         // Student Functions
-        function displayStudentView() {
+        async function loadStudentData() {
+            const content = document.getElementById('studentContent');
+            content.innerHTML = '<div class="loading">Loading...</div>';
+
+            try {
+                const latestMedia = await apiGet('/media/latest');
+                const questions = await apiGet('/questions') || [];
+                const answers = await apiGet('/answers') || [];
+
+                displayStudentView(latestMedia, questions, answers);
+            } catch (error) {
+                content.innerHTML = '<div class="error-msg">Unable to connect to server. Please try again later.</div>';
+            }
+        }
+
+        function displayStudentView(latestMedia, questions, answers) {
             const content = document.getElementById('studentContent');
             let html = '';
 
-            // Display latest media
-            if (mediaFiles.length > 0) {
-                const latestMedia = mediaFiles[mediaFiles.length - 1];
-                const hasAnsweredMedia = studentAnswers.some(a => 
+            // Display latest media with answer box
+            if (latestMedia) {
+                const hasAnsweredMedia = answers.some(a => 
                     a.questionId === latestMedia.id && 
                     a.studentPin === currentStudent &&
                     a.type === 'media'
@@ -899,8 +718,9 @@
                 html += latestMedia.opinion;
                 html += '</div>';
 
+                // Add answer box for media
                 if (hasAnsweredMedia) {
-                    const myAnswer = studentAnswers.find(a => 
+                    const myAnswer = answers.find(a => 
                         a.questionId === latestMedia.id && 
                         a.studentPin === currentStudent &&
                         a.type === 'media'
@@ -925,7 +745,7 @@
             }
 
             const latestQuestion = questions[questions.length - 1];
-            const hasAnswered = studentAnswers.some(a => 
+            const hasAnswered = answers.some(a => 
                 a.questionId === latestQuestion.id && 
                 a.studentPin === currentStudent &&
                 (!a.type || a.type === 'question')
@@ -937,7 +757,7 @@
             html += '<p style="font-size: 16px; margin-top: 10px;">' + latestQuestion.question + '</p>';
 
             if (hasAnswered) {
-                const myAnswer = studentAnswers.find(a => 
+                const myAnswer = answers.find(a => 
                     a.questionId === latestQuestion.id && 
                     a.studentPin === currentStudent &&
                     (!a.type || a.type === 'question')
@@ -970,7 +790,7 @@
             content.innerHTML = html;
         }
 
-        function submitAnswer(questionId) {
+        async function submitAnswer(questionId) {
             const answerText = document.getElementById('studentAnswer').value.trim();
 
             if (!answerText) {
@@ -978,22 +798,23 @@
                 return;
             }
 
-            studentAnswers.push({
-                id: Date.now(),
-                questionId: questionId,
-                studentPin: currentStudent,
-                studentName: currentStudentName,
-                answer: answerText,
-                type: 'question',
-                date: new Date().toLocaleString()
-            });
+            try {
+                await apiPost('/answers', {
+                    questionId: questionId,
+                    studentPin: currentStudent,
+                    studentName: currentStudentName,
+                    answer: answerText,
+                    type: 'question'
+                });
 
-            saveAllData();
-            alert('Answer submitted successfully!');
-            displayStudentView();
+                alert('Answer submitted successfully!');
+                loadStudentData();
+            } catch (error) {
+                alert(error.message || 'Error submitting answer. Please try again.');
+            }
         }
 
-        function submitMediaAnswer(mediaId) {
+        async function submitMediaAnswer(mediaId) {
             const answerText = document.getElementById('mediaAnswer-' + mediaId).value.trim();
 
             if (!answerText) {
@@ -1001,23 +822,45 @@
                 return;
             }
 
-            studentAnswers.push({
-                id: Date.now(),
-                questionId: mediaId,
-                studentPin: currentStudent,
-                studentName: currentStudentName,
-                answer: answerText,
-                type: 'media',
-                date: new Date().toLocaleString()
-            });
+            try {
+                await apiPost('/answers', {
+                    questionId: mediaId,
+                    studentPin: currentStudent,
+                    studentName: currentStudentName,
+                    answer: answerText,
+                    type: 'media'
+                });
 
-            saveAllData();
-            alert('Response submitted successfully!');
-            displayStudentView();
+                alert('Response submitted successfully!');
+                loadStudentData();
+            } catch (error) {
+                alert(error.message || 'Error submitting response. Please try again.');
+            }
         }
 
         // Teacher Functions
-        function displayTeacherView() {
+        async function loadTeacherData() {
+            loadTeacherQuestions();
+            loadMediaList();
+            loadPhoneNumbers();
+        }
+
+        async function loadTeacherQuestions() {
+            const content = document.getElementById('teacherContent');
+            content.innerHTML = '<div class="loading">Loading...</div>';
+
+            try {
+                const questions = await apiGet('/questions') || [];
+                const answers = await apiGet('/answers') || [];
+                const phones = await apiGet('/phones') || {};
+
+                displayTeacherView(questions, answers, phones);
+            } catch (error) {
+                content.innerHTML = '<div class="error-msg">Unable to load questions.</div>';
+            }
+        }
+
+        function displayTeacherView(questions, answers, phones) {
             const content = document.getElementById('teacherContent');
 
             if (questions.length === 0) {
@@ -1028,7 +871,7 @@
             let html = '<h3 style="margin-top: 20px; color: #1E5BFF;">📊 Student Responses</h3>';
 
             const latestQuestion = questions[questions.length - 1];
-            const answersForQuestion = studentAnswers.filter(a => 
+            const answersForQuestion = answers.filter(a => 
                 a.questionId === latestQuestion.id && (!a.type || a.type === 'question')
             );
 
@@ -1042,11 +885,11 @@
             if (answersForQuestion.length > 0) {
                 answersForQuestion.forEach(answer => {
                     html += '<div class="student-answer">';
-                    html += '<strong style="color: #1E5BFF;">👤 ' + answer.studentName + '</strong>';
+                    html += '<strong style="color: #1E5BFF;">👤 ' + (answer.studentName || 'Unknown') + '</strong>';
                     html += '<br><span style="color: #999; font-size: 14px;">PIN: ' + answer.studentPin + '</span>';
 
-                    if (studentPhones[answer.studentPin]) {
-                        html += '<br><span style="color: #999; font-size: 14px;">📱 ' + studentPhones[answer.studentPin].phone + '</span>';
+                    if (phones[answer.studentPin]) {
+                        html += '<br><span style="color: #999; font-size: 14px;">📱 ' + phones[answer.studentPin].phone + '</span>';
                     }
 
                     html += '<div style="color: #999; font-size: 13px; margin: 5px 0;">Submitted: ' + answer.date + '</div>';
@@ -1060,7 +903,7 @@
             content.innerHTML = html;
         }
 
-        function postQuestion() {
+        async function postQuestion() {
             const question = document.getElementById('newQuestion').value.trim();
             const answer = document.getElementById('yesterdayAnswer').value.trim();
 
@@ -1069,24 +912,17 @@
                 return;
             }
 
-            if (answer && questions.length > 0) {
-                questions[questions.length - 1].answer = answer;
+            try {
+                await apiPost('/questions', { question, answer });
+
+                document.getElementById('newQuestion').value = '';
+                document.getElementById('yesterdayAnswer').value = '';
+
+                alert('Question posted successfully!');
+                loadTeacherQuestions();
+            } catch (error) {
+                alert('Error posting question: ' + error.message);
             }
-
-            questions.push({
-                id: Date.now(),
-                question: question,
-                answer: null,
-                date: new Date().toLocaleString()
-            });
-
-            saveAllData();
-
-            document.getElementById('newQuestion').value = '';
-            document.getElementById('yesterdayAnswer').value = '';
-
-            alert('Question posted successfully!');
-            displayTeacherView();
         }
 
         // Media Functions
@@ -1115,7 +951,7 @@
             reader.readAsDataURL(file);
         }
 
-        function uploadMedia() {
+        async function uploadMedia() {
             const fileInput = document.getElementById('mediaFile');
             const opinion = document.getElementById('mediaOpinion').value.trim();
 
@@ -1130,251 +966,120 @@
             }
 
             const file = fileInput.files[0];
-            
-            if (file.size > 10 * 1024 * 1024) {
-                alert('File is too large! Please choose a file smaller than 10MB.');
-                return;
-            }
-
             const reader = new FileReader();
 
-            reader.onload = function(e) {
-                mediaFiles.push({
-                    id: Date.now(),
-                    type: file.type.startsWith('image/') ? 'image' : 'audio',
-                    data: e.target.result,
-                    fileName: file.name,
-                    opinion: opinion,
-                    date: new Date().toLocaleString()
-                });
+            reader.onload = async function(e) {
+                try {
+                    await apiPost('/media', {
+                        type: file.type.startsWith('image/') ? 'image' : 'audio',
+                        data: e.target.result,
+                        fileName: file.name,
+                        opinion: opinion
+                    });
 
-                saveAllData();
+                    fileInput.value = '';
+                    document.getElementById('mediaOpinion').value = '';
+                    document.getElementById('mediaPreview').innerHTML = '';
 
-                fileInput.value = '';
-                document.getElementById('mediaOpinion').value = '';
-                document.getElementById('mediaPreview').innerHTML = '';
-
-                alert('Media uploaded successfully!');
-                displayMediaList();
+                    alert('Media uploaded successfully!');
+                    loadMediaList();
+                } catch (error) {
+                    alert('Error uploading media: ' + error.message);
+                }
             };
 
             reader.readAsDataURL(file);
         }
 
-        function displayMediaList() {
+        async function loadMediaList() {
             const container = document.getElementById('mediaList');
+            container.innerHTML = '<div class="loading">Loading...</div>';
 
-            if (mediaFiles.length === 0) {
-                container.innerHTML = '<p style="color: #999; text-align: center; margin-top: 20px;">No media files uploaded yet.</p>';
-                return;
-            }
+            try {
+                const mediaFiles = await apiGet('/media') || [];
+                const answers = await apiGet('/answers') || [];
 
-            let html = '<h3 style="margin-top: 30px; color: #ff9800;">📁 Uploaded Media & Student Responses</h3>';
-
-            const reversedMedia = [...mediaFiles].reverse();
-
-            reversedMedia.forEach(media => {
-                const mediaAnswers = studentAnswers.filter(a => a.questionId === media.id && a.type === 'media');
-                
-                html += '<div class="media-box">';
-                html += '<div style="color: #999; font-size: 13px; margin-bottom: 8px;">📅 ' + media.date + '</div>';
-                html += '<h4>📎 ' + media.fileName + '</h4>';
-
-                if (media.type === 'image') {
-                    html += '<img src="' + media.data + '" class="media-preview" alt="' + media.fileName + '">';
-                } else {
-                    html += '<audio controls><source src="' + media.data + '"></audio>';
+                if (mediaFiles.length === 0) {
+                    container.innerHTML = '<p style="color: #999; text-align: center; margin-top: 20px;">No media files uploaded yet.</p>';
+                    return;
                 }
 
-                html += '<div class="opinion-box">';
-                html += '<strong>Your Opinion:</strong><br>';
-                html += media.opinion;
-                html += '</div>';
+                let html = '<h3 style="margin-top: 30px; color: #ff9800;">📁 Uploaded Media & Student Responses</h3>';
 
-                if (mediaAnswers.length > 0) {
-                    html += '<div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 6px;">';
-                    html += '<strong style="color: #1976d2;">👥 Student Responses (' + mediaAnswers.length + '):</strong>';
-                    mediaAnswers.forEach(ans => {
-                        html += '<div style="margin-top: 10px; padding: 8px; background: white; border-radius: 4px;">';
-                        html += '<strong>' + ans.studentName + '</strong> (' + ans.studentPin + '):<br>';
-                        html += '<span style="font-size: 14px;">' + ans.answer + '</span>';
-                        html += '</div>';
-                    });
+                const reversedMedia = [...mediaFiles].reverse();
+
+                reversedMedia.forEach(media => {
+                    const mediaAnswers = answers.filter(a => a.questionId === media.id && a.type === 'media');
+                    
+                    html += '<div class="media-box">';
+                    html += '<div style="color: #999; font-size: 13px; margin-bottom: 8px;">📅 ' + media.date + '</div>';
+                    html += '<h4>📎 ' + media.fileName + '</h4>';
+
+                    if (media.type === 'image') {
+                        html += '<img src="' + media.data + '" class="media-preview" alt="' + media.fileName + '">';
+                    } else {
+                        html += '<audio controls><source src="' + media.data + '"></audio>';
+                    }
+
+                    html += '<div class="opinion-box">';
+                    html += '<strong>Your Opinion:</strong><br>';
+                    html += media.opinion;
                     html += '</div>';
-                }
 
-                html += '</div>';
-            });
+                    // Show student responses to media
+                    if (mediaAnswers.length > 0) {
+                        html += '<div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 6px;">';
+                        html += '<strong style="color: #1976d2;">👥 Student Responses (' + mediaAnswers.length + '):</strong>';
+                        mediaAnswers.forEach(ans => {
+                            html += '<div style="margin-top: 10px; padding: 8px; background: white; border-radius: 4px;">';
+                            html += '<strong>' + ans.studentName + '</strong> (' + ans.studentPin + '):<br>';
+                            html += '<span style="font-size: 14px;">' + ans.answer + '</span>';
+                            html += '</div>';
+                        });
+                        html += '</div>';
+                    }
 
-            container.innerHTML = html;
+                    html += '</div>';
+                });
+
+                container.innerHTML = html;
+            } catch (error) {
+                container.innerHTML = '<div class="error-msg">Unable to load media files.</div>';
+            }
         }
 
-        function displayLeaderboard() {
-            const container = document.getElementById('leaderboardContent');
-
-            // Calculate student statistics
-            const studentStats = {};
-            
-            // Count answers per student
-            studentAnswers.forEach(answer => {
-                if (!studentStats[answer.studentPin]) {
-                    studentStats[answer.studentPin] = {
-                        pin: answer.studentPin,
-                        name: answer.studentName,
-                        totalAnswers: 0,
-                        questionAnswers: 0,
-                        mediaAnswers: 0,
-                        phone: studentPhones[answer.studentPin]?.phone || 'N/A',
-                        lastActivity: answer.date
-                    };
-                }
-                
-                studentStats[answer.studentPin].totalAnswers++;
-                
-                if (answer.type === 'media') {
-                    studentStats[answer.studentPin].mediaAnswers++;
-                } else {
-                    studentStats[answer.studentPin].questionAnswers++;
-                }
-                
-                // Update last activity to most recent
-                if (new Date(answer.date) > new Date(studentStats[answer.studentPin].lastActivity)) {
-                    studentStats[answer.studentPin].lastActivity = answer.date;
-                }
-            });
-
-            // Convert to array and sort by total answers
-            const rankedStudents = Object.values(studentStats).sort((a, b) => {
-                if (b.totalAnswers !== a.totalAnswers) {
-                    return b.totalAnswers - a.totalAnswers;
-                }
-                // If same answers, sort by most recent activity
-                return new Date(b.lastActivity) - new Date(a.lastActivity);
-            });
-
-            if (rankedStudents.length === 0) {
-                container.innerHTML = '<p style="color: #999; text-align: center; margin: 20px 0;">No student activity yet. Students will appear here once they start answering questions.</p>';
-                return;
-            }
-
-            // Calculate stats for header
-            const totalStudents = rankedStudents.length;
-            const totalAnswers = rankedStudents.reduce((sum, s) => sum + s.totalAnswers, 0);
-            const avgAnswers = (totalAnswers / totalStudents).toFixed(1);
-            const mostActive = rankedStudents[0];
-
-            let html = '<div class="leaderboard-header">';
-            html += '<h3 style="margin: 0;">🏆 Top Performers</h3>';
-            html += '<div class="leaderboard-stats">';
-            html += '<div class="leaderboard-stat"><span class="number">' + totalStudents + '</span><span class="label">Total Students</span></div>';
-            html += '<div class="leaderboard-stat"><span class="number">' + totalAnswers + '</span><span class="label">Total Responses</span></div>';
-            html += '<div class="leaderboard-stat"><span class="number">' + avgAnswers + '</span><span class="label">Avg per Student</span></div>';
-            html += '</div>';
-            html += '</div>';
-
-            html += '<div class="leaderboard-container">';
-
-            rankedStudents.forEach((student, index) => {
-                const rank = index + 1;
-                let rankClass = '';
-                let rankBadgeClass = '';
-                let rankEmoji = rank;
-
-                if (rank === 1) {
-                    rankClass = 'rank-1';
-                    rankBadgeClass = 'gold';
-                    rankEmoji = '🥇';
-                } else if (rank === 2) {
-                    rankClass = 'rank-2';
-                    rankBadgeClass = 'silver';
-                    rankEmoji = '🥈';
-                } else if (rank === 3) {
-                    rankClass = 'rank-3';
-                    rankBadgeClass = 'bronze';
-                    rankEmoji = '🥉';
-                }
-
-                html += '<div class="leaderboard-item ' + rankClass + '">';
-                
-                // Rank badge
-                html += '<div class="rank-badge ' + rankBadgeClass + '">';
-                if (rank <= 3) {
-                    html += rankEmoji;
-                } else {
-                    html += '#' + rank;
-                }
-                html += '</div>';
-
-                // Student info
-                html += '<div class="student-info">';
-                html += '<strong>' + student.name + '</strong>';
-                html += '<small>PIN: ' + student.pin + ' | 📱 ' + student.phone + '</small><br>';
-                html += '<small style="color: #999;">Last active: ' + student.lastActivity + '</small>';
-                html += '</div>';
-
-                // Streak badge
-                let streakClass = student.totalAnswers >= 5 ? 'high' : '';
-                html += '<div class="streak-badge ' + streakClass + '">';
-                html += '🔥 ' + student.totalAnswers + ' response' + (student.totalAnswers > 1 ? 's' : '');
-                html += '<br><small style="font-size: 10px;">Q: ' + student.questionAnswers + ' | M: ' + student.mediaAnswers + '</small>';
-                html += '</div>';
-
-                html += '</div>';
-            });
-
-            html += '</div>';
-
-            // Add insights section
-            if (rankedStudents.length >= 3) {
-                html += '<div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #4CAF50;">';
-                html += '<h4 style="color: #4CAF50; margin-bottom: 10px;">📊 Insights</h4>';
-                html += '<p style="font-size: 14px; margin: 5px 0;"><strong>🌟 Top Performer:</strong> ' + mostActive.name + ' (' + mostActive.totalAnswers + ' responses)</p>';
-                
-                const activeStudents = rankedStudents.filter(s => s.totalAnswers >= 3).length;
-                html += '<p style="font-size: 14px; margin: 5px 0;"><strong>💪 Highly Active:</strong> ' + activeStudents + ' students (3+ responses)</p>';
-                
-                const questionOnlyStudents = rankedStudents.filter(s => s.mediaAnswers === 0 && s.questionAnswers > 0).length;
-                if (questionOnlyStudents > 0) {
-                    html += '<p style="font-size: 14px; margin: 5px 0;"><strong>💡 Tip:</strong> ' + questionOnlyStudents + ' students haven\'t responded to media yet</p>';
-                }
-                html += '</div>';
-            }
-
-            container.innerHTML = html;
-        }
-
-        function displayPhoneNumbers() {
+        async function loadPhoneNumbers() {
             const container = document.getElementById('phoneNumbersList');
-            const phoneList = Object.entries(studentPhones);
+            container.innerHTML = '<div class="loading">Loading...</div>';
 
-            if (phoneList.length === 0) {
-                container.innerHTML = '<p class="date-info">No student phone numbers available yet.</p>';
-                return;
+            try {
+                const phones = await apiGet('/phones') || {};
+                const phoneList = Object.entries(phones);
+
+                if (phoneList.length === 0) {
+                    container.innerHTML = '<p class="date-info">No student phone numbers available yet.</p>';
+                    return;
+                }
+
+                let html = '<div style="margin-bottom: 10px; color: #666;"><strong>Total Students: ' + phoneList.length + '</strong></div>';
+
+                phoneList.forEach(([pin, data]) => {
+                    html += '<div class="phone-item">';
+                    html += '<div>';
+                    html += '<strong>' + data.name + '</strong><br>';
+                    html += '<span style="color: #666; font-size: 14px;">PIN: ' + pin + '</span><br>';
+                    html += '<span style="color: #666; font-size: 13px;">Last Login: ' + data.lastLogin + '</span>';
+                    html += '</div>';
+                    html += '<div style="font-size: 18px; color: #1E5BFF; font-weight: 600;">';
+                    html += '📱 ' + data.phone;
+                    html += '</div>';
+                    html += '</div>';
+                });
+
+                container.innerHTML = html;
+            } catch (error) {
+                container.innerHTML = '<div class="error-msg">Unable to load phone numbers.</div>';
             }
-
-            let html = '<div style="margin-bottom: 10px; color: #666;"><strong>Total Students: ' + phoneList.length + '</strong></div>';
-
-            phoneList.forEach(([pin, data]) => {
-                // Check cooldown status
-                const cooldownCheck = checkLoginCooldown(pin);
-                const cooldownStatus = cooldownCheck.allowed 
-                    ? '✅ Can login' 
-                    : '⏱️ Cooldown: ' + formatTimeRemaining(cooldownCheck.timeRemaining);
-
-                html += '<div class="phone-item">';
-                html += '<div>';
-                html += '<strong>' + data.name + '</strong><br>';
-                html += '<span style="color: #666; font-size: 14px;">PIN: ' + pin + '</span><br>';
-                html += '<span style="color: #666; font-size: 13px;">Last Login: ' + data.lastLogin + '</span><br>';
-                html += '<span style="color: ' + (cooldownCheck.allowed ? '#28a745' : '#ffc107') + '; font-size: 12px;">' + cooldownStatus + '</span>';
-                html += '</div>';
-                html += '<div style="font-size: 18px; color: #1E5BFF; font-weight: 600;">';
-                html += '📱 ' + data.phone;
-                html += '</div>';
-                html += '</div>';
-            });
-
-            container.innerHTML = html;
         }
 
         // Password Functions
@@ -1419,22 +1124,11 @@
                 return;
             }
 
-            if (!confirm('This will delete all questions, answers, media, phone numbers, AND login cooldowns. Are you absolutely sure?')) {
+            if (!confirm('This will delete all questions, answers, media, and phone numbers. Are you absolutely sure?')) {
                 return;
             }
 
-            questions = [];
-            studentAnswers = [];
-            mediaFiles = [];
-            studentPhones = {};
-            loginCooldowns = {};
-            
-            saveAllData();
-
-            alert('All data has been reset!');
-            displayTeacherView();
-            displayMediaList();
-            displayPhoneNumbers();
+            alert('For security reasons, data reset must be done on the server. Please contact your administrator.');
         }
     </script>
 </body>
