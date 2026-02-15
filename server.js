@@ -8,7 +8,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
 // Serve static files
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(__dirname));
 
 // In-memory storage
 let questions = [];
@@ -240,7 +240,13 @@ app.post("/admin/reset-all", (req, res) => {
 
 // ============ HEALTH CHECK & INFO ============
 
+// Root endpoint - serve the HTML app
 app.get("/", (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// API info endpoint
+app.get("/api", (req, res) => {
     res.json({ 
         message: "TEJAPRATAP'S QUIZ API",
         status: "running",
