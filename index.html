@@ -1,362 +1,1136 @@
-
-        const express = require("express");
-const cors = require("cors");
-const path = require("path");
-const fs = require("fs");
-const app = express();
-
-app.use(cors());
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ extended: true, limit: '50mb' }));
-
-// In-memory storage
-let questions = [];
-let studentAnswers = [];
-let mediaFiles = [];
-let studentPhones = {};
-
-// ============ QUESTIONS ENDPOINTS ============
-
-app.get("/questions", (req, res) => {
-    res.json(questions);
-});
-
-app.post("/questions", (req, res) => {
-    const { question, answer } = req.body;
-    
-    if (!question) {
-        return res.status(400).json({ error: "Question is required" });
-    }
-    
-    if (answer && questions.length > 0) {
-        questions[questions.length - 1].answer = answer;
-    }
-    
-    const newQuestion = {
-        id: Date.now(),
-        question,
-        answer: null,
-        date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-    };
-    
-    questions.push(newQuestion);
-    
-    res.json({ 
-        success: true, 
-        message: "Question posted successfully",
-        question: newQuestion
-    });
-});
-
-app.get("/questions/:id", (req, res) => {
-    const question = questions.find(q => q.id === parseInt(req.params.id));
-    if (question) {
-        res.json(question);
-    } else {
-        res.status(404).json({ error: "Question not found" });
-    }
-});
-
-app.put("/questions/:id/answer", (req, res) => {
-    const { answer } = req.body;
-    const question = questions.find(q => q.id === parseInt(req.params.id));
-    
-    if (question) {
-        question.answer = answer;
-        res.json({ success: true, question });
-    } else {
-        res.status(404).json({ error: "Question not found" });
-    }
-});
-
-app.delete("/questions/reset", (req, res) => {
-    questions = [];
-    res.json({ success: true, message: "All questions deleted" });
-});
-
-// ============ STUDENT ANSWERS ENDPOINTS ============
-
-app.get("/answers", (req, res) => {
-    res.json(studentAnswers);
-});
-
-app.get("/answers/question/:questionId", (req, res) => {
-    const answers = studentAnswers.filter(a => a.questionId === parseInt(req.params.questionId));
-    res.json(answers);
-});
-
-app.post("/answers", (req, res) => {
-    const { questionId, studentPin, studentName, answer, type } = req.body;
-    
-    if (!questionId || !studentPin || !studentName || !answer) {
-        return res.status(400).json({ error: "All fields are required" });
-    }
-    
-    const existingAnswer = studentAnswers.find(
-        a => a.questionId === questionId && 
-             a.studentPin === studentPin &&
-             (a.type || 'question') === (type || 'question')
-    );
-    
-    if (existingAnswer) {
-        return res.status(400).json({ 
-            error: "You have already answered this" 
-        });
-    }
-    
-    const newAnswer = {
-        id: Date.now(),
-        questionId,
-        studentPin,
-        studentName,
-        answer,
-        type: type || 'question',
-        date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-    };
-    
-    studentAnswers.push(newAnswer);
-    
-    res.json({ 
-        success: true, 
-        message: "Answer submitted successfully",
-        answer: newAnswer
-    });
-});
-
-// ============ MEDIA FILES ENDPOINTS ============
-
-app.get("/media", (req, res) => {
-    res.json(mediaFiles);
-});
-
-app.post("/media", (req, res) => {
-    const { type, data, fileName, opinion } = req.body;
-    
-    if (!type || !data || !fileName || !opinion) {
-        return res.status(400).json({ error: "All fields are required" });
-    }
-    
-    const newMedia = {
-        id: Date.now(),
-        type,
-        data,
-        fileName,
-        opinion,
-        date: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-    };
-    
-    mediaFiles.push(newMedia);
-    
-    res.json({ 
-        success: true, 
-        message: "Media uploaded successfully",
-        media: newMedia
-    });
-});
-
-app.get("/media/latest", (req, res) => {
-    if (mediaFiles.length > 0) {
-        res.json(mediaFiles[mediaFiles.length - 1]);
-    } else {
-        res.status(404).json({ error: "No media files found" });
-    }
-});
-
-app.delete("/media/:id", (req, res) => {
-    const mediaIndex = mediaFiles.findIndex(m => m.id === parseInt(req.params.id));
-    
-    if (mediaIndex !== -1) {
-        mediaFiles.splice(mediaIndex, 1);
-        res.json({ success: true, message: "Media deleted successfully" });
-    } else {
-        res.status(404).json({ error: "Media not found" });
-    }
-});
-
-// ============ STUDENT PHONES ENDPOINTS ============
-
-app.get("/phones", (req, res) => {
-    res.json(studentPhones);
-});
-
-app.post("/phones", (req, res) => {
-    const { pin, name, phone } = req.body;
-    
-    if (!pin || !name || !phone) {
-        return res.status(400).json({ error: "All fields are required" });
-    }
-    
-    studentPhones[pin] = {
-        name,
-        phone,
-        lastLogin: new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-    };
-    
-    res.json({ 
-        success: true, 
-        message: "Phone registered successfully" 
-    });
-});
-
-// ============ STATISTICS ENDPOINTS ============
-
-app.get("/stats", (req, res) => {
-    const stats = {
-        totalQuestions: questions.length,
-        totalAnswers: studentAnswers.length,
-        totalMedia: mediaFiles.length,
-        totalStudents: Object.keys(studentPhones).length,
-        uniqueStudents: [...new Set(studentAnswers.map(a => a.studentPin))].length,
-        latestQuestionDate: questions.length > 0 ? questions[questions.length - 1].date : null,
-        latestMediaDate: mediaFiles.length > 0 ? mediaFiles[mediaFiles.length - 1].date : null,
-        questionAnswers: studentAnswers.filter(a => (!a.type || a.type === 'question')).length,
-        mediaAnswers: studentAnswers.filter(a => a.type === 'media').length
-    };
-    
-    res.json(stats);
-});
-
-// ============ ADMIN/RESET ENDPOINTS ============
-
-app.post("/admin/reset-all", (req, res) => {
-    const { confirmPassword } = req.body;
-    
-    if (confirmPassword !== "RESET_ALL_DATA_TEJAPRATAP") {
-        return res.status(403).json({ error: "Incorrect confirmation password" });
-    }
-    
-    questions = [];
-    studentAnswers = [];
-    mediaFiles = [];
-    studentPhones = {};
-    
-    res.json({ 
-        success: true, 
-        message: "All data has been reset" 
-    });
-});
-
-// ============ HEALTH CHECK & INFO ============
-
-// API info endpoint - MUST come before root route
-app.get("/api", (req, res) => {
-    res.json({ 
-        message: "TEJAPRATAP'S QUIZ API",
-        status: "running",
-        version: "2.1.0",
-        description: "Learn something new every day!",
-        endpoints: {
-            questions: "/questions",
-            answers: "/answers (supports type: 'question' or 'media')",
-            media: "/media",
-            phones: "/phones",
-            stats: "/stats"
-        },
-        features: [
-            "Daily questions",
-            "Media uploads (images/audio)",
-            "Student responses to media",
-            "Phone number tracking",
-            "Real-time synchronization"
-        ]
-    });
-});
-
-app.get("/health", (req, res) => {
-    res.json({ 
-        status: "OK", 
-        timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        memory: process.memoryUsage(),
-        dataStats: {
-            questions: questions.length,
-            answers: studentAnswers.length,
-            media: mediaFiles.length,
-            students: Object.keys(studentPhones).length
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEJAPRATAP'S QUIZ</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-    });
-});
 
-// ============ SERVE HTML APP ============
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(to right, #1E5BFF, #A84DFF);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
 
-// Serve static files AFTER API routes
-app.use(express.static(__dirname));
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
 
-// Root endpoint - serve the HTML app
-app.get("/", (req, res) => {
-    const indexPath = path.join(__dirname, 'index.html');
-    console.log('Serving index.html from:', indexPath);
-    console.log('File exists?', fs.existsSync(indexPath));
-    
-    if (fs.existsSync(indexPath)) {
-        res.sendFile(indexPath);
-    } else {
-        console.error('index.html not found at:', indexPath);
-        console.error('Directory contents:', fs.readdirSync(__dirname));
-        res.status(500).send(`
-            <h1>Error: index.html not found</h1>
-            <p>Path: ${indexPath}</p>
-            <p>Try visiting <a href="/app">/app</a> instead</p>
-        `);
-    }
-});
+        h1 {
+            color: #1E5BFF;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 28px;
+        }
 
-// Alternative route
-app.get("/app", (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
-});
+        h2 {
+            color: #764ba2;
+            margin-bottom: 20px;
+            text-align: center;
+        }
 
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({ 
-        error: "Endpoint not found",
-        message: "Please check the API documentation",
-        requestedPath: req.path
-    });
-});
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
 
-// Error handler
-app.use((err, req, res, next) => {
-    console.error('Error:', err);
-    res.status(500).json({ 
-        error: "Internal server error",
-        message: err.message 
-    });
-});
+        .pin-format-info {
+            background: #e7f3ff;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #0066cc;
+            border-left: 4px solid #0066cc;
+        }
 
-// ============ SERVER START ============
+        .media-box {
+            background: #fff8e1;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #ff9800;
+        }
 
-const PORT = process.env.PORT || 3000;
-const server = app.listen(PORT, () => {
-    console.log(`
-╔═══════════════════════════════════════════╗
-║     TEJAPRATAP'S QUIZ SERVER              ║
-║     Learn something new every day!        ║
-║     Server running on port ${PORT}          ║
-╚═══════════════════════════════════════════╝
-    `);
-    console.log(`\n📡 API URL: http://localhost:${PORT}`);
-    console.log(`🌐 Web App: http://localhost:${PORT}/app`);
-    console.log(`\n📊 Available Endpoints:`);
-    console.log(`   GET  /questions - Get all questions`);
-    console.log(`   POST /questions - Post new question`);
-    console.log(`   GET  /answers - Get all answers`);
-    console.log(`   POST /answers - Submit answer (question or media)`);
-    console.log(`   GET  /media - Get all media`);
-    console.log(`   POST /media - Upload media`);
-    console.log(`   GET  /media/latest - Get latest media`);
-    console.log(`   GET  /phones - Get student phones`);
-    console.log(`   POST /phones - Register phone`);
-    console.log(`   GET  /stats - Get statistics`);
-    console.log(`   GET  /health - Health check\n`);
-});
+        .media-box h4 {
+            color: #ff9800;
+            margin-bottom: 10px;
+        }
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-    console.log('SIGTERM signal received: closing HTTP server');
-    server.close(() => {
-        console.log('HTTP server closed');
-    });
-});
+        .opinion-box {
+            background: #e8f5e9;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            border-left: 3px solid #4caf50;
+        }
 
-module.exports = app;
+        .opinion-box strong {
+            color: #2e7d32;
+        }
+
+        .media-preview {
+            max-width: 100%;
+            max-height: 200px;
+            margin-top: 10px;
+            border-radius: 8px;
+        }
+
+        audio {
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .login-section, .student-section, .teacher-section, .password-change-section, .teacher-login-section {
+            display: none;
+        }
+
+        .login-section.active, .student-section.active, .teacher-section.active, .password-change-section.active, .teacher-login-section.active {
+            display: block;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"], input[type="password"], input[type="tel"], input[type="file"], textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #1E5BFF;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(30, 91, 255, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .secondary-btn {
+            background: #6c757d;
+            margin-top: 10px;
+        }
+
+        .warning-btn {
+            background: #ffc107;
+            color: #333;
+        }
+
+        .danger-btn {
+            background: #dc3545;
+        }
+
+        .question-box {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #1E5BFF;
+        }
+
+        .question-box h3 {
+            color: #1E5BFF;
+            margin-bottom: 10px;
+        }
+
+        .answer-box {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border-left: 4px solid #28a745;
+        }
+
+        .student-answer {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #e0e0e0;
+        }
+
+        .link-button {
+            color: #1E5BFF;
+            text-decoration: none;
+            cursor: pointer;
+            display: inline-block;
+            margin-top: 15px;
+        }
+
+        .link-button:hover {
+            text-decoration: underline;
+        }
+
+        .success-msg {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+            margin: 10px 0;
+        }
+
+        .error-msg {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 12px;
+            border-radius: 8px;
+            border-left: 4px solid #dc3545;
+            margin: 10px 0;
+        }
+
+        .phone-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 10px 0;
+            border: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .date-info {
+            color: #999;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .logo {
+            font-size: 40px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .media-answer-section {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            border-left: 4px solid #ff9800;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Login Screen -->
+        <div id="loginSection" class="login-section active">
+            <div class="logo">📚🏫</div>
+            <h1>TEJAPRATAP'S QUIZ</h1>
+            <p class="subtitle">Learn something new every day!</p>
+
+            <div class="pin-format-info">
+                📌 <strong>PIN Format:</strong> YYYYY-BB-XXX<br>
+                <strong>YYYYY:</strong> Year (22007-30007) | <strong>BB:</strong> Branch (CS/EE/ME/EI/CE/EC) | <strong>XXX:</strong> Roll No. (001-999)<br>
+                Example: <strong>23007-CS-001</strong>
+            </div>
+
+            <div class="input-group">
+                <label>👤 Your Name:</label>
+                <input type="text" id="studentName" placeholder="Enter your full name">
+            </div>
+
+            <div class="input-group">
+                <label>📱 Phone Number:</label>
+                <input type="tel" id="studentPhone" placeholder="Enter 10-digit phone number" maxlength="10">
+            </div>
+
+            <div class="input-group">
+                <label>🔑 Your PIN (YYYYY-BB-XXX):</label>
+                <input type="text" id="studentPin" placeholder="e.g., 23007-CS-001">
+            </div>
+
+            <button onclick="loginStudent()">Login as Student</button>
+
+            <p style="text-align: center; margin-top: 20px; color: #666;">
+                Are you TEJAPRATAP? <a href="#" class="link-button" onclick="showTeacherLogin(); return false;">Login here</a>
+            </p>
+        </div>
+
+        <!-- Teacher Login Screen -->
+        <div id="teacherLoginSection" class="teacher-login-section">
+            <div class="logo">👨‍🏫🔒</div>
+            <h1>TEJAPRATAP Login</h1>
+            <p class="subtitle">Manage daily questions and view student responses</p>
+
+            <div class="input-group" style="background: #fff3cd; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
+                ⚠️ <strong>This website is managed by TEJAPRATAP</strong>
+            </div>
+
+            <div class="input-group">
+                <label>🔐 TEJAPRATAP Password:</label>
+                <input type="password" id="teacherPassword" placeholder="Enter password">
+            </div>
+
+            <button onclick="loginTeacher()">Login as TEJAPRATAP</button>
+
+            <p style="text-align: center; margin-top: 15px;">
+                <a href="#" class="link-button" onclick="showForgotPassword(); return false;">Forgot Password?</a>
+            </p>
+
+            <p style="text-align: center; margin-top: 10px; color: #666;">
+                Are you a student? <a href="#" class="link-button" onclick="showStudentLogin(); return false;">Login here</a>
+            </p>
+        </div>
+
+        <!-- Student Dashboard -->
+        <div id="studentSection" class="student-section">
+            <div class="logo">📚</div>
+            <h2 id="studentWelcome">Welcome!</h2>
+
+            <div id="studentContent"></div>
+
+            <button class="secondary-btn" onclick="logoutStudent()">Logout</button>
+        </div>
+
+        <!-- Teacher Dashboard -->
+        <div id="teacherSection" class="teacher-section">
+            <div class="logo">👨‍🏫</div>
+            <h1>TEJAPRATAP Dashboard</h1>
+
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('questions')">Questions</button>
+                <button class="tab-btn" onclick="switchTab('media')">Media Files</button>
+                <button class="tab-btn" onclick="switchTab('phones')">Phone Numbers</button>
+            </div>
+
+            <!-- Questions Tab -->
+            <div id="questionsTab" class="tab-content active">
+                <h2>📝 Post New Question</h2>
+                
+                <div class="input-group">
+                    <label>Today's Question:</label>
+                    <textarea id="newQuestion" placeholder="Enter today's question..."></textarea>
+                </div>
+
+                <div class="input-group">
+                    <label>Yesterday's Answer (Optional):</label>
+                    <textarea id="yesterdayAnswer" placeholder="Enter answer to yesterday's question..."></textarea>
+                </div>
+
+                <button onclick="postQuestion()">Post Question</button>
+
+                <div id="teacherContent"></div>
+            </div>
+
+            <!-- Media Tab -->
+            <div id="mediaTab" class="tab-content">
+                <h2>🎵 Upload Media & Give Opinion</h2>
+                
+                <div class="input-group">
+                    <label>Upload Image or Audio:</label>
+                    <input type="file" id="mediaFile" accept="image/*,audio/*" onchange="previewMedia()">
+                    <div id="mediaPreview"></div>
+                </div>
+
+                <div class="input-group">
+                    <label>Your Opinion/Description:</label>
+                    <textarea id="mediaOpinion" placeholder="Share your opinion about this media..."></textarea>
+                </div>
+
+                <button onclick="uploadMedia()">Upload Media</button>
+
+                <div id="mediaList"></div>
+            </div>
+
+            <!-- Phone Numbers Tab -->
+            <div id="phonesTab" class="tab-content">
+                <h2>📞 Student Contact Information</h2>
+                <div id="phoneNumbersList"></div>
+            </div>
+
+            <button class="warning-btn" onclick="showChangePassword()">Change Password</button>
+            <button class="danger-btn" onclick="resetAllData()">Reset All Data</button>
+            <button class="secondary-btn" onclick="logoutTeacher()">Logout</button>
+        </div>
+
+        <!-- Password Change Section -->
+        <div id="passwordChangeSection" class="password-change-section">
+            <h2>🔐 Change Password</h2>
+            
+            <div class="input-group">
+                <label>Current Password:</label>
+                <input type="password" id="currentPassword" placeholder="Enter current password">
+            </div>
+
+            <div class="input-group">
+                <label>New Password:</label>
+                <input type="password" id="newPassword" placeholder="Enter new password">
+            </div>
+
+            <div class="input-group">
+                <label>Confirm New Password:</label>
+                <input type="password" id="confirmPassword" placeholder="Confirm new password">
+            </div>
+
+            <button onclick="changePassword()">Change Password</button>
+            <button class="secondary-btn" onclick="backToTeacher()">Back to Dashboard</button>
+        </div>
+    </div>
+
+    <script>
+        // CONFIGURATION
+        const API_URL = 'https://tejapratap-s-quiz.onrender.com';
+        // Backend is deployed on Render - all devices connect to this server
+
+        // State
+        let currentStudent = null;
+        let currentStudentName = null;
+        let isTeacher = false;
+        let teacherPassword = 'tejapratap123';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            const savedStudent = localStorage.getItem('currentStudent');
+            const savedName = localStorage.getItem('currentStudentName');
+            const savedTeacher = localStorage.getItem('isTeacher');
+
+            if (savedStudent && savedName) {
+                currentStudent = savedStudent;
+                currentStudentName = savedName;
+                showStudentDashboard();
+                loadStudentData();
+            } else if (savedTeacher === 'true') {
+                isTeacher = true;
+                showTeacherDashboard();
+                loadTeacherData();
+            }
+
+            const savedPassword = localStorage.getItem('teacherPassword');
+            if (savedPassword) {
+                teacherPassword = savedPassword;
+            }
+        });
+
+        // API Helper Functions
+        async function apiGet(endpoint) {
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        return null;
+                    }
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API GET Error:', error);
+                return null;
+            }
+        }
+
+        async function apiPost(endpoint, data) {
+            try {
+                const response = await fetch(`${API_URL}${endpoint}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+                return await response.json();
+            } catch (error) {
+                console.error('API POST Error:', error);
+                throw error;
+            }
+        }
+
+        // Login Functions
+        function loginStudent() {
+            const name = document.getElementById('studentName').value.trim();
+            const phone = document.getElementById('studentPhone').value.trim();
+            const pin = document.getElementById('studentPin').value.trim();
+
+            if (!name) {
+                alert('Please enter your name!');
+                return;
+            }
+
+            if (!phone || phone.length !== 10 || !/^\d{10}$/.test(phone)) {
+                alert('Please enter a valid 10-digit phone number!');
+                return;
+            }
+
+            if (!pin) {
+                alert('Please enter your PIN!');
+                return;
+            }
+
+            const pinRegex = /^(2[2-9]|30)\d{3}-(CS|EE|ME|EI|CE|EC)-\d{3}$/;
+            if (!pinRegex.test(pin)) {
+                alert('Invalid PIN format! Please use YYYYY-BB-XXX format.\nExample: 23007-CS-001');
+                return;
+            }
+
+            currentStudent = pin;
+            currentStudentName = name;
+            
+            localStorage.setItem('currentStudent', pin);
+            localStorage.setItem('currentStudentName', name);
+
+            apiPost('/phones', { pin, name, phone })
+                .catch(error => console.error('Error registering phone:', error));
+
+            showStudentDashboard();
+            loadStudentData();
+        }
+
+        function loginTeacher() {
+            const password = document.getElementById('teacherPassword').value;
+
+            if (password === teacherPassword) {
+                isTeacher = true;
+                localStorage.setItem('isTeacher', 'true');
+                showTeacherDashboard();
+                loadTeacherData();
+            } else {
+                alert('Incorrect password!');
+            }
+        }
+
+        function logoutStudent() {
+            currentStudent = null;
+            currentStudentName = null;
+            localStorage.removeItem('currentStudent');
+            localStorage.removeItem('currentStudentName');
+            showStudentLogin();
+        }
+
+        function logoutTeacher() {
+            isTeacher = false;
+            localStorage.removeItem('isTeacher');
+            showStudentLogin();
+        }
+
+        // Navigation Functions
+        function showStudentLogin() {
+            document.getElementById('loginSection').classList.add('active');
+            document.getElementById('teacherLoginSection').classList.remove('active');
+            document.getElementById('studentSection').classList.remove('active');
+            document.getElementById('teacherSection').classList.remove('active');
+            document.getElementById('passwordChangeSection').classList.remove('active');
+        }
+
+        function showTeacherLogin() {
+            document.getElementById('loginSection').classList.remove('active');
+            document.getElementById('teacherLoginSection').classList.add('active');
+            document.getElementById('studentSection').classList.remove('active');
+            document.getElementById('teacherSection').classList.remove('active');
+            document.getElementById('passwordChangeSection').classList.remove('active');
+        }
+
+        function showStudentDashboard() {
+            document.getElementById('loginSection').classList.remove('active');
+            document.getElementById('teacherLoginSection').classList.remove('active');
+            document.getElementById('studentSection').classList.add('active');
+            document.getElementById('teacherSection').classList.remove('active');
+            document.getElementById('passwordChangeSection').classList.remove('active');
+            
+            document.getElementById('studentWelcome').textContent = `Welcome, ${currentStudentName}!`;
+        }
+
+        function showTeacherDashboard() {
+            document.getElementById('loginSection').classList.remove('active');
+            document.getElementById('teacherLoginSection').classList.remove('active');
+            document.getElementById('studentSection').classList.remove('active');
+            document.getElementById('teacherSection').classList.add('active');
+            document.getElementById('passwordChangeSection').classList.remove('active');
+        }
+
+        function showChangePassword() {
+            document.getElementById('teacherSection').classList.remove('active');
+            document.getElementById('passwordChangeSection').classList.add('active');
+        }
+
+        function backToTeacher() {
+            document.getElementById('passwordChangeSection').classList.remove('active');
+            document.getElementById('teacherSection').classList.add('active');
+        }
+
+        function showForgotPassword() {
+            alert('Please contact the administrator to reset your password.');
+        }
+
+        function switchTab(tab) {
+            document.getElementById('questionsTab').classList.remove('active');
+            document.getElementById('mediaTab').classList.remove('active');
+            document.getElementById('phonesTab').classList.remove('active');
+
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            if (tab === 'questions') {
+                document.getElementById('questionsTab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                loadTeacherQuestions();
+            } else if (tab === 'media') {
+                document.getElementById('mediaTab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                loadMediaList();
+            } else if (tab === 'phones') {
+                document.getElementById('phonesTab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[2].classList.add('active');
+                loadPhoneNumbers();
+            }
+        }
+
+        // Student Functions
+        async function loadStudentData() {
+            const content = document.getElementById('studentContent');
+            content.innerHTML = '<div class="loading">Loading...</div>';
+
+            try {
+                const latestMedia = await apiGet('/media/latest');
+                const questions = await apiGet('/questions') || [];
+                const answers = await apiGet('/answers') || [];
+
+                displayStudentView(latestMedia, questions, answers);
+            } catch (error) {
+                content.innerHTML = '<div class="error-msg">Unable to connect to server. Please try again later.</div>';
+            }
+        }
+
+        function displayStudentView(latestMedia, questions, answers) {
+            const content = document.getElementById('studentContent');
+            let html = '';
+
+            // Display latest media with answer box
+            if (latestMedia) {
+                const hasAnsweredMedia = answers.some(a => 
+                    a.questionId === latestMedia.id && 
+                    a.studentPin === currentStudent &&
+                    a.type === 'media'
+                );
+
+                html += '<div class="media-box">';
+                html += '<h3>🎵 Latest Media from TEJAPRATAP</h3>';
+                html += '<div style="color: #999; font-size: 13px; margin: 8px 0;">📅 ' + latestMedia.date + '</div>';
+                html += '<h4>📎 ' + latestMedia.fileName + '</h4>';
+                
+                if (latestMedia.type === 'image') {
+                    html += '<img src="' + latestMedia.data + '" class="media-preview" alt="' + latestMedia.fileName + '">';
+                } else {
+                    html += '<audio controls><source src="' + latestMedia.data + '"></audio>';
+                }
+                
+                html += '<div class="opinion-box">';
+                html += '<strong>TEJAPRATAP\'s Opinion:</strong><br>';
+                html += latestMedia.opinion;
+                html += '</div>';
+
+                // Add answer box for media
+                if (hasAnsweredMedia) {
+                    const myAnswer = answers.find(a => 
+                        a.questionId === latestMedia.id && 
+                        a.studentPin === currentStudent &&
+                        a.type === 'media'
+                    );
+                    html += '<div class="success-msg" style="margin-top: 15px;">✓ You already responded to this media!<br><strong>Your response:</strong> ' + myAnswer.answer + '</div>';
+                } else {
+                    html += '<div class="media-answer-section">';
+                    html += '<label style="display: block; margin-bottom: 8px; font-weight: 600; color: #ff9800;">💬 Your Response to this Media:</label>';
+                    html += '<textarea id="mediaAnswer-' + latestMedia.id + '" placeholder="Share your thoughts about this media..." style="width: 100%; padding: 10px; border: 2px solid #ff9800; border-radius: 6px; min-height: 80px;"></textarea>';
+                    html += '<button onclick="submitMediaAnswer(' + latestMedia.id + ')" style="margin-top: 10px; background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">Submit Response</button>';
+                    html += '</div>';
+                }
+
+                html += '</div>';
+            }
+
+            // Display questions
+            if (questions.length === 0) {
+                html += '<p style="color: #999; text-align: center; margin: 30px 0;">No questions available yet. Check back tomorrow!</p>';
+                content.innerHTML = html;
+                return;
+            }
+
+            const latestQuestion = questions[questions.length - 1];
+            const hasAnswered = answers.some(a => 
+                a.questionId === latestQuestion.id && 
+                a.studentPin === currentStudent &&
+                (!a.type || a.type === 'question')
+            );
+
+            html += '<div class="question-box">';
+            html += '<div style="color: #999; font-size: 13px; margin-bottom: 8px;">📅 ' + latestQuestion.date + '</div>';
+            html += '<h3>Today\'s Question:</h3>';
+            html += '<p style="font-size: 16px; margin-top: 10px;">' + latestQuestion.question + '</p>';
+
+            if (hasAnswered) {
+                const myAnswer = answers.find(a => 
+                    a.questionId === latestQuestion.id && 
+                    a.studentPin === currentStudent &&
+                    (!a.type || a.type === 'question')
+                );
+                html += '<div class="success-msg" style="margin-top: 15px;">✓ You already answered this question!<br><strong>Your answer:</strong> ' + myAnswer.answer + '</div>';
+            } else {
+                html += '<div class="input-group" style="margin-top: 15px;">';
+                html += '<label>Your Answer:</label>';
+                html += '<textarea id="studentAnswer" placeholder="Type your answer here..."></textarea>';
+                html += '</div>';
+                html += '<button onclick="submitAnswer(' + latestQuestion.id + ')">Submit Answer</button>';
+            }
+
+            html += '</div>';
+
+            // Show previous question's answer
+            if (questions.length > 1) {
+                const previousQuestion = questions[questions.length - 2];
+                if (previousQuestion.answer) {
+                    html += '<div class="answer-box">';
+                    html += '<div style="color: #666; font-size: 13px; margin-bottom: 8px;">📅 ' + previousQuestion.date + '</div>';
+                    html += '<h4>Previous Question:</h4>';
+                    html += '<p style="margin: 8px 0;">' + previousQuestion.question + '</p>';
+                    html += '<h4 style="margin-top: 15px;">✓ Answer:</h4>';
+                    html += '<p style="background: white; padding: 12px; border-radius: 6px; margin-top: 8px;">' + previousQuestion.answer + '</p>';
+                    html += '</div>';
+                }
+            }
+
+            content.innerHTML = html;
+        }
+
+        async function submitAnswer(questionId) {
+            const answerText = document.getElementById('studentAnswer').value.trim();
+
+            if (!answerText) {
+                alert('Please write your answer!');
+                return;
+            }
+
+            try {
+                await apiPost('/answers', {
+                    questionId: questionId,
+                    studentPin: currentStudent,
+                    studentName: currentStudentName,
+                    answer: answerText,
+                    type: 'question'
+                });
+
+                alert('Answer submitted successfully!');
+                loadStudentData();
+            } catch (error) {
+                alert(error.message || 'Error submitting answer. Please try again.');
+            }
+        }
+
+        async function submitMediaAnswer(mediaId) {
+            const answerText = document.getElementById('mediaAnswer-' + mediaId).value.trim();
+
+            if (!answerText) {
+                alert('Please write your response!');
+                return;
+            }
+
+            try {
+                await apiPost('/answers', {
+                    questionId: mediaId,
+                    studentPin: currentStudent,
+                    studentName: currentStudentName,
+                    answer: answerText,
+                    type: 'media'
+                });
+
+                alert('Response submitted successfully!');
+                loadStudentData();
+            } catch (error) {
+                alert(error.message || 'Error submitting response. Please try again.');
+            }
+        }
+
+        // Teacher Functions
+        async function loadTeacherData() {
+            loadTeacherQuestions();
+            loadMediaList();
+            loadPhoneNumbers();
+        }
+
+        async function loadTeacherQuestions() {
+            const content = document.getElementById('teacherContent');
+            content.innerHTML = '<div class="loading">Loading...</div>';
+
+            try {
+                const questions = await apiGet('/questions') || [];
+                const answers = await apiGet('/answers') || [];
+                const phones = await apiGet('/phones') || {};
+
+                displayTeacherView(questions, answers, phones);
+            } catch (error) {
+                content.innerHTML = '<div class="error-msg">Unable to load questions.</div>';
+            }
+        }
+
+        function displayTeacherView(questions, answers, phones) {
+            const content = document.getElementById('teacherContent');
+
+            if (questions.length === 0) {
+                content.innerHTML = '<p style="color: #999; text-align: center; margin: 20px 0;">No questions posted yet.</p>';
+                return;
+            }
+
+            let html = '<h3 style="margin-top: 20px; color: #1E5BFF;">📊 Student Responses</h3>';
+
+            const latestQuestion = questions[questions.length - 1];
+            const answersForQuestion = answers.filter(a => 
+                a.questionId === latestQuestion.id && (!a.type || a.type === 'question')
+            );
+
+            html += '<div class="question-box">';
+            html += '<div style="color: #999; font-size: 13px; margin-bottom: 8px;">📅 ' + latestQuestion.date + '</div>';
+            html += '<h3>Current Question:</h3>';
+            html += '<p style="font-size: 16px; margin-top: 8px;">' + latestQuestion.question + '</p>';
+            html += '<p style="margin-top: 12px; color: #1E5BFF; font-weight: 600;">Total Responses: ' + answersForQuestion.length + '</p>';
+            html += '</div>';
+
+            if (answersForQuestion.length > 0) {
+                answersForQuestion.forEach(answer => {
+                    html += '<div class="student-answer">';
+                    html += '<strong style="color: #1E5BFF;">👤 ' + (answer.studentName || 'Unknown') + '</strong>';
+                    html += '<br><span style="color: #999; font-size: 14px;">PIN: ' + answer.studentPin + '</span>';
+
+                    if (phones[answer.studentPin]) {
+                        html += '<br><span style="color: #999; font-size: 14px;">📱 ' + phones[answer.studentPin].phone + '</span>';
+                    }
+
+                    html += '<div style="color: #999; font-size: 13px; margin: 5px 0;">Submitted: ' + answer.date + '</div>';
+                    html += '<p style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 6px;">' + answer.answer + '</p>';
+                    html += '</div>';
+                });
+            } else {
+                html += '<p style="color: #999; text-align: center; margin: 20px 0;">No student responses yet.</p>';
+            }
+
+            content.innerHTML = html;
+        }
+
+        async function postQuestion() {
+            const question = document.getElementById('newQuestion').value.trim();
+            const answer = document.getElementById('yesterdayAnswer').value.trim();
+
+            if (!question) {
+                alert('Please enter a question!');
+                return;
+            }
+
+            try {
+                await apiPost('/questions', { question, answer });
+
+                document.getElementById('newQuestion').value = '';
+                document.getElementById('yesterdayAnswer').value = '';
+
+                alert('Question posted successfully!');
+                loadTeacherQuestions();
+            } catch (error) {
+                alert('Error posting question: ' + error.message);
+            }
+        }
+
+        // Media Functions
+        function previewMedia() {
+            const fileInput = document.getElementById('mediaFile');
+            const preview = document.getElementById('mediaPreview');
+
+            if (!fileInput.files || !fileInput.files[0]) {
+                preview.innerHTML = '';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                if (file.type.startsWith('image/')) {
+                    preview.innerHTML = '<img src="' + e.target.result + '" class="media-preview">';
+                } else if (file.type.startsWith('audio/')) {
+                    preview.innerHTML = '<audio controls><source src="' + e.target.result + '"></audio>';
+                } else {
+                    preview.innerHTML = '<p>File selected: ' + file.name + '</p>';
+                }
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        async function uploadMedia() {
+            const fileInput = document.getElementById('mediaFile');
+            const opinion = document.getElementById('mediaOpinion').value.trim();
+
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('Please select a media file!');
+                return;
+            }
+
+            if (!opinion) {
+                alert('Please write your opinion about this media!');
+                return;
+            }
+
+            const file = fileInput.files[0];
+            const reader = new FileReader();
+
+            reader.onload = async function(e) {
+                try {
+                    await apiPost('/media', {
+                        type: file.type.startsWith('image/') ? 'image' : 'audio',
+                        data: e.target.result,
+                        fileName: file.name,
+                        opinion: opinion
+                    });
+
+                    fileInput.value = '';
+                    document.getElementById('mediaOpinion').value = '';
+                    document.getElementById('mediaPreview').innerHTML = '';
+
+                    alert('Media uploaded successfully!');
+                    loadMediaList();
+                } catch (error) {
+                    alert('Error uploading media: ' + error.message);
+                }
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        async function loadMediaList() {
+            const container = document.getElementById('mediaList');
+            container.innerHTML = '<div class="loading">Loading...</div>';
+
+            try {
+                const mediaFiles = await apiGet('/media') || [];
+                const answers = await apiGet('/answers') || [];
+
+                if (mediaFiles.length === 0) {
+                    container.innerHTML = '<p style="color: #999; text-align: center; margin-top: 20px;">No media files uploaded yet.</p>';
+                    return;
+                }
+
+                let html = '<h3 style="margin-top: 30px; color: #ff9800;">📁 Uploaded Media & Student Responses</h3>';
+
+                const reversedMedia = [...mediaFiles].reverse();
+
+                reversedMedia.forEach(media => {
+                    const mediaAnswers = answers.filter(a => a.questionId === media.id && a.type === 'media');
+                    
+                    html += '<div class="media-box">';
+                    html += '<div style="color: #999; font-size: 13px; margin-bottom: 8px;">📅 ' + media.date + '</div>';
+                    html += '<h4>📎 ' + media.fileName + '</h4>';
+
+                    if (media.type === 'image') {
+                        html += '<img src="' + media.data + '" class="media-preview" alt="' + media.fileName + '">';
+                    } else {
+                        html += '<audio controls><source src="' + media.data + '"></audio>';
+                    }
+
+                    html += '<div class="opinion-box">';
+                    html += '<strong>Your Opinion:</strong><br>';
+                    html += media.opinion;
+                    html += '</div>';
+
+                    // Show student responses to media
+                    if (mediaAnswers.length > 0) {
+                        html += '<div style="margin-top: 15px; padding: 10px; background: #e3f2fd; border-radius: 6px;">';
+                        html += '<strong style="color: #1976d2;">👥 Student Responses (' + mediaAnswers.length + '):</strong>';
+                        mediaAnswers.forEach(ans => {
+                            html += '<div style="margin-top: 10px; padding: 8px; background: white; border-radius: 4px;">';
+                            html += '<strong>' + ans.studentName + '</strong> (' + ans.studentPin + '):<br>';
+                            html += '<span style="font-size: 14px;">' + ans.answer + '</span>';
+                            html += '</div>';
+                        });
+                        html += '</div>';
+                    }
+
+                    html += '</div>';
+                });
+
+                container.innerHTML = html;
+            } catch (error) {
+                container.innerHTML = '<div class="error-msg">Unable to load media files.</div>';
+            }
+        }
+
+        async function loadPhoneNumbers() {
+            const container = document.getElementById('phoneNumbersList');
+            container.innerHTML = '<div class="loading">Loading...</div>';
+
+            try {
+                const phones = await apiGet('/phones') || {};
+                const phoneList = Object.entries(phones);
+
+                if (phoneList.length === 0) {
+                    container.innerHTML = '<p class="date-info">No student phone numbers available yet.</p>';
+                    return;
+                }
+
+                let html = '<div style="margin-bottom: 10px; color: #666;"><strong>Total Students: ' + phoneList.length + '</strong></div>';
+
+                phoneList.forEach(([pin, data]) => {
+                    html += '<div class="phone-item">';
+                    html += '<div>';
+                    html += '<strong>' + data.name + '</strong><br>';
+                    html += '<span style="color: #666; font-size: 14px;">PIN: ' + pin + '</span><br>';
+                    html += '<span style="color: #666; font-size: 13px;">Last Login: ' + data.lastLogin + '</span>';
+                    html += '</div>';
+                    html += '<div style="font-size: 18px; color: #1E5BFF; font-weight: 600;">';
+                    html += '📱 ' + data.phone;
+                    html += '</div>';
+                    html += '</div>';
+                });
+
+                container.innerHTML = html;
+            } catch (error) {
+                container.innerHTML = '<div class="error-msg">Unable to load phone numbers.</div>';
+            }
+        }
+
+        // Password Functions
+        function changePassword() {
+            const current = document.getElementById('currentPassword').value;
+            const newPass = document.getElementById('newPassword').value;
+            const confirm = document.getElementById('confirmPassword').value;
+
+            if (!current || !newPass || !confirm) {
+                alert('Please fill all fields!');
+                return;
+            }
+
+            if (current !== teacherPassword) {
+                alert('Current password is incorrect!');
+                return;
+            }
+
+            if (newPass !== confirm) {
+                alert('New passwords do not match!');
+                return;
+            }
+
+            if (newPass.length < 6) {
+                alert('Password must be at least 6 characters long!');
+                return;
+            }
+
+            teacherPassword = newPass;
+            localStorage.setItem('teacherPassword', newPass);
+
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmPassword').value = '';
+
+            alert('Password changed successfully!');
+            backToTeacher();
+        }
+
+        function resetAllData() {
+            if (!confirm('Are you sure you want to reset ALL data? This action cannot be undone!')) {
+                return;
+            }
+
+            if (!confirm('This will delete all questions, answers, media, and phone numbers. Are you absolutely sure?')) {
+                return;
+            }
+
+            alert('For security reasons, data reset must be done on the server. Please contact your administrator.');
+        }
+    </script>
+</body>
+</html>
+
