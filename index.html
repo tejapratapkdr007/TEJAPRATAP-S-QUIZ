@@ -306,6 +306,148 @@
             margin-top: 15px;
             border-left: 4px solid #ff9800;
         }
+
+        /* Leaderboard Styles */
+        .leaderboard-section {
+            margin-top: 20px;
+        }
+
+        .leaderboard-title {
+            text-align: center;
+            font-size: 22px;
+            font-weight: 700;
+            color: #1E5BFF;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            border: 1.5px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            transition: box-shadow 0.2s;
+        }
+
+        .leaderboard-item:hover {
+            box-shadow: 0 4px 16px rgba(30,91,255,0.12);
+        }
+
+        .leaderboard-item.rank-1 { border-color: #FFD700; background: linear-gradient(90deg, #fffbe6, #fff); }
+        .leaderboard-item.rank-2 { border-color: #C0C0C0; background: linear-gradient(90deg, #f5f5f5, #fff); }
+        .leaderboard-item.rank-3 { border-color: #cd7f32; background: linear-gradient(90deg, #fdf0e0, #fff); }
+
+        .rank-badge {
+            font-size: 22px;
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .lb-name {
+            flex: 1;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .lb-score {
+            font-weight: 700;
+            color: #1E5BFF;
+            font-size: 15px;
+        }
+
+        .lb-streak {
+            font-size: 13px;
+            color: #ff9800;
+            font-weight: 600;
+        }
+
+        /* Streak Badge */
+        .streak-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: linear-gradient(135deg, #ff9800, #f44336);
+            color: white;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+
+        /* Ranking on Day 14 */
+        .ranking-section {
+            background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 14px;
+            margin: 20px 0;
+        }
+
+        .ranking-section h3 {
+            text-align: center;
+            font-size: 20px;
+            margin-bottom: 14px;
+            letter-spacing: 1px;
+        }
+
+        .ranking-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+        }
+
+        .ranking-badge {
+            font-size: 20px;
+            min-width: 32px;
+        }
+
+        .ranking-name {
+            flex: 1;
+            font-weight: 600;
+        }
+
+        .ranking-pts {
+            font-size: 15px;
+            font-weight: 700;
+        }
+
+        /* Designer Footer */
+        .designer-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 16px;
+            border-top: 1px solid #e0e0e0;
+            color: #aaa;
+            font-size: 13px;
+            letter-spacing: 0.5px;
+        }
+
+        .designer-footer span {
+            background: linear-gradient(135deg, #1E5BFF, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 700;
+        }
+
+        /* Data expiry notice */
+        .expiry-notice {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            border-radius: 8px;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #e65100;
+            margin-bottom: 14px;
+        }
     </style>
 </head>
 <body>
@@ -389,6 +531,7 @@
                 <button class="tab-btn active" onclick="switchTab('questions')">Questions</button>
                 <button class="tab-btn" onclick="switchTab('media')">Media Files</button>
                 <button class="tab-btn" onclick="switchTab('phones')">Phone Numbers</button>
+                <button class="tab-btn" onclick="switchTab('leaderboard')">🏆 Board</button>
             </div>
 
             <!-- Questions Tab -->
@@ -436,6 +579,13 @@
                 <div id="phoneNumbersList"></div>
             </div>
 
+            <!-- Leaderboard Tab -->
+            <div id="leaderboardTab" class="tab-content">
+                <h2>🏆 Leaderboard & Streaks</h2>
+                <div class="expiry-notice">⏳ All student data is automatically deleted after <strong>15 days</strong>. Rankings are locked on Day 14.</div>
+                <div id="leaderboardContent"><div class="loading">Loading...</div></div>
+            </div>
+
             <button class="warning-btn" onclick="showChangePassword()">Change Password</button>
             <button class="danger-btn" onclick="resetAllData()">Reset All Data</button>
             <button class="secondary-btn" onclick="logoutTeacher()">Logout</button>
@@ -462,6 +612,11 @@
 
             <button onclick="changePassword()">Change Password</button>
             <button class="secondary-btn" onclick="backToTeacher()">Back to Dashboard</button>
+        </div>
+
+        <!-- Designer Footer -->
+        <div class="designer-footer">
+            Designed by <span>SATHWIK</span>
         </div>
     </div>
 
@@ -656,6 +811,7 @@
             document.getElementById('questionsTab').classList.remove('active');
             document.getElementById('mediaTab').classList.remove('active');
             document.getElementById('phonesTab').classList.remove('active');
+            document.getElementById('leaderboardTab').classList.remove('active');
 
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
@@ -671,6 +827,10 @@
                 document.getElementById('phonesTab').classList.add('active');
                 document.querySelectorAll('.tab-btn')[2].classList.add('active');
                 loadPhoneNumbers();
+            } else if (tab === 'leaderboard') {
+                document.getElementById('leaderboardTab').classList.add('active');
+                document.querySelectorAll('.tab-btn')[3].classList.add('active');
+                loadLeaderboard();
             }
         }
 
@@ -693,6 +853,54 @@
         function displayStudentView(latestMedia, questions, answers) {
             const content = document.getElementById('studentContent');
             let html = '';
+
+            // Streak & Score badge
+            autoDeleteOldData();
+            const streak = getStreak(currentStudent);
+            const myTotal = getTotalScore(currentStudent);
+            const allStats = getAllStudentStats();
+            const myRank = allStats.findIndex(s => s.pin === currentStudent) + 1;
+
+            html += `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;justify-content:center;">
+                <div style="background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;padding:10px 18px;border-radius:12px;text-align:center;min-width:90px;">
+                    <div style="font-size:11px;opacity:0.85;">MY SCORE</div>
+                    <div style="font-size:22px;font-weight:700;">${myTotal}</div>
+                    <div style="font-size:11px;opacity:0.85;">pts</div>
+                </div>
+                ${streak > 0 ? `<div style="background:linear-gradient(135deg,#ff9800,#f44336);color:white;padding:10px 18px;border-radius:12px;text-align:center;min-width:90px;">
+                    <div style="font-size:11px;opacity:0.85;">STREAK</div>
+                    <div style="font-size:22px;font-weight:700;">🔥${streak}</div>
+                    <div style="font-size:11px;opacity:0.85;">days</div>
+                </div>` : ''}
+                ${myRank > 0 ? `<div style="background:linear-gradient(135deg,#28a745,#218838);color:white;padding:10px 18px;border-radius:12px;text-align:center;min-width:90px;">
+                    <div style="font-size:11px;opacity:0.85;">MY RANK</div>
+                    <div style="font-size:22px;font-weight:700;">#${myRank}</div>
+                    <div style="font-size:11px;opacity:0.85;">of ${allStats.length}</div>
+                </div>` : ''}
+            </div>`;
+
+            // Mini Leaderboard (top 5)
+            if (allStats.length > 0) {
+                const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+                html += '<div style="background:#f8f9fa;border-radius:12px;padding:14px;margin-bottom:16px;">';
+                html += '<div style="font-weight:700;color:#1E5BFF;margin-bottom:10px;text-align:center;">🏆 Top Students</div>';
+                allStats.slice(0, 5).forEach((s, i) => {
+                    const isMe = s.pin === currentStudent;
+                    html += `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;margin-bottom:6px;border-radius:8px;background:${isMe?'rgba(30,91,255,0.1)':'white'};border:1px solid ${isMe?'#1E5BFF':'#eee'};">
+                        <span style="font-size:16px;">${medals[i]||i+1}</span>
+                        <span style="flex:1;font-weight:${isMe?700:500};color:${isMe?'#1E5BFF':'#333'};">${s.name}${isMe?' (You)':''}</span>
+                        ${s.streak>0?`<span style="font-size:12px;color:#ff9800;">🔥${s.streak}</span>`:''}
+                        <span style="font-weight:700;color:#764ba2;font-size:14px;">${s.total}pts</span>
+                    </div>`;
+                });
+                html += '</div>';
+            }
+
+            // Day-14 ranking alert for students
+            if (isDay14()) {
+                const dayStudents = getAllStudentStats();
+                html += renderRankingSection(dayStudents);
+            }
 
             // Display latest media with answer box
             if (latestMedia) {
@@ -1130,7 +1338,255 @@
 
             alert('For security reasons, data reset must be done on the server. Please contact your administrator.');
         }
+
+        // =====================================================
+        // LEADERBOARD, STREAKS & 15-DAY AUTO-DELETE SYSTEM
+        // =====================================================
+
+        // ---------- Utility ----------
+        function getTodayStr() {
+            return new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+        }
+
+        function daysBetween(dateStr1, dateStr2) {
+            const d1 = new Date(dateStr1);
+            const d2 = new Date(dateStr2);
+            return Math.round(Math.abs(d2 - d1) / (1000 * 60 * 60 * 24));
+        }
+
+        // ---------- Streak Storage ----------
+        // Streaks stored locally per student: { pin: { count, lastDate } }
+        function getStreaks() {
+            try {
+                return JSON.parse(localStorage.getItem('studentStreaks') || '{}');
+            } catch { return {}; }
+        }
+
+        function saveStreaks(streaks) {
+            localStorage.setItem('studentStreaks', JSON.stringify(streaks));
+        }
+
+        function updateStreak(pin) {
+            const streaks = getStreaks();
+            const today = getTodayStr();
+            if (!streaks[pin]) {
+                streaks[pin] = { count: 1, lastDate: today };
+            } else {
+                const diff = daysBetween(streaks[pin].lastDate, today);
+                if (diff === 0) {
+                    // same day, no update
+                } else if (diff === 1) {
+                    streaks[pin].count += 1;
+                    streaks[pin].lastDate = today;
+                } else {
+                    // streak broken
+                    streaks[pin].count = 1;
+                    streaks[pin].lastDate = today;
+                }
+            }
+            saveStreaks(streaks);
+        }
+
+        function getStreak(pin) {
+            const streaks = getStreaks();
+            return streaks[pin] ? streaks[pin].count : 0;
+        }
+
+        // ---------- Score Storage (15 days, auto-delete) ----------
+        // Scores: { pin: { name, scores: [ { date, points } ] } }
+        function getScores() {
+            try {
+                return JSON.parse(localStorage.getItem('studentScores') || '{}');
+            } catch { return {}; }
+        }
+
+        function saveScores(scores) {
+            localStorage.setItem('studentScores', JSON.stringify(scores));
+        }
+
+        function autoDeleteOldData() {
+            // Delete scores older than 15 days
+            const scores = getScores();
+            const today = getTodayStr();
+            let changed = false;
+            for (const pin in scores) {
+                const before = scores[pin].scores.length;
+                scores[pin].scores = scores[pin].scores.filter(s => daysBetween(s.date, today) <= 15);
+                if (scores[pin].scores.length !== before) changed = true;
+            }
+            if (changed) saveScores(scores);
+
+            // Also clear streaks for students who haven't answered in 15+ days
+            const streaks = getStreaks();
+            for (const pin in streaks) {
+                if (daysBetween(streaks[pin].lastDate, today) > 15) {
+                    streaks[pin].count = 0;
+                }
+            }
+            saveStreaks(streaks);
+        }
+
+        function addScore(pin, name, points) {
+            autoDeleteOldData();
+            const scores = getScores();
+            if (!scores[pin]) scores[pin] = { name, scores: [] };
+            scores[pin].name = name; // update name
+            const today = getTodayStr();
+            // Only one score per day
+            const exists = scores[pin].scores.find(s => s.date === today);
+            if (!exists) {
+                scores[pin].scores.push({ date: today, points });
+            }
+            saveScores(scores);
+        }
+
+        function getTotalScore(pin) {
+            const scores = getScores();
+            if (!scores[pin]) return 0;
+            return scores[pin].scores.reduce((sum, s) => sum + (s.points || 0), 0);
+        }
+
+        function getAllStudentStats() {
+            autoDeleteOldData();
+            const scores = getScores();
+            const streaks = getStreaks();
+            return Object.entries(scores).map(([pin, data]) => ({
+                pin,
+                name: data.name,
+                total: data.scores.reduce((s, x) => s + (x.points || 0), 0),
+                days: data.scores.length,
+                streak: streaks[pin] ? streaks[pin].count : 0
+            })).sort((a, b) => b.total - a.total);
+        }
+
+        // Award score when student submits answer
+        function awardScoreForAnswer(pin, name) {
+            addScore(pin, name, 10); // 10 pts per answer
+            updateStreak(pin);
+        }
+
+        // ---------- Day-14 Ranking ----------
+        function getDayNumber() {
+            // Count days since first score entry across all students
+            const scores = getScores();
+            let firstDate = null;
+            for (const pin in scores) {
+                for (const s of scores[pin].scores) {
+                    if (!firstDate || s.date < firstDate) firstDate = s.date;
+                }
+            }
+            if (!firstDate) return 1;
+            return daysBetween(firstDate, getTodayStr()) + 1;
+        }
+
+        function isDay14() {
+            return getDayNumber() === 14;
+        }
+
+        function renderRankingSection(students) {
+            const top5 = students.slice(0, 5);
+            const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+            let html = '<div class="ranking-section">';
+            html += '<h3>🎖️ Day 14 Final Rankings!</h3>';
+            top5.forEach((s, i) => {
+                html += `<div class="ranking-item">
+                    <span class="ranking-badge">${medals[i]}</span>
+                    <span class="ranking-name">${s.name}</span>
+                    <span class="ranking-pts">${s.total} pts</span>
+                </div>`;
+            });
+            html += '</div>';
+            return html;
+        }
+
+        // ---------- Leaderboard Render ----------
+        async function loadLeaderboard() {
+            const container = document.getElementById('leaderboardContent');
+            container.innerHTML = '<div class="loading">Loading...</div>';
+            autoDeleteOldData();
+
+            const students = getAllStudentStats();
+            const medals = ['🥇', '🥈', '🥉'];
+            const dayNum = getDayNumber();
+
+            let html = '';
+
+            if (isDay14()) {
+                html += renderRankingSection(students);
+            }
+
+            html += `<div style="text-align:center;color:#999;font-size:13px;margin-bottom:12px;">📅 Day <strong>${dayNum}</strong> of 15 &nbsp;|&nbsp; Data auto-deletes after Day 15</div>`;
+            html += '<div class="leaderboard-section">';
+            html += '<div class="leaderboard-title">🏆 Leaderboard</div>';
+
+            if (students.length === 0) {
+                html += '<p style="color:#999;text-align:center;">No data yet. Students need to submit answers!</p>';
+            } else {
+                students.forEach((s, i) => {
+                    const rankClass = i < 3 ? `rank-${i+1}` : '';
+                    const medal = medals[i] || `#${i+1}`;
+                    const streakBadge = s.streak > 0 ? `<span class="streak-badge">🔥 ${s.streak} day${s.streak>1?'s':''}</span>` : '';
+                    html += `<div class="leaderboard-item ${rankClass}">
+                        <span class="rank-badge">${medal}</span>
+                        <span class="lb-name">${s.name} ${streakBadge}</span>
+                        <span style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+                            <span class="lb-score">${s.total} pts</span>
+                            <span style="color:#999;font-size:12px;">${s.days} day${s.days!==1?'s':''} active</span>
+                        </span>
+                    </div>`;
+                });
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // ---------- Hook answer submission to award scores ----------
+        const _originalSubmitAnswer = submitAnswer;
+        async function submitAnswer(questionId) {
+            const answerText = document.getElementById('studentAnswer') ? document.getElementById('studentAnswer').value.trim() : '';
+            if (!answerText) { alert('Please write your answer!'); return; }
+            try {
+                await apiPost('/answers', {
+                    questionId: questionId,
+                    studentPin: currentStudent,
+                    studentName: currentStudentName,
+                    answer: answerText,
+                    type: 'question'
+                });
+                awardScoreForAnswer(currentStudent, currentStudentName);
+                alert('Answer submitted successfully!');
+                loadStudentData();
+            } catch (error) {
+                alert(error.message || 'Error submitting answer. Please try again.');
+            }
+        }
+
+        const _originalSubmitMediaAnswer = submitMediaAnswer;
+        async function submitMediaAnswer(mediaId) {
+            const answerText = document.getElementById('mediaAnswer-' + mediaId) ? document.getElementById('mediaAnswer-' + mediaId).value.trim() : '';
+            if (!answerText) { alert('Please write your response!'); return; }
+            try {
+                await apiPost('/answers', {
+                    questionId: mediaId,
+                    studentPin: currentStudent,
+                    studentName: currentStudentName,
+                    answer: answerText,
+                    type: 'media'
+                });
+                awardScoreForAnswer(currentStudent, currentStudentName);
+                alert('Response submitted successfully!');
+                loadStudentData();
+            } catch (error) {
+                alert(error.message || 'Error submitting response. Please try again.');
+            }
+        }
+
+        // Run auto-delete on load
+        autoDeleteOldData();
     </script>
 </body>
 </html>
+
+
 
