@@ -319,7 +319,7 @@
             <div class="pin-format-info">
                 📌 <strong>PIN Format:</strong> YYYYY-BB-XXX<br>
                 <strong>YYYYY:</strong> Year (22007-30007) | <strong>BB:</strong> Branch (CS/EE/ME/EI/CE/EC) | <strong>XXX:</strong> Roll No. (001-999)<br>
-                Example: <strong>23007-CS-001</strong>
+                Example: <strong>25007-CS-007</strong>
             </div>
 
             <div class="input-group">
@@ -334,7 +334,7 @@
 
             <div class="input-group">
                 <label>🔑 Your PIN (YYYYY-BB-XXX):</label>
-                <input type="text" id="studentPin" placeholder="e.g., 23007-CS-001">
+                <input type="text" id="studentPin" placeholder="e.g., 25007-CS-007">
             </div>
 
             <button onclick="loginStudent()">Login as Student</button>
@@ -557,7 +557,7 @@
                 return;
             }
 
-            const pinRegex = /^(2[2-9]|30)\d{3}-(CS|EE|ME|EI|CE|EC)-\d{3}$/;
+            const pinRegex = /^(2[2-9]|30)\d{3}-(CS|EE|ME|EI|CE|EC|cs|ee|me|ei|ce|ec)-\d{3}$/;
             if (!pinRegex.test(pin)) {
                 alert('Invalid PIN format! Please use YYYYY-BB-XXX format.\nExample: 23007-CS-001');
                 return;
