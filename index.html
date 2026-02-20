@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TEJAPRATAP'S QUIZ</title>
+    <title>QUIZ FOR POLYTECHNIC</title>
     <style>
         * {
             margin: 0;
@@ -455,7 +455,7 @@
         <!-- Login Screen -->
         <div id="loginSection" class="login-section active">
             <div class="logo">📚🏫</div>
-            <h1>TEJAPRATAP'S QUIZ</h1>
+            <h1>QUIZ FOR POLYTECHNIC</h1>
             <p class="subtitle">Learn something new every day!</p>
 
             <div class="pin-format-info">
@@ -545,7 +545,7 @@
 
                 <div class="input-group">
                     <label>Yesterday's Answer (Optional):</label>
-                    <textarea id="yesterdayAnswer" placeholder="Enter answer to yesterday's question..."></textarea>
+                    <textarea id="yesterdayAnswer" placeholder="Yesterday's answer..."></textarea>
                 </div>
 
                 <button onclick="postQuestion()">Post Question</button>
@@ -582,7 +582,6 @@
             <!-- Leaderboard Tab -->
             <div id="leaderboardTab" class="tab-content">
                 <h2>🏆 Leaderboard & Streaks</h2>
-                <div class="expiry-notice">⏳ All student data is automatically deleted after <strong>15 days</strong>. Rankings are locked on Day 14.</div>
                 <div id="leaderboardContent"><div class="loading">Loading...</div></div>
             </div>
 
@@ -879,16 +878,16 @@
                 </div>` : ''}
             </div>`;
 
-            // Mini Leaderboard (top 5)
+            // Mini Leaderboard (top 3 with PIN)
             if (allStats.length > 0) {
-                const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+                const medals = ['🥇','🥈','🥉'];
                 html += '<div style="background:#f8f9fa;border-radius:12px;padding:14px;margin-bottom:16px;">';
-                html += '<div style="font-weight:700;color:#1E5BFF;margin-bottom:10px;text-align:center;">🏆 Top Students</div>';
-                allStats.slice(0, 5).forEach((s, i) => {
+                html += '<div style="font-weight:700;color:#1E5BFF;margin-bottom:10px;text-align:center;">🏆 Top 3 Students</div>';
+                allStats.slice(0, 3).forEach((s, i) => {
                     const isMe = s.pin === currentStudent;
                     html += `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;margin-bottom:6px;border-radius:8px;background:${isMe?'rgba(30,91,255,0.1)':'white'};border:1px solid ${isMe?'#1E5BFF':'#eee'};">
                         <span style="font-size:16px;">${medals[i]||i+1}</span>
-                        <span style="flex:1;font-weight:${isMe?700:500};color:${isMe?'#1E5BFF':'#333'};">${s.name}${isMe?' (You)':''}</span>
+                        <span style="flex:1;font-weight:${isMe?700:500};color:${isMe?'#1E5BFF':'#333'};">${s.name}${isMe?' (You)':''} <span style="font-size:11px;color:#999;">(${s.pin})</span></span>
                         ${s.streak>0?`<span style="font-size:12px;color:#ff9800;">🔥${s.streak}</span>`:''}
                         <span style="font-weight:700;color:#764ba2;font-size:14px;">${s.total}pts</span>
                     </div>`;
@@ -1061,6 +1060,15 @@
                 const questions = await apiGet('/questions') || [];
                 const answers = await apiGet('/answers') || [];
                 const phones = await apiGet('/phones') || {};
+
+                // Set yesterday's question as placeholder in the answer textarea
+                if (questions.length > 0) {
+                    const lastQ = questions[questions.length - 1];
+                    const answerField = document.getElementById('yesterdayAnswer');
+                    if (answerField) {
+                        answerField.placeholder = `Yesterday's question: "${lastQ.question}" — Enter the answer here...`;
+                    }
+                }
 
                 displayTeacherView(questions, answers, phones);
             } catch (error) {
@@ -1511,13 +1519,25 @@
 
             let html = '';
 
-            if (isDay14()) {
-                html += renderRankingSection(students);
+            html += `<div style="text-align:center;color:#999;font-size:13px;margin-bottom:12px;">📅 Day <strong>${dayNum}</strong> of 15 &nbsp;|&nbsp; Data auto-deletes after Day 15</div>`;
+
+            // Always show Top 3 podium if there are students
+            if (students.length > 0) {
+                html += '<div style="background:linear-gradient(135deg,#1E5BFF 0%,#764ba2 100%);color:white;padding:18px;border-radius:14px;margin-bottom:16px;">';
+                html += '<div style="text-align:center;font-size:18px;font-weight:700;margin-bottom:12px;letter-spacing:1px;">🏆 Top 3 Champions</div>';
+                students.slice(0, 3).forEach((s, i) => {
+                    html += `<div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.15);border-radius:10px;padding:10px 14px;margin-bottom:8px;">
+                        <span style="font-size:22px;min-width:36px;">${medals[i]}</span>
+                        <span style="flex:1;font-weight:700;font-size:15px;">${s.name} <span style="font-size:12px;opacity:0.8;">(${s.pin})</span></span>
+                        ${s.streak > 0 ? `<span style="background:rgba(255,152,0,0.4);padding:3px 8px;border-radius:12px;font-size:12px;">🔥${s.streak}</span>` : ''}
+                        <span style="font-weight:700;font-size:15px;">${s.total} pts</span>
+                    </div>`;
+                });
+                html += '</div>';
             }
 
-            html += `<div style="text-align:center;color:#999;font-size:13px;margin-bottom:12px;">📅 Day <strong>${dayNum}</strong> of 15 &nbsp;|&nbsp; Data auto-deletes after Day 15</div>`;
             html += '<div class="leaderboard-section">';
-            html += '<div class="leaderboard-title">🏆 Leaderboard</div>';
+            html += '<div class="leaderboard-title">🏆 Full Leaderboard</div>';
 
             if (students.length === 0) {
                 html += '<p style="color:#999;text-align:center;">No data yet. Students need to submit answers!</p>';
@@ -1587,6 +1607,9 @@
     </script>
 </body>
 </html>
+
+
+
 
 
 
