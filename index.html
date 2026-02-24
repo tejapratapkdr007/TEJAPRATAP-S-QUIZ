@@ -537,18 +537,36 @@
             <!-- Questions Tab -->
             <div id="questionsTab" class="tab-content active">
                 <h2>📝 Post New Question</h2>
-                
-                <div class="input-group">
-                    <label>Today's Question:</label>
-                    <textarea id="newQuestion" placeholder="Enter today's question..."></textarea>
+
+                <!-- Mode toggle -->
+                <div style="display:flex;gap:8px;margin-bottom:16px;">
+                    <button class="tab-btn active" id="singleModeBtn" onclick="switchQuestionMode('single')" style="flex:1;padding:9px;font-size:14px;">Single Question</button>
+                    <button class="tab-btn" id="bulkModeBtn" onclick="switchQuestionMode('bulk')" style="flex:1;padding:9px;font-size:14px;">📦 Bulk Upload (10 Questions)</button>
                 </div>
 
-                <div class="input-group">
-                    <label>Yesterday's Answer (Optional):</label>
-                    <textarea id="yesterdayAnswer" placeholder="Yesterday's answer..."></textarea>
+                <!-- Single Question Mode -->
+                <div id="singleQuestionMode">
+                    <div class="input-group">
+                        <label>Today's Question:</label>
+                        <textarea id="newQuestion" placeholder="Enter today's question..."></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>Yesterday's Answer (Optional):</label>
+                        <textarea id="yesterdayAnswer" placeholder="Yesterday's answer..."></textarea>
+                    </div>
+                    <button onclick="postQuestion()">Post Question</button>
                 </div>
 
-                <button onclick="postQuestion()">Post Question</button>
+                <!-- Bulk Upload Mode -->
+                <div id="bulkQuestionMode" style="display:none;">
+                    <div style="background:#e3f2fd;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;color:#1565c0;border-left:4px solid #1E5BFF;">
+                        📌 Upload 10 questions at once. They will be auto-posted one per day, starting from tomorrow. Each question must have an answer.
+                    </div>
+                    <div id="bulkQuestionsContainer">
+                    </div>
+                    <button onclick="submitBulkQuestions()" style="background:linear-gradient(135deg,#28a745,#218838);">📤 Schedule All 10 Questions</button>
+                    <div id="bulkStatus"></div>
+                </div>
 
                 <div id="teacherContent"></div>
             </div>
@@ -556,6 +574,42 @@
             <!-- Media Tab -->
             <div id="mediaTab" class="tab-content">
                 <h2>🎵 Upload Media & Give Opinion</h2>
+
+                <!-- Teacher feedback for yesterday's question -->
+                <div style="background:#e8f5e9;padding:16px;border-radius:10px;margin-bottom:20px;border-left:4px solid #4caf50;">
+                    <h4 style="color:#2e7d32;margin-bottom:12px;">💬 Add Feedback for Yesterday's Question</h4>
+                    <div id="yesterdayQPreview" style="background:white;padding:10px;border-radius:6px;margin-bottom:10px;font-size:13px;color:#555;"></div>
+                    <div class="input-group" style="margin-bottom:10px;">
+                        <label>Your Explanation / Opinion for Yesterday's Question:</label>
+                        <textarea id="prevQFeedback" placeholder="Write your explanation or opinion about yesterday's question and its answer..."></textarea>
+                    </div>
+                    <button onclick="saveYesterdayFeedback()" style="background:linear-gradient(135deg,#4caf50,#388e3c);margin-top:0;">Save Question Feedback for Students</button>
+                    <div id="feedbackStatus"></div>
+                </div>
+
+                <!-- Teacher feedback + question for yesterday's media -->
+                <div style="background:#fff3e0;padding:16px;border-radius:10px;margin-bottom:20px;border-left:4px solid #ff9800;">
+                    <h4 style="color:#e65100;margin-bottom:12px;">🎵 Yesterday's Media — Feedback &amp; Question</h4>
+                    <div id="yesterdayMediaPreview" style="background:white;padding:10px;border-radius:6px;margin-bottom:10px;font-size:13px;color:#555;"></div>
+
+                    <div class="input-group" style="margin-bottom:10px;">
+                        <label>📝 Post a Question for This Media <span style="color:#ff9800;">(students will see &amp; answer it)</span>:</label>
+                        <textarea id="prevMediaQuestion" placeholder="e.g. What do you think this image represents? OR What is the main message of this audio?..." style="min-height:70px;"></textarea>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom:10px;">
+                        <label>✅ Answer / Expected Response:</label>
+                        <textarea id="prevMediaAnswer" placeholder="Write the correct answer or expected response for this media question..."></textarea>
+                    </div>
+
+                    <div class="input-group" style="margin-bottom:10px;">
+                        <label>💬 Your Explanation / Opinion:</label>
+                        <textarea id="prevMediaFeedback" placeholder="Write your explanation or opinion about yesterday's media..."></textarea>
+                    </div>
+
+                    <button onclick="saveYesterdayMediaFeedback()" style="background:linear-gradient(135deg,#ff9800,#f57c00);margin-top:0;">💾 Save &amp; Post for Students</button>
+                    <div id="mediaFeedbackStatus"></div>
+                </div>
                 
                 <div class="input-group">
                     <label>Upload Image or Audio:</label>
@@ -822,6 +876,8 @@
                 document.getElementById('mediaTab').classList.add('active');
                 document.querySelectorAll('.tab-btn')[1].classList.add('active');
                 loadMediaList();
+                loadYesterdayQPreview();
+                loadYesterdayMediaPreview();
             } else if (tab === 'phones') {
                 document.getElementById('phonesTab').classList.add('active');
                 document.querySelectorAll('.tab-btn')[2].classList.add('active');
@@ -840,16 +896,17 @@
 
             try {
                 const latestMedia = await apiGet('/media/latest');
+                const allMedia = await apiGet('/media') || [];
                 const questions = await apiGet('/questions') || [];
                 const answers = await apiGet('/answers') || [];
 
-                displayStudentView(latestMedia, questions, answers);
+                displayStudentView(latestMedia, allMedia, questions, answers);
             } catch (error) {
                 content.innerHTML = '<div class="error-msg">Unable to connect to server. Please try again later.</div>';
             }
         }
 
-        function displayStudentView(latestMedia, questions, answers) {
+        function displayStudentView(latestMedia, allMedia, questions, answers) {
             const content = document.getElementById('studentContent');
             let html = '';
 
@@ -901,47 +958,145 @@
                 html += renderRankingSection(dayStudents);
             }
 
-            // Display latest media with answer box
-            if (latestMedia) {
-                const hasAnsweredMedia = answers.some(a => 
-                    a.questionId === latestMedia.id && 
+            // ── TODAY'S MEDIA ──
+            if (latestMedia && !latestMedia.isFeedback) {
+                const hasAnsweredMedia = answers.some(a =>
+                    a.questionId === latestMedia.id &&
                     a.studentPin === currentStudent &&
                     a.type === 'media'
                 );
 
                 html += '<div class="media-box">';
-                html += '<h3>🎵 Latest Media from TEJAPRATAP</h3>';
-                html += '<div style="color: #999; font-size: 13px; margin: 8px 0;">📅 ' + latestMedia.date + '</div>';
+                html += '<h3>🎵 Today\'s Media from TEJAPRATAP</h3>';
+                html += '<div style="color:#999;font-size:13px;margin:8px 0;">📅 ' + latestMedia.date + '</div>';
                 html += '<h4>📎 ' + latestMedia.fileName + '</h4>';
-                
+
                 if (latestMedia.type === 'image') {
                     html += '<img src="' + latestMedia.data + '" class="media-preview" alt="' + latestMedia.fileName + '">';
-                } else {
+                } else if (latestMedia.type === 'audio') {
                     html += '<audio controls><source src="' + latestMedia.data + '"></audio>';
                 }
-                
-                html += '<div class="opinion-box">';
-                html += '<strong>TEJAPRATAP\'s Opinion:</strong><br>';
-                html += latestMedia.opinion;
-                html += '</div>';
 
-                // Add answer box for media
+                html += '<div class="opinion-box"><strong>TEJAPRATAP\'s Opinion:</strong><br>' + latestMedia.opinion + '</div>';
+
                 if (hasAnsweredMedia) {
-                    const myAnswer = answers.find(a => 
-                        a.questionId === latestMedia.id && 
+                    const myAnswer = answers.find(a =>
+                        a.questionId === latestMedia.id &&
                         a.studentPin === currentStudent &&
                         a.type === 'media'
                     );
-                    html += '<div class="success-msg" style="margin-top: 15px;">✓ You already responded to this media!<br><strong>Your response:</strong> ' + myAnswer.answer + '</div>';
+                    const editKey = 'media_' + latestMedia.id;
+                    const canEdit = canEditAnswer(editKey);
+                    html += '<div class="success-msg" style="margin-top:15px;">✓ You already responded!<br><strong>Your response:</strong> ' + myAnswer.answer + '</div>';
+                    if (canEdit) {
+                        html += '<button onclick="editAnswer(' + latestMedia.id + ', \'media\', \'' + myAnswer.answer.replace(/'/g, "\\'") + '\')" style="margin-top:8px;background:linear-gradient(135deg,#ff9800,#f57c00);font-size:14px;padding:10px;">✏️ Edit Response (' + getEditTimeRemaining(editKey) + ' min left)</button>';
+                    }
                 } else {
                     html += '<div class="media-answer-section">';
-                    html += '<label style="display: block; margin-bottom: 8px; font-weight: 600; color: #ff9800;">💬 Your Response to this Media:</label>';
-                    html += '<textarea id="mediaAnswer-' + latestMedia.id + '" placeholder="Share your thoughts about this media..." style="width: 100%; padding: 10px; border: 2px solid #ff9800; border-radius: 6px; min-height: 80px;"></textarea>';
-                    html += '<button onclick="submitMediaAnswer(' + latestMedia.id + ')" style="margin-top: 10px; background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">Submit Response</button>';
+                    html += '<label style="display:block;margin-bottom:8px;font-weight:600;color:#ff9800;">💬 Your Response to this Media:</label>';
+                    html += '<textarea id="mediaAnswer-' + latestMedia.id + '" placeholder="Share your thoughts about this media..." style="width:100%;padding:10px;border:2px solid #ff9800;border-radius:6px;min-height:80px;"></textarea>';
+                    html += '<button onclick="submitMediaAnswer(' + latestMedia.id + ')" style="margin-top:10px;background:linear-gradient(135deg,#ff9800,#f57c00);">Submit Response</button>';
                     html += '</div>';
                 }
-
                 html += '</div>';
+
+                // ── YESTERDAY'S MEDIA ──
+                // Find the media item just before the latest (skip feedback entries)
+                const realMedia = (allMedia || []).filter(m => !m.isFeedback && m.type !== 'feedback');
+                const latestRealIdx = realMedia.findIndex(m => m.id === latestMedia.id);
+                const yesterdayMedia = latestRealIdx > 0 ? realMedia[latestRealIdx - 1] : null;
+
+                if (yesterdayMedia) {
+                    const feedbacks = getTeacherFeedbacks();
+                    const mediaFeedbackKey = 'media_' + yesterdayMedia.id;
+                    const localFb = feedbacks[mediaFeedbackKey];
+                    const serverFb = (allMedia || []).find(m => m.isFeedback && String(m.questionId) === String(yesterdayMedia.id));
+
+                    // Merge data from local or server
+                    const fbText = (localFb && localFb.feedback) || (serverFb && serverFb.opinion) || null;
+                    const mediaQuestion = (localFb && localFb.mediaQuestion) || (serverFb && serverFb.mediaQuestion) || null;
+                    const mediaAnswer = (localFb && localFb.mediaAnswer) || (serverFb && serverFb.mediaAnswer) || null;
+
+                    html += '<div style="background:#fff3e0;padding:15px;border-radius:10px;margin:15px 0;border-left:4px solid #ffb74d;">';
+                    html += '<h4 style="color:#e65100;margin-bottom:10px;">📁 Yesterday\'s Media</h4>';
+                    html += '<div style="color:#999;font-size:13px;margin-bottom:8px;">📅 ' + yesterdayMedia.date + '</div>';
+                    html += '<h4>📎 ' + yesterdayMedia.fileName + '</h4>';
+
+                    if (yesterdayMedia.type === 'image') {
+                        html += '<img src="' + yesterdayMedia.data + '" class="media-preview" alt="' + yesterdayMedia.fileName + '">';
+                    } else if (yesterdayMedia.type === 'audio') {
+                        html += '<audio controls><source src="' + yesterdayMedia.data + '"></audio>';
+                    }
+
+                    // Teacher's original opinion
+                    html += '<div class="opinion-box"><strong>TEJAPRATAP\'s Opinion:</strong><br>' + yesterdayMedia.opinion + '</div>';
+
+                    // ── TEACHER'S MEDIA QUESTION (if posted) ──
+                    if (mediaQuestion) {
+                        html += '<div style="margin-top:14px;background:#fff8e1;padding:14px;border-radius:8px;border-left:4px solid #ffc107;">';
+                        html += '<h4 style="color:#f57f17;margin-bottom:8px;">❓ TEJAPRATAP\'s Question about this Media:</h4>';
+                        html += '<p style="font-size:15px;font-weight:600;color:#333;">' + mediaQuestion + '</p>';
+
+                        // ── ANSWER (shown below question) ──
+                        if (mediaAnswer) {
+                            html += '<div style="margin-top:10px;background:#e8f5e9;padding:10px;border-radius:6px;border-left:3px solid #4caf50;">';
+                            html += '<strong style="color:#2e7d32;">✅ Answer:</strong><br>';
+                            html += '<p style="margin-top:6px;color:#333;">' + mediaAnswer + '</p>';
+                            html += '</div>';
+                        }
+
+                        html += '</div>';
+
+                        // ── STUDENT RESPONSE BOX for the media question ──
+                        const hasAnsweredMediaQ = answers.some(a =>
+                            a.questionId === ('mq_' + yesterdayMedia.id) &&
+                            a.studentPin === currentStudent &&
+                            a.type === 'mediaq'
+                        );
+
+                        if (hasAnsweredMediaQ) {
+                            const myMQAnswer = answers.find(a =>
+                                a.questionId === ('mq_' + yesterdayMedia.id) &&
+                                a.studentPin === currentStudent &&
+                                a.type === 'mediaq'
+                            );
+                            const editKey = 'mediaq_mq_' + yesterdayMedia.id;
+                            const canEdit = canEditAnswer(editKey);
+                            html += '<div class="success-msg" style="margin-top:12px;">✓ You answered this media question!<br><strong>Your answer:</strong> ' + myMQAnswer.answer + '</div>';
+                            if (canEdit) {
+                                html += '<button onclick="editAnswer(\'mq_' + yesterdayMedia.id + '\', \'mediaq\', \'' + myMQAnswer.answer.replace(/'/g, "\\'") + '\')" style="margin-top:8px;background:linear-gradient(135deg,#ff9800,#f57c00);font-size:14px;padding:10px;">✏️ Edit Answer (' + getEditTimeRemaining(editKey) + ' min left)</button>';
+                            }
+                        } else {
+                            html += '<div style="background:#fff3e0;padding:12px;border-radius:8px;margin-top:12px;border-left:3px solid #ff9800;">';
+                            html += '<label style="display:block;margin-bottom:8px;font-weight:600;color:#e65100;">✍️ Your Answer to TEJAPRATAP\'s Question:</label>';
+                            html += '<textarea id="mediaQAnswer-' + yesterdayMedia.id + '" placeholder="Write your answer here..." style="width:100%;padding:10px;border:2px solid #ff9800;border-radius:6px;min-height:80px;font-family:inherit;font-size:14px;"></textarea>';
+                            html += '<button onclick="submitMediaQuestionAnswer(\'' + yesterdayMedia.id + '\')" style="margin-top:10px;background:linear-gradient(135deg,#ff9800,#f57c00);">📤 Submit Answer</button>';
+                            html += '</div>';
+                        }
+                    }
+
+                    // ── TEACHER EXPLANATION ──
+                    if (fbText) {
+                        html += '<div style="margin-top:12px;background:#e8f5e9;padding:12px;border-radius:8px;border-left:3px solid #4caf50;">';
+                        html += '<strong style="color:#2e7d32;">👨‍🏫 TEJAPRATAP\'s Explanation:</strong><br>';
+                        html += '<p style="margin-top:8px;color:#333;">' + fbText + '</p>';
+                        html += '</div>';
+                    }
+
+                    // Show student's own past media response if any
+                    const myPastAnswer = answers.find(a =>
+                        a.questionId === yesterdayMedia.id &&
+                        a.studentPin === currentStudent &&
+                        a.type === 'media'
+                    );
+                    if (myPastAnswer) {
+                        html += '<div style="margin-top:10px;background:#e3f2fd;padding:10px;border-radius:8px;font-size:13px;">';
+                        html += '<strong style="color:#1565c0;">Your past response to media:</strong> ' + myPastAnswer.answer;
+                        html += '</div>';
+                    }
+
+                    html += '</div>';
+                }
             }
 
             // Display questions
@@ -969,7 +1124,12 @@
                     a.studentPin === currentStudent &&
                     (!a.type || a.type === 'question')
                 );
+                const editKey = 'question_' + latestQuestion.id;
+                const canEdit = canEditAnswer(editKey);
                 html += '<div class="success-msg" style="margin-top: 15px;">✓ You already answered this question!<br><strong>Your answer:</strong> ' + myAnswer.answer + '</div>';
+                if (canEdit) {
+                    html += '<button onclick="editAnswer(' + latestQuestion.id + ', \'question\', \'' + myAnswer.answer.replace(/'/g, "\\'") + '\')" style="margin-top:8px;background:linear-gradient(135deg,#ff9800,#f57c00);font-size:14px;padding:10px;">✏️ Edit Answer (' + getEditTimeRemaining(editKey) + ' min left)</button>';
+                }
             } else {
                 html += '<div class="input-group" style="margin-top: 15px;">';
                 html += '<label>Your Answer:</label>';
@@ -980,16 +1140,36 @@
 
             html += '</div>';
 
-            // Show previous question's answer
+            // Show previous question's answer + teacher feedback
             if (questions.length > 1) {
                 const previousQuestion = questions[questions.length - 2];
                 if (previousQuestion.answer) {
                     html += '<div class="answer-box">';
                     html += '<div style="color: #666; font-size: 13px; margin-bottom: 8px;">📅 ' + previousQuestion.date + '</div>';
-                    html += '<h4>Previous Question:</h4>';
+                    html += '<h4>Yesterday\'s Question:</h4>';
                     html += '<p style="margin: 8px 0;">' + previousQuestion.question + '</p>';
                     html += '<h4 style="margin-top: 15px;">✓ Answer:</h4>';
                     html += '<p style="background: white; padding: 12px; border-radius: 6px; margin-top: 8px;">' + previousQuestion.answer + '</p>';
+
+                    // Show teacher feedback if available
+                    const feedbacks = getTeacherFeedbacks();
+                    const fbKey = previousQuestion.id ? String(previousQuestion.id) : null;
+                    const feedback = fbKey && feedbacks[fbKey];
+                    if (feedback) {
+                        html += '<div style="margin-top:12px;background:#e8f5e9;padding:12px;border-radius:8px;border-left:3px solid #4caf50;">';
+                        html += '<strong style="color:#2e7d32;">👨‍🏫 TEJAPRATAP\'s Explanation:</strong><br>';
+                        html += '<p style="margin-top:8px;color:#333;">' + feedback.feedback + '</p>';
+                        html += '</div>';
+                    } else {
+                        // Check if feedback was stored in server media as isFeedback type
+                        if (latestMedia && latestMedia.isFeedback && String(latestMedia.questionId) === fbKey) {
+                            html += '<div style="margin-top:12px;background:#e8f5e9;padding:12px;border-radius:8px;border-left:3px solid #4caf50;">';
+                            html += '<strong style="color:#2e7d32;">👨‍🏫 TEJAPRATAP\'s Explanation:</strong><br>';
+                            html += '<p style="margin-top:8px;color:#333;">' + latestMedia.opinion + '</p>';
+                            html += '</div>';
+                        }
+                    }
+
                     html += '</div>';
                 }
             }
@@ -1014,7 +1194,29 @@
                     type: 'question'
                 });
 
-                alert('Answer submitted successfully!');
+                saveAnswerTimestamp('question_' + questionId);
+                alert('Answer submitted successfully! You can edit it within 30 minutes.');
+                loadStudentData();
+            } catch (error) {
+                alert(error.message || 'Error submitting answer. Please try again.');
+            }
+        }
+
+        async function submitMediaQuestionAnswer(yesterdayMediaId) {
+            const answerText = document.getElementById('mediaQAnswer-' + yesterdayMediaId)?.value?.trim();
+            if (!answerText) { alert('Please write your answer!'); return; }
+            const questionId = 'mq_' + yesterdayMediaId;
+            try {
+                await apiPost('/answers', {
+                    questionId: questionId,
+                    studentPin: currentStudent,
+                    studentName: currentStudentName,
+                    answer: answerText,
+                    type: 'mediaq'
+                });
+                awardScoreForAnswer(currentStudent, currentStudentName);
+                saveAnswerTimestamp('mediaq_' + questionId);
+                alert('✅ Answer submitted! You can edit it within 30 minutes.');
                 loadStudentData();
             } catch (error) {
                 alert(error.message || 'Error submitting answer. Please try again.');
@@ -1038,11 +1240,249 @@
                     type: 'media'
                 });
 
-                alert('Response submitted successfully!');
+                saveAnswerTimestamp('media_' + mediaId);
+                alert('Response submitted successfully! You can edit it within 30 minutes.');
                 loadStudentData();
             } catch (error) {
                 alert(error.message || 'Error submitting response. Please try again.');
             }
+        }
+
+        // =====================================================
+        // BULK QUESTION UPLOAD SYSTEM
+        // =====================================================
+        function switchQuestionMode(mode) {
+            if (mode === 'single') {
+                document.getElementById('singleQuestionMode').style.display = 'block';
+                document.getElementById('bulkQuestionMode').style.display = 'none';
+                document.getElementById('singleModeBtn').classList.add('active');
+                document.getElementById('bulkModeBtn').classList.remove('active');
+            } else {
+                document.getElementById('singleQuestionMode').style.display = 'none';
+                document.getElementById('bulkQuestionMode').style.display = 'block';
+                document.getElementById('singleModeBtn').classList.remove('active');
+                document.getElementById('bulkModeBtn').classList.add('active');
+                renderBulkQuestionForm();
+            }
+        }
+
+        function renderBulkQuestionForm() {
+            const container = document.getElementById('bulkQuestionsContainer');
+            let html = '';
+            for (let i = 1; i <= 10; i++) {
+                const d = new Date();
+                d.setDate(d.getDate() + i);
+                const dateStr = d.toLocaleDateString('en-IN', { weekday: 'short', month: 'short', day: 'numeric' });
+                html += `<div style="background:#f8f9fa;padding:14px;border-radius:10px;margin-bottom:14px;border-left:4px solid #1E5BFF;">
+                    <div style="font-weight:700;color:#1E5BFF;margin-bottom:10px;">Day ${i} — ${dateStr}</div>
+                    <div class="input-group" style="margin-bottom:8px;">
+                        <label style="font-size:13px;">Question ${i}:</label>
+                        <textarea id="bulkQ${i}" placeholder="Enter question ${i}..." style="min-height:70px;"></textarea>
+                    </div>
+                    <div class="input-group" style="margin-bottom:0;">
+                        <label style="font-size:13px;">Answer ${i}:</label>
+                        <textarea id="bulkA${i}" placeholder="Enter answer ${i}..." style="min-height:60px;"></textarea>
+                    </div>
+                </div>`;
+            }
+            container.innerHTML = html;
+        }
+
+        async function submitBulkQuestions() {
+            const pairs = [];
+            for (let i = 1; i <= 10; i++) {
+                const q = document.getElementById('bulkQ' + i)?.value?.trim();
+                const a = document.getElementById('bulkA' + i)?.value?.trim();
+                if (!q) { alert('Please enter Question ' + i + '!'); return; }
+                if (!a) { alert('Please enter Answer ' + i + '!'); return; }
+                pairs.push({ question: q, answer: a });
+            }
+
+            const statusEl = document.getElementById('bulkStatus');
+            statusEl.innerHTML = '<div class="loading">Scheduling questions... (0/10)</div>';
+
+            let errors = 0;
+            for (let i = 0; i < pairs.length; i++) {
+                const d = new Date();
+                d.setDate(d.getDate() + i + 1);
+                const scheduledDate = d.toISOString().split('T')[0];
+                try {
+                    await apiPost('/questions', { question: pairs[i].question, answer: pairs[i].answer, scheduledDate });
+                    statusEl.innerHTML = '<div class="loading">Scheduling questions... (' + (i+1) + '/10)</div>';
+                } catch(e) { errors++; }
+            }
+
+            const schedule = pairs.map((p, i) => {
+                const d = new Date(); d.setDate(d.getDate() + i + 1);
+                return { ...p, scheduledDate: d.toISOString().split('T')[0] };
+            });
+            localStorage.setItem('bulkSchedule', JSON.stringify(schedule));
+
+            statusEl.innerHTML = errors === 0
+                ? '<div class="success-msg">✅ All 10 questions scheduled! They will auto-post one per day.</div>'
+                : '<div class="error-msg">⚠️ ' + (10-errors) + '/10 questions scheduled. ' + errors + ' failed — check server.</div>';
+            renderBulkScheduleSummary();
+        }
+
+        function renderBulkScheduleSummary() {
+            const schedule = JSON.parse(localStorage.getItem('bulkSchedule') || '[]');
+            if (!schedule.length) return;
+            const today = getTodayStr();
+            let html = '<div style="margin-top:16px;"><h4 style="color:#1E5BFF;">📅 Scheduled Questions:</h4>';
+            schedule.forEach(item => {
+                const isPast = item.scheduledDate < today, isToday = item.scheduledDate === today;
+                const badge = isPast ? '✅ Posted' : isToday ? '🟢 Today' : '🕐 Pending';
+                html += '<div style="display:flex;gap:10px;align-items:center;padding:8px 12px;margin-top:8px;background:' + (isToday?'#e3f2fd':isPast?'#f1f8e9':'white') + ';border:1px solid #e0e0e0;border-radius:8px;font-size:13px;">'
+                    + '<span style="font-weight:700;min-width:60px;">' + item.scheduledDate + '</span>'
+                    + '<span style="flex:1;">' + item.question.substring(0,60) + (item.question.length>60?'...':'') + '</span>'
+                    + '<span>' + badge + '</span></div>';
+            });
+            html += '</div>';
+            const statusEl = document.getElementById('bulkStatus');
+            if (statusEl) statusEl.innerHTML += html;
+        }
+
+        // =====================================================
+        // YESTERDAY QUESTION FEEDBACK SYSTEM
+        // =====================================================
+        async function loadYesterdayQPreview() {
+            const previewEl = document.getElementById('yesterdayQPreview');
+            if (!previewEl) return;
+            try {
+                const questions = await apiGet('/questions') || [];
+                if (!questions.length) { previewEl.innerHTML = '<em style="color:#999;">No questions posted yet.</em>'; return; }
+                const prev = questions.length >= 2 ? questions[questions.length - 2] : questions[questions.length - 1];
+                previewEl.innerHTML = '<strong>📅 ' + prev.date + '</strong><br>Q: ' + prev.question
+                    + (prev.answer ? '<br><span style="color:#2e7d32;">✓ A: ' + prev.answer + '</span>' : '');
+                const saved = localStorage.getItem('prevQFeedback_' + prev.id);
+                if (saved) document.getElementById('prevQFeedback').value = saved;
+                document.getElementById('prevQFeedback').dataset.questionId = prev.id;
+                document.getElementById('prevQFeedback').dataset.questionText = prev.question;
+            } catch (e) { previewEl.innerHTML = '<em style="color:#999;">Could not load question.</em>'; }
+        }
+
+        async function saveYesterdayFeedback() {
+            const feedback = document.getElementById('prevQFeedback').value.trim();
+            const questionId = document.getElementById('prevQFeedback').dataset.questionId;
+            const questionText = document.getElementById('prevQFeedback').dataset.questionText || '';
+            if (!feedback) { alert('Please write your feedback/explanation!'); return; }
+            if (!questionId) { alert('No question found to attach feedback to!'); return; }
+
+            localStorage.setItem('prevQFeedback_' + questionId, feedback);
+            const all = JSON.parse(localStorage.getItem('teacherFeedbacks') || '{}');
+            all[questionId] = { questionId, questionText, feedback, date: getTodayStr() };
+            localStorage.setItem('teacherFeedbacks', JSON.stringify(all));
+
+            try {
+                await apiPost('/media', { type: 'feedback', data: '', fileName: '📋 Teacher Feedback for: ' + questionText.substring(0, 50), opinion: feedback, questionId, isFeedback: true });
+            } catch (e) { /* fallback to local */ }
+
+            document.getElementById('feedbackStatus').innerHTML = '<div class="success-msg">✅ Feedback saved! Students will see this in the Yesterday\'s Q&A section.</div>';
+        }
+
+        async function loadYesterdayMediaPreview() {
+            const previewEl = document.getElementById('yesterdayMediaPreview');
+            if (!previewEl) return;
+            try {
+                const allMedia = await apiGet('/media') || [];
+                const realMedia = allMedia.filter(m => !m.isFeedback && m.type !== 'feedback');
+                if (realMedia.length < 2) {
+                    previewEl.innerHTML = '<em style="color:#999;">' + (realMedia.length === 0 ? 'No media uploaded yet.' : 'Only one media so far — upload more to enable this.') + '</em>';
+                    return;
+                }
+                const prev = realMedia[realMedia.length - 2];
+                let previewHtml = '<strong>📅 ' + prev.date + '</strong> — ' + prev.fileName;
+                if (prev.type === 'image') {
+                    previewHtml += '<br><img src="' + prev.data + '" style="max-width:100%;max-height:120px;border-radius:6px;margin-top:6px;">';
+                } else if (prev.type === 'audio') {
+                    previewHtml += '<br><audio controls style="width:100%;margin-top:6px;"><source src="' + prev.data + '"></audio>';
+                }
+                previewEl.innerHTML = previewHtml;
+
+                // Restore saved values
+                const saved = JSON.parse(localStorage.getItem('prevMediaQuestion_' + prev.id) || 'null');
+                if (saved) {
+                    if (saved.mediaQuestion) document.getElementById('prevMediaQuestion').value = saved.mediaQuestion;
+                    if (saved.mediaAnswer) document.getElementById('prevMediaAnswer').value = saved.mediaAnswer;
+                    if (saved.feedback) document.getElementById('prevMediaFeedback').value = saved.feedback;
+                }
+                document.getElementById('prevMediaFeedback').dataset.mediaId = prev.id;
+                document.getElementById('prevMediaFeedback').dataset.mediaName = prev.fileName;
+                document.getElementById('prevMediaQuestion').dataset.mediaId = prev.id;
+            } catch (e) {
+                previewEl.innerHTML = '<em style="color:#999;">Could not load media.</em>';
+            }
+        }
+
+        async function saveYesterdayMediaFeedback() {
+            const feedback = document.getElementById('prevMediaFeedback').value.trim();
+            const question = document.getElementById('prevMediaQuestion').value.trim();
+            const answer = document.getElementById('prevMediaAnswer').value.trim();
+            const mediaId = document.getElementById('prevMediaFeedback').dataset.mediaId;
+            const mediaName = document.getElementById('prevMediaFeedback').dataset.mediaName || '';
+
+            if (!feedback && !question) { alert('Please write at least a feedback or a question!'); return; }
+            if (!mediaId) { alert('No media found to attach to!'); return; }
+            if (question && !answer) { alert('Please provide the answer/expected response for the media question!'); return; }
+
+            const dataToSave = { questionId: 'media_' + mediaId, questionText: mediaName, feedback, mediaQuestion: question, mediaAnswer: answer, date: getTodayStr() };
+
+            localStorage.setItem('prevMediaFeedback_' + mediaId, feedback);
+            localStorage.setItem('prevMediaQuestion_' + mediaId, JSON.stringify(dataToSave));
+
+            const all = JSON.parse(localStorage.getItem('teacherFeedbacks') || '{}');
+            all['media_' + mediaId] = dataToSave;
+            localStorage.setItem('teacherFeedbacks', JSON.stringify(all));
+
+            try {
+                await apiPost('/media', {
+                    type: 'feedback',
+                    data: '',
+                    fileName: '🎵 Media Feedback for: ' + mediaName.substring(0, 50),
+                    opinion: feedback,
+                    questionId: mediaId,
+                    isFeedback: true,
+                    mediaQuestion: question,
+                    mediaAnswer: answer
+                });
+            } catch (e) { /* fallback to local */ }
+
+            document.getElementById('mediaFeedbackStatus').innerHTML = '<div class="success-msg">✅ Saved! Students will see the media, your question, answer & explanation.</div>';
+        }
+
+        function getTeacherFeedbacks() {
+            try { return JSON.parse(localStorage.getItem('teacherFeedbacks') || '{}'); } catch { return {}; }
+        }
+
+        // =====================================================
+        // STUDENT ANSWER EDIT SYSTEM (30-min window)
+        // =====================================================
+        function getAnswerTimestamps() {
+            try { return JSON.parse(localStorage.getItem('answerTimestamps') || '{}'); } catch { return {}; }
+        }
+        function saveAnswerTimestamp(key) {
+            const ts = getAnswerTimestamps(); ts[key] = Date.now();
+            localStorage.setItem('answerTimestamps', JSON.stringify(ts));
+        }
+        function canEditAnswer(key) {
+            const ts = getAnswerTimestamps();
+            return ts[key] && (Date.now() - ts[key]) / 60000 < 30;
+        }
+        function getEditTimeRemaining(key) {
+            const ts = getAnswerTimestamps();
+            if (!ts[key]) return 0;
+            return Math.max(0, 30 - (Date.now() - ts[key]) / 60000).toFixed(0);
+        }
+        async function editAnswer(questionId, type, currentAnswer) {
+            const minLeft = getEditTimeRemaining(type + '_' + questionId);
+            const newAnswer = prompt('✏️ Edit your answer (' + minLeft + ' min remaining to edit):\n\nCurrent: "' + currentAnswer + '"', currentAnswer);
+            if (newAnswer === null) return;
+            if (!newAnswer.trim()) { alert('Answer cannot be empty!'); return; }
+            try {
+                await apiPost('/answers', { questionId, studentPin: currentStudent, studentName: currentStudentName, answer: newAnswer.trim(), type, isEdit: true });
+                alert('✅ Answer updated successfully!');
+                loadStudentData();
+            } catch (error) { alert(error.message || 'Error updating answer.'); }
         }
 
         // Teacher Functions
@@ -1050,6 +1490,8 @@
             loadTeacherQuestions();
             loadMediaList();
             loadPhoneNumbers();
+            loadYesterdayQPreview();
+            loadYesterdayMediaPreview();
         }
 
         async function loadTeacherQuestions() {
@@ -1575,7 +2017,8 @@
                     type: 'question'
                 });
                 awardScoreForAnswer(currentStudent, currentStudentName);
-                alert('Answer submitted successfully!');
+                saveAnswerTimestamp('question_' + questionId);
+                alert('Answer submitted successfully! You can edit it within 30 minutes.');
                 loadStudentData();
             } catch (error) {
                 alert(error.message || 'Error submitting answer. Please try again.');
@@ -1595,7 +2038,8 @@
                     type: 'media'
                 });
                 awardScoreForAnswer(currentStudent, currentStudentName);
-                alert('Response submitted successfully!');
+                saveAnswerTimestamp('media_' + mediaId);
+                alert('Response submitted successfully! You can edit it within 30 minutes.');
                 loadStudentData();
             } catch (error) {
                 alert(error.message || 'Error submitting response. Please try again.');
@@ -1607,9 +2051,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
