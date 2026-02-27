@@ -745,7 +745,7 @@
                 return;
             }
 
-            const pinRegex = /^(2[2-9]|30)\d{3}-(CS|EE|ME|EI|CE|EC|cs|ee|me|ei|ce|ec)-\d{3}$/;
+            const pinRegex = /^(2[2-9]|30)\d{3}-(CS|EE|ME|EI|CE|EC|cs|ee|me|ei|ce|ec|DAEC|DAUT|DAU|DCHE|DCSE|DECE|DEIE|DEVE|DEMB|DWT|DFT|DGT|DHMCT|DSC|DLT|DMNG|DMET|DPKT|DPT|DTXT|daec|daut|dau|dche|dcse|dece|deie|deve|demb|dwt|dft|dgt|dhmct|dsc|dlt|dmng|dmet|dpkt|dpt|dtxt)-\d{3}$/;
             if (!pinRegex.test(pin)) {
                 alert('Invalid PIN format! Please use YYYYY-BB-XXX format.\nExample: 23007-CS-001');
                 return;
