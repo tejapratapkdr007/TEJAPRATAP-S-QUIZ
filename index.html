@@ -444,8 +444,6 @@ let autoPostInterval = null; // Global interval handle
 // INIT
 // =====================================================
 document.addEventListener('DOMContentLoaded', function () {
-    autoDeleteOldData();
-
     const savedStudent = localStorage.getItem('currentStudent');
     const savedName = localStorage.getItem('currentStudentName');
     const savedTeacher = localStorage.getItem('isTeacher');
@@ -473,23 +471,42 @@ function getTodayStr() {
     return new Date().toISOString().split('T')[0];
 }
 
-function getBulkSchedule() {
-    try { return JSON.parse(localStorage.getItem('bulkSchedule') || 'null'); } catch { return null; }
+// In-memory cache of schedule (fetched from server)
+let _scheduleCache = null;
+
+async function getBulkSchedule() {
+    try {
+        const res = await fetch(API_URL + '/schedule');
+        const data = await res.json();
+        if (data && data.empty) { _scheduleCache = null; return null; }
+        _scheduleCache = data;
+        return data;
+    } catch (e) {
+        console.error('getBulkSchedule error:', e);
+        return _scheduleCache; // fallback to cache if offline
+    }
 }
 
-function saveBulkSchedule(data) {
-    localStorage.setItem('bulkSchedule', JSON.stringify(data));
+async function saveBulkSchedule(data) {
+    try {
+        _scheduleCache = data;
+        await fetch(API_URL + '/schedule', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ schedule: data })
+        });
+    } catch (e) { console.error('saveBulkSchedule error:', e); }
 }
 
 /**
  * Main auto-post engine.
  * Checks if a question is scheduled for TODAY and hasn't been posted yet.
- * Posts it, marks it posted, and records the timestamp.
+ * Posts it, marks it as posted on the SERVER so all devices stay in sync.
  */
 async function runAutoPostCheck(silent = false) {
-    const schedule = getBulkSchedule();
+    const schedule = await getBulkSchedule();
     if (!schedule || !schedule.questions) {
-        if (!silent) updateAutoPostStatusUI();
+        if (!silent) updateAutoPostStatusUI(null);
         return false;
     }
 
@@ -498,7 +515,6 @@ async function runAutoPostCheck(silent = false) {
         const q = schedule.questions[i];
         if (!q.posted && q.date === today) {
             try {
-                // Post question then set its own answer via PUT
                 const postResult = await apiPost('/questions', { question: q.question, answer: null });
                 if (postResult && postResult.question && postResult.question.id && q.answer) {
                     await fetch(API_URL + '/questions/' + postResult.question.id + '/answer', {
@@ -507,14 +523,16 @@ async function runAutoPostCheck(silent = false) {
                         body: JSON.stringify({ answer: q.answer })
                     });
                 }
-                schedule.questions[i].posted = true;
-                schedule.questions[i].postedAt = new Date().toLocaleString('en-IN');
-                schedule.lastAutoPost = { question: q.question.substring(0, 50) + '...', time: new Date().toLocaleString('en-IN'), day: i + 1 };
-                saveBulkSchedule(schedule);
-                updateAutoPostStatusUI();
-                if (!silent) {
-                    console.log(`[AutoPost] ✅ Question ${i+1} posted for ${today}`);
-                }
+                // Mark posted on SERVER (syncs across all devices)
+                const postedAt = new Date().toLocaleString('en-IN');
+                await fetch(API_URL + '/schedule/mark-posted', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ index: i, postedAt })
+                });
+                _scheduleCache = null; // invalidate cache
+                if (!silent) console.log(`[AutoPost] ✅ Question ${i+1} posted for ${today}`);
+                updateAutoPostStatusUI(await getBulkSchedule());
                 return true;
             } catch (err) {
                 console.error('[AutoPost] ❌ Failed:', err);
@@ -522,7 +540,7 @@ async function runAutoPostCheck(silent = false) {
             }
         }
     }
-    if (!silent) updateAutoPostStatusUI();
+    if (!silent) updateAutoPostStatusUI(schedule);
     return false;
 }
 
@@ -532,18 +550,16 @@ async function runAutoPostCheck(silent = false) {
  */
 function startAutoPostMachine() {
     // Run immediately on start
-    runAutoPostCheck(true);
+    runAutoPostCheck(true).then(() => updateAutoPostStatusUI());
 
     // Then every 60 seconds
     if (autoPostInterval) clearInterval(autoPostInterval);
-    autoPostInterval = setInterval(() => {
-        runAutoPostCheck(true).then(posted => {
-            if (posted) {
-                // Refresh teacher view if a question was auto-posted
-                loadTeacherQuestions();
-                showToast('🤖 Auto-Post: Today\'s question was posted automatically!', 'success');
-            }
-        });
+    autoPostInterval = setInterval(async () => {
+        const posted = await runAutoPostCheck(true);
+        if (posted) {
+            loadTeacherQuestions();
+            showToast('🤖 Auto-Post: Today\'s question was posted automatically!', 'success');
+        }
         updateAutoPostStatusUI();
     }, 60000);
 
@@ -561,8 +577,9 @@ function stopAutoPostMachine() {
 /**
  * Updates the status panel UI
  */
-function updateAutoPostStatusUI() {
-    const schedule = getBulkSchedule();
+function updateAutoPostStatusUI(schedule) {
+    // schedule is passed in directly (already fetched async) or from cache
+    if (schedule === undefined) schedule = _scheduleCache;
     const panel = document.getElementById('autoPostStatusPanel');
     if (!panel) return;
 
@@ -654,13 +671,13 @@ async function manualCheckAndPost() {
     btn.textContent = '⏳ Checking...';
 
     const posted = await runAutoPostCheck(false);
+    const schedule = await getBulkSchedule();
 
     if (posted) {
         showToast('✅ Today\'s question posted successfully!', 'success');
         loadTeacherQuestions();
         renderBulkFields();
     } else {
-        const schedule = getBulkSchedule();
         if (!schedule) {
             showToast('⚠️ No schedule saved yet. Fill in the questions first.', 'warn');
         } else {
@@ -684,13 +701,14 @@ async function manualCheckAndPost() {
     btn.textContent = '🔄 Manual Check: Post Today\'s Question Now';
 }
 
-function resetBulkSchedule() {
+async function resetBulkSchedule() {
     if (!confirm('Are you sure you want to reset the bulk schedule? All 10 question slots will be cleared.')) return;
-    localStorage.removeItem('bulkSchedule');
+    await fetch(API_URL + '/schedule', { method: 'DELETE' });
+    _scheduleCache = null;
     stopAutoPostMachine();
     showToast('🗑️ Schedule reset. Fill in new questions to restart.', 'warn');
     renderBulkFields();
-    updateAutoPostStatusUI();
+    updateAutoPostStatusUI(null);
 }
 
 // =====================================================
@@ -708,22 +726,22 @@ function switchQMode(mode) {
         document.getElementById('bulkQBtn').style.cssText = 'flex:1;padding:10px;background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;';
         document.getElementById('singleQBtn').style.cssText = 'flex:1;padding:10px;background:#e0e0e0;color:#333;border:none;border-radius:8px;cursor:pointer;font-weight:600;';
         renderBulkFields();
-        updateAutoPostStatusUI();
     }
 }
 
-function renderBulkFields() {
+async function renderBulkFields() {
     const container = document.getElementById('bulkQFields');
-    const existing = getBulkSchedule();
+    if (!container) return;
+    container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">🔄 Loading schedule from server...</div>';
+    const existing = await getBulkSchedule();
     const today = getTodayStr();
     let html = '';
 
     for (let i = 0; i < 10; i++) {
         const d = new Date();
-        d.setDate(d.getDate() + i + 1); // Day 1 = tomorrow (only used for NEW schedules)
+        d.setDate(d.getDate() + i + 1);
         const isoDate = d.toISOString().split('T')[0];
         const existingQ = existing ? existing.questions[i] : null;
-        // BUG FIX: Always use the saved date for existing questions; only use recalculated date for brand-new entries
         const effectiveDate = existingQ ? existingQ.date : isoDate;
         const effectiveD = new Date(effectiveDate + 'T00:00:00');
         const dateLabel = effectiveD.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
@@ -751,11 +769,11 @@ function renderBulkFields() {
     }
 
     container.innerHTML = html;
-    renderScheduleInfo();
+    renderScheduleInfo(existing);
+    updateAutoPostStatusUI(existing);
 }
 
-function renderScheduleInfo() {
-    const schedule = getBulkSchedule();
+function renderScheduleInfo(schedule) {
     const info = document.getElementById('bulkScheduledInfo');
     if (!info) return;
     if (!schedule) { info.innerHTML = ''; return; }
@@ -768,8 +786,8 @@ function renderScheduleInfo() {
     </div>`;
 }
 
-function saveBulkQuestions() {
-    const existingSchedule = getBulkSchedule();
+async function saveBulkQuestions() {
+    const existingSchedule = await getBulkSchedule();
     const questions = [];
     let valid = true;
 
@@ -778,7 +796,6 @@ function saveBulkQuestions() {
         const aEl = document.getElementById('ba_' + i);
         const dEl = document.getElementById('bd_' + i);
 
-        // If already posted (readonly), keep existing data
         if (existingSchedule && existingSchedule.questions[i] && existingSchedule.questions[i].posted) {
             questions.push(existingSchedule.questions[i]);
             continue;
@@ -798,12 +815,11 @@ function saveBulkQuestions() {
 
     if (!valid) return;
 
-    saveBulkSchedule({ savedOn: new Date().toISOString(), questions, lastAutoPost: existingSchedule ? existingSchedule.lastAutoPost : null });
-    startAutoPostMachine(); // Restart engine with new schedule
+    await saveBulkSchedule({ savedOn: new Date().toISOString(), questions, lastAutoPost: existingSchedule ? existingSchedule.lastAutoPost : null });
+    startAutoPostMachine();
 
-    showToast('✅ 10 questions saved! Auto-Post Machine is now ACTIVE. Questions will post one per day automatically.', 'success');
+    showToast('✅ 10 questions saved on SERVER! All devices will now sync. Auto-Post Machine is ACTIVE.', 'success');
     renderBulkFields();
-    updateAutoPostStatusUI();
 }
 
 // =====================================================
@@ -947,13 +963,12 @@ async function loadStudentData() {
     }
 }
 
-function displayStudentView(latestMedia, questions, answers) {
+async function displayStudentView(latestMedia, questions, answers) {
     const content = document.getElementById('studentContent');
     let html = '';
-    autoDeleteOldData();
-    const streak = getStreak(currentStudent);
-    const myTotal = getTotalScore(currentStudent);
-    const allStats = getAllStudentStats();
+    const streak = await getStreak(currentStudent);
+    const myTotal = await getTotalScore(currentStudent);
+    const allStats = await getAllStudentStats();
     const myRank = allStats.findIndex(s => s.pin === currentStudent) + 1;
 
     html += `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;justify-content:center;">
@@ -990,7 +1005,7 @@ function displayStudentView(latestMedia, questions, answers) {
         html += '</div>';
     }
 
-    if (isDay14()) html += renderRankingSection(getAllStudentStats());
+    if (isDay14()) html += renderRankingSection(allStats); // allStats already fetched above
 
     if (latestMedia) {
         const hasAnsweredMedia = answers.some(a => a.questionId === latestMedia.id && a.studentPin === currentStudent && a.type === 'media');
@@ -1300,67 +1315,65 @@ function resetAllData() {
 }
 
 // =====================================================
-// LEADERBOARD, STREAKS & 15-DAY AUTO-DELETE
+// LEADERBOARD, STREAKS & SCORES (SERVER-SYNCED)
 // =====================================================
+let _scoresCache = null; // { scores: {...}, streaks: {...} }
+
 function daysBetween(d1, d2) {
     return Math.round(Math.abs(new Date(d2) - new Date(d1)) / (1000 * 60 * 60 * 24));
 }
 
-function getStreaks() { try { return JSON.parse(localStorage.getItem('studentStreaks') || '{}'); } catch { return {}; } }
-function saveStreaks(s) { localStorage.setItem('studentStreaks', JSON.stringify(s)); }
-
-function updateStreak(pin) {
-    const streaks = getStreaks(); const today = getTodayStr();
-    if (!streaks[pin]) { streaks[pin] = { count: 1, lastDate: today }; }
-    else {
-        const diff = daysBetween(streaks[pin].lastDate, today);
-        if (diff === 0) {} else if (diff === 1) { streaks[pin].count += 1; streaks[pin].lastDate = today; }
-        else { streaks[pin].count = 1; streaks[pin].lastDate = today; }
-    }
-    saveStreaks(streaks);
+async function fetchScoresFromServer() {
+    try {
+        const res = await fetch(API_URL + '/scores');
+        _scoresCache = await res.json();
+    } catch (e) { console.error('fetchScores error:', e); }
+    return _scoresCache || { scores: {}, streaks: {} };
 }
 
-function getStreak(pin) { const s = getStreaks(); return s[pin] ? s[pin].count : 0; }
-
-function getScores() { try { return JSON.parse(localStorage.getItem('studentScores') || '{}'); } catch { return {}; } }
-function saveScores(s) { localStorage.setItem('studentScores', JSON.stringify(s)); }
-
-function autoDeleteOldData() {
-    const scores = getScores(); const today = getTodayStr(); let changed = false;
-    for (const pin in scores) {
-        const before = scores[pin].scores.length;
-        scores[pin].scores = scores[pin].scores.filter(s => daysBetween(s.date, today) <= 15);
-        if (scores[pin].scores.length !== before) changed = true;
-    }
-    if (changed) saveScores(scores);
-    const streaks = getStreaks();
-    for (const pin in streaks) { if (daysBetween(streaks[pin].lastDate, today) > 15) streaks[pin].count = 0; }
-    saveStreaks(streaks);
-}
-
-function addScore(pin, name, points) {
-    autoDeleteOldData();
-    const scores = getScores(); if (!scores[pin]) scores[pin] = { name, scores: [] };
-    scores[pin].name = name;
+async function awardScoreForAnswer(pin, name) {
     const today = getTodayStr();
-    if (!scores[pin].scores.find(s => s.date === today)) scores[pin].scores.push({ date: today, points });
-    saveScores(scores);
+    try {
+        await fetch(API_URL + '/scores', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ pin, name, points: 10, date: today })
+        });
+        _scoresCache = null; // invalidate cache
+    } catch (e) { console.error('awardScore error:', e); }
 }
 
-function getTotalScore(pin) { const s = getScores(); if (!s[pin]) return 0; return s[pin].scores.reduce((sum, x) => sum + (x.points || 0), 0); }
+async function updateStreak(pin) {
+    // Streak is now handled server-side when posting score
+    _scoresCache = null;
+}
 
-function getAllStudentStats() {
-    autoDeleteOldData();
-    const scores = getScores(); const streaks = getStreaks();
-    return Object.entries(scores).map(([pin, data]) => ({
-        pin, name: data.name,
-        total: data.scores.reduce((s, x) => s + (x.points || 0), 0),
-        days: data.scores.length,
+async function getStreak(pin) {
+    const data = _scoresCache || await fetchScoresFromServer();
+    return data.streaks && data.streaks[pin] ? data.streaks[pin].count : 0;
+}
+
+async function getTotalScore(pin) {
+    const data = _scoresCache || await fetchScoresFromServer();
+    const s = data.scores && data.scores[pin];
+    if (!s) return 0;
+    return s.scores.reduce((sum, x) => sum + (x.points || 0), 0);
+}
+
+async function getAllStudentStats() {
+    const data = await fetchScoresFromServer();
+    const scores = data.scores || {};
+    const streaks = data.streaks || {};
+    return Object.entries(scores).map(([pin, d]) => ({
+        pin, name: d.name,
+        total: d.scores.reduce((s, x) => s + (x.points || 0), 0),
+        days: d.scores.length,
         streak: streaks[pin] ? streaks[pin].count : 0
     })).sort((a, b) => b.total - a.total);
 }
 
-function awardScoreForAnswer(pin, name) { addScore(pin, name, 10); updateStreak(pin); }
+function autoDeleteOldData() { /* Handled server-side now */ }
+
 
 function getDayNumber() {
     const scores = getScores(); let firstDate = null;
@@ -1384,8 +1397,7 @@ function renderRankingSection(students) {
 async function loadLeaderboard() {
     const container = document.getElementById('leaderboardContent');
     container.innerHTML = '<div class="loading">Loading...</div>';
-    autoDeleteOldData();
-    const students = getAllStudentStats();
+    const students = await getAllStudentStats();
     const medals = ['🥇','🥈','🥉'];
     const dayNum = getDayNumber();
     let html = `<div style="text-align:center;color:#999;font-size:13px;margin-bottom:12px;">📅 Day <strong>${dayNum}</strong> of 15 &nbsp;|&nbsp; Data auto-deletes after Day 15</div>`;
@@ -1504,7 +1516,7 @@ async function loadRankTab() {
             if (a.studentName) activityMap[pin].name = a.studentName;
         });
 
-        const localStats = getAllStudentStats();
+        const localStats = await getAllStudentStats();
         localStats.forEach(s => {
             if (!activityMap[s.pin]) activityMap[s.pin] = { name: s.name, pin: s.pin, count: 0, streak: 0 };
             activityMap[s.pin].localDays = s.days;
@@ -1565,7 +1577,6 @@ async function loadRankTab() {
 }
 
 
-autoDeleteOldData();
 
 // =====================================================
 // LOGIN PAGE — FIRST ANSWER FIRST BANNER
