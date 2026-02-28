@@ -3,183 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUIZ FOR POLYTECHNIC</title>  
-   
+    <title>QUIZ FOR POLYTECHNIC</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(to right, #1E5BFF, #A84DFF);
+            background: linear-gradient(135deg, #1E5BFF 0%, #A84DFF 100%);
             min-height: 100vh;
             display: flex;
             justify-content: center;
-            align-items: center;
+            align-items: flex-start;
             padding: 20px;
         }
         .container {
-            background: white;
-            padding: 40px;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            padding: 30px;
             border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            max-width: 620px;
             width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
+            margin: auto;
         }
-        h1 { color: #1E5BFF; margin-bottom: 10px; text-align: center; font-size: 28px; }
-        h2 { color: #764ba2; margin-bottom: 20px; text-align: center; }
-        .subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 14px; }
-        .pin-format-info { background: #e7f3ff; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; color: #0066cc; border-left: 4px solid #0066cc; }
-        .media-box { background: #fff8e1; padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #ff9800; }
-        .media-box h4 { color: #ff9800; margin-bottom: 10px; }
-        .opinion-box { background: #e8f5e9; padding: 12px; border-radius: 8px; margin-top: 10px; border-left: 3px solid #4caf50; }
-        .opinion-box strong { color: #2e7d32; }
+        h1 { color: #7b9fff; margin-bottom: 8px; text-align: center; font-size: 24px; }
+        h2 { color: #a78bfa; margin-bottom: 16px; text-align: center; font-size: 20px; }
+        h3 { color: #7b9fff; margin-bottom: 10px; }
+        .subtitle { text-align: center; color: #888; margin-bottom: 24px; font-size: 14px; }
+        .pin-format-info { background: #0f2a4a; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; color: #60a5fa; border-left: 4px solid #1E5BFF; }
+        .media-box { background: #2a1f0a; padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #ff9800; }
+        .media-box h3, .media-box h4 { color: #ff9800; margin-bottom: 8px; }
+        .opinion-box { background: #0f2a14; padding: 12px; border-radius: 8px; margin-top: 10px; border-left: 3px solid #4caf50; color: #a7f3d0; }
+        .opinion-box strong { color: #4caf50; }
         .media-preview { max-width: 100%; max-height: 200px; margin-top: 10px; border-radius: 8px; }
         audio { width: 100%; margin-top: 10px; }
-        .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { flex: 1; padding: 10px; background: #e0e0e0; color: #333; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .tab-buttons { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        .tab-btn { flex: 1; padding: 10px 6px; background: #2a2a3e; color: #aaa; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; min-width: 60px; }
         .tab-btn.active { background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%); color: white; }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
-        .login-section, .student-section, .teacher-section, .password-change-section, .teacher-login-section { display: none; }
-        .login-section.active, .student-section.active, .teacher-section.active, .password-change-section.active, .teacher-login-section.active { display: block; }
-        .input-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; color: #333; font-weight: 500; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .input-group { margin-bottom: 18px; }
+        label { display: block; margin-bottom: 7px; color: #ccc; font-weight: 500; font-size: 14px; }
         input[type="text"], input[type="password"], input[type="tel"], input[type="file"], textarea {
-            width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; transition: border-color 0.3s;
+            width: 100%; padding: 12px; border: 2px solid #333; border-radius: 8px; font-size: 15px;
+            background: #0f0f1a; color: #e0e0e0; transition: border-color 0.3s;
         }
+        input[type="file"] { color: #aaa; }
         input:focus, textarea:focus { outline: none; border-color: #1E5BFF; }
-        textarea { min-height: 100px; resize: vertical; font-family: inherit; }
+        textarea { min-height: 90px; resize: vertical; font-family: inherit; }
         button {
             width: 100%; padding: 14px;
             background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%);
-            color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600;
-            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; margin-top: 10px;
+            color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: 700;
+            cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; margin-top: 8px;
         }
-        button:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(30, 91, 255, 0.4); }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(30,91,255,0.5); }
         button:active { transform: translateY(0); }
-        button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
-        .secondary-btn { background: #6c757d; margin-top: 10px; }
-        .warning-btn { background: #ffc107; color: #333; }
-        .danger-btn { background: #dc3545; }
-        .question-box { background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #1E5BFF; }
-        .question-box h3 { color: #1E5BFF; margin-bottom: 10px; }
-        .answer-box { background: #e7f3ff; padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #28a745; }
-        .student-answer { background: white; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #e0e0e0; }
-        .link-button { color: #1E5BFF; text-decoration: none; cursor: pointer; display: inline-block; margin-top: 15px; }
-        .link-button:hover { text-decoration: underline; }
-        .success-msg { background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; border-left: 4px solid #28a745; margin: 10px 0; }
-        .error-msg { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border-left: 4px solid #dc3545; margin: 10px 0; }
-        .phone-item { background: white; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
-        .date-info { color: #999; text-align: center; margin: 20px 0; }
-        .logo { font-size: 40px; text-align: center; margin-bottom: 10px; }
-        .loading { text-align: center; padding: 20px; color: #666; }
-        .media-answer-section { background: #fff3e0; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #ff9800; }
-        .leaderboard-section { margin-top: 20px; }
-        .leaderboard-title { text-align: center; font-size: 22px; font-weight: 700; color: #1E5BFF; margin-bottom: 16px; letter-spacing: 1px; }
-        .leaderboard-item { display: flex; align-items: center; gap: 12px; background: white; border: 1.5px solid #e0e0e0; border-radius: 12px; padding: 12px 16px; margin-bottom: 10px; transition: box-shadow 0.2s; }
-        .leaderboard-item:hover { box-shadow: 0 4px 16px rgba(30,91,255,0.12); }
-        .leaderboard-item.rank-1 { border-color: #FFD700; background: linear-gradient(90deg, #fffbe6, #fff); }
-        .leaderboard-item.rank-2 { border-color: #C0C0C0; background: linear-gradient(90deg, #f5f5f5, #fff); }
-        .leaderboard-item.rank-3 { border-color: #cd7f32; background: linear-gradient(90deg, #fdf0e0, #fff); }
-        .rank-badge { font-size: 22px; min-width: 36px; text-align: center; }
-        .lb-name { flex: 1; font-weight: 600; color: #333; }
-        .lb-score { font-weight: 700; color: #1E5BFF; font-size: 15px; }
-        .streak-badge { display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(135deg, #ff9800, #f44336); color: white; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-left: 8px; }
-        .ranking-section { background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0; }
-        .ranking-section h3 { text-align: center; font-size: 20px; margin-bottom: 14px; letter-spacing: 1px; }
-        .ranking-item { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.15); border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; }
-        .ranking-badge { font-size: 20px; min-width: 32px; }
-        .ranking-name { flex: 1; font-weight: 600; }
-        .ranking-pts { font-size: 15px; font-weight: 700; }
-        .designer-footer { text-align: center; margin-top: 30px; padding-top: 16px; border-top: 1px solid #e0e0e0; color: #aaa; font-size: 13px; letter-spacing: 0.5px; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-secondary { background: #3a3a5a; }
+        .btn-warning { background: linear-gradient(135deg, #f59e0b, #d97706); color: #111; }
+        .btn-danger { background: linear-gradient(135deg, #dc2626, #b91c1c); }
+        .btn-green { background: linear-gradient(135deg, #16a34a, #15803d); }
+        .btn-orange { background: linear-gradient(135deg, #ff9800, #f57c00); }
+        .btn-small { width: auto; padding: 8px 16px; font-size: 13px; }
+        .question-box { background: #0f1a2e; padding: 18px; border-radius: 10px; margin: 16px 0; border-left: 4px solid #1E5BFF; }
+        .answer-box { background: #0f2a14; padding: 14px; border-radius: 10px; margin: 14px 0; border-left: 4px solid #28a745; }
+        .student-answer { background: #1a1a2e; padding: 14px; border-radius: 8px; margin: 10px 0; border: 1px solid #333; }
+        .link-btn { color: #60a5fa; text-decoration: none; cursor: pointer; background: none; border: none; font-size: 14px; padding: 0; width: auto; margin: 0; display: inline; }
+        .link-btn:hover { text-decoration: underline; transform: none; box-shadow: none; }
+        .success-msg { background: #0f2a14; color: #86efac; padding: 12px; border-radius: 8px; border-left: 4px solid #22c55e; margin: 10px 0; }
+        .error-msg { background: #2a0f0f; color: #fca5a5; padding: 12px; border-radius: 8px; border-left: 4px solid #dc2626; margin: 10px 0; }
+        .info-msg { background: #0f1a2e; color: #93c5fd; padding: 12px; border-radius: 8px; border-left: 4px solid #3b82f6; margin: 10px 0; }
+        .warn-msg { background: #2a1f0a; color: #fcd34d; padding: 12px; border-radius: 8px; border-left: 4px solid #f59e0b; margin: 10px 0; }
+        .phone-item { background: #1a1a2e; padding: 14px; border-radius: 8px; margin: 8px 0; border: 1px solid #333; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 38px; text-align: center; margin-bottom: 10px; }
+        .loading { text-align: center; padding: 30px 20px; color: #aaa; font-size: 15px; }
+        .loading .spinner { display: inline-block; width: 36px; height: 36px; border: 4px solid #333; border-top-color: #1E5BFF; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 14px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .media-answer-section { background: #1f1208; padding: 14px; border-radius: 8px; margin-top: 14px; border-left: 4px solid #ff9800; }
+        .leaderboard-item { display: flex; align-items: center; gap: 12px; background: #1a1a2e; border: 1.5px solid #333; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px; }
+        .leaderboard-item.rank-1 { border-color: #FFD700; background: #1a1700; }
+        .leaderboard-item.rank-2 { border-color: #C0C0C0; background: #181818; }
+        .leaderboard-item.rank-3 { border-color: #cd7f32; background: #1a1000; }
+        .rank-badge { font-size: 22px; min-width: 34px; text-align: center; }
+        .lb-name { flex: 1; font-weight: 600; color: #e0e0e0; }
+        .lb-score { font-weight: 700; color: #7b9fff; font-size: 15px; }
+        .streak-badge { display: inline-flex; align-items: center; gap: 3px; background: linear-gradient(135deg, #ff9800, #f44336); color: white; padding: 3px 8px; border-radius: 20px; font-size: 12px; font-weight: 700; margin-left: 6px; }
+        .designer-footer { text-align: center; margin-top: 28px; padding-top: 14px; border-top: 1px solid #333; color: #555; font-size: 13px; }
         .designer-footer span { background: linear-gradient(135deg, #1E5BFF, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
 
-        /* ===== AUTO-POST MACHINE STYLES ===== */
-        .autopost-status {
-            background: linear-gradient(135deg, #0d1b2a, #1a3a5c);
-            color: white;
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 16px;
-            border-left: 4px solid #00e5ff;
-        }
-        .autopost-status h4 { color: #00e5ff; margin-bottom: 10px; font-size: 15px; letter-spacing: 1px; }
-        .autopost-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
+        /* FAF Banner */
+        .faf-banner { background: linear-gradient(135deg, #1a1a2e, #16213e); border: 2px solid #FFD700; border-radius: 14px; padding: 14px 16px; margin-bottom: 18px; position: relative; overflow: hidden; }
+        .faf-title { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+
+        /* Stats row */
+        .stats-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; justify-content: center; }
+        .stat-card { padding: 10px 16px; border-radius: 12px; text-align: center; min-width: 85px; }
+        .stat-card .val { font-size: 22px; font-weight: 800; }
+        .stat-card .lbl { font-size: 11px; opacity: 0.85; margin-top: 2px; }
+
+        /* Auto-post panel */
+        .autopost-status { background: linear-gradient(135deg, #0d1b2a, #1a3a5c); color: white; padding: 16px; border-radius: 12px; margin-bottom: 16px; border-left: 4px solid #00e5ff; }
+        .autopost-status h4 { color: #00e5ff; margin-bottom: 10px; font-size: 14px; letter-spacing: 1px; }
+        .autopost-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.07); font-size: 13px; }
         .autopost-row:last-child { border-bottom: none; }
         .autopost-label { color: #aaa; }
-        .autopost-value { font-weight: 700; color: #fff; }
-        .autopost-value.green { color: #69f0ae; }
-        .autopost-value.yellow { color: #ffeb3b; }
-        .autopost-value.red { color: #ff5252; }
-        .autopost-value.cyan { color: #00e5ff; }
-        .pulse-dot {
-            width: 10px; height: 10px; border-radius: 50%;
-            background: #69f0ae;
-            display: inline-block;
-            margin-right: 6px;
-            animation: pulse 1.5s infinite;
-        }
+        .autopost-value { font-weight: 700; }
+        .clr-green { color: #69f0ae; }
+        .clr-yellow { color: #ffeb3b; }
+        .clr-red { color: #ff5252; }
+        .clr-cyan { color: #00e5ff; }
+        .pulse-dot { width: 9px; height: 9px; border-radius: 50%; background: #69f0ae; display: inline-block; margin-right: 5px; animation: pulse 1.5s infinite; }
         .pulse-dot.off { background: #ff5252; animation: none; }
         @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.4)} }
-        .progress-bar-wrap { background: rgba(255,255,255,0.1); border-radius: 20px; height: 8px; margin-top: 10px; overflow: hidden; }
+        .progress-bar-wrap { background: rgba(255,255,255,0.1); border-radius: 20px; height: 7px; margin-top: 10px; overflow: hidden; }
         .progress-bar-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, #1E5BFF, #00e5ff); transition: width 0.5s ease; }
-        .bulk-day-card {
-            border-left: 4px solid #1E5BFF;
-            padding: 12px;
-            margin-bottom: 12px;
-            background: #f0f4ff;
-            border-radius: 8px;
-        }
-        .bulk-day-card.posted { border-color: #28a745; background: #e8f5e9; }
-        .bulk-day-card.today-card { border-color: #ff9800; background: #fff3e0; box-shadow: 0 0 0 2px #ff9800; }
-        .bulk-day-header { font-weight: 700; color: #1E5BFF; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
-        .bulk-day-card.posted .bulk-day-header { color: #28a745; }
+        .bulk-day-card { border-left: 4px solid #1E5BFF; padding: 12px; margin-bottom: 12px; background: #0f1a2e; border-radius: 8px; }
+        .bulk-day-card.posted { border-color: #22c55e; background: #0a1f0f; }
+        .bulk-day-card.today-card { border-color: #ff9800; background: #1f1208; box-shadow: 0 0 0 2px #ff980044; }
+        .bulk-day-header { font-weight: 700; color: #7b9fff; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+        .bulk-day-card.posted .bulk-day-header { color: #22c55e; }
         .bulk-day-card.today-card .bulk-day-header { color: #ff9800; }
-        .status-chip {
-            font-size: 11px;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-weight: 700;
+        .status-chip { font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 700; }
+        .chip-posted { background: #0a2f14; color: #22c55e; border: 1px solid #22c55e; }
+        .chip-today { background: #2a1f0a; color: #ff9800; border: 1px solid #ff9800; }
+        .chip-pending { background: #0f1a2e; color: #60a5fa; border: 1px solid #1E5BFF; }
+        .bulk-day-card textarea, .bulk-day-card input { background: #0a0a14; color: #e0e0e0; border: 1.5px solid #333; }
+        .bulk-day-card textarea:focus, .bulk-day-card input:focus { border-color: #1E5BFF; }
+        .server-wake { background: linear-gradient(135deg, #0f1a2e, #1a0f2e); border: 2px solid #1E5BFF; border-radius: 14px; padding: 20px; text-align: center; margin: 10px 0; }
+        .server-wake .big-icon { font-size: 48px; margin-bottom: 12px; }
+        .wake-bar-wrap { background: #1a1a2e; border-radius: 20px; height: 10px; margin: 14px 0; overflow: hidden; }
+        .wake-bar-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, #1E5BFF, #a78bfa); animation: wakeProgress 30s linear forwards; }
+        @keyframes wakeProgress { from { width: 0%; } to { width: 95%; } }
+        @media (max-width: 480px) {
+            .container { padding: 20px 16px; }
+            h1 { font-size: 20px; }
+            .stats-row { gap: 8px; }
+            .stat-card { min-width: 75px; padding: 8px 10px; }
         }
-        .chip-posted { background: #d4edda; color: #155724; }
-        .chip-today { background: #fff3cd; color: #856404; }
-        .chip-pending { background: #e7f3ff; color: #0066cc; }
     </style>
 </head>
 <body>
 <div class="container">
 
-    <!-- Login Screen -->
-    <div id="loginSection" class="login-section active">
+    <!-- LOGIN -->
+    <div id="loginSection" class="section active">
         <div class="logo">📚🏫</div>
         <h1>QUIZ FOR POLYTECHNIC STUDENTS</h1>
         <p class="subtitle">Learn something new every day!</p>
 
-        <!-- FIRST ANSWER FIRST Banner -->
-        <div id="loginFafBanner" style="
-            background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 2px solid #FFD700;
-            border-radius: 14px;
-            padding: 14px 16px;
-            margin-bottom: 18px;
-            position: relative;
-            overflow: hidden;
-        ">
-            <div style="position:absolute;top:-8px;right:-8px;font-size:50px;opacity:0.07;">⚡</div>
-            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <div class="faf-banner">
+            <div class="faf-title">
                 <span style="font-size:20px;">⚡</span>
                 <span style="color:#FFD700;font-weight:700;font-size:14px;letter-spacing:1px;">FIRST ANSWER FIRST</span>
-                <span style="color:#aaa;font-size:11px;margin-left:4px;">— Yesterday's Top 3</span>
+                <span style="color:#888;font-size:11px;margin-left:4px;">— Yesterday's Top 3</span>
             </div>
-            <div id="loginFafContent" style="min-height:36px;">
-                <div style="color:#aaa;font-size:13px;text-align:center;">Loading...</div>
-            </div>
+            <div id="loginFafContent"><div style="color:#555;font-size:13px;text-align:center;">Loading...</div></div>
         </div>
 
         <div class="pin-format-info">
             📌 <strong>PIN Format:</strong> YYYYY-BB-XXX<br>
-            <strong>YYYYY:</strong> Year (22007-30007) | <strong>BB:</strong> Branch (CS/EE/ME/EI/CE/EC & ETC) <strong>XXX:</strong> Roll No. (001-999)<br>
+            <strong>YYYYY:</strong> Year (22007–30007) | <strong>BB:</strong> Branch (CS/EE/ME/EI/CE/EC/ETC) | <strong>XXX:</strong> Roll No. (001–999)<br>
             Example: <strong>25007-CS-007</strong>
         </div>
         <div class="input-group">
@@ -192,120 +177,98 @@
         </div>
         <div class="input-group">
             <label>🔑 Your PIN (YYYYY-BB-XXX):</label>
-            <input type="text" id="studentPin" placeholder="e.g., 25007-CS-007">
+            <input type="text" id="studentPin" placeholder="e.g. 25007-CS-007" autocapitalize="characters">
         </div>
-        <button onclick="loginStudent()">Login as Student</button>
-        <p style="text-align:center;margin-top:20px;color:#666;">
-            Are you TEJAPRATAP? <a href="#" class="link-button" onclick="showTeacherLogin();return false;">Login here</a>
+        <button onclick="loginStudent()">🚀 Login as Student</button>
+        <p style="text-align:center;margin-top:18px;color:#666;font-size:14px;">
+            Are you TEJAPRATAP? <button class="link-btn" onclick="showSection('teacherLoginSection')">Login here</button>
         </p>
     </div>
 
-    <!-- Teacher Login Screen -->
-    <div id="teacherLoginSection" class="teacher-login-section">
+    <!-- TEACHER LOGIN -->
+    <div id="teacherLoginSection" class="section">
         <div class="logo">👨‍🏫🔒</div>
         <h1>TEJAPRATAP Login</h1>
         <p class="subtitle">Manage daily questions and view student responses</p>
-        <div class="input-group" style="background:#fff3cd;padding:12px;border-radius:8px;margin-bottom:15px;">
-            ⚠️ <strong>This website is managed by TEJAPRATAP</strong>
-        </div>
+        <div class="warn-msg">⚠️ <strong>This website is managed by TEJAPRATAP</strong></div>
         <div class="input-group">
-            <label>🔐 TEJAPRATAP Password:</label>
-            <input type="password" id="teacherPassword" placeholder="Enter password">
+            <label>🔐 Password:</label>
+            <input type="password" id="teacherPassword" placeholder="Enter password" onkeydown="if(event.key==='Enter')loginTeacher()">
         </div>
-        <button onclick="loginTeacher()">Login as TEJAPRATAP</button>
-        <p style="text-align:center;margin-top:15px;">
-            <a href="#" class="link-button" onclick="showForgotPassword();return false;">Forgot Password?</a>
+        <button onclick="loginTeacher()">🔓 Login as TEJAPRATAP</button>
+        <p style="text-align:center;margin-top:14px;">
+            <button class="link-btn" onclick="alert('Please contact the administrator to reset your password.')">Forgot Password?</button>
         </p>
-        <p style="text-align:center;margin-top:10px;color:#666;">
-            Are you a student? <a href="#" class="link-button" onclick="showStudentLogin();return false;">Login here</a>
+        <p style="text-align:center;margin-top:10px;color:#666;font-size:14px;">
+            Are you a student? <button class="link-btn" onclick="showSection('loginSection')">Login here</button>
         </p>
     </div>
 
-    <!-- Student Dashboard -->
-    <div id="studentSection" class="student-section">
+    <!-- STUDENT DASHBOARD -->
+    <div id="studentSection" class="section">
         <div class="logo">📚</div>
         <h2 id="studentWelcome">Welcome!</h2>
-        <div id="studentContent"></div>
-        <button class="secondary-btn" onclick="logoutStudent()">Logout</button>
+        <div id="studentContent">
+            <div class="server-wake">
+                <div class="big-icon">🚀</div>
+                <div style="color:#7b9fff;font-weight:700;font-size:16px;margin-bottom:6px;">Connecting to server...</div>
+                <div style="color:#888;font-size:13px;">First visit may take up to 60 seconds.<br>Please wait!</div>
+                <div class="wake-bar-wrap"><div class="wake-bar-fill"></div></div>
+                <div style="color:#555;font-size:12px;margin-top:8px;" id="wakeMsg">Waking up server...</div>
+            </div>
+        </div>
+        <button class="btn-secondary" onclick="logoutStudent()" style="margin-top:16px;">↩️ Logout</button>
     </div>
 
-    <!-- Teacher Dashboard -->
-    <div id="teacherSection" class="teacher-section">
+    <!-- TEACHER DASHBOARD -->
+    <div id="teacherSection" class="section">
         <div class="logo">👨‍🏫</div>
         <h1>TEJAPRATAP Dashboard</h1>
-        <div class="tab-buttons" style="flex-wrap:wrap;">
-            <button class="tab-btn active" onclick="switchTab('questions')">Questions</button>
-            <button class="tab-btn" onclick="switchTab('media')">Media Files</button>
-            <button class="tab-btn" onclick="switchTab('phones')">Phone Numbers</button>
-            <button class="tab-btn" onclick="switchTab('rank')" style="background:linear-gradient(135deg,#FFD700,#ff9800);color:#333;">🎖️ RANK</button>
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('questions')">📝 Questions</button>
+            <button class="tab-btn" onclick="switchTab('media')">🎵 Media</button>
+            <button class="tab-btn" onclick="switchTab('phones')">📞 Phones</button>
+            <button class="tab-btn" onclick="switchTab('rank')" style="background:linear-gradient(135deg,#854d0e,#b45309);color:#fef9c3;">🎖️ RANK</button>
         </div>
 
         <!-- Questions Tab -->
         <div id="questionsTab" class="tab-content active">
-            <div style="display:flex;gap:8px;margin-bottom:18px;">
-                <button id="singleQBtn" onclick="switchQMode('single')" style="flex:1;padding:10px;background:#e0e0e0;color:#333;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Single Question</button>
-                <button id="bulkQBtn" onclick="switchQMode('bulk')" style="flex:1;padding:10px;background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">🤖 Auto-Post Machine (10 Questions)</button>
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+                <button id="singleQBtn" onclick="switchQMode('single')" style="flex:1;padding:10px;background:#2a2a3e;color:#aaa;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">Single Question</button>
+                <button id="bulkQBtn" onclick="switchQMode('bulk')" style="flex:1;padding:10px;background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">🤖 Auto-Post (10Qs)</button>
             </div>
 
-            <!-- Single Question Mode -->
+            <!-- Single Mode -->
             <div id="singleQMode">
-                <h2>📝 Post New Question</h2>
                 <div class="input-group">
-                    <label>Today's Question:</label>
+                    <label>📝 Today's Question:</label>
                     <textarea id="newQuestion" placeholder="Enter today's question..."></textarea>
                 </div>
                 <div class="input-group">
-                    <label>✅ Today's Answer <span style="color:#28a745;font-size:12px;">(Students will see this only after they submit their answer)</span></label>
-                    <textarea id="todayAnswer" placeholder="Enter the correct answer for today's question..." style="border-color:#28a745;"></textarea>
+                    <label>✅ Today's Answer <span style="color:#22c55e;font-size:12px;">(Shown to students ONLY after they submit)</span></label>
+                    <textarea id="todayAnswer" placeholder="Enter the correct answer..." style="border-color:#22c55e;"></textarea>
                 </div>
-                <button onclick="postQuestion()">Post Question</button>
+                <button onclick="postQuestion()">📤 Post Question</button>
             </div>
 
-            <!-- Bulk/Auto-Post Mode -->
+            <!-- Bulk Mode -->
             <div id="bulkQMode" style="display:none;">
-                <!-- Auto-Post Machine Status Panel -->
                 <div class="autopost-status" id="autoPostStatusPanel">
                     <h4>🤖 AUTO-POST MACHINE STATUS</h4>
-                    <div class="autopost-row">
-                        <span class="autopost-label">Engine</span>
-                        <span class="autopost-value" id="apEngineStatus"><span class="pulse-dot off"></span>Idle</span>
-                    </div>
-                    <div class="autopost-row">
-                        <span class="autopost-label">Schedule Loaded</span>
-                        <span class="autopost-value" id="apScheduleLoaded">—</span>
-                    </div>
-                    <div class="autopost-row">
-                        <span class="autopost-label">Questions Posted</span>
-                        <span class="autopost-value cyan" id="apPostedCount">0 / 10</span>
-                    </div>
-                    <div class="autopost-row">
-                        <span class="autopost-label">Next Scheduled Post</span>
-                        <span class="autopost-value yellow" id="apNextPost">—</span>
-                    </div>
-                    <div class="autopost-row">
-                        <span class="autopost-label">Last Auto-Post</span>
-                        <span class="autopost-value green" id="apLastPost">—</span>
-                    </div>
-                    <div class="autopost-row">
-                        <span class="autopost-label">Auto-Check Timer</span>
-                        <span class="autopost-value" id="apTimerStatus">—</span>
-                    </div>
-                    <div class="progress-bar-wrap">
-                        <div class="progress-bar-fill" id="apProgressBar" style="width:0%"></div>
-                    </div>
-                    <div style="text-align:center;font-size:11px;color:#aaa;margin-top:6px;" id="apProgressLabel">0 of 10 posted</div>
+                    <div class="autopost-row"><span class="autopost-label">Engine</span><span class="autopost-value" id="apEngineStatus"><span class="pulse-dot off"></span>Idle</span></div>
+                    <div class="autopost-row"><span class="autopost-label">Schedule Loaded</span><span class="autopost-value" id="apScheduleLoaded">—</span></div>
+                    <div class="autopost-row"><span class="autopost-label">Questions Posted</span><span class="autopost-value clr-cyan" id="apPostedCount">0 / 10</span></div>
+                    <div class="autopost-row"><span class="autopost-label">Next Scheduled Post</span><span class="autopost-value clr-yellow" id="apNextPost">—</span></div>
+                    <div class="autopost-row"><span class="autopost-label">Last Auto-Post</span><span class="autopost-value clr-green" id="apLastPost">—</span></div>
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="apProgressBar" style="width:0%"></div></div>
+                    <div style="text-align:center;font-size:11px;color:#aaa;margin-top:5px;" id="apProgressLabel">0 of 10 posted</div>
                 </div>
-
-                <div style="background:#e7f3ff;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;color:#0066cc;border-left:4px solid #1E5BFF;">
-                    📌 Fill 10 questions + answers. They post <strong>one per day</strong> automatically. The machine checks every <strong>60 seconds</strong> and also runs on every page load.
-                </div>
-
+                <div class="info-msg" style="font-size:13px;">📌 Fill 10 questions + answers. They post <strong>one per day</strong> automatically. Machine checks every 60 seconds.</div>
                 <div id="bulkQFields"></div>
-                <div id="bulkScheduledInfo" style="margin-top:10px;"></div>
-
+                <div id="bulkScheduledInfo"></div>
                 <button onclick="saveBulkQuestions()" style="background:linear-gradient(135deg,#1E5BFF,#764ba2);">💾 Save & Activate Auto-Post Machine</button>
-                <button onclick="manualCheckAndPost()" style="background:#28a745;margin-top:8px;">🔄 Manual Check: Post Today's Question Now</button>
-                <button onclick="resetBulkSchedule()" style="background:#dc3545;margin-top:8px;">🗑️ Reset Schedule</button>
+                <button onclick="manualCheckAndPost()" class="btn-green" style="margin-top:8px;">🔄 Manual Check: Post Today's Question Now</button>
+                <button onclick="resetBulkSchedule()" class="btn-danger" style="margin-top:8px;">🗑️ Reset Schedule</button>
             </div>
 
             <div id="teacherContent"></div>
@@ -313,139 +276,106 @@
 
         <!-- Media Tab -->
         <div id="mediaTab" class="tab-content">
-            <div style="background:#1a1a2e;border-radius:12px;padding:18px;margin-bottom:20px;border-left:4px solid #ff9800;">
+            <div style="background:#1f1208;border-radius:12px;padding:18px;margin-bottom:20px;border-left:4px solid #ff9800;">
                 <h2 style="color:#ff9800;margin-bottom:14px;">📤 Post New Media + Question</h2>
                 <div class="input-group">
-                    <label style="color:#ccc;">Upload Image or Audio:</label>
+                    <label>Upload Image or Audio:</label>
                     <input type="file" id="mediaFile" accept="image/*,audio/*" onchange="previewMedia()">
-                    <div id="mediaPreview"></div>
+                    <div id="mediaPreview" style="margin-top:8px;"></div>
                 </div>
                 <div class="input-group">
-                    <label style="color:#ccc;">📝 Question for Students:</label>
-                    <textarea id="mediaQuestion" placeholder="e.g. What do you think this image represents?..." style="border-color:#ff9800;"></textarea>
+                    <label>📝 Question for Students:</label>
+                    <textarea id="mediaQuestion" placeholder="e.g. What do you think this image represents?" style="border-color:#ff9800;"></textarea>
                 </div>
                 <div class="input-group">
-                    <label style="color:#ccc;">✅ Expected Answer / Key Points:</label>
-                    <textarea id="mediaAnswer" placeholder="Write the expected answer or key points..."></textarea>
+                    <label>✅ Expected Answer / Key Points:</label>
+                    <textarea id="mediaAnswer" placeholder="Write the expected answer..."></textarea>
                 </div>
-                <button onclick="uploadMedia()" style="background:linear-gradient(135deg,#ff9800,#f57c00);">📤 Upload & Post for Students</button>
+                <button onclick="uploadMedia()" class="btn-orange">📤 Upload & Post for Students</button>
             </div>
             <div id="yesterdayMediaFeedback"></div>
             <div id="mediaList"></div>
         </div>
 
-        <!-- Phone Numbers Tab -->
+        <!-- Phones Tab -->
         <div id="phonesTab" class="tab-content">
             <h2>📞 Student Contact Information</h2>
-            <div id="phoneNumbersList"></div>
+            <div id="phoneNumbersList"><div class="loading"><div class="spinner"></div><br>Loading...</div></div>
         </div>
 
-        <!-- Leaderboard Tab -->
-        <div id="leaderboardTab" class="tab-content">
-            <h2>🏆 Leaderboard & Streaks</h2>
-            <div id="leaderboardContent"><div class="loading">Loading...</div></div>
-        </div>
-
-        <!-- RANK Tab -->
+        <!-- Rank Tab -->
         <div id="rankTab" class="tab-content">
             <div style="text-align:center;margin-bottom:20px;">
                 <div style="font-size:32px;">🎖️</div>
                 <h2 style="color:#ff9800;margin:0;">RANK</h2>
-                <p style="color:#999;font-size:13px;margin-top:4px;">Student recognition & activity ranking</p>
+                <p style="color:#888;font-size:13px;margin-top:4px;">Student recognition & activity ranking</p>
             </div>
 
-            <!-- Block 1: First Answerer of Yesterday -->
-            <div id="rankFirstAnswerer" style="
-                background: linear-gradient(135deg, #1a1a2e, #16213e);
-                border-radius: 16px;
-                padding: 20px;
-                margin-bottom: 20px;
-                border: 2px solid #FFD700;
-                position: relative;
-                overflow: hidden;
-            ">
-                <div style="position:absolute;top:-10px;right:-10px;font-size:60px;opacity:0.08;">⚡</div>
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-                    <span style="font-size:26px;">⚡</span>
+            <div id="rankFirstAnswerer" style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:20px;margin-bottom:20px;border:2px solid #FFD700;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                    <span style="font-size:24px;">⚡</span>
                     <div>
-                        <div style="color:#FFD700;font-weight:700;font-size:16px;letter-spacing:1px;">FASTEST FINGER FIRST — TOP 3</div>
-                        <div style="color:#aaa;font-size:12px;">Who answered yesterday's question 1st, 2nd & 3rd?</div>
+                        <div style="color:#FFD700;font-weight:700;font-size:15px;letter-spacing:1px;">FASTEST FINGER FIRST — TOP 3</div>
+                        <div style="color:#888;font-size:12px;">Who answered yesterday's question 1st, 2nd & 3rd?</div>
                     </div>
                 </div>
-                <div id="rankFirstAnswererContent"><div class="loading" style="color:#aaa;">Loading...</div></div>
+                <div id="rankFirstAnswererContent"><div class="loading"><div class="spinner"></div></div></div>
             </div>
 
-            <!-- Block 2: Top 3 Most Active (15 days) -->
-            <div id="rankMostActive" style="
-                background: linear-gradient(135deg, #0d1b2a, #1a3a1a);
-                border-radius: 16px;
-                padding: 20px;
-                margin-bottom: 20px;
-                border: 2px solid #69f0ae;
-                position: relative;
-                overflow: hidden;
-            ">
-                <div style="position:absolute;top:-10px;right:-10px;font-size:60px;opacity:0.08;">🔥</div>
-                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-                    <span style="font-size:26px;">🔥</span>
+            <div id="rankMostActive" style="background:linear-gradient(135deg,#0d1b2a,#0d2010);border-radius:16px;padding:20px;margin-bottom:20px;border:2px solid #22c55e;">
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                    <span style="font-size:24px;">🔥</span>
                     <div>
-                        <div style="color:#69f0ae;font-weight:700;font-size:16px;letter-spacing:1px;">TOP 3 MOST ACTIVE</div>
-                        <div style="color:#aaa;font-size:12px;">Most answers submitted in the last 15 days</div>
+                        <div style="color:#22c55e;font-weight:700;font-size:15px;letter-spacing:1px;">TOP 3 MOST ACTIVE</div>
+                        <div style="color:#888;font-size:12px;">Most answers submitted in the last 15 days</div>
                     </div>
                 </div>
-                <div id="rankMostActiveContent"><div class="loading" style="color:#aaa;">Loading...</div></div>
+                <div id="rankMostActiveContent"><div class="loading"><div class="spinner"></div></div></div>
             </div>
 
-            <button onclick="loadRankTab()" style="background:linear-gradient(135deg,#FFD700,#ff9800);color:#333;font-weight:700;">🔄 Refresh Rankings</button>
+            <button onclick="loadRankTab()" style="background:linear-gradient(135deg,#854d0e,#b45309);color:#fef9c3;font-weight:700;">🔄 Refresh Rankings</button>
         </div>
 
-        <button class="warning-btn" onclick="showChangePassword()">Change Password</button>
-        <button class="danger-btn" onclick="resetAllData()">Reset All Data</button>
-        <button class="secondary-btn" onclick="logoutTeacher()">Logout</button>
+        <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;">
+            <button class="btn-warning" onclick="showSection('passwordChangeSection')">🔑 Change Password</button>
+            <button class="btn-danger" onclick="resetAllData()">⚠️ Reset All Data</button>
+            <button class="btn-secondary" onclick="logoutTeacher()">↩️ Logout</button>
+        </div>
     </div>
 
-    <!-- Password Change Section -->
-    <div id="passwordChangeSection" class="password-change-section">
+    <!-- PASSWORD CHANGE -->
+    <div id="passwordChangeSection" class="section">
         <h2>🔐 Change Password</h2>
-        <div class="input-group">
-            <label>Current Password:</label>
-            <input type="password" id="currentPassword" placeholder="Enter current password">
-        </div>
-        <div class="input-group">
-            <label>New Password:</label>
-            <input type="password" id="newPassword" placeholder="Enter new password">
-        </div>
-        <div class="input-group">
-            <label>Confirm New Password:</label>
-            <input type="password" id="confirmPassword" placeholder="Confirm new password">
-        </div>
-        <button onclick="changePassword()">Change Password</button>
-        <button class="secondary-btn" onclick="backToTeacher()">Back to Dashboard</button>
+        <div class="input-group"><label>Current Password:</label><input type="password" id="currentPassword" placeholder="Enter current password"></div>
+        <div class="input-group"><label>New Password:</label><input type="password" id="newPassword" placeholder="Enter new password"></div>
+        <div class="input-group"><label>Confirm New Password:</label><input type="password" id="confirmPassword" placeholder="Confirm new password"></div>
+        <button onclick="changePassword()">💾 Change Password</button>
+        <button class="btn-secondary" onclick="showSection('teacherSection')">↩️ Back to Dashboard</button>
     </div>
 
-    <div class="designer-footer">
-        Designed by <span>SATHWIK__DEENANAATH</span>
-    </div>
+    <div class="designer-footer">Designed by <span>SATHWIK__DEENANAATH</span></div>
 </div>
 
 <script>
 // =====================================================
-// CONFIGURATION
+// CONFIG
 // =====================================================
 const API_URL = 'https://tejapratap-s-quiz.onrender.com';
-// Keep Render server awake by pinging every 14 minutes
-setInterval(() => fetch(API_URL + '/health').catch(()=>{}), 14 * 60 * 1000);
-
 let currentStudent = null;
 let currentStudentName = null;
 let isTeacher = false;
 let teacherPassword = '11223344@Ttp';
-let autoPostInterval = null; // Global interval handle
+let autoPostInterval = null;
+let _scheduleCache = null;
+let _scoresCache = null;
+
+// Keep server alive every 10 minutes
+setInterval(() => fetch(API_URL + '/health').catch(() => {}), 10 * 60 * 1000);
 
 // =====================================================
 // INIT
 // =====================================================
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     const savedStudent = localStorage.getItem('currentStudent');
     const savedName = localStorage.getItem('currentStudentName');
     const savedTeacher = localStorage.getItem('isTeacher');
@@ -455,26 +385,535 @@ document.addEventListener('DOMContentLoaded', function () {
     if (savedStudent && savedName) {
         currentStudent = savedStudent;
         currentStudentName = savedName;
-        showStudentDashboard();
+        showSection('studentSection');
+        document.getElementById('studentWelcome').textContent = `Welcome, ${currentStudentName}!`;
         loadStudentData();
     } else if (savedTeacher === 'true') {
         isTeacher = true;
-        showTeacherDashboard();
+        showSection('teacherSection');
         loadTeacherData();
-        startAutoPostMachine(); // 🤖 Start the machine
+        startAutoPostMachine();
+    } else {
+        loadLoginFafBanner();
     }
 });
 
 // =====================================================
-// 🤖 AUTO-POST MACHINE (CORE)
+// NAVIGATION
 // =====================================================
-
-function getTodayStr() {
-    return new Date().toISOString().split('T')[0];
+function showSection(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
 }
 
-// In-memory cache of schedule (fetched from server)
-let _scheduleCache = null;
+function switchTab(tab) {
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    const map = { questions: 0, media: 1, phones: 2, rank: 3 };
+    document.getElementById(tab + 'Tab').classList.add('active');
+    document.querySelectorAll('.tab-btn')[map[tab]].classList.add('active');
+    if (tab === 'questions') loadTeacherQuestions();
+    else if (tab === 'media') loadMediaList();
+    else if (tab === 'phones') loadPhoneNumbers();
+    else if (tab === 'rank') loadRankTab();
+}
+
+// =====================================================
+// API
+// =====================================================
+async function apiGet(endpoint, timeoutMs = 60000) {
+    try {
+        const controller = new AbortController();
+        const t = setTimeout(() => controller.abort(), timeoutMs);
+        const res = await fetch(API_URL + endpoint, { signal: controller.signal });
+        clearTimeout(t);
+        if (!res.ok) { if (res.status === 404) return null; throw new Error('HTTP ' + res.status); }
+        return await res.json();
+    } catch (e) { console.error('GET ' + endpoint, e.message); return null; }
+}
+
+async function apiPost(endpoint, data, timeoutMs = 60000) {
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), timeoutMs);
+    const res = await fetch(API_URL + endpoint, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data), signal: controller.signal
+    });
+    clearTimeout(t);
+    if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'HTTP ' + res.status); }
+    return await res.json();
+}
+
+// =====================================================
+// LOGIN
+// =====================================================
+function loginStudent() {
+    const name = document.getElementById('studentName').value.trim();
+    const phone = document.getElementById('studentPhone').value.trim();
+    const pin = document.getElementById('studentPin').value.trim().toUpperCase();
+    if (!name) return showToast('Please enter your name!', 'error');
+    if (!phone || !/^\d{10}$/.test(phone)) return showToast('Please enter a valid 10-digit phone number!', 'error');
+    if (!pin) return showToast('Please enter your PIN!', 'error');
+    const pinRegex = /^(2[2-9]|30)\d{3}-(CS|EE|ME|EI|CE|EC|ETC|DAEC|DAUT|DAU|DCHE|DCSE|DECE|DEIE|DEVE|DEMB|DWT|DFT|DGT|DHMCT|DSC|DLT|DMNG|DMET|DPKT|DPT|DTXT)-\d{3}$/i;
+    if (!pinRegex.test(pin)) return showToast('Invalid PIN format! Use YYYYY-BB-XXX (e.g. 25007-CS-007)', 'error');
+    currentStudent = pin;
+    currentStudentName = name;
+    localStorage.setItem('currentStudent', pin);
+    localStorage.setItem('currentStudentName', name);
+    apiPost('/phones', { pin, name, phone }).catch(e => {});
+    showSection('studentSection');
+    document.getElementById('studentWelcome').textContent = `Welcome, ${currentStudentName}!`;
+    loadStudentData();
+}
+
+function loginTeacher() {
+    const pw = document.getElementById('teacherPassword').value;
+    if (pw === teacherPassword) {
+        isTeacher = true;
+        localStorage.setItem('isTeacher', 'true');
+        showSection('teacherSection');
+        loadTeacherData();
+        startAutoPostMachine();
+    } else {
+        showToast('Incorrect password!', 'error');
+    }
+}
+
+function logoutStudent() {
+    currentStudent = null; currentStudentName = null;
+    localStorage.removeItem('currentStudent'); localStorage.removeItem('currentStudentName');
+    showSection('loginSection');
+    loadLoginFafBanner();
+}
+
+function logoutTeacher() {
+    stopAutoPostMachine();
+    isTeacher = false;
+    localStorage.removeItem('isTeacher');
+    showSection('loginSection');
+    loadLoginFafBanner();
+}
+
+// =====================================================
+// STUDENT
+// =====================================================
+async function loadStudentData() {
+    const content = document.getElementById('studentContent');
+    const wakeMsg = document.getElementById('wakeMsg');
+
+    // Show wake animation
+    content.innerHTML = `<div class="server-wake">
+        <div class="big-icon">🚀</div>
+        <div style="color:#7b9fff;font-weight:700;font-size:16px;margin-bottom:6px;">Connecting to server...</div>
+        <div style="color:#888;font-size:13px;">First visit may take up to 60 seconds.<br>Please wait!</div>
+        <div class="wake-bar-wrap"><div class="wake-bar-fill"></div></div>
+        <div style="color:#555;font-size:12px;margin-top:8px;" id="wakeMsg2">Waking up server...</div>
+    </div>`;
+
+    const msgs = ['Waking up server...', 'Connecting...', 'Almost there...', 'Loading your data...', 'Just a moment...'];
+    let mi = 0;
+    const msgInterval = setInterval(() => {
+        const el = document.getElementById('wakeMsg2');
+        if (el) el.textContent = msgs[Math.min(mi++, msgs.length - 1)];
+    }, 8000);
+
+    try {
+        // Use Promise.all for parallel loading — 3x faster
+        const [latestMedia, questions, answers] = await Promise.all([
+            apiGet('/media/latest'),
+            apiGet('/questions'),
+            apiGet('/answers')
+        ]);
+        clearInterval(msgInterval);
+        displayStudentView(latestMedia, questions || [], answers || []);
+    } catch (error) {
+        clearInterval(msgInterval);
+        content.innerHTML = `<div class="error-msg">
+            ❌ Could not connect to server.<br>
+            <small style="color:#aaa;">Server may be sleeping. Try again in 30 seconds.</small><br>
+            <button onclick="loadStudentData()" style="width:auto;padding:10px 20px;margin-top:12px;">🔄 Retry</button>
+        </div>`;
+    }
+}
+
+async function displayStudentView(latestMedia, questions, answers) {
+    const content = document.getElementById('studentContent');
+
+    const [streak, myTotal, allStats] = await Promise.all([
+        getStreak(currentStudent),
+        getTotalScore(currentStudent),
+        getAllStudentStats()
+    ]);
+
+    const myRank = allStats.findIndex(s => s.pin === currentStudent) + 1;
+
+    let html = '<div class="stats-row">';
+    html += `<div class="stat-card" style="background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;">
+        <div class="val">${myTotal}</div><div class="lbl">MY SCORE</div></div>`;
+    if (streak > 0) html += `<div class="stat-card" style="background:linear-gradient(135deg,#ff9800,#f44336);color:white;">
+        <div class="val">🔥${streak}</div><div class="lbl">STREAK</div></div>`;
+    if (myRank > 0) html += `<div class="stat-card" style="background:linear-gradient(135deg,#16a34a,#15803d);color:white;">
+        <div class="val">#${myRank}</div><div class="lbl">MY RANK</div></div>`;
+    html += '</div>';
+
+    // Top 3
+    if (allStats.length > 0) {
+        const medals = ['🥇','🥈','🥉'];
+        html += '<div style="background:#0f1a2e;border-radius:12px;padding:14px;margin-bottom:16px;">';
+        html += '<div style="font-weight:700;color:#7b9fff;margin-bottom:10px;text-align:center;">🏆 Top 3 Students</div>';
+        allStats.slice(0, 3).forEach((s, i) => {
+            const isMe = s.pin === currentStudent;
+            html += `<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:6px;border-radius:8px;background:${isMe?'rgba(30,91,255,0.15)':'#1a1a2e'};border:1px solid ${isMe?'#1E5BFF':'#333'};">
+                <span style="font-size:16px;">${medals[i]||i+1}</span>
+                <span style="flex:1;font-weight:${isMe?700:400};color:${isMe?'#7b9fff':'#e0e0e0'};">${s.name}${isMe?' (You)':''}</span>
+                ${s.streak>0?`<span style="font-size:12px;color:#ff9800;">🔥${s.streak}</span>`:''}
+                <span style="font-weight:700;color:#a78bfa;">${s.total}pts</span>
+            </div>`;
+        });
+        html += '</div>';
+    }
+
+    // Media
+    if (latestMedia) {
+        const hasAnsweredMedia = answers.some(a => a.questionId === latestMedia.id && a.studentPin === currentStudent && a.type === 'media');
+        html += `<div class="media-box"><h4>🎵 Latest Media from TEJAPRATAP</h4>
+            <div style="color:#888;font-size:13px;margin:6px 0;">📅 ${latestMedia.date}</div>
+            <div style="color:#ccc;font-size:13px;">📎 ${latestMedia.fileName}</div>`;
+        if (latestMedia.type === 'image') html += `<img src="${latestMedia.data}" class="media-preview" alt="${latestMedia.fileName}">`;
+        else html += `<audio controls><source src="${latestMedia.data}"></audio>`;
+        if (latestMedia.opinion) html += `<div class="opinion-box"><strong>TEJAPRATAP's Question:</strong><br>${latestMedia.opinion}</div>`;
+        if (hasAnsweredMedia) {
+            const myAns = answers.find(a => a.questionId === latestMedia.id && a.studentPin === currentStudent && a.type === 'media');
+            html += `<div class="success-msg" style="margin-top:12px;">✅ You already responded!<br><strong>Your response:</strong> ${myAns.answer}</div>`;
+        } else {
+            html += `<div class="media-answer-section"><label>💬 Your Response:</label>
+                <textarea id="mediaAnswer-${latestMedia.id}" placeholder="Share your thoughts..."></textarea>
+                <button onclick="submitMediaAnswer(${latestMedia.id})" class="btn-orange" style="margin-top:8px;">Submit Response</button></div>`;
+        }
+        html += '</div>';
+    }
+
+    // Questions
+    if (questions.length === 0) {
+        html += '<div class="info-msg" style="text-align:center;margin:20px 0;">📭 No questions yet. Check back tomorrow!</div>';
+        content.innerHTML = html;
+        return;
+    }
+
+    const latestQ = questions[questions.length - 1];
+    const hasAnswered = answers.some(a => a.questionId === latestQ.id && a.studentPin === currentStudent && (!a.type || a.type === 'question'));
+
+    html += `<div class="question-box">
+        <div style="color:#888;font-size:13px;margin-bottom:8px;">📅 ${latestQ.date}</div>
+        <h3>📌 Today's Question:</h3>
+        <p style="font-size:16px;margin-top:10px;color:#e0e0e0;line-height:1.6;">${latestQ.question}</p>`;
+
+    if (hasAnswered) {
+        const myAns = answers.find(a => a.questionId === latestQ.id && a.studentPin === currentStudent && (!a.type || a.type === 'question'));
+        html += `<div class="success-msg" style="margin-top:14px;">✅ You answered!<br><strong>Your answer:</strong> ${myAns.answer}</div>`;
+        if (latestQ.answer) {
+            html += `<div style="background:#0f2a14;border-radius:12px;padding:16px;margin-top:14px;border:2px solid #22c55e;">
+                <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                    <span style="font-size:20px;">✅</span>
+                    <div style="font-weight:700;color:#22c55e;font-size:15px;">TODAY'S CORRECT ANSWER</div>
+                </div>
+                <div style="background:#0a0a14;border-radius:8px;padding:12px;color:#86efac;font-size:15px;font-weight:600;border-left:4px solid #22c55e;">${latestQ.answer}</div>
+            </div>`;
+        } else {
+            html += `<div class="warn-msg" style="margin-top:12px;">⏳ The teacher hasn't revealed the answer yet. Check back soon!</div>`;
+        }
+    } else {
+        html += `<div class="input-group" style="margin-top:14px;"><label>✍️ Your Answer:</label>
+            <textarea id="studentAnswer" placeholder="Type your answer here..."></textarea></div>
+            <button onclick="submitAnswer(${latestQ.id})">📨 Submit Answer</button>`;
+        if (latestQ.answer) html += `<div class="info-msg" style="margin-top:10px;font-size:13px;">💡 Submit your answer to reveal today's correct answer!</div>`;
+    }
+    html += '</div>';
+
+    // Refresh button
+    html += `<button class="btn-secondary" onclick="loadStudentData()" style="margin-top:8px;">🔄 Refresh</button>`;
+
+    content.innerHTML = html;
+}
+
+async function submitAnswer(questionId) {
+    const ansEl = document.getElementById('studentAnswer');
+    const answerText = ansEl ? ansEl.value.trim() : '';
+    if (!answerText) return showToast('Please write your answer!', 'error');
+    const btn = event.target;
+    btn.disabled = true; btn.textContent = '⏳ Submitting...';
+    try {
+        await apiPost('/answers', { questionId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText, type: 'question' });
+        awardScoreForAnswer(currentStudent, currentStudentName);
+        showToast('✅ Answer submitted!', 'success');
+        loadStudentData();
+    } catch (error) {
+        showToast(error.message || 'Error submitting answer.', 'error');
+        btn.disabled = false; btn.textContent = '📨 Submit Answer';
+    }
+}
+
+async function submitMediaAnswer(mediaId) {
+    const ansEl = document.getElementById('mediaAnswer-' + mediaId);
+    const answerText = ansEl ? ansEl.value.trim() : '';
+    if (!answerText) return showToast('Please write your response!', 'error');
+    const btn = event.target;
+    btn.disabled = true; btn.textContent = '⏳ Submitting...';
+    try {
+        await apiPost('/answers', { questionId: mediaId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText, type: 'media' });
+        awardScoreForAnswer(currentStudent, currentStudentName);
+        showToast('✅ Response submitted!', 'success');
+        loadStudentData();
+    } catch (error) {
+        showToast(error.message || 'Error submitting response.', 'error');
+        btn.disabled = false; btn.textContent = 'Submit Response';
+    }
+}
+
+// =====================================================
+// TEACHER
+// =====================================================
+async function loadTeacherData() { loadTeacherQuestions(); }
+
+async function loadTeacherQuestions() {
+    const content = document.getElementById('teacherContent');
+    content.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading...</div>';
+    try {
+        const [questions, answers, phones] = await Promise.all([
+            apiGet('/questions'), apiGet('/answers'), apiGet('/phones')
+        ]);
+        displayTeacherView(questions || [], answers || [], phones || {});
+    } catch (error) { content.innerHTML = '<div class="error-msg">Unable to load questions. Check connection.</div>'; }
+}
+
+function displayTeacherView(questions, answers, phones) {
+    const content = document.getElementById('teacherContent');
+    if (questions.length === 0) { content.innerHTML = '<div class="info-msg" style="text-align:center;margin-top:16px;">No questions posted yet.</div>'; return; }
+
+    const latestQ = questions[questions.length - 1];
+    const answersForQ = answers.filter(a => a.questionId === latestQ.id && (!a.type || a.type === 'question'));
+
+    let html = `<h3 style="margin-top:20px;">📋 Today's Question</h3>
+        <div class="question-box">
+            <div style="color:#888;font-size:13px;margin-bottom:8px;">📅 ${latestQ.date}</div>
+            <h3>Current Question:</h3>
+            <p style="font-size:15px;margin-top:8px;color:#e0e0e0;line-height:1.6;">${latestQ.question}</p>
+            <p style="margin-top:12px;color:#7b9fff;font-weight:600;">Total Responses: ${answersForQ.length}</p>
+        </div>`;
+
+    const hasAnswer = !!latestQ.answer;
+    html += `<div style="background:${hasAnswer?'#0f2a14':'#1f1208'};border-radius:14px;padding:18px;margin:14px 0;border:2px solid ${hasAnswer?'#22c55e':'#ff9800'};">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+            <span style="font-size:22px;">${hasAnswer?'✅':'⏳'}</span>
+            <div>
+                <div style="font-weight:700;font-size:15px;color:${hasAnswer?'#22c55e':'#ff9800'};">TODAY'S ANSWER</div>
+                <div style="font-size:12px;color:#888;">Students see this ONLY after they submit their own answer</div>
+            </div>
+        </div>`;
+    if (hasAnswer) {
+        html += `<div style="background:#0a0a14;border-radius:8px;padding:12px;font-size:15px;color:#86efac;font-weight:600;border-left:4px solid #22c55e;margin-bottom:12px;">${latestQ.answer}</div>`;
+        html += `<label style="font-size:13px;display:block;margin-bottom:5px;">✏️ Update Answer:</label>
+            <textarea id="updateAnswerField" style="border-color:#22c55e;">${latestQ.answer}</textarea>
+            <button onclick="updateTodaysAnswer(${latestQ.id})" class="btn-green btn-small" style="width:auto;margin-top:8px;">💾 Update Answer</button>`;
+    } else {
+        html += `<div style="color:#ff9800;font-style:italic;margin-bottom:10px;font-size:13px;">⚠️ No answer set yet</div>
+            <textarea id="updateAnswerField" placeholder="Type today's correct answer here..." style="border-color:#ff9800;"></textarea>
+            <button onclick="updateTodaysAnswer(${latestQ.id})" class="btn-orange btn-small" style="width:auto;margin-top:8px;">✅ Set Answer Now</button>`;
+    }
+    html += '</div>';
+
+    html += `<h3>👥 Student Responses (${answersForQ.length})</h3>`;
+    if (answersForQ.length > 0) {
+        answersForQ.forEach(ans => {
+            html += `<div class="student-answer">
+                <strong style="color:#7b9fff;">👤 ${ans.studentName || 'Unknown'}</strong>
+                <br><span style="color:#888;font-size:13px;">PIN: ${ans.studentPin}</span>
+                ${phones[ans.studentPin] ? `<br><span style="color:#888;font-size:13px;">📱 ${phones[ans.studentPin].phone}</span>` : ''}
+                <div style="color:#888;font-size:12px;margin:5px 0;">Submitted: ${ans.date}</div>
+                <p style="margin-top:8px;padding:10px;background:#0f0f1a;border-radius:6px;color:#e0e0e0;">${ans.answer}</p>
+            </div>`;
+        });
+    } else {
+        html += '<div class="info-msg" style="text-align:center;">No student responses yet.</div>';
+    }
+    content.innerHTML = html;
+}
+
+async function updateTodaysAnswer(questionId) {
+    const field = document.getElementById('updateAnswerField');
+    const val = field ? field.value.trim() : '';
+    if (!val) return showToast('Please enter an answer!', 'error');
+    try {
+        const res = await fetch(API_URL + '/questions/' + questionId + '/answer', {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ answer: val })
+        });
+        if (!res.ok) throw new Error('Server error');
+        showToast('✅ Answer saved! Students will see it after they submit.', 'success');
+        loadTeacherQuestions();
+    } catch (e) { showToast('Error saving answer: ' + e.message, 'error'); }
+}
+
+async function postQuestion() {
+    const question = document.getElementById('newQuestion').value.trim();
+    const todayAns = document.getElementById('todayAnswer').value.trim();
+    if (!question) return showToast('Please enter a question!', 'error');
+    if (!todayAns) return showToast("Please enter today's answer!", 'error');
+    const btn = event.target;
+    btn.disabled = true; btn.textContent = '⏳ Posting...';
+    try {
+        const result = await apiPost('/questions', { question, answer: null });
+        if (result && result.question && result.question.id) {
+            await fetch(API_URL + '/questions/' + result.question.id + '/answer', {
+                method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ answer: todayAns })
+            });
+        }
+        document.getElementById('newQuestion').value = '';
+        document.getElementById('todayAnswer').value = '';
+        showToast('✅ Question posted successfully!', 'success');
+        loadTeacherQuestions();
+    } catch (error) { showToast('Error posting question: ' + error.message, 'error'); }
+    btn.disabled = false; btn.textContent = '📤 Post Question';
+}
+
+// =====================================================
+// MEDIA
+// =====================================================
+function previewMedia() {
+    const file = document.getElementById('mediaFile').files[0];
+    const preview = document.getElementById('mediaPreview');
+    if (!file) { preview.innerHTML = ''; return; }
+    const reader = new FileReader();
+    reader.onload = e => {
+        if (file.type.startsWith('image/')) preview.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px;">`;
+        else if (file.type.startsWith('audio/')) preview.innerHTML = `<audio controls style="width:100%;margin-top:8px;"><source src="${e.target.result}"></audio>`;
+    };
+    reader.readAsDataURL(file);
+}
+
+async function uploadMedia() {
+    const fileInput = document.getElementById('mediaFile');
+    const question = document.getElementById('mediaQuestion').value.trim();
+    const expectedAnswer = document.getElementById('mediaAnswer').value.trim();
+    if (!fileInput.files || !fileInput.files[0]) return showToast('Please select a media file!', 'error');
+    if (!question) return showToast('Please write a question for students!', 'error');
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = async e => {
+        try {
+            await apiPost('/media', { type: file.type.startsWith('image/') ? 'image' : 'audio', data: e.target.result, fileName: file.name, opinion: question, expectedAnswer });
+            fileInput.value = ''; document.getElementById('mediaQuestion').value = ''; document.getElementById('mediaAnswer').value = ''; document.getElementById('mediaPreview').innerHTML = '';
+            showToast('✅ Media uploaded successfully!', 'success');
+            loadMediaList();
+        } catch (error) { showToast('Error uploading: ' + error.message, 'error'); }
+    };
+    reader.readAsDataURL(file);
+}
+
+async function loadMediaList() {
+    const container = document.getElementById('mediaList');
+    const feedbackContainer = document.getElementById('yesterdayMediaFeedback');
+    container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading...</div>';
+    try {
+        const [mediaFiles, answers] = await Promise.all([apiGet('/media'), apiGet('/answers')]);
+        const media = mediaFiles || [];
+        const ans = answers || [];
+        if (media.length === 0) { feedbackContainer.innerHTML = ''; container.innerHTML = '<div class="info-msg" style="text-align:center;margin-top:16px;">No media files uploaded yet.</div>'; return; }
+        const reversed = [...media].reverse();
+        const latest = reversed[0];
+        feedbackContainer.innerHTML = `<div style="background:#1f1208;border-radius:12px;padding:18px;margin-bottom:20px;border-left:4px solid #4caf50;">
+            <h3 style="color:#4caf50;margin-bottom:12px;">💬 Add Explanation for Latest Media</h3>
+            <div style="color:#888;font-size:13px;margin-bottom:8px;">📅 ${latest.date} — ${latest.fileName}</div>
+            ${latest.type==='image'?`<img src="${latest.data}" style="max-width:100%;max-height:180px;border-radius:8px;margin-bottom:12px;">`:`<audio controls style="width:100%;margin-bottom:12px;"><source src="${latest.data}"></audio>`}
+            <div class="input-group"><label>📖 Your Explanation:</label><textarea id="mediaExplanation" placeholder="Write your explanation..." style="border-color:#4caf50;"></textarea></div>
+            <button onclick="saveMediaFeedback(${latest.id})" class="btn-green">💾 Save Explanation</button>
+        </div>`;
+
+        let html = '<h3 style="color:#ff9800;margin-bottom:12px;">📁 All Media & Student Responses</h3>';
+        reversed.forEach(m => {
+            const mediaAns = ans.filter(a => a.questionId === m.id && a.type === 'media');
+            html += `<div class="media-box" style="margin-top:12px;">
+                <div style="color:#888;font-size:13px;margin-bottom:6px;">📅 ${m.date} — ${m.fileName}</div>
+                ${m.type==='image'?`<img src="${m.data}" class="media-preview">`:`<audio controls><source src="${m.data}"></audio>`}
+                <div class="opinion-box" style="margin-top:10px;">
+                    <strong>📝 Question:</strong> ${m.opinion||'—'}
+                    ${m.expectedAnswer?`<br><strong>✅ Expected:</strong> ${m.expectedAnswer}`:''}
+                    ${m.explanation?`<br><strong>💬 Explanation:</strong> ${m.explanation}`:''}
+                </div>
+                ${mediaAns.length>0?`<div style="margin-top:10px;padding:10px;background:#0f1a2e;border-radius:8px;">
+                    <strong style="color:#60a5fa;">👥 Responses (${mediaAns.length}):</strong>
+                    ${mediaAns.map(a=>`<div style="margin-top:7px;padding:8px;background:#1a1a2e;border-radius:6px;">
+                        <strong style="color:#a78bfa;">${a.studentName}</strong> <span style="color:#888;font-size:12px;">(${a.studentPin})</span>
+                        <br><span style="font-size:13px;color:#e0e0e0;">${a.answer}</span>
+                    </div>`).join('')}
+                </div>`:'<p style="color:#666;font-size:13px;margin-top:8px;">No responses yet.</p>'}
+            </div>`;
+        });
+        container.innerHTML = html;
+    } catch (e) { container.innerHTML = '<div class="error-msg">Unable to load media files.</div>'; }
+}
+
+async function saveMediaFeedback(mediaId) {
+    const exp = document.getElementById('mediaExplanation').value.trim();
+    if (!exp) return showToast('Please write your explanation first!', 'error');
+    try {
+        await apiPost('/media/' + mediaId + '/explanation', { explanation: exp });
+        showToast('✅ Explanation saved for students!', 'success');
+        document.getElementById('mediaExplanation').value = '';
+        loadMediaList();
+    } catch (e) { showToast('Error saving explanation.', 'error'); }
+}
+
+async function loadPhoneNumbers() {
+    const container = document.getElementById('phoneNumbersList');
+    container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading...</div>';
+    try {
+        const phones = await apiGet('/phones') || {};
+        const list = Object.entries(phones);
+        if (list.length === 0) { container.innerHTML = '<div class="info-msg" style="text-align:center;">No student phone numbers yet.</div>'; return; }
+        let html = `<div style="color:#888;margin-bottom:10px;font-size:14px;"><strong style="color:#e0e0e0;">Total Students: ${list.length}</strong></div>`;
+        list.forEach(([pin, data]) => {
+            html += `<div class="phone-item">
+                <div>
+                    <strong style="color:#e0e0e0;">${data.name}</strong>
+                    <br><span style="color:#888;font-size:13px;">PIN: ${pin}</span>
+                    <br><span style="color:#888;font-size:12px;">Last Login: ${data.lastLogin}</span>
+                </div>
+                <div style="font-size:16px;color:#7b9fff;font-weight:700;">📱 ${data.phone}</div>
+            </div>`;
+        });
+        container.innerHTML = html;
+    } catch (e) { container.innerHTML = '<div class="error-msg">Unable to load phone numbers.</div>'; }
+}
+
+function changePassword() {
+    const current = document.getElementById('currentPassword').value;
+    const newPass = document.getElementById('newPassword').value;
+    const confirm = document.getElementById('confirmPassword').value;
+    if (!current || !newPass || !confirm) return showToast('Please fill all fields!', 'error');
+    if (current !== teacherPassword) return showToast('Current password is incorrect!', 'error');
+    if (newPass !== confirm) return showToast('New passwords do not match!', 'error');
+    if (newPass.length < 6) return showToast('Password must be at least 6 characters!', 'error');
+    teacherPassword = newPass;
+    localStorage.setItem('teacherPassword', newPass);
+    document.getElementById('currentPassword').value = '';
+    document.getElementById('newPassword').value = '';
+    document.getElementById('confirmPassword').value = '';
+    showToast('✅ Password changed successfully!', 'success');
+    showSection('teacherSection');
+}
+
+function resetAllData() {
+    if (!confirm('Are you sure you want to reset ALL data? This cannot be undone!')) return;
+    if (!confirm('This will delete ALL questions, answers, media and phone numbers. Are you absolutely sure?')) return;
+    showToast('For security, data reset must be done on the server. Contact your administrator.', 'warn');
+}
+
+// =====================================================
+// 🤖 AUTO-POST MACHINE
+// =====================================================
+function getTodayStr() { return new Date().toISOString().split('T')[0]; }
 
 async function getBulkSchedule() {
     try {
@@ -483,35 +922,17 @@ async function getBulkSchedule() {
         if (data && data.empty) { _scheduleCache = null; return null; }
         _scheduleCache = data;
         return data;
-    } catch (e) {
-        console.error('getBulkSchedule error:', e);
-        return _scheduleCache; // fallback to cache if offline
-    }
+    } catch (e) { return _scheduleCache; }
 }
 
 async function saveBulkSchedule(data) {
-    try {
-        _scheduleCache = data;
-        await fetch(API_URL + '/schedule', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ schedule: data })
-        });
-    } catch (e) { console.error('saveBulkSchedule error:', e); }
+    _scheduleCache = data;
+    await fetch(API_URL + '/schedule', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ schedule: data }) });
 }
 
-/**
- * Main auto-post engine.
- * Checks if a question is scheduled for TODAY and hasn't been posted yet.
- * Posts it, marks it as posted on the SERVER so all devices stay in sync.
- */
 async function runAutoPostCheck(silent = false) {
     const schedule = await getBulkSchedule();
-    if (!schedule || !schedule.questions) {
-        if (!silent) updateAutoPostStatusUI(null);
-        return false;
-    }
-
+    if (!schedule || !schedule.questions) { if (!silent) updateAutoPostStatusUI(null); return false; }
     const today = getTodayStr();
     for (let i = 0; i < schedule.questions.length; i++) {
         const q = schedule.questions[i];
@@ -520,213 +941,95 @@ async function runAutoPostCheck(silent = false) {
                 const postResult = await apiPost('/questions', { question: q.question, answer: null });
                 if (postResult && postResult.question && postResult.question.id && q.answer) {
                     await fetch(API_URL + '/questions/' + postResult.question.id + '/answer', {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ answer: q.answer })
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answer: q.answer })
                     });
                 }
-                // Mark posted on SERVER (syncs across all devices)
                 const postedAt = new Date().toLocaleString('en-IN');
                 await fetch(API_URL + '/schedule/mark-posted', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ index: i, postedAt })
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ index: i, postedAt })
                 });
-                _scheduleCache = null; // invalidate cache
-                if (!silent) console.log(`[AutoPost] ✅ Question ${i+1} posted for ${today}`);
+                _scheduleCache = null;
                 updateAutoPostStatusUI(await getBulkSchedule());
                 return true;
-            } catch (err) {
-                console.error('[AutoPost] ❌ Failed:', err);
-                return false;
-            }
+            } catch (err) { console.error('[AutoPost] Failed:', err); return false; }
         }
     }
     if (!silent) updateAutoPostStatusUI(schedule);
     return false;
 }
 
-/**
- * Starts the repeating auto-post timer (every 60 seconds).
- * Clears any existing timer first to avoid duplicates.
- */
 function startAutoPostMachine() {
-    // Run immediately on start
     runAutoPostCheck(true).then(() => updateAutoPostStatusUI());
-
-    // Then every 60 seconds
     if (autoPostInterval) clearInterval(autoPostInterval);
     autoPostInterval = setInterval(async () => {
         const posted = await runAutoPostCheck(true);
-        if (posted) {
-            loadTeacherQuestions();
-            showToast('🤖 Auto-Post: Today\'s question was posted automatically!', 'success');
-        }
+        if (posted) { loadTeacherQuestions(); showToast("🤖 Auto-Post: Today's question was posted!", 'success'); }
         updateAutoPostStatusUI();
     }, 60000);
-
     updateAutoPostStatusUI();
-    console.log('[AutoPost Machine] 🤖 Engine started. Checking every 60 seconds.');
 }
 
 function stopAutoPostMachine() {
-    if (autoPostInterval) {
-        clearInterval(autoPostInterval);
-        autoPostInterval = null;
-    }
+    if (autoPostInterval) { clearInterval(autoPostInterval); autoPostInterval = null; }
 }
 
-/**
- * Updates the status panel UI
- */
 function updateAutoPostStatusUI(schedule) {
-    // schedule is passed in directly (already fetched async) or from cache
     if (schedule === undefined) schedule = _scheduleCache;
     const panel = document.getElementById('autoPostStatusPanel');
     if (!panel) return;
-
     const engineEl = document.getElementById('apEngineStatus');
     const scheduleEl = document.getElementById('apScheduleLoaded');
     const postedCountEl = document.getElementById('apPostedCount');
     const nextPostEl = document.getElementById('apNextPost');
     const lastPostEl = document.getElementById('apLastPost');
-    const timerEl = document.getElementById('apTimerStatus');
     const progressBar = document.getElementById('apProgressBar');
     const progressLabel = document.getElementById('apProgressLabel');
 
-    // Engine status
     if (engineEl) {
-        if (autoPostInterval) {
-            engineEl.innerHTML = '<span class="pulse-dot"></span>Running ✅';
-            engineEl.className = 'autopost-value green';
-        } else {
-            engineEl.innerHTML = '<span class="pulse-dot off"></span>Stopped';
-            engineEl.className = 'autopost-value red';
-        }
+        engineEl.innerHTML = autoPostInterval ? '<span class="pulse-dot"></span><span class="clr-green">Running ✅</span>' : '<span class="pulse-dot off"></span><span class="clr-red">Stopped</span>';
     }
-
     if (!schedule) {
-        if (scheduleEl) { scheduleEl.textContent = 'No schedule saved'; scheduleEl.className = 'autopost-value red'; }
+        if (scheduleEl) { scheduleEl.textContent = 'No schedule saved'; scheduleEl.className = 'autopost-value clr-red'; }
         if (postedCountEl) postedCountEl.textContent = '0 / 10';
         if (nextPostEl) nextPostEl.textContent = '—';
         if (lastPostEl) lastPostEl.textContent = '—';
-        if (timerEl) timerEl.textContent = autoPostInterval ? 'Every 60s' : 'Not running';
         if (progressBar) progressBar.style.width = '0%';
         if (progressLabel) progressLabel.textContent = '0 of 10 posted';
         return;
     }
-
     const total = schedule.questions.length;
     const posted = schedule.questions.filter(q => q.posted).length;
-    const remaining = total - posted;
     const today = getTodayStr();
-
-    if (scheduleEl) {
-        const savedOn = schedule.savedOn ? new Date(schedule.savedOn).toLocaleDateString('en-IN') : '?';
-        scheduleEl.textContent = `Yes (saved ${savedOn})`;
-        scheduleEl.className = 'autopost-value green';
-    }
-
-    if (postedCountEl) {
-        postedCountEl.textContent = `${posted} / ${total}`;
-        postedCountEl.className = posted === total ? 'autopost-value green' : 'autopost-value cyan';
-    }
-
-    // Next pending question
+    if (scheduleEl) { scheduleEl.textContent = `Yes (saved ${schedule.savedOn ? new Date(schedule.savedOn).toLocaleDateString('en-IN') : '?'})`; scheduleEl.className = 'autopost-value clr-green'; }
+    if (postedCountEl) { postedCountEl.textContent = `${posted} / ${total}`; postedCountEl.className = `autopost-value ${posted === total ? 'clr-green' : 'clr-cyan'}`; }
     const nextQ = schedule.questions.find(q => !q.posted);
     if (nextPostEl) {
-        if (nextQ) {
-            const d = new Date(nextQ.date + 'T00:00:00');
-            const label = nextQ.date === today ? '⚡ TODAY!' : d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
-            nextPostEl.textContent = label;
-            nextPostEl.className = nextQ.date === today ? 'autopost-value green' : 'autopost-value yellow';
-        } else {
-            nextPostEl.textContent = 'All done! 🎉';
-            nextPostEl.className = 'autopost-value green';
-        }
+        if (nextQ) { const d = new Date(nextQ.date + 'T00:00:00'); nextPostEl.textContent = nextQ.date === today ? '⚡ TODAY!' : d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' }); nextPostEl.className = nextQ.date === today ? 'autopost-value clr-green' : 'autopost-value clr-yellow'; }
+        else { nextPostEl.textContent = 'All done! 🎉'; nextPostEl.className = 'autopost-value clr-green'; }
     }
-
-    // Last auto-post
     if (lastPostEl) {
-        if (schedule.lastAutoPost) {
-            lastPostEl.textContent = `Day ${schedule.lastAutoPost.day} — ${schedule.lastAutoPost.time}`;
-            lastPostEl.className = 'autopost-value green';
-        } else {
-            lastPostEl.textContent = 'None yet';
-            lastPostEl.className = 'autopost-value';
-        }
+        if (schedule.lastAutoPost) { lastPostEl.textContent = `Day ${schedule.lastAutoPost.day} — ${schedule.lastAutoPost.time}`; lastPostEl.className = 'autopost-value clr-green'; }
+        else { lastPostEl.textContent = 'None yet'; lastPostEl.className = 'autopost-value'; }
     }
-
-    if (timerEl) {
-        timerEl.textContent = autoPostInterval ? '⏱ Every 60 seconds' : '⛔ Not running';
-        timerEl.className = autoPostInterval ? 'autopost-value green' : 'autopost-value red';
-    }
-
     if (progressBar) progressBar.style.width = `${(posted / total) * 100}%`;
     if (progressLabel) progressLabel.textContent = `${posted} of ${total} questions posted`;
 }
 
-// Manual trigger button
-async function manualCheckAndPost() {
-    const btn = event.target;
-    btn.disabled = true;
-    btn.textContent = '⏳ Checking...';
-
-    const posted = await runAutoPostCheck(false);
-    const schedule = await getBulkSchedule();
-
-    if (posted) {
-        showToast('✅ Today\'s question posted successfully!', 'success');
-        loadTeacherQuestions();
-        renderBulkFields();
-    } else {
-        if (!schedule) {
-            showToast('⚠️ No schedule saved yet. Fill in the questions first.', 'warn');
-        } else {
-            const today = getTodayStr();
-            const todayQ = schedule.questions.find(q => q.date === today);
-            if (todayQ && todayQ.posted) {
-                showToast('✅ Today\'s question was already posted!', 'success');
-            } else {
-                const next = schedule.questions.find(q => !q.posted);
-                if (next) {
-                    const d = new Date(next.date + 'T00:00:00');
-                    showToast(`📅 Next question is scheduled for ${d.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}`, 'info');
-                } else {
-                    showToast('🎉 All 10 questions have been posted!', 'success');
-                }
-            }
-        }
-    }
-
-    btn.disabled = false;
-    btn.textContent = '🔄 Manual Check: Post Today\'s Question Now';
-}
-
-async function resetBulkSchedule() {
-    if (!confirm('Are you sure you want to reset the bulk schedule? All 10 question slots will be cleared.')) return;
-    await fetch(API_URL + '/schedule', { method: 'DELETE' });
-    _scheduleCache = null;
-    stopAutoPostMachine();
-    showToast('🗑️ Schedule reset. Fill in new questions to restart.', 'warn');
-    renderBulkFields();
-    updateAutoPostStatusUI(null);
-}
-
-// =====================================================
-// BULK FIELDS RENDER
-// =====================================================
 function switchQMode(mode) {
     if (mode === 'single') {
         document.getElementById('singleQMode').style.display = 'block';
         document.getElementById('bulkQMode').style.display = 'none';
-        document.getElementById('singleQBtn').style.cssText = 'flex:1;padding:10px;background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;';
-        document.getElementById('bulkQBtn').style.cssText = 'flex:1;padding:10px;background:#e0e0e0;color:#333;border:none;border-radius:8px;cursor:pointer;font-weight:600;';
+        document.getElementById('singleQBtn').style.background = 'linear-gradient(135deg,#1E5BFF,#764ba2)';
+        document.getElementById('singleQBtn').style.color = 'white';
+        document.getElementById('bulkQBtn').style.background = '#2a2a3e';
+        document.getElementById('bulkQBtn').style.color = '#aaa';
     } else {
         document.getElementById('singleQMode').style.display = 'none';
         document.getElementById('bulkQMode').style.display = 'block';
-        document.getElementById('bulkQBtn').style.cssText = 'flex:1;padding:10px;background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;';
-        document.getElementById('singleQBtn').style.cssText = 'flex:1;padding:10px;background:#e0e0e0;color:#333;border:none;border-radius:8px;cursor:pointer;font-weight:600;';
+        document.getElementById('bulkQBtn').style.background = 'linear-gradient(135deg,#1E5BFF,#764ba2)';
+        document.getElementById('bulkQBtn').style.color = 'white';
+        document.getElementById('singleQBtn').style.background = '#2a2a3e';
+        document.getElementById('singleQBtn').style.color = '#aaa';
         renderBulkFields();
     }
 }
@@ -734,11 +1037,10 @@ function switchQMode(mode) {
 async function renderBulkFields() {
     const container = document.getElementById('bulkQFields');
     if (!container) return;
-    container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">🔄 Loading schedule from server...</div>';
+    container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading schedule...</div>';
     const existing = await getBulkSchedule();
     const today = getTodayStr();
     let html = '';
-
     for (let i = 0; i < 10; i++) {
         const d = new Date();
         d.setDate(d.getDate() + i + 1);
@@ -749,27 +1051,19 @@ async function renderBulkFields() {
         const dateLabel = effectiveD.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
         const posted = existingQ && existingQ.posted;
         const isToday = existingQ && existingQ.date === today && !posted;
-
         const cardClass = posted ? 'bulk-day-card posted' : (isToday ? 'bulk-day-card today-card' : 'bulk-day-card');
-        const chipHtml = posted
-            ? '<span class="status-chip chip-posted">✅ Posted</span>'
-            : (isToday ? '<span class="status-chip chip-today">⚡ Due Today</span>' : '<span class="status-chip chip-pending">⏳ Pending</span>');
-        const postedAtHtml = posted && existingQ.postedAt ? `<div style="font-size:11px;color:#388e3c;margin-top:2px;">Posted at: ${existingQ.postedAt}</div>` : '';
-
+        const chipHtml = posted ? '<span class="status-chip chip-posted">✅ Posted</span>' : (isToday ? '<span class="status-chip chip-today">⚡ Due Today</span>' : '<span class="status-chip chip-pending">⏳ Pending</span>');
+        const postedAtHtml = posted && existingQ.postedAt ? `<div style="font-size:11px;color:#22c55e;margin-top:2px;">Posted at: ${existingQ.postedAt}</div>` : '';
         html += `<div class="${cardClass}" id="dayCard_${i}">
-            <div class="bulk-day-header">
-                <span>Day ${i + 1} — ${dateLabel}</span>
-                ${chipHtml}
-            </div>
+            <div class="bulk-day-header"><span>Day ${i + 1} — ${dateLabel}</span>${chipHtml}</div>
             ${postedAtHtml}
-            <label style="font-size:13px;color:#555;">Question ${i + 1}:</label>
-            <textarea id="bq_${i}" placeholder="Enter question ${i + 1}..." style="width:100%;padding:8px;border:1.5px solid #ccc;border-radius:6px;margin:4px 0 8px;font-family:inherit;font-size:14px;${posted ? 'background:#f0fff0;' : ''}" ${posted ? 'readonly' : ''}>${existingQ ? existingQ.question : ''}</textarea>
-            <label style="font-size:13px;color:#28a745;font-weight:700;">Answer ${i + 1} (revealed after student submits):</label>
-            <textarea id="ba_${i}" placeholder="Enter answer ${i + 1}..." style="width:100%;padding:8px;border:1.5px solid #ccc;border-radius:6px;margin:4px 0;font-family:inherit;font-size:14px;${posted ? 'background:#f0fff0;' : ''}" ${posted ? 'readonly' : ''}>${existingQ ? existingQ.answer : ''}</textarea>
+            <label style="font-size:13px;color:#aaa;">Question ${i + 1}:</label>
+            <textarea id="bq_${i}" placeholder="Enter question ${i + 1}..." style="min-height:70px;margin:4px 0 8px;" ${posted ? 'readonly' : ''}>${existingQ ? existingQ.question : ''}</textarea>
+            <label style="font-size:13px;color:#22c55e;font-weight:700;">Answer ${i + 1}:</label>
+            <textarea id="ba_${i}" placeholder="Enter answer ${i + 1}..." style="min-height:60px;margin:4px 0;" ${posted ? 'readonly' : ''}>${existingQ ? existingQ.answer : ''}</textarea>
             <input type="hidden" id="bd_${i}" value="${effectiveDate}">
         </div>`;
     }
-
     container.innerHTML = html;
     renderScheduleInfo(existing);
     updateAutoPostStatusUI(existing);
@@ -781,9 +1075,8 @@ function renderScheduleInfo(schedule) {
     if (!schedule) { info.innerHTML = ''; return; }
     const total = schedule.questions.length;
     const posted = schedule.questions.filter(q => q.posted).length;
-    const remaining = total - posted;
-    info.innerHTML = `<div style="background:#e7f3ff;border-left:4px solid #1E5BFF;padding:10px;border-radius:6px;margin-bottom:10px;font-size:13px;color:#0066cc;">
-        📊 Schedule: <strong>${posted}/${total}</strong> posted &nbsp;|&nbsp; <strong>${remaining}</strong> remaining
+    info.innerHTML = `<div class="info-msg" style="font-size:13px;">
+        📊 <strong>${posted}/${total}</strong> posted &nbsp;|&nbsp; <strong>${total - posted}</strong> remaining
         ${schedule.lastAutoPost ? `<br>🤖 Last auto-post: <strong>Day ${schedule.lastAutoPost.day}</strong> — ${schedule.lastAutoPost.time}` : ''}
     </div>`;
 }
@@ -792,585 +1085,69 @@ async function saveBulkQuestions() {
     const existingSchedule = await getBulkSchedule();
     const questions = [];
     let valid = true;
-
     for (let i = 0; i < 10; i++) {
         const qEl = document.getElementById('bq_' + i);
         const aEl = document.getElementById('ba_' + i);
         const dEl = document.getElementById('bd_' + i);
-
-        if (existingSchedule && existingSchedule.questions[i] && existingSchedule.questions[i].posted) {
-            questions.push(existingSchedule.questions[i]);
-            continue;
-        }
-
-        if (!qEl.value.trim()) { alert(`Please fill Question ${i + 1}`); valid = false; break; }
-        if (!aEl.value.trim()) { alert(`Please fill Answer ${i + 1}`); valid = false; break; }
-
-        questions.push({
-            question: qEl.value.trim(),
-            answer: aEl.value.trim(),
-            date: dEl.value,
-            posted: false,
-            postedAt: null
-        });
+        if (existingSchedule && existingSchedule.questions[i] && existingSchedule.questions[i].posted) { questions.push(existingSchedule.questions[i]); continue; }
+        if (!qEl.value.trim()) { showToast('Please fill Question ' + (i + 1), 'error'); valid = false; break; }
+        if (!aEl.value.trim()) { showToast('Please fill Answer ' + (i + 1), 'error'); valid = false; break; }
+        questions.push({ question: qEl.value.trim(), answer: aEl.value.trim(), date: dEl.value, posted: false, postedAt: null });
     }
-
     if (!valid) return;
-
     await saveBulkSchedule({ savedOn: new Date().toISOString(), questions, lastAutoPost: existingSchedule ? existingSchedule.lastAutoPost : null });
     startAutoPostMachine();
-
-    showToast('✅ 10 questions saved on SERVER! All devices will now sync. Auto-Post Machine is ACTIVE.', 'success');
+    showToast('✅ 10 questions saved on SERVER! Auto-Post Machine is ACTIVE.', 'success');
     renderBulkFields();
 }
 
-// =====================================================
-// TOAST NOTIFICATIONS
-// =====================================================
-function showToast(msg, type = 'info') {
-    const colors = { success: '#28a745', warn: '#ffc107', info: '#1E5BFF', error: '#dc3545' };
-    const toast = document.createElement('div');
-    toast.style.cssText = `
-        position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
-        background:${colors[type] || '#333'};color:white;
-        padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;
-        box-shadow:0 4px 20px rgba(0,0,0,0.3);z-index:9999;
-        animation:slideUp 0.3s ease;max-width:90vw;text-align:center;
-    `;
-    toast.textContent = msg;
-    document.body.appendChild(toast);
-    setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.5s'; setTimeout(() => toast.remove(), 500); }, 3500);
+async function manualCheckAndPost() {
+    const btn = event.target;
+    btn.disabled = true; btn.textContent = '⏳ Checking...';
+    const posted = await runAutoPostCheck(false);
+    const schedule = await getBulkSchedule();
+    if (posted) { showToast("✅ Today's question posted successfully!", 'success'); loadTeacherQuestions(); renderBulkFields(); }
+    else if (!schedule) showToast('⚠️ No schedule saved yet.', 'warn');
+    else {
+        const today = getTodayStr();
+        const todayQ = schedule.questions.find(q => q.date === today);
+        if (todayQ && todayQ.posted) showToast("✅ Today's question was already posted!", 'success');
+        else {
+            const next = schedule.questions.find(q => !q.posted);
+            if (next) { const d = new Date(next.date + 'T00:00:00'); showToast(`📅 Next question scheduled for ${d.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}`, 'info'); }
+            else showToast('🎉 All 10 questions have been posted!', 'success');
+        }
+    }
+    btn.disabled = false; btn.textContent = '🔄 Manual Check: Post Today\'s Question Now';
 }
 
-// =====================================================
-// API HELPERS
-// =====================================================
-// Wake up the server if it's sleeping (Render free tier spins down)
-let _serverAwake = false;
-async function wakeServer() {
-    if (_serverAwake) return true;
-    try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 65000);
-        const res = await fetch(`${API_URL}/health`, { signal: controller.signal });
-        clearTimeout(timeout);
-        if (res.ok) { _serverAwake = true; return true; }
-    } catch(e) { /* still sleeping */ }
-    return false;
-}
-
-async function apiGet(endpoint) {
-    try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 65000);
-        const response = await fetch(`${API_URL}${endpoint}`, { signal: controller.signal });
-        clearTimeout(timeout);
-        _serverAwake = true;
-        if (!response.ok) { if (response.status === 404) return null; throw new Error(`HTTP ${response.status}`); }
-        return await response.json();
-    } catch (error) { console.error('API GET Error:', error); return null; }
-}
-
-async function apiPost(endpoint, data) {
-    try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 65000);
-        const response = await fetch(`${API_URL}${endpoint}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data),
-            signal: controller.signal
-        });
-        clearTimeout(timeout);
-        _serverAwake = true;
-        if (!response.ok) { const e = await response.json(); throw new Error(e.error || `HTTP ${response.status}`); }
-        return await response.json();
-    } catch (error) { console.error('API POST Error:', error); throw error; }
-}
-
-// =====================================================
-// LOGIN & NAVIGATION
-// =====================================================
-function loginStudent() {
-    const name = document.getElementById('studentName').value.trim();
-    const phone = document.getElementById('studentPhone').value.trim();
-    const pin = document.getElementById('studentPin').value.trim();
-    if (!name) { alert('Please enter your name!'); return; }
-    if (!phone || phone.length !== 10 || !/^\d{10}$/.test(phone)) { alert('Please enter a valid 10-digit phone number!'); return; }
-    if (!pin) { alert('Please enter your PIN!'); return; }
-    const pinRegex = /^(2[1-9]|30)\d{3}-(CS|EE|ME|EI|CE|EC|ETC|cs|ee|me|ei|ce|ec|etc|DAEC|DAUT|DAU|DCHE|DCSE|DECE|DEIE|DEVE|DEMB|DWT|DFT|DGT|DHMCT|DSC|DLT|DMNG|DMET|DPKT|DPT|DTXT|daec|daut|dau|dche|dcse|dece|deie|deve|demb|dwt|dft|dgt|dhmct|dsc|dlt|dmng|dmet|dpkt|dpt|dtxt)-\d{3}$/;
-    if (!pinRegex.test(pin)) { alert('Invalid PIN format! Please use YYYYY-BB-XXX format.\nExample: 23007-CS-001'); return; }
-    currentStudent = pin;
-    currentStudentName = name;
-    localStorage.setItem('currentStudent', pin);
-    localStorage.setItem('currentStudentName', name);
-    apiPost('/phones', { pin, name, phone }).catch(e => console.error('Phone reg error:', e));
-    showStudentDashboard();
-    loadStudentData();
-}
-
-function loginTeacher() {
-    const password = document.getElementById('teacherPassword').value;
-    if (password === teacherPassword) {
-        isTeacher = true;
-        localStorage.setItem('isTeacher', 'true');
-        showTeacherDashboard();
-        loadTeacherData();
-        startAutoPostMachine(); // 🤖 Start on login
-    } else { alert('Incorrect password!'); }
-}
-
-function logoutStudent() {
-    currentStudent = null; currentStudentName = null;
-    localStorage.removeItem('currentStudent'); localStorage.removeItem('currentStudentName');
-    showStudentLogin();
-}
-
-function logoutTeacher() {
+async function resetBulkSchedule() {
+    if (!confirm('Reset the bulk schedule? All 10 question slots will be cleared.')) return;
+    await fetch(API_URL + '/schedule', { method: 'DELETE' });
+    _scheduleCache = null;
     stopAutoPostMachine();
-    isTeacher = false;
-    localStorage.removeItem('isTeacher');
-    showStudentLogin();
-}
-
-function showStudentLogin() {
-    ['loginSection','teacherLoginSection','studentSection','teacherSection','passwordChangeSection'].forEach(id => document.getElementById(id).classList.remove('active'));
-    document.getElementById('loginSection').classList.add('active');
-}
-function showTeacherLogin() {
-    ['loginSection','teacherLoginSection','studentSection','teacherSection','passwordChangeSection'].forEach(id => document.getElementById(id).classList.remove('active'));
-    document.getElementById('teacherLoginSection').classList.add('active');
-}
-function showStudentDashboard() {
-    ['loginSection','teacherLoginSection','studentSection','teacherSection','passwordChangeSection'].forEach(id => document.getElementById(id).classList.remove('active'));
-    document.getElementById('studentSection').classList.add('active');
-    document.getElementById('studentWelcome').textContent = `Welcome, ${currentStudentName}!`;
-}
-function showTeacherDashboard() {
-    ['loginSection','teacherLoginSection','studentSection','teacherSection','passwordChangeSection'].forEach(id => document.getElementById(id).classList.remove('active'));
-    document.getElementById('teacherSection').classList.add('active');
-}
-function showChangePassword() {
-    document.getElementById('teacherSection').classList.remove('active');
-    document.getElementById('passwordChangeSection').classList.add('active');
-}
-function backToTeacher() {
-    document.getElementById('passwordChangeSection').classList.remove('active');
-    document.getElementById('teacherSection').classList.add('active');
-}
-function showForgotPassword() { alert('Please contact the administrator to reset your password.'); }
-
-function switchTab(tab) {
-    ['questionsTab','mediaTab','phonesTab','rankTab'].forEach(id => document.getElementById(id).classList.remove('active'));
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    const map = { questions:0, media:1, phones:2, rank:3 };
-    document.getElementById(tab + 'Tab').classList.add('active');
-    document.querySelectorAll('.tab-btn')[map[tab]].classList.add('active');
-    if (tab === 'questions') loadTeacherQuestions();
-    else if (tab === 'media') loadMediaList();
-    else if (tab === 'phones') loadPhoneNumbers();
-    else if (tab === 'rank') loadRankTab();
+    showToast('🗑️ Schedule reset.', 'warn');
+    renderBulkFields();
+    updateAutoPostStatusUI(null);
 }
 
 // =====================================================
-// STUDENT FUNCTIONS
+// SCORES & LEADERBOARD
 // =====================================================
-async function loadStudentData() {
-    const content = document.getElementById('studentContent');
-    content.innerHTML = '<div class="loading">⏳ Connecting to server...<br><small style="color:#aaa;">Server may take ~60 sec to wake up on first visit. Please wait!</small></div>';
-    try {
-        const latestMedia = await apiGet('/media/latest');
-        const questions = await apiGet('/questions') || [];
-        const answers = await apiGet('/answers') || [];
-        displayStudentView(latestMedia, questions, answers);
-    } catch (error) {
-        content.innerHTML = '<div class="error-msg">Unable to connect to server. Please try again later.</div>';
-    }
-}
-
-async function displayStudentView(latestMedia, questions, answers) {
-    const content = document.getElementById('studentContent');
-    let html = '';
-    const streak = await getStreak(currentStudent);
-    const myTotal = await getTotalScore(currentStudent);
-    const allStats = await getAllStudentStats();
-    const myRank = allStats.findIndex(s => s.pin === currentStudent) + 1;
-
-    html += `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;justify-content:center;">
-        <div style="background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;padding:10px 18px;border-radius:12px;text-align:center;min-width:90px;">
-            <div style="font-size:11px;opacity:0.85;">MY SCORE</div>
-            <div style="font-size:22px;font-weight:700;">${myTotal}</div>
-            <div style="font-size:11px;opacity:0.85;">pts</div>
-        </div>
-        ${streak > 0 ? `<div style="background:linear-gradient(135deg,#ff9800,#f44336);color:white;padding:10px 18px;border-radius:12px;text-align:center;min-width:90px;">
-            <div style="font-size:11px;opacity:0.85;">STREAK</div>
-            <div style="font-size:22px;font-weight:700;">🔥${streak}</div>
-            <div style="font-size:11px;opacity:0.85;">days</div>
-        </div>` : ''}
-        ${myRank > 0 ? `<div style="background:linear-gradient(135deg,#28a745,#218838);color:white;padding:10px 18px;border-radius:12px;text-align:center;min-width:90px;">
-            <div style="font-size:11px;opacity:0.85;">MY RANK</div>
-            <div style="font-size:22px;font-weight:700;">#${myRank}</div>
-            <div style="font-size:11px;opacity:0.85;">of ${allStats.length}</div>
-        </div>` : ''}
-    </div>`;
-
-    if (allStats.length > 0) {
-        const medals = ['🥇','🥈','🥉'];
-        html += '<div style="background:#f8f9fa;border-radius:12px;padding:14px;margin-bottom:16px;">';
-        html += '<div style="font-weight:700;color:#1E5BFF;margin-bottom:10px;text-align:center;">🏆 Top 3 Students</div>';
-        allStats.slice(0, 3).forEach((s, i) => {
-            const isMe = s.pin === currentStudent;
-            html += `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;margin-bottom:6px;border-radius:8px;background:${isMe?'rgba(30,91,255,0.1)':'white'};border:1px solid ${isMe?'#1E5BFF':'#eee'};">
-                <span style="font-size:16px;">${medals[i]||i+1}</span>
-                <span style="flex:1;font-weight:${isMe?700:500};color:${isMe?'#1E5BFF':'#333'};">${s.name}${isMe?' (You)':''} <span style="font-size:11px;color:#999;">(${s.pin})</span></span>
-                ${s.streak>0?`<span style="font-size:12px;color:#ff9800;">🔥${s.streak}</span>`:''}
-                <span style="font-weight:700;color:#764ba2;font-size:14px;">${s.total}pts</span>
-            </div>`;
-        });
-        html += '</div>';
-    }
-
-    if (isDay14()) html += renderRankingSection(allStats); // allStats already fetched above
-
-    if (latestMedia) {
-        const hasAnsweredMedia = answers.some(a => a.questionId === latestMedia.id && a.studentPin === currentStudent && a.type === 'media');
-        html += '<div class="media-box"><h3>🎵 Latest Media from TEJAPRATAP</h3>';
-        html += '<div style="color:#999;font-size:13px;margin:8px 0;">📅 ' + latestMedia.date + '</div>';
-        html += '<h4>📎 ' + latestMedia.fileName + '</h4>';
-        if (latestMedia.type === 'image') {
-            html += '<img src="' + latestMedia.data + '" class="media-preview" alt="' + latestMedia.fileName + '">';
-        } else {
-            html += '<audio controls><source src="' + latestMedia.data + '"></audio>';
-        }
-        html += '<div class="opinion-box"><strong>TEJAPRATAP\'s Opinion:</strong><br>' + latestMedia.opinion + '</div>';
-        if (hasAnsweredMedia) {
-            const myAns = answers.find(a => a.questionId === latestMedia.id && a.studentPin === currentStudent && a.type === 'media');
-            html += '<div class="success-msg" style="margin-top:15px;">✓ You already responded!<br><strong>Your response:</strong> ' + myAns.answer + '</div>';
-        } else {
-            html += '<div class="media-answer-section"><label style="display:block;margin-bottom:8px;font-weight:600;color:#ff9800;">💬 Your Response:</label>';
-            html += '<textarea id="mediaAnswer-' + latestMedia.id + '" placeholder="Share your thoughts..." style="width:100%;padding:10px;border:2px solid #ff9800;border-radius:6px;min-height:80px;"></textarea>';
-            html += '<button onclick="submitMediaAnswer(' + latestMedia.id + ')" style="margin-top:10px;background:linear-gradient(135deg,#ff9800,#f57c00);">Submit Response</button></div>';
-        }
-        html += '</div>';
-    }
-
-    if (questions.length === 0) {
-        html += '<p style="color:#999;text-align:center;margin:30px 0;">No questions available yet. Check back tomorrow!</p>';
-        content.innerHTML = html;
-        return;
-    }
-
-    const latestQuestion = questions[questions.length - 1];
-    const hasAnswered = answers.some(a => a.questionId === latestQuestion.id && a.studentPin === currentStudent && (!a.type || a.type === 'question'));
-
-    html += '<div class="question-box"><div style="color:#999;font-size:13px;margin-bottom:8px;">📅 ' + latestQuestion.date + '</div>';
-    html += '<h3>Today\'s Question:</h3><p style="font-size:16px;margin-top:10px;">' + latestQuestion.question + '</p>';
-
-    if (hasAnswered) {
-        const myAns = answers.find(a => a.questionId === latestQuestion.id && a.studentPin === currentStudent && (!a.type || a.type === 'question'));
-        html += '<div class="success-msg" style="margin-top:15px;">\u2713 You answered!<br><strong>Your answer:</strong> ' + myAns.answer + '</div>';
-        if (latestQuestion.answer) {
-            html += '<div style="background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border-radius:12px;padding:16px;margin-top:14px;border:2px solid #28a745;">';
-            html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:20px;">\u2705</span>';
-            html += '<div style="font-weight:700;color:#1b5e20;font-size:15px;">TODAY\'S CORRECT ANSWER</div></div>';
-            html += '<div style="background:white;border-radius:8px;padding:12px;color:#1b5e20;font-size:15px;font-weight:600;border-left:4px solid #28a745;">' + latestQuestion.answer + '</div>';
-            html += '</div>';
-        } else {
-            html += '<div style="background:#fff3e0;border-radius:8px;padding:12px;margin-top:12px;border-left:4px solid #ff9800;color:#e65100;font-size:13px;">\u23f3 The teacher hasn\'t revealed the answer yet. Check back soon!</div>';
-        }
-    } else {
-        html += '<div class="input-group" style="margin-top:15px;"><label>Your Answer:</label><textarea id="studentAnswer" placeholder="Type your answer here..."></textarea></div>';
-        html += '<button onclick="submitAnswer(' + latestQuestion.id + ')">Submit Answer</button>';
-        if (latestQuestion.answer) {
-            html += '<div style="background:#e3f2fd;border-radius:8px;padding:10px;margin-top:10px;border-left:4px solid #1E5BFF;color:#1565c0;font-size:13px;">💡 Submit your answer to reveal today\'s correct answer!</div>';
-        }
-    }
-    html += '</div>';
-
-    content.innerHTML = html;
-}
-
-async function submitAnswer(questionId) {
-    const answerText = document.getElementById('studentAnswer') ? document.getElementById('studentAnswer').value.trim() : '';
-    if (!answerText) { alert('Please write your answer!'); return; }
-    try {
-        await apiPost('/answers', { questionId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText, type: 'question' });
-        awardScoreForAnswer(currentStudent, currentStudentName);
-        alert('Answer submitted successfully!');
-        loadStudentData();
-    } catch (error) { alert(error.message || 'Error submitting answer.'); }
-}
-
-async function submitMediaAnswer(mediaId) {
-    const answerText = document.getElementById('mediaAnswer-' + mediaId) ? document.getElementById('mediaAnswer-' + mediaId).value.trim() : '';
-    if (!answerText) { alert('Please write your response!'); return; }
-    try {
-        await apiPost('/answers', { questionId: mediaId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText, type: 'media' });
-        awardScoreForAnswer(currentStudent, currentStudentName);
-        alert('Response submitted successfully!');
-        loadStudentData();
-    } catch (error) { alert(error.message || 'Error submitting response.'); }
-}
-
-// =====================================================
-// TEACHER FUNCTIONS
-// =====================================================
-async function loadTeacherData() { loadTeacherQuestions(); loadMediaList(); loadPhoneNumbers(); }
-
-async function loadTeacherQuestions() {
-    const content = document.getElementById('teacherContent');
-    content.innerHTML = '<div class="loading">Loading...</div>';
-    try {
-        const questions = await apiGet('/questions') || [];
-        const answers = await apiGet('/answers') || [];
-        const phones = await apiGet('/phones') || {};
-        // questions loaded
-        displayTeacherView(questions, answers, phones);
-    } catch (error) { content.innerHTML = '<div class="error-msg">Unable to load questions.</div>'; }
-}
-
-function displayTeacherView(questions, answers, phones) {
-    const content = document.getElementById('teacherContent');
-    if (questions.length === 0) { content.innerHTML = '<p style="color:#999;text-align:center;margin:20px 0;">No questions posted yet.</p>'; return; }
-
-    const latestQuestion = questions[questions.length - 1];
-    const answersForQuestion = answers.filter(a => a.questionId === latestQuestion.id && (!a.type || a.type === 'question'));
-
-    let html = '<h3 style="margin-top:20px;color:#1E5BFF;">📋 Today\'s Question</h3>';
-    html += '<div class="question-box"><div style="color:#999;font-size:13px;margin-bottom:8px;">📅 ' + latestQuestion.date + '</div>';
-    html += '<h3>Current Question:</h3><p style="font-size:16px;margin-top:8px;">' + latestQuestion.question + '</p>';
-    html += '<p style="margin-top:12px;color:#1E5BFF;font-weight:600;">Total Responses: ' + answersForQuestion.length + '</p></div>';
-
-    // TODAY'S ANSWER BOX
-    const answerBg = latestQuestion.answer ? 'linear-gradient(135deg,#e8f5e9,#f1f8e9)' : 'linear-gradient(135deg,#fff3e0,#fffde7)';
-    const answerBorder = latestQuestion.answer ? '#28a745' : '#ff9800';
-    html += '<div style="background:' + answerBg + ';border-radius:14px;padding:18px;margin:16px 0;border:2px solid ' + answerBorder + ';">';
-    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">';
-    html += '<span style="font-size:24px;">' + (latestQuestion.answer ? '✅' : '⏳') + '</span>';
-    html += '<div>';
-    html += '<div style="font-weight:700;font-size:16px;color:' + (latestQuestion.answer ? '#1b5e20' : '#e65100') + ';letter-spacing:0.5px;">TODAY\'S ANSWER</div>';
-    html += '<div style="font-size:12px;color:#666;">Students see this ONLY after they submit their own answer</div>';
-    html += '</div></div>';
-    if (latestQuestion.answer) {
-        html += '<div style="background:white;border-radius:8px;padding:14px;font-size:15px;color:#1b5e20;font-weight:600;border-left:4px solid #28a745;margin-bottom:12px;">' + latestQuestion.answer + '</div>';
-        html += '<label style="font-size:13px;color:#555;display:block;margin-bottom:5px;">✏️ Update Answer:</label>';
-        html += '<textarea id="updateAnswerField" style="width:100%;padding:8px;border:2px solid #28a745;border-radius:6px;font-family:inherit;font-size:14px;min-height:60px;">' + latestQuestion.answer + '</textarea>';
-        html += '<button onclick="updateTodaysAnswer(' + latestQuestion.id + ')" style="width:auto;padding:8px 20px;margin-top:8px;background:#28a745;border:none;border-radius:8px;color:white;font-weight:700;cursor:pointer;font-size:14px;">💾 Update Answer</button>';
-    } else {
-        html += '<div style="color:#e65100;font-style:italic;margin-bottom:10px;font-size:13px;">⚠️ No answer set yet — students won\'t see an answer until you set one.</div>';
-        html += '<textarea id="updateAnswerField" style="width:100%;padding:8px;border:2px solid #ff9800;border-radius:6px;font-family:inherit;font-size:14px;min-height:80px;" placeholder="Type today\'s correct answer here..."></textarea>';
-        html += '<button onclick="updateTodaysAnswer(' + latestQuestion.id + ')" style="width:auto;padding:8px 20px;margin-top:8px;background:#ff9800;border:none;border-radius:8px;color:white;font-weight:700;cursor:pointer;font-size:14px;">✅ Set Answer Now</button>';
-    }
-    html += '</div>';
-
-    // Student responses
-    html += '<h3 style="color:#1E5BFF;margin-top:4px;">👥 Student Responses (' + answersForQuestion.length + ')</h3>';
-    if (answersForQuestion.length > 0) {
-        answersForQuestion.forEach(answer => {
-            html += '<div class="student-answer"><strong style="color:#1E5BFF;">👤 ' + (answer.studentName || 'Unknown') + '</strong>';
-            html += '<br><span style="color:#999;font-size:14px;">PIN: ' + answer.studentPin + '</span>';
-            if (phones[answer.studentPin]) html += '<br><span style="color:#999;font-size:14px;">📱 ' + phones[answer.studentPin].phone + '</span>';
-            html += '<div style="color:#999;font-size:13px;margin:5px 0;">Submitted: ' + answer.date + '</div>';
-            html += '<p style="margin-top:10px;padding:10px;background:#f8f9fa;border-radius:6px;">' + answer.answer + '</p></div>';
-        });
-    } else {
-        html += '<p style="color:#999;text-align:center;margin:20px 0;">No student responses yet.</p>';
-    }
-    content.innerHTML = html;
-}
-
-async function updateTodaysAnswer(questionId) {
-    const field = document.getElementById('updateAnswerField');
-    const val = field ? field.value.trim() : '';
-    if (!val) { alert('Please enter an answer!'); return; }
-    try {
-        const response = await fetch(API_URL + '/questions/' + questionId + '/answer', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ answer: val })
-        });
-        if (!response.ok) throw new Error('Server error');
-        showToast('✅ Answer saved! Students will see it after they submit.', 'success');
-        loadTeacherQuestions();
-    } catch (e) { alert('Error saving answer: ' + e.message); }
-}
-
-async function postQuestion() {
-    const question = document.getElementById('newQuestion').value.trim();
-    const todayAns = document.getElementById('todayAnswer').value.trim();
-    if (!question) { alert('Please enter a question!'); return; }
-    if (!todayAns) { alert('Please enter today\'s answer! Students will see it after they submit.'); return; }
-    try {
-        // Post the question first, then immediately set its answer
-        const result = await apiPost('/questions', { question, answer: null });
-        // Set the answer on this new question right away
-        if (result && result.question && result.question.id) {
-            await apiPost('/questions/' + result.question.id + '/answer', { answer: todayAns });
-        }
-        document.getElementById('newQuestion').value = '';
-        document.getElementById('todayAnswer').value = '';
-        alert('Question posted successfully!');
-        loadTeacherQuestions();
-    } catch (error) { alert('Error posting question: ' + error.message); }
-}
-
-// =====================================================
-// MEDIA FUNCTIONS
-// =====================================================
-function previewMedia() {
-    const fileInput = document.getElementById('mediaFile');
-    const preview = document.getElementById('mediaPreview');
-    if (!fileInput.files || !fileInput.files[0]) { preview.innerHTML = ''; return; }
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-    reader.onload = function (e) {
-        if (file.type.startsWith('image/')) preview.innerHTML = '<img src="' + e.target.result + '" class="media-preview">';
-        else if (file.type.startsWith('audio/')) preview.innerHTML = '<audio controls><source src="' + e.target.result + '"></audio>';
-        else preview.innerHTML = '<p>File selected: ' + file.name + '</p>';
-    };
-    reader.readAsDataURL(file);
-}
-
-async function uploadMedia() {
-    const fileInput = document.getElementById('mediaFile');
-    const question = document.getElementById('mediaQuestion').value.trim();
-    const expectedAnswer = document.getElementById('mediaAnswer').value.trim();
-    if (!fileInput.files || !fileInput.files[0]) { alert('Please select a media file!'); return; }
-    if (!question) { alert('Please write a question for students!'); return; }
-    const file = fileInput.files[0];
-    const reader = new FileReader();
-    reader.onload = async function (e) {
-        try {
-            await apiPost('/media', { type: file.type.startsWith('image/') ? 'image' : 'audio', data: e.target.result, fileName: file.name, opinion: question, expectedAnswer });
-            fileInput.value = ''; document.getElementById('mediaQuestion').value = ''; document.getElementById('mediaAnswer').value = ''; document.getElementById('mediaPreview').innerHTML = '';
-            alert('Media uploaded successfully!');
-            loadMediaList();
-        } catch (error) { alert('Error uploading media: ' + error.message); }
-    };
-    reader.readAsDataURL(file);
-}
-
-async function loadMediaList() {
-    const container = document.getElementById('mediaList');
-    const feedbackContainer = document.getElementById('yesterdayMediaFeedback');
-    container.innerHTML = '<div class="loading">Loading...</div>';
-    try {
-        const mediaFiles = await apiGet('/media') || [];
-        const answers = await apiGet('/answers') || [];
-        if (mediaFiles.length === 0) { feedbackContainer.innerHTML = ''; container.innerHTML = '<p style="color:#999;text-align:center;margin-top:20px;">No media files uploaded yet.</p>'; return; }
-        const reversedMedia = [...mediaFiles].reverse();
-        const yesterdayMedia = reversedMedia[0];
-        let feedbackHtml = `<div style="background:#1a1a2e;border-radius:12px;padding:18px;margin-bottom:20px;border-left:4px solid #4caf50;">
-            <h2 style="color:#4caf50;margin-bottom:14px;">💬 Give Explanation for Yesterday's Media</h2>
-            <div style="color:#999;font-size:13px;margin-bottom:8px;">📅 ${yesterdayMedia.date} — ${yesterdayMedia.fileName}</div>`;
-        if (yesterdayMedia.type === 'image') feedbackHtml += `<img src="${yesterdayMedia.data}" class="media-preview" alt="${yesterdayMedia.fileName}" style="margin-bottom:12px;">`;
-        else feedbackHtml += `<audio controls style="width:100%;margin-bottom:12px;"><source src="${yesterdayMedia.data}"></audio>`;
-        feedbackHtml += `<div class="input-group"><label style="color:#ccc;">📖 Your Explanation:</label>
-            <textarea id="mediaExplanation" placeholder="Write your explanation..." style="border-color:#4caf50;"></textarea></div>
-            <button onclick="saveMediaFeedback(${yesterdayMedia.id})" style="background:linear-gradient(135deg,#4caf50,#388e3c);">💾 Save Explanation</button></div>`;
-        feedbackContainer.innerHTML = feedbackHtml;
-
-        let html = '<h3 style="margin-top:10px;color:#ff9800;">📁 Uploaded Media & Student Responses</h3>';
-        reversedMedia.forEach(media => {
-            const mediaAnswers = answers.filter(a => a.questionId === media.id && a.type === 'media');
-            html += '<div class="media-box" style="margin-top:12px;"><div style="color:#999;font-size:13px;margin-bottom:8px;">📅 ' + media.date + ' — ' + media.fileName + '</div>';
-            if (media.type === 'image') html += '<img src="' + media.data + '" class="media-preview" alt="' + media.fileName + '">';
-            else html += '<audio controls><source src="' + media.data + '"></audio>';
-            html += '<div class="opinion-box" style="margin-top:10px;"><strong>📝 Question:</strong> ' + (media.opinion || '—');
-            if (media.expectedAnswer) html += '<br><strong>✅ Expected Answer:</strong> ' + media.expectedAnswer;
-            if (media.explanation) html += '<br><strong>💬 Explanation:</strong> ' + media.explanation;
-            html += '</div>';
-            if (mediaAnswers.length > 0) {
-                html += '<div style="margin-top:10px;padding:10px;background:#e3f2fd;border-radius:6px;"><strong style="color:#1976d2;">👥 Student Responses (' + mediaAnswers.length + '):</strong>';
-                mediaAnswers.forEach(ans => { html += '<div style="margin-top:8px;padding:8px;background:white;border-radius:4px;"><strong>' + ans.studentName + '</strong> (' + ans.studentPin + '):<br><span style="font-size:14px;">' + ans.answer + '</span></div>'; });
-                html += '</div>';
-            } else { html += '<p style="color:#999;font-size:13px;margin-top:8px;">No student responses yet.</p>'; }
-            html += '</div>';
-        });
-        container.innerHTML = html;
-    } catch (error) { container.innerHTML = '<div class="error-msg">Unable to load media files.</div>'; }
-}
-
-async function saveMediaFeedback(mediaId) {
-    const explanation = document.getElementById('mediaExplanation').value.trim();
-    if (!explanation) { alert('Please write your explanation first!'); return; }
-    try {
-        await apiPost('/media/' + mediaId + '/explanation', { explanation });
-        alert('Explanation saved for students!');
-        document.getElementById('mediaExplanation').value = '';
-        loadMediaList();
-    } catch (error) { alert('Explanation saved locally!'); }
-}
-
-async function loadPhoneNumbers() {
-    const container = document.getElementById('phoneNumbersList');
-    container.innerHTML = '<div class="loading">Loading...</div>';
-    try {
-        const phones = await apiGet('/phones') || {};
-        const phoneList = Object.entries(phones);
-        if (phoneList.length === 0) { container.innerHTML = '<p class="date-info">No student phone numbers available yet.</p>'; return; }
-        let html = '<div style="margin-bottom:10px;color:#666;"><strong>Total Students: ' + phoneList.length + '</strong></div>';
-        phoneList.forEach(([pin, data]) => {
-            html += '<div class="phone-item"><div><strong>' + data.name + '</strong><br><span style="color:#666;font-size:14px;">PIN: ' + pin + '</span><br><span style="color:#666;font-size:13px;">Last Login: ' + data.lastLogin + '</span></div>';
-            html += '<div style="font-size:18px;color:#1E5BFF;font-weight:600;">📱 ' + data.phone + '</div></div>';
-        });
-        container.innerHTML = html;
-    } catch (error) { container.innerHTML = '<div class="error-msg">Unable to load phone numbers.</div>'; }
-}
-
-function changePassword() {
-    const current = document.getElementById('currentPassword').value;
-    const newPass = document.getElementById('newPassword').value;
-    const confirm = document.getElementById('confirmPassword').value;
-    if (!current || !newPass || !confirm) { alert('Please fill all fields!'); return; }
-    if (current !== teacherPassword) { alert('Current password is incorrect!'); return; }
-    if (newPass !== confirm) { alert('New passwords do not match!'); return; }
-    if (newPass.length < 6) { alert('Password must be at least 6 characters long!'); return; }
-    teacherPassword = newPass;
-    localStorage.setItem('teacherPassword', newPass);
-    document.getElementById('currentPassword').value = ''; document.getElementById('newPassword').value = ''; document.getElementById('confirmPassword').value = '';
-    alert('Password changed successfully!');
-    backToTeacher();
-}
-
-function resetAllData() {
-    if (!confirm('Are you sure you want to reset ALL data? This action cannot be undone!')) return;
-    if (!confirm('This will delete all questions, answers, media, and phone numbers. Are you absolutely sure?')) return;
-    alert('For security reasons, data reset must be done on the server. Please contact your administrator.');
-}
-
-// =====================================================
-// LEADERBOARD, STREAKS & SCORES (SERVER-SYNCED)
-// =====================================================
-let _scoresCache = null; // { scores: {...}, streaks: {...} }
-
-function daysBetween(d1, d2) {
-    return Math.round(Math.abs(new Date(d2) - new Date(d1)) / (1000 * 60 * 60 * 24));
-}
-
 async function fetchScoresFromServer() {
     try {
         const res = await fetch(API_URL + '/scores');
         _scoresCache = await res.json();
-    } catch (e) { console.error('fetchScores error:', e); }
+    } catch (e) {}
     return _scoresCache || { scores: {}, streaks: {} };
 }
 
 async function awardScoreForAnswer(pin, name) {
     const today = getTodayStr();
     try {
-        await fetch(API_URL + '/scores', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ pin, name, points: 10, date: today })
-        });
-        _scoresCache = null; // invalidate cache
-    } catch (e) { console.error('awardScore error:', e); }
-}
-
-async function updateStreak(pin) {
-    // Streak is now handled server-side when posting score
-    _scoresCache = null;
+        await fetch(API_URL + '/scores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin, name, points: 10, date: today }) });
+        _scoresCache = null;
+    } catch (e) {}
 }
 
 async function getStreak(pin) {
@@ -1397,266 +1174,159 @@ async function getAllStudentStats() {
     })).sort((a, b) => b.total - a.total);
 }
 
-function autoDeleteOldData() { /* Handled server-side now */ }
-
-
-function getDayNumber() {
-    const scores = getScores(); let firstDate = null;
-    for (const pin in scores) for (const s of scores[pin].scores) if (!firstDate || s.date < firstDate) firstDate = s.date;
-    if (!firstDate) return 1;
-    return daysBetween(firstDate, getTodayStr()) + 1;
-}
-
-function isDay14() { return getDayNumber() === 14; }
-
-function renderRankingSection(students) {
-    const top5 = students.slice(0, 5);
-    const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
-    let html = '<div class="ranking-section"><h3>🎖️ Day 14 Final Rankings!</h3>';
-    top5.forEach((s, i) => {
-        html += `<div class="ranking-item"><span class="ranking-badge">${medals[i]}</span><span class="ranking-name">${s.name}</span><span class="ranking-pts">${s.total} pts</span></div>`;
-    });
-    return html + '</div>';
-}
-
-async function loadLeaderboard() {
-    const container = document.getElementById('leaderboardContent');
-    container.innerHTML = '<div class="loading">Loading...</div>';
-    const students = await getAllStudentStats();
-    const medals = ['🥇','🥈','🥉'];
-    const dayNum = getDayNumber();
-    let html = `<div style="text-align:center;color:#999;font-size:13px;margin-bottom:12px;">📅 Day <strong>${dayNum}</strong> of 15 &nbsp;|&nbsp; Data auto-deletes after Day 15</div>`;
-    if (students.length > 0) {
-        html += '<div style="background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;padding:18px;border-radius:14px;margin-bottom:16px;">';
-        html += '<div style="text-align:center;font-size:18px;font-weight:700;margin-bottom:12px;">🏆 Top 3 Champions</div>';
-        students.slice(0, 3).forEach((s, i) => {
-            html += `<div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.15);border-radius:10px;padding:10px 14px;margin-bottom:8px;">
-                <span style="font-size:22px;min-width:36px;">${medals[i]}</span>
-                <span style="flex:1;font-weight:700;font-size:15px;">${s.name} <span style="font-size:12px;opacity:0.8;">(${s.pin})</span></span>
-                ${s.streak>0?`<span style="background:rgba(255,152,0,0.4);padding:3px 8px;border-radius:12px;font-size:12px;">🔥${s.streak}</span>`:''}
-                <span style="font-weight:700;font-size:15px;">${s.total} pts</span>
-            </div>`;
-        });
-        html += '</div>';
-    }
-    html += '<div class="leaderboard-section"><div class="leaderboard-title">🏆 Full Leaderboard</div>';
-    if (students.length === 0) {
-        html += '<p style="color:#999;text-align:center;">No data yet.</p>';
-    } else {
-        students.forEach((s, i) => {
-            const rankClass = i < 3 ? `rank-${i+1}` : '';
-            const streakBadge = s.streak > 0 ? `<span class="streak-badge">🔥 ${s.streak}</span>` : '';
-            html += `<div class="leaderboard-item ${rankClass}">
-                <span class="rank-badge">${medals[i]||`#${i+1}`}</span>
-                <span class="lb-name">${s.name} ${streakBadge}</span>
-                <span style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
-                    <span class="lb-score">${s.total} pts</span>
-                    <span style="color:#999;font-size:12px;">${s.days} day${s.days!==1?'s':''} active</span>
-                </span>
-            </div>`;
-        });
-    }
-    html += '</div>';
-    container.innerHTML = html;
-}
-
 // =====================================================
-// 🎖️ RANK TAB — Fastest Finger + Most Active
+// RANK TAB
 // =====================================================
 async function loadRankTab() {
     const firstEl = document.getElementById('rankFirstAnswererContent');
     const activeEl = document.getElementById('rankMostActiveContent');
-    firstEl.innerHTML = '<div class="loading" style="color:#aaa;">Loading...</div>';
-    activeEl.innerHTML = '<div class="loading" style="color:#aaa;">Loading...</div>';
-
+    firstEl.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
+    activeEl.innerHTML = '<div class="loading"><div class="spinner"></div></div>';
     try {
-        const questions = await apiGet('/questions') || [];
-        const answers = await apiGet('/answers') || [];
-        const phones = await apiGet('/phones') || {};
+        const [questions, answers, phones] = await Promise.all([apiGet('/questions'), apiGet('/answers'), apiGet('/phones')]);
+        const qs = questions || []; const ans = answers || []; const ph = phones || {};
 
-        // Block 1: FASTEST FINGER FIRST — Top 3
-        const yesterdayQ = questions.length >= 2 ? questions[questions.length - 2] : (questions.length === 1 ? questions[0] : null);
-
+        // Fastest Finger First
+        const yesterdayQ = qs.length >= 2 ? qs[qs.length - 2] : (qs.length === 1 ? qs[0] : null);
         if (!yesterdayQ) {
-            firstEl.innerHTML = '<p style="color:#aaa;text-align:center;padding:10px;">No previous question found yet.</p>';
+            firstEl.innerHTML = '<p style="color:#888;text-align:center;padding:10px;">No previous question found yet.</p>';
         } else {
-            const yAnswers = answers
-                .filter(a => a.questionId === yesterdayQ.id && (!a.type || a.type === 'question'))
-                .sort((a, b) => new Date(a.submittedAt || a.date) - new Date(b.submittedAt || b.date));
-
-            if (yAnswers.length === 0) {
-                firstEl.innerHTML = `
-                    <p style="color:#aaa;text-align:center;padding:10px;">No one answered yesterday's question yet.</p>
-                    <div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:10px;margin-top:8px;">
-                        <div style="color:#FFD700;font-size:13px;font-weight:600;">Yesterday's Question:</div>
-                        <div style="color:#ddd;font-size:14px;margin-top:4px;">${yesterdayQ.question}</div>
+            const yAns = ans.filter(a => a.questionId === yesterdayQ.id && (!a.type || a.type === 'question')).sort((a, b) => new Date(a.submittedAt || a.date) - new Date(b.submittedAt || b.date));
+            if (yAns.length === 0) {
+                firstEl.innerHTML = `<p style="color:#888;text-align:center;padding:10px;">No one answered yet.</p>
+                    <div style="background:rgba(255,255,255,0.05);border-radius:8px;padding:10px;">
+                        <div style="color:#FFD700;font-size:13px;font-weight:600;">Yesterday's Q:</div>
+                        <div style="color:#ccc;font-size:14px;margin-top:4px;">${yesterdayQ.question}</div>
                     </div>`;
             } else {
-                const top3First = yAnswers.slice(0, 3);
                 const fafMedals = [
-                    { icon: '🥇', label: '1st — FIRST TO ANSWER', color: '#FFD700', bg: 'rgba(255,215,0,0.12)', border: '#FFD700' },
-                    { icon: '🥈', label: '2nd', color: '#C0C0C0', bg: 'rgba(192,192,192,0.12)', border: '#C0C0C0' },
-                    { icon: '🥉', label: '3rd', color: '#cd7f32', bg: 'rgba(205,127,50,0.12)', border: '#cd7f32' }
+                    { icon: '🥇', label: 'FIRST!', color: '#FFD700', border: '#FFD700', bg: 'rgba(255,215,0,0.1)' },
+                    { icon: '🥈', label: '2nd', color: '#C0C0C0', border: '#C0C0C0', bg: 'rgba(192,192,192,0.1)' },
+                    { icon: '🥉', label: '3rd', color: '#cd7f32', border: '#cd7f32', bg: 'rgba(205,127,50,0.1)' }
                 ];
-                let fafHtml = `
-                    <div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:10px;margin-bottom:14px;">
-                        <div style="color:#aaa;font-size:11px;margin-bottom:3px;">📝 Yesterday's Question:</div>
-                        <div style="color:#eee;font-size:13px;">${yesterdayQ.question}</div>
-                    </div>
-                    <div style="display:flex;flex-direction:column;gap:10px;">`;
-                top3First.forEach((ans, i) => {
-                    const m = fafMedals[i];
-                    const ph = phones[ans.studentPin];
-                    fafHtml += `
-                        <div style="background:${m.bg};border:1.5px solid ${m.border};border-radius:12px;padding:12px;display:flex;align-items:flex-start;gap:12px;">
-                            <div style="font-size:28px;min-width:36px;text-align:center;">${m.icon}</div>
-                            <div style="flex:1;">
-                                <div style="color:${m.color};font-weight:700;font-size:15px;">${ans.studentName || 'Unknown'}</div>
-                                <div style="color:#aaa;font-size:12px;">PIN: ${ans.studentPin}${ph ? ' · 📱 ' + ph.phone : ''}</div>
-                                <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:7px 10px;margin-top:7px;">
-                                    <div style="color:#bbb;font-size:11px;margin-bottom:2px;">💬 Answer:</div>
-                                    <div style="color:#eee;font-size:13px;">${ans.answer}</div>
-                                </div>
-                                <div style="display:inline-block;background:${m.bg};border:1px solid ${m.border};border-radius:14px;padding:2px 10px;margin-top:6px;font-size:11px;color:${m.color};font-weight:700;">⚡ ${m.label}</div>
-                            </div>
-                        </div>`;
+                let fafHtml = `<div style="background:rgba(255,255,255,0.05);border-radius:10px;padding:10px;margin-bottom:12px;">
+                    <div style="color:#888;font-size:11px;">📝 Yesterday's Q:</div>
+                    <div style="color:#eee;font-size:13px;margin-top:3px;">${yesterdayQ.question}</div>
+                </div><div style="display:flex;flex-direction:column;gap:10px;">`;
+                yAns.slice(0, 3).forEach((a, i) => {
+                    const m = fafMedals[i]; const p = ph[a.studentPin];
+                    fafHtml += `<div style="background:${m.bg};border:1.5px solid ${m.border};border-radius:12px;padding:12px;display:flex;gap:12px;">
+                        <div style="font-size:28px;min-width:34px;text-align:center;">${m.icon}</div>
+                        <div style="flex:1;">
+                            <div style="color:${m.color};font-weight:700;font-size:15px;">${a.studentName||'Unknown'}</div>
+                            <div style="color:#888;font-size:12px;">PIN: ${a.studentPin}${p?' · 📱 '+p.phone:''}</div>
+                            <div style="background:rgba(255,255,255,0.05);border-radius:7px;padding:7px;margin-top:7px;color:#ddd;font-size:13px;">${a.answer}</div>
+                            <div style="display:inline-block;margin-top:5px;background:${m.bg};border:1px solid ${m.border};border-radius:12px;padding:2px 9px;font-size:11px;color:${m.color};font-weight:700;">⚡ ${m.label}</div>
+                        </div>
+                    </div>`;
                 });
-                fafHtml += `</div>`;
-                if (yAnswers.length > 3) {
-                    fafHtml += `<div style="color:#aaa;font-size:12px;text-align:center;margin-top:10px;">+${yAnswers.length - 3} more student${yAnswers.length - 3 > 1 ? 's' : ''} also answered</div>`;
-                }
+                fafHtml += '</div>';
+                if (yAns.length > 3) fafHtml += `<div style="color:#888;font-size:12px;text-align:center;margin-top:10px;">+${yAns.length - 3} more also answered</div>`;
                 firstEl.innerHTML = fafHtml;
             }
         }
 
-        // Block 2: TOP 3 MOST ACTIVE (15 days)
-        const today = getTodayStr();
+        // Most Active
         const activityMap = {};
-
-        answers.forEach(a => {
-            const pin = a.studentPin;
-            if (!pin) return;
-            if (!activityMap[pin]) activityMap[pin] = { name: a.studentName || 'Unknown', pin, count: 0, streak: 0 };
-            activityMap[pin].count += 1;
-            if (a.studentName) activityMap[pin].name = a.studentName;
+        ans.forEach(a => {
+            if (!a.studentPin) return;
+            if (!activityMap[a.studentPin]) activityMap[a.studentPin] = { name: a.studentName || 'Unknown', pin: a.studentPin, count: 0 };
+            activityMap[a.studentPin].count++;
+            if (a.studentName) activityMap[a.studentPin].name = a.studentName;
         });
-
         const localStats = await getAllStudentStats();
         localStats.forEach(s => {
-            if (!activityMap[s.pin]) activityMap[s.pin] = { name: s.name, pin: s.pin, count: 0, streak: 0 };
+            if (!activityMap[s.pin]) activityMap[s.pin] = { name: s.name, pin: s.pin, count: 0 };
             activityMap[s.pin].localDays = s.days;
             activityMap[s.pin].streak = s.streak;
         });
-
-        const sorted = Object.values(activityMap).sort((a, b) => {
-            const aScore = a.count + (a.localDays || 0);
-            const bScore = b.count + (b.localDays || 0);
-            return bScore - aScore;
-        });
-
+        const sorted = Object.values(activityMap).sort((a, b) => (b.count + (b.localDays||0)) - (a.count + (a.localDays||0)));
         const top3 = sorted.slice(0, 3);
         const podiumColors = [
-            { bg: 'rgba(255,215,0,0.15)', border: '#FFD700', medal: '🥇', label: '1st Place', color: '#FFD700' },
-            { bg: 'rgba(192,192,192,0.15)', border: '#C0C0C0', medal: '🥈', label: '2nd Place', color: '#C0C0C0' },
-            { bg: 'rgba(205,127,50,0.15)', border: '#cd7f32', medal: '🥉', label: '3rd Place', color: '#cd7f32' }
+            { bg: 'rgba(255,215,0,0.1)', border: '#FFD700', medal: '🥇', label: '1st', color: '#FFD700' },
+            { bg: 'rgba(192,192,192,0.1)', border: '#C0C0C0', medal: '🥈', label: '2nd', color: '#C0C0C0' },
+            { bg: 'rgba(205,127,50,0.1)', border: '#cd7f32', medal: '🥉', label: '3rd', color: '#cd7f32' }
         ];
-
         if (top3.length === 0) {
-            activeEl.innerHTML = '<p style="color:#aaa;text-align:center;padding:10px;">No activity data yet. Students need to submit answers!</p>';
+            activeEl.innerHTML = '<p style="color:#888;text-align:center;padding:10px;">No activity data yet.</p>';
         } else {
             let html = '<div style="display:flex;flex-direction:column;gap:12px;">';
             top3.forEach((s, i) => {
-                const c = podiumColors[i];
-                const ph = phones[s.pin];
-                const streak = s.streak || 0;
-                const totalAnswers = s.count;
-                const activeDays = s.localDays || 0;
-                html += `
-                <div style="background:${c.bg};border:1.5px solid ${c.border};border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;">
-                    <div style="text-align:center;min-width:44px;">
-                        <div style="font-size:32px;">${c.medal}</div>
-                        <div style="font-size:10px;color:${c.color};font-weight:700;margin-top:2px;">${c.label}</div>
+                const c = podiumColors[i]; const p = ph[s.pin];
+                html += `<div style="background:${c.bg};border:1.5px solid ${c.border};border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;">
+                    <div style="text-align:center;min-width:42px;">
+                        <div style="font-size:30px;">${c.medal}</div>
+                        <div style="font-size:10px;color:${c.color};font-weight:700;">${c.label}</div>
                     </div>
                     <div style="flex:1;">
-                        <div style="color:#222;font-weight:700;font-size:15px;">${s.name}</div>
-                        <div style="color:#666;font-size:12px;">PIN: ${s.pin} ${ph ? '· 📱 ' + ph.phone : ''}</div>
-                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
-                            <span style="background:#e8f5e9;padding:2px 8px;border-radius:10px;font-size:12px;color:#2e7d32;">📝 ${totalAnswers} answer${totalAnswers !== 1 ? 's' : ''}</span>
-                            ${activeDays > 0 ? `<span style="background:#e3f2fd;padding:2px 8px;border-radius:10px;font-size:12px;color:#1565c0;">📅 ${activeDays} day${activeDays !== 1 ? 's' : ''} active</span>` : ''}
-                            ${streak > 0 ? `<span style="background:#fff3e0;padding:2px 8px;border-radius:10px;font-size:12px;color:#e65100;">🔥 ${streak} streak</span>` : ''}
+                        <div style="color:#e0e0e0;font-weight:700;font-size:15px;">${s.name}</div>
+                        <div style="color:#888;font-size:12px;">PIN: ${s.pin}${p?' · 📱 '+p.phone:''}</div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
+                            <span style="background:#0f2a14;padding:2px 8px;border-radius:10px;font-size:12px;color:#22c55e;">📝 ${s.count} answers</span>
+                            ${(s.localDays||0)>0?`<span style="background:#0f1a2e;padding:2px 8px;border-radius:10px;font-size:12px;color:#60a5fa;">📅 ${s.localDays} days</span>`:''}
+                            ${(s.streak||0)>0?`<span style="background:#1f1208;padding:2px 8px;border-radius:10px;font-size:12px;color:#ff9800;">🔥 ${s.streak} streak</span>`:''}
                         </div>
                     </div>
                 </div>`;
             });
             html += '</div>';
-            if (sorted.length > 3) {
-                html += `<div style="text-align:center;color:#999;font-size:12px;margin-top:10px;">+${sorted.length - 3} more student${sorted.length - 3 > 1 ? 's' : ''} participating</div>`;
-            }
+            if (sorted.length > 3) html += `<div style="color:#888;font-size:12px;text-align:center;margin-top:10px;">+${sorted.length - 3} more participating</div>`;
             activeEl.innerHTML = html;
         }
-
-    } catch (error) {
-        firstEl.innerHTML = '<div style="color:#dc3545;padding:10px;">Error loading data. Check connection.</div>';
-        activeEl.innerHTML = '<div style="color:#dc3545;padding:10px;">Error loading data. Check connection.</div>';
+    } catch (e) {
+        firstEl.innerHTML = '<div class="error-msg">Error loading data.</div>';
+        activeEl.innerHTML = '<div class="error-msg">Error loading data.</div>';
     }
 }
 
-
-
 // =====================================================
-// LOGIN PAGE — FIRST ANSWER FIRST BANNER
+// LOGIN FAF BANNER
 // =====================================================
 async function loadLoginFafBanner() {
     const el = document.getElementById('loginFafContent');
     if (!el) return;
     try {
-        const questions = await apiGet('/questions') || [];
-        const answers = await apiGet('/answers') || [];
-
-        const yesterdayQ = questions.length >= 2 ? questions[questions.length - 2] : (questions.length === 1 ? questions[0] : null);
-
-        if (!yesterdayQ) {
-            el.innerHTML = '<div style="color:#aaa;font-size:12px;text-align:center;">No previous question data yet.</div>';
-            return;
-        }
-
-        const yAnswers = answers
-            .filter(a => a.questionId === yesterdayQ.id && (!a.type || a.type === 'question'))
-            .sort((a, b) => new Date(a.submittedAt || a.date) - new Date(b.submittedAt || b.date));
-
-        if (yAnswers.length === 0) {
-            el.innerHTML = `<div style="color:#aaa;font-size:12px;text-align:center;">No one answered yesterday's question yet.</div>`;
-            return;
-        }
-
-        const medals = ['🥇','🥈','🥉'];
-        const colors = ['#FFD700','#C0C0C0','#cd7f32'];
-        const top3 = yAnswers.slice(0, 3);
-
-        let html = `<div style="color:#888;font-size:11px;margin-bottom:8px;font-style:italic;">Q: ${yesterdayQ.question.substring(0,65)}${yesterdayQ.question.length>65?'...':''}</div>`;
-        html += `<div style="display:flex;flex-direction:column;gap:6px;">`;
-        top3.forEach((ans, i) => {
-            html += `
-            <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid ${colors[i]}55;border-radius:8px;padding:7px 10px;">
-                <span style="font-size:20px;">${medals[i]}</span>
-                <div style="flex:1;">
-                    <span style="color:${colors[i]};font-weight:700;font-size:13px;">${ans.studentName || 'Unknown'}</span>
-                    <span style="color:#888;font-size:11px;margin-left:6px;">(${ans.studentPin})</span>
-                </div>
-                ${i===0?`<span style="background:rgba(255,215,0,0.15);border:1px solid #FFD700;border-radius:10px;padding:1px 8px;font-size:10px;color:#FFD700;font-weight:700;">⚡ FIRST</span>`:''}
+        const [questions, answers] = await Promise.all([apiGet('/questions'), apiGet('/answers')]);
+        const qs = questions || []; const ans = answers || [];
+        const yesterdayQ = qs.length >= 2 ? qs[qs.length - 2] : (qs.length === 1 ? qs[0] : null);
+        if (!yesterdayQ) { el.innerHTML = '<div style="color:#555;font-size:12px;text-align:center;">No previous question data yet.</div>'; return; }
+        const yAns = ans.filter(a => a.questionId === yesterdayQ.id && (!a.type || a.type === 'question')).sort((a, b) => new Date(a.submittedAt||a.date) - new Date(b.submittedAt||b.date));
+        if (yAns.length === 0) { el.innerHTML = '<div style="color:#555;font-size:12px;text-align:center;">No one answered yet.</div>'; return; }
+        const medals = ['🥇','🥈','🥉']; const colors = ['#FFD700','#C0C0C0','#cd7f32'];
+        let html = `<div style="color:#666;font-size:11px;margin-bottom:8px;font-style:italic;">Q: ${yesterdayQ.question.substring(0,65)}${yesterdayQ.question.length>65?'...':''}</div>`;
+        html += '<div style="display:flex;flex-direction:column;gap:5px;">';
+        yAns.slice(0, 3).forEach((a, i) => {
+            html += `<div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.04);border:1px solid ${colors[i]}44;border-radius:8px;padding:6px 10px;">
+                <span style="font-size:18px;">${medals[i]}</span>
+                <span style="flex:1;color:${colors[i]};font-weight:700;font-size:13px;">${a.studentName||'Unknown'} <span style="color:#666;font-size:11px;">(${a.studentPin})</span></span>
+                ${i===0?`<span style="background:rgba(255,215,0,0.15);border:1px solid #FFD700;border-radius:10px;padding:1px 7px;font-size:10px;color:#FFD700;font-weight:700;">⚡ FIRST</span>`:''}
             </div>`;
         });
-        html += `</div>`;
-        if (yAnswers.length > 3) {
-            html += `<div style="color:#666;font-size:11px;text-align:center;margin-top:6px;">+${yAnswers.length-3} more also answered</div>`;
-        }
+        html += '</div>';
+        if (yAns.length > 3) html += `<div style="color:#555;font-size:11px;text-align:center;margin-top:5px;">+${yAns.length-3} more also answered</div>`;
         el.innerHTML = html;
     } catch (e) {
         const el2 = document.getElementById('loginFafContent');
-        if (el2) el2.innerHTML = '<div style="color:#555;font-size:12px;text-align:center;">Could not load.</div>';
+        if (el2) el2.innerHTML = '<div style="color:#444;font-size:12px;text-align:center;">Could not load.</div>';
     }
 }
 
+// =====================================================
+// TOAST
+// =====================================================
+function showToast(msg, type = 'info') {
+    const colors = { success: '#16a34a', warn: '#d97706', info: '#1E5BFF', error: '#dc2626' };
+    const existing = document.querySelectorAll('.toast-notification');
+    existing.forEach(t => t.remove());
+    const toast = document.createElement('div');
+    toast.className = 'toast-notification';
+    toast.style.cssText = `position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:${colors[type]||'#333'};color:white;padding:12px 20px;border-radius:12px;font-size:14px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,0.4);z-index:9999;animation:slideUp 0.3s ease;max-width:88vw;text-align:center;`;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.4s'; setTimeout(() => toast.remove(), 400); }, 3200);
+}
+
+// Load FAF banner on page load
 loadLoginFafBanner();
 </script>
 </body>
