@@ -13,6 +13,78 @@ let studentAnswers = [];
 let mediaFiles = [];
 let studentPhones = {};
 
+// =====================================================
+// BULK SCHEDULE (server-side so all devices sync)
+// =====================================================
+let bulkSchedule = null;
+
+app.get("/schedule", (req, res) => {
+    res.json(bulkSchedule || { empty: true });
+});
+
+app.post("/schedule", (req, res) => {
+    const { schedule } = req.body;
+    if (!schedule) return res.status(400).json({ error: "Schedule required" });
+    bulkSchedule = schedule;
+    res.json({ success: true, schedule: bulkSchedule });
+});
+
+app.delete("/schedule", (req, res) => {
+    bulkSchedule = null;
+    res.json({ success: true });
+});
+
+// Patch a single question's posted status (called after auto-post)
+app.post("/schedule/mark-posted", (req, res) => {
+    const { index, postedAt } = req.body;
+    if (!bulkSchedule || !bulkSchedule.questions || index === undefined)
+        return res.status(400).json({ error: "Invalid request" });
+    if (bulkSchedule.questions[index]) {
+        bulkSchedule.questions[index].posted = true;
+        bulkSchedule.questions[index].postedAt = postedAt || new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        // Track last auto-post
+        bulkSchedule.lastAutoPost = {
+            question: bulkSchedule.questions[index].question.substring(0, 50) + "...",
+            time: bulkSchedule.questions[index].postedAt,
+            day: index + 1
+        };
+    }
+    res.json({ success: true, schedule: bulkSchedule });
+});
+
+// =====================================================
+// SCORES (server-side so all devices share leaderboard)
+// =====================================================
+let studentScores = {};   // { pin: { name, scores: [{date, points}] } }
+let studentStreaks = {};  // { pin: { count, lastDate } }
+
+app.get("/scores", (req, res) => res.json({ scores: studentScores, streaks: studentStreaks }));
+
+app.post("/scores", (req, res) => {
+    const { pin, name, points, date } = req.body;
+    if (!pin || !name || !points || !date) return res.status(400).json({ error: "All fields required" });
+    if (!studentScores[pin]) studentScores[pin] = { name, scores: [] };
+    studentScores[pin].name = name;
+    // Only award once per day
+    if (!studentScores[pin].scores.find(s => s.date === date)) {
+        studentScores[pin].scores.push({ date, points });
+    }
+    // Update streak
+    if (!studentStreaks[pin]) {
+        studentStreaks[pin] = { count: 1, lastDate: date };
+    } else {
+        const last = studentStreaks[pin].lastDate;
+        const diff = Math.round(Math.abs(new Date(date) - new Date(last)) / (1000 * 60 * 60 * 24));
+        if (diff === 0) { /* same day, no change */ }
+        else if (diff === 1) { studentStreaks[pin].count += 1; studentStreaks[pin].lastDate = date; }
+        else { studentStreaks[pin].count = 1; studentStreaks[pin].lastDate = date; }
+    }
+    res.json({ success: true });
+});
+
+// =====================================================
+// QUESTIONS
+// =====================================================
 app.get("/questions", (req, res) => res.json(questions));
 
 app.post("/questions", (req, res) => {
@@ -45,6 +117,9 @@ app.post("/questions/:id/answer", setAnswer);
 
 app.delete("/questions/reset", (req, res) => { questions = []; res.json({ success: true }); });
 
+// =====================================================
+// ANSWERS
+// =====================================================
 app.get("/answers", (req, res) => res.json(studentAnswers));
 
 app.get("/answers/question/:questionId", (req, res) => {
@@ -70,6 +145,9 @@ app.post("/answers", (req, res) => {
     res.json({ success: true, message: "Answer submitted successfully", answer: newAnswer });
 });
 
+// =====================================================
+// MEDIA
+// =====================================================
 app.get("/media", (req, res) => res.json(mediaFiles));
 
 app.post("/media", (req, res) => {
@@ -101,6 +179,9 @@ app.delete("/media/:id", (req, res) => {
     idx !== -1 ? (mediaFiles.splice(idx, 1), res.json({ success: true })) : res.status(404).json({ error: "Not found" });
 });
 
+// =====================================================
+// PHONES
+// =====================================================
 app.get("/phones", (req, res) => res.json(studentPhones));
 
 app.post("/phones", (req, res) => {
@@ -110,6 +191,9 @@ app.post("/phones", (req, res) => {
     res.json({ success: true });
 });
 
+// =====================================================
+// STATS / HEALTH / API INFO
+// =====================================================
 app.get("/stats", (req, res) => res.json({
     totalQuestions: questions.length,
     totalAnswers: studentAnswers.length,
@@ -124,22 +208,28 @@ app.get("/stats", (req, res) => res.json({
 app.get("/health", (req, res) => res.json({ status: "OK", timestamp: new Date().toISOString(), uptime: process.uptime() }));
 
 app.get("/api", (req, res) => res.json({
-    message: "TEJAPRATAP QUIZ API v3.0", status: "running",
+    message: "TEJAPRATAP QUIZ API v4.0", status: "running",
     endpoints: {
         "GET  /questions": "All questions",
         "POST /questions": "Post { question, answer }",
         "PUT  /questions/:id/answer": "Set answer { answer }",
-        "POST /questions/:id/answer": "Set answer alt",
-        "POST /answers": "Submit { questionId, studentPin, studentName, answer, type }",
+        "POST /answers": "Submit answer",
+        "GET  /schedule": "Get bulk schedule (synced across devices)",
+        "POST /schedule": "Save bulk schedule { schedule }",
+        "POST /schedule/mark-posted": "Mark question posted { index, postedAt }",
+        "DELETE /schedule": "Reset schedule",
+        "GET  /scores": "Get all scores + streaks",
+        "POST /scores": "Add score { pin, name, points, date }",
         "POST /media": "Upload media",
-        "POST /media/:id/explanation": "Add explanation",
-        "GET  /phones": "Student phones", "GET /stats": "Stats"
+        "GET  /phones": "Student phones",
+        "GET  /stats": "Stats"
     }
 }));
 
 app.post("/admin/reset-all", (req, res) => {
     if (req.body.confirmPassword !== "RESET_ALL_DATA_TEJAPRATAP") return res.status(403).json({ error: "Wrong password" });
     questions = []; studentAnswers = []; mediaFiles = []; studentPhones = {};
+    bulkSchedule = null; studentScores = {}; studentStreaks = {};
     res.json({ success: true, message: "All data reset" });
 });
 
@@ -151,7 +241,7 @@ app.use((err, req, res, next) => res.status(500).json({ error: err.message }));
 
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
-    console.log("TEJAPRATAP QUIZ SERVER v3.0 on port " + PORT);
+    console.log("TEJAPRATAP QUIZ SERVER v4.0 on port " + PORT);
     console.log("App: http://localhost:" + PORT);
     console.log("API: http://localhost:" + PORT + "/api");
 });
