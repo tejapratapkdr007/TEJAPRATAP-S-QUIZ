@@ -720,10 +720,13 @@ function renderBulkFields() {
 
     for (let i = 0; i < 10; i++) {
         const d = new Date();
-        d.setDate(d.getDate() + i + 1); // Day 1 = tomorrow
+        d.setDate(d.getDate() + i + 1); // Day 1 = tomorrow (only used for NEW schedules)
         const isoDate = d.toISOString().split('T')[0];
-        const dateLabel = d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
         const existingQ = existing ? existing.questions[i] : null;
+        // BUG FIX: Always use the saved date for existing questions; only use recalculated date for brand-new entries
+        const effectiveDate = existingQ ? existingQ.date : isoDate;
+        const effectiveD = new Date(effectiveDate + 'T00:00:00');
+        const dateLabel = effectiveD.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
         const posted = existingQ && existingQ.posted;
         const isToday = existingQ && existingQ.date === today && !posted;
 
@@ -743,7 +746,7 @@ function renderBulkFields() {
             <textarea id="bq_${i}" placeholder="Enter question ${i + 1}..." style="width:100%;padding:8px;border:1.5px solid #ccc;border-radius:6px;margin:4px 0 8px;font-family:inherit;font-size:14px;${posted ? 'background:#f0fff0;' : ''}" ${posted ? 'readonly' : ''}>${existingQ ? existingQ.question : ''}</textarea>
             <label style="font-size:13px;color:#28a745;font-weight:700;">Answer ${i + 1} (revealed after student submits):</label>
             <textarea id="ba_${i}" placeholder="Enter answer ${i + 1}..." style="width:100%;padding:8px;border:1.5px solid #ccc;border-radius:6px;margin:4px 0;font-family:inherit;font-size:14px;${posted ? 'background:#f0fff0;' : ''}" ${posted ? 'readonly' : ''}>${existingQ ? existingQ.answer : ''}</textarea>
-            <input type="hidden" id="bd_${i}" value="${existingQ ? existingQ.date : isoDate}">
+            <input type="hidden" id="bd_${i}" value="${effectiveDate}">
         </div>`;
     }
 
@@ -854,7 +857,7 @@ function loginStudent() {
     if (!name) { alert('Please enter your name!'); return; }
     if (!phone || phone.length !== 10 || !/^\d{10}$/.test(phone)) { alert('Please enter a valid 10-digit phone number!'); return; }
     if (!pin) { alert('Please enter your PIN!'); return; }
-    const pinRegex = /^(2[2-9]|30)\d{3}-(CS|EE|ME|EI|CE|EC|cs|ee|me|ei|ce|ec|DAEC|DAUT|DAU|DCHE|DCSE|DECE|DEIE|DEVE|DEMB|DWT|DFT|DGT|DHMCT|DSC|DLT|DMNG|DMET|DPKT|DPT|DTXT|daec|daut|dau|dche|dcse|dece|deie|deve|demb|dwt|dft|dgt|dhmct|dsc|dlt|dmng|dmet|dpkt|dpt|dtxt)-\d{3}$/;
+    const pinRegex = /^(2[1-9]|30)\d{3}-(CS|EE|ME|EI|CE|EC|ETC|cs|ee|me|ei|ce|ec|etc|DAEC|DAUT|DAU|DCHE|DCSE|DECE|DEIE|DEVE|DEMB|DWT|DFT|DGT|DHMCT|DSC|DLT|DMNG|DMET|DPKT|DPT|DTXT|daec|daut|dau|dche|dcse|dece|deie|deve|demb|dwt|dft|dgt|dhmct|dsc|dlt|dmng|dmet|dpkt|dpt|dtxt)-\d{3}$/;
     if (!pinRegex.test(pin)) { alert('Invalid PIN format! Please use YYYYY-BB-XXX format.\nExample: 23007-CS-001'); return; }
     currentStudent = pin;
     currentStudentName = name;
@@ -1093,7 +1096,7 @@ function displayTeacherView(questions, answers, phones) {
     const latestQuestion = questions[questions.length - 1];
     const answersForQuestion = answers.filter(a => a.questionId === latestQuestion.id && (!a.type || a.type === 'question'));
 
-    let html = '<h3 style="margin-top:20px;color:#1E5BFF;">📋 Today's Question</h3>';
+    let html = '<h3 style="margin-top:20px;color:#1E5BFF;">📋 Today\'s Question</h3>';
     html += '<div class="question-box"><div style="color:#999;font-size:13px;margin-bottom:8px;">📅 ' + latestQuestion.date + '</div>';
     html += '<h3>Current Question:</h3><p style="font-size:16px;margin-top:8px;">' + latestQuestion.question + '</p>';
     html += '<p style="margin-top:12px;color:#1E5BFF;font-weight:600;">Total Responses: ' + answersForQuestion.length + '</p></div>';
@@ -1105,7 +1108,7 @@ function displayTeacherView(questions, answers, phones) {
     html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">';
     html += '<span style="font-size:24px;">' + (latestQuestion.answer ? '✅' : '⏳') + '</span>';
     html += '<div>';
-    html += '<div style="font-weight:700;font-size:16px;color:' + (latestQuestion.answer ? '#1b5e20' : '#e65100') + ';letter-spacing:0.5px;">TODAY'S ANSWER</div>';
+    html += '<div style="font-weight:700;font-size:16px;color:' + (latestQuestion.answer ? '#1b5e20' : '#e65100') + ';letter-spacing:0.5px;">TODAY\'S ANSWER</div>';
     html += '<div style="font-size:12px;color:#666;">Students see this ONLY after they submit their own answer</div>';
     html += '</div></div>';
     if (latestQuestion.answer) {
@@ -1114,8 +1117,8 @@ function displayTeacherView(questions, answers, phones) {
         html += '<textarea id="updateAnswerField" style="width:100%;padding:8px;border:2px solid #28a745;border-radius:6px;font-family:inherit;font-size:14px;min-height:60px;">' + latestQuestion.answer + '</textarea>';
         html += '<button onclick="updateTodaysAnswer(' + latestQuestion.id + ')" style="width:auto;padding:8px 20px;margin-top:8px;background:#28a745;border:none;border-radius:8px;color:white;font-weight:700;cursor:pointer;font-size:14px;">💾 Update Answer</button>';
     } else {
-        html += '<div style="color:#e65100;font-style:italic;margin-bottom:10px;font-size:13px;">⚠️ No answer set yet — students won't see an answer until you set one.</div>';
-        html += '<textarea id="updateAnswerField" style="width:100%;padding:8px;border:2px solid #ff9800;border-radius:6px;font-family:inherit;font-size:14px;min-height:80px;" placeholder="Type today's correct answer here..."></textarea>';
+        html += '<div style="color:#e65100;font-style:italic;margin-bottom:10px;font-size:13px;">⚠️ No answer set yet — students won\'t see an answer until you set one.</div>';
+        html += '<textarea id="updateAnswerField" style="width:100%;padding:8px;border:2px solid #ff9800;border-radius:6px;font-family:inherit;font-size:14px;min-height:80px;" placeholder="Type today\'s correct answer here..."></textarea>';
         html += '<button onclick="updateTodaysAnswer(' + latestQuestion.id + ')" style="width:auto;padding:8px 20px;margin-top:8px;background:#ff9800;border:none;border-radius:8px;color:white;font-weight:700;cursor:pointer;font-size:14px;">✅ Set Answer Now</button>';
     }
     html += '</div>';
