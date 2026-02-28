@@ -6,12 +6,7 @@
     <title>QUIZ FOR POLYTECHNIC</title>  
    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(to right, #1E5BFF, #A84DFF);
@@ -21,7 +16,6 @@
             align-items: center;
             padding: 20px;
         }
-
         .container {
             background: white;
             padding: 40px;
@@ -32,1819 +26,1599 @@
             max-height: 90vh;
             overflow-y: auto;
         }
-
-        h1 {
-            color: #1E5BFF;
-            margin-bottom: 10px;
-            text-align: center;
-            font-size: 28px;
-        }
-
-        h2 {
-            color: #764ba2;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 14px;
-        }
-
-        .pin-format-info {
-            background: #e7f3ff;
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 13px;
-            color: #0066cc;
-            border-left: 4px solid #0066cc;
-        }
-
-        .media-box {
-            background: #fff8e1;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            border-left: 4px solid #ff9800;
-        }
-
-        .media-box h4 {
-            color: #ff9800;
-            margin-bottom: 10px;
-        }
-
-        .opinion-box {
-            background: #e8f5e9;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 10px;
-            border-left: 3px solid #4caf50;
-        }
-
-        .opinion-box strong {
-            color: #2e7d32;
-        }
-
-        .media-preview {
-            max-width: 100%;
-            max-height: 200px;
-            margin-top: 10px;
-            border-radius: 8px;
-        }
-
-        audio {
-            width: 100%;
-            margin-top: 10px;
-        }
-
-        .tab-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 10px;
-            background: #e0e0e0;
-            color: #333;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .tab-btn.active {
-            background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .login-section, .student-section, .teacher-section, .password-change-section, .teacher-login-section {
-            display: none;
-        }
-
-        .login-section.active, .student-section.active, .teacher-section.active, .password-change-section.active, .teacher-login-section.active {
-            display: block;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 8px;
-            color: #333;
-            font-weight: 500;
-        }
-
+        h1 { color: #1E5BFF; margin-bottom: 10px; text-align: center; font-size: 28px; }
+        h2 { color: #764ba2; margin-bottom: 20px; text-align: center; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 30px; font-size: 14px; }
+        .pin-format-info { background: #e7f3ff; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px; color: #0066cc; border-left: 4px solid #0066cc; }
+        .media-box { background: #fff8e1; padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #ff9800; }
+        .media-box h4 { color: #ff9800; margin-bottom: 10px; }
+        .opinion-box { background: #e8f5e9; padding: 12px; border-radius: 8px; margin-top: 10px; border-left: 3px solid #4caf50; }
+        .opinion-box strong { color: #2e7d32; }
+        .media-preview { max-width: 100%; max-height: 200px; margin-top: 10px; border-radius: 8px; }
+        audio { width: 100%; margin-top: 10px; }
+        .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 10px; background: #e0e0e0; color: #333; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; }
+        .tab-btn.active { background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%); color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .login-section, .student-section, .teacher-section, .password-change-section, .teacher-login-section { display: none; }
+        .login-section.active, .student-section.active, .teacher-section.active, .password-change-section.active, .teacher-login-section.active { display: block; }
+        .input-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #333; font-weight: 500; }
         input[type="text"], input[type="password"], input[type="tel"], input[type="file"], textarea {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.3s;
+            width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px; transition: border-color 0.3s;
         }
-
-        input:focus, textarea:focus {
-            outline: none;
-            border-color: #1E5BFF;
-        }
-
-        textarea {
-            min-height: 100px;
-            resize: vertical;
-            font-family: inherit;
-        }
-
+        input:focus, textarea:focus { outline: none; border-color: #1E5BFF; }
+        textarea { min-height: 100px; resize: vertical; font-family: inherit; }
         button {
-            width: 100%;
-            padding: 14px;
+            width: 100%; padding: 14px;
             background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.2s, box-shadow 0.2s;
-            margin-top: 10px;
+            color: white; border: none; border-radius: 8px; font-size: 16px; font-weight: 600;
+            cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; margin-top: 10px;
         }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(30, 91, 255, 0.4);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .secondary-btn {
-            background: #6c757d;
-            margin-top: 10px;
-        }
-
-        .warning-btn {
-            background: #ffc107;
-            color: #333;
-        }
-
-        .danger-btn {
-            background: #dc3545;
-        }
-
-        .question-box {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 10px;
-            margin: 20px 0;
-            border-left: 4px solid #1E5BFF;
-        }
-
-        .question-box h3 {
-            color: #1E5BFF;
-            margin-bottom: 10px;
-        }
-
-        .answer-box {
-            background: #e7f3ff;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            border-left: 4px solid #28a745;
-        }
-
-        .student-answer {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border: 1px solid #e0e0e0;
-        }
-
-        .link-button {
-            color: #1E5BFF;
-            text-decoration: none;
-            cursor: pointer;
-            display: inline-block;
-            margin-top: 15px;
-        }
-
-        .link-button:hover {
-            text-decoration: underline;
-        }
-
-        .success-msg {
-            background: #d4edda;
-            color: #155724;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 4px solid #28a745;
-            margin: 10px 0;
-        }
-
-        .error-msg {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 12px;
-            border-radius: 8px;
-            border-left: 4px solid #dc3545;
-            margin: 10px 0;
-        }
-
-        .phone-item {
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 10px 0;
-            border: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .date-info {
-            color: #999;
-            text-align: center;
-            margin: 20px 0;
-        }
-
-        .logo {
-            font-size: 40px;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-
-        .media-answer-section {
-            background: #fff3e0;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-            border-left: 4px solid #ff9800;
-        }
-
-        /* Leaderboard Styles */
-        .leaderboard-section {
-            margin-top: 20px;
-        }
-
-        .leaderboard-title {
-            text-align: center;
-            font-size: 22px;
-            font-weight: 700;
-            color: #1E5BFF;
-            margin-bottom: 16px;
-            letter-spacing: 1px;
-        }
-
-        .leaderboard-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: white;
-            border: 1.5px solid #e0e0e0;
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 10px;
-            transition: box-shadow 0.2s;
-        }
-
-        .leaderboard-item:hover {
-            box-shadow: 0 4px 16px rgba(30,91,255,0.12);
-        }
-
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 20px rgba(30, 91, 255, 0.4); }
+        button:active { transform: translateY(0); }
+        button:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+        .secondary-btn { background: #6c757d; margin-top: 10px; }
+        .warning-btn { background: #ffc107; color: #333; }
+        .danger-btn { background: #dc3545; }
+        .question-box { background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; border-left: 4px solid #1E5BFF; }
+        .question-box h3 { color: #1E5BFF; margin-bottom: 10px; }
+        .answer-box { background: #e7f3ff; padding: 15px; border-radius: 10px; margin: 15px 0; border-left: 4px solid #28a745; }
+        .student-answer { background: white; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #e0e0e0; }
+        .link-button { color: #1E5BFF; text-decoration: none; cursor: pointer; display: inline-block; margin-top: 15px; }
+        .link-button:hover { text-decoration: underline; }
+        .success-msg { background: #d4edda; color: #155724; padding: 12px; border-radius: 8px; border-left: 4px solid #28a745; margin: 10px 0; }
+        .error-msg { background: #f8d7da; color: #721c24; padding: 12px; border-radius: 8px; border-left: 4px solid #dc3545; margin: 10px 0; }
+        .phone-item { background: white; padding: 15px; border-radius: 8px; margin: 10px 0; border: 1px solid #e0e0e0; display: flex; justify-content: space-between; align-items: center; }
+        .date-info { color: #999; text-align: center; margin: 20px 0; }
+        .logo { font-size: 40px; text-align: center; margin-bottom: 10px; }
+        .loading { text-align: center; padding: 20px; color: #666; }
+        .media-answer-section { background: #fff3e0; padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid #ff9800; }
+        .leaderboard-section { margin-top: 20px; }
+        .leaderboard-title { text-align: center; font-size: 22px; font-weight: 700; color: #1E5BFF; margin-bottom: 16px; letter-spacing: 1px; }
+        .leaderboard-item { display: flex; align-items: center; gap: 12px; background: white; border: 1.5px solid #e0e0e0; border-radius: 12px; padding: 12px 16px; margin-bottom: 10px; transition: box-shadow 0.2s; }
+        .leaderboard-item:hover { box-shadow: 0 4px 16px rgba(30,91,255,0.12); }
         .leaderboard-item.rank-1 { border-color: #FFD700; background: linear-gradient(90deg, #fffbe6, #fff); }
         .leaderboard-item.rank-2 { border-color: #C0C0C0; background: linear-gradient(90deg, #f5f5f5, #fff); }
         .leaderboard-item.rank-3 { border-color: #cd7f32; background: linear-gradient(90deg, #fdf0e0, #fff); }
+        .rank-badge { font-size: 22px; min-width: 36px; text-align: center; }
+        .lb-name { flex: 1; font-weight: 600; color: #333; }
+        .lb-score { font-weight: 700; color: #1E5BFF; font-size: 15px; }
+        .streak-badge { display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(135deg, #ff9800, #f44336); color: white; padding: 4px 10px; border-radius: 20px; font-size: 13px; font-weight: 700; margin-left: 8px; }
+        .ranking-section { background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 14px; margin: 20px 0; }
+        .ranking-section h3 { text-align: center; font-size: 20px; margin-bottom: 14px; letter-spacing: 1px; }
+        .ranking-item { display: flex; align-items: center; gap: 12px; background: rgba(255,255,255,0.15); border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; }
+        .ranking-badge { font-size: 20px; min-width: 32px; }
+        .ranking-name { flex: 1; font-weight: 600; }
+        .ranking-pts { font-size: 15px; font-weight: 700; }
+        .designer-footer { text-align: center; margin-top: 30px; padding-top: 16px; border-top: 1px solid #e0e0e0; color: #aaa; font-size: 13px; letter-spacing: 0.5px; }
+        .designer-footer span { background: linear-gradient(135deg, #1E5BFF, #764ba2); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 700; }
 
-        .rank-badge {
-            font-size: 22px;
-            min-width: 36px;
-            text-align: center;
-        }
-
-        .lb-name {
-            flex: 1;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .lb-score {
-            font-weight: 700;
-            color: #1E5BFF;
-            font-size: 15px;
-        }
-
-        .lb-streak {
-            font-size: 13px;
-            color: #ff9800;
-            font-weight: 600;
-        }
-
-        /* Streak Badge */
-        .streak-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            background: linear-gradient(135deg, #ff9800, #f44336);
+        /* ===== AUTO-POST MACHINE STYLES ===== */
+        .autopost-status {
+            background: linear-gradient(135deg, #0d1b2a, #1a3a5c);
             color: white;
-            padding: 4px 10px;
-            border-radius: 20px;
-            font-size: 13px;
-            font-weight: 700;
-            margin-left: 8px;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border-left: 4px solid #00e5ff;
         }
-
-        /* Ranking on Day 14 */
-        .ranking-section {
-            background: linear-gradient(135deg, #1E5BFF 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 14px;
-            margin: 20px 0;
+        .autopost-status h4 { color: #00e5ff; margin-bottom: 10px; font-size: 15px; letter-spacing: 1px; }
+        .autopost-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.08); font-size: 13px; }
+        .autopost-row:last-child { border-bottom: none; }
+        .autopost-label { color: #aaa; }
+        .autopost-value { font-weight: 700; color: #fff; }
+        .autopost-value.green { color: #69f0ae; }
+        .autopost-value.yellow { color: #ffeb3b; }
+        .autopost-value.red { color: #ff5252; }
+        .autopost-value.cyan { color: #00e5ff; }
+        .pulse-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: #69f0ae;
+            display: inline-block;
+            margin-right: 6px;
+            animation: pulse 1.5s infinite;
         }
-
-        .ranking-section h3 {
-            text-align: center;
-            font-size: 20px;
-            margin-bottom: 14px;
-            letter-spacing: 1px;
-        }
-
-        .ranking-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 10px;
-            padding: 10px 14px;
-            margin-bottom: 8px;
-        }
-
-        .ranking-badge {
-            font-size: 20px;
-            min-width: 32px;
-        }
-
-        .ranking-name {
-            flex: 1;
-            font-weight: 600;
-        }
-
-        .ranking-pts {
-            font-size: 15px;
-            font-weight: 700;
-        }
-
-        /* Designer Footer */
-        .designer-footer {
-            text-align: center;
-            margin-top: 30px;
-            padding-top: 16px;
-            border-top: 1px solid #e0e0e0;
-            color: #aaa;
-            font-size: 13px;
-            letter-spacing: 0.5px;
-        }
-
-        .designer-footer span {
-            background: linear-gradient(135deg, #1E5BFF, #764ba2);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 700;
-        }
-
-        /* Data expiry notice */
-        .expiry-notice {
-            background: #fff3e0;
-            border-left: 4px solid #ff9800;
+        .pulse-dot.off { background: #ff5252; animation: none; }
+        @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.4)} }
+        .progress-bar-wrap { background: rgba(255,255,255,0.1); border-radius: 20px; height: 8px; margin-top: 10px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, #1E5BFF, #00e5ff); transition: width 0.5s ease; }
+        .bulk-day-card {
+            border-left: 4px solid #1E5BFF;
+            padding: 12px;
+            margin-bottom: 12px;
+            background: #f0f4ff;
             border-radius: 8px;
-            padding: 10px 14px;
-            font-size: 13px;
-            color: #e65100;
-            margin-bottom: 14px;
         }
+        .bulk-day-card.posted { border-color: #28a745; background: #e8f5e9; }
+        .bulk-day-card.today-card { border-color: #ff9800; background: #fff3e0; box-shadow: 0 0 0 2px #ff9800; }
+        .bulk-day-header { font-weight: 700; color: #1E5BFF; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+        .bulk-day-card.posted .bulk-day-header { color: #28a745; }
+        .bulk-day-card.today-card .bulk-day-header { color: #ff9800; }
+        .status-chip {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
+        .chip-posted { background: #d4edda; color: #155724; }
+        .chip-today { background: #fff3cd; color: #856404; }
+        .chip-pending { background: #e7f3ff; color: #0066cc; }
     </style>
 </head>
 <body>
-    <div class="container">
-        <!-- Login Screen -->
-        <div id="loginSection" class="login-section active">
-            <div class="logo">📚🏫</div>
-            <h1>QUIZ FOR POLYTECHNIC STUDENTS</h1>
-            <p class="subtitle">Learn something new every day!</p>
+<div class="container">
 
-            <div class="pin-format-info">
-                📌 <strong>PIN Format:</strong> YYYYY-BB-XXX<br>
-                <strong>YYYYY:</strong> Year (22007-30007) | <strong>BB:</strong> Branch (CS/EE/ME/EI/CE/EC & ETC)<strong>XXX:</strong> Roll No. (001-999)<br>
-                Example: <strong>25007-CS-007</strong>
+    <!-- Login Screen -->
+    <div id="loginSection" class="login-section active">
+        <div class="logo">📚🏫</div>
+        <h1>QUIZ FOR POLYTECHNIC STUDENTS</h1>
+        <p class="subtitle">Learn something new every day!</p>
+
+        <!-- FIRST ANSWER FIRST Banner -->
+        <div id="loginFafBanner" style="
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 2px solid #FFD700;
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+            position: relative;
+            overflow: hidden;
+        ">
+            <div style="position:absolute;top:-8px;right:-8px;font-size:50px;opacity:0.07;">⚡</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                <span style="font-size:20px;">⚡</span>
+                <span style="color:#FFD700;font-weight:700;font-size:14px;letter-spacing:1px;">FIRST ANSWER FIRST</span>
+                <span style="color:#aaa;font-size:11px;margin-left:4px;">— Yesterday's Top 3</span>
             </div>
-
-            <div class="input-group">
-                <label>👤 Your Name:</label>
-                <input type="text" id="studentName" placeholder="Enter your full name">
+            <div id="loginFafContent" style="min-height:36px;">
+                <div style="color:#aaa;font-size:13px;text-align:center;">Loading...</div>
             </div>
-
-            <div class="input-group">
-                <label>📱 Phone Number:</label>
-                <input type="tel" id="studentPhone" placeholder="Enter 10-digit phone number" maxlength="10">
-            </div>
-
-            <div class="input-group">
-                <label>🔑 Your PIN (YYYYY-BB-XXX):</label>
-                <input type="text" id="studentPin" placeholder="e.g., 25007-CS-007">
-            </div>
-
-            <button onclick="loginStudent()">Login as Student</button>
-
-            <p style="text-align: center; margin-top: 20px; color: #666;">
-                Are you TEJAPRATAP? <a href="#" class="link-button" onclick="showTeacherLogin(); return false;">Login here</a>
-            </p>
         </div>
 
-        <!-- Teacher Login Screen -->
-        <div id="teacherLoginSection" class="teacher-login-section">
-            <div class="logo">👨‍🏫🔒</div>
-            <h1>TEJAPRATAP Login</h1>
-            <p class="subtitle">Manage daily questions and view student responses</p>
-
-            <div class="input-group" style="background: #fff3cd; padding: 12px; border-radius: 8px; margin-bottom: 15px;">
-                ⚠️ <strong>This website is managed by TEJAPRATAP</strong>
-            </div>
-
-            <div class="input-group">
-                <label>🔐 TEJAPRATAP Password:</label>
-                <input type="password" id="teacherPassword" placeholder="Enter password">
-            </div>
-
-            <button onclick="loginTeacher()">Login as TEJAPRATAP</button>
-
-            <p style="text-align: center; margin-top: 15px;">
-                <a href="#" class="link-button" onclick="showForgotPassword(); return false;">Forgot Password?</a>
-            </p>
-
-            <p style="text-align: center; margin-top: 10px; color: #666;">
-                Are you a student? <a href="#" class="link-button" onclick="showStudentLogin(); return false;">Login here</a>
-            </p>
+        <div class="pin-format-info">
+            📌 <strong>PIN Format:</strong> YYYYY-BB-XXX<br>
+            <strong>YYYYY:</strong> Year (22007-30007) | <strong>BB:</strong> Branch (CS/EE/ME/EI/CE/EC & ETC) <strong>XXX:</strong> Roll No. (001-999)<br>
+            Example: <strong>25007-CS-007</strong>
         </div>
-
-        <!-- Student Dashboard -->
-        <div id="studentSection" class="student-section">
-            <div class="logo">📚</div>
-            <h2 id="studentWelcome">Welcome!</h2>
-
-            <div id="studentContent"></div>
-
-            <button class="secondary-btn" onclick="logoutStudent()">Logout</button>
+        <div class="input-group">
+            <label>👤 Your Name:</label>
+            <input type="text" id="studentName" placeholder="Enter your full name">
         </div>
-
-        <!-- Teacher Dashboard -->
-        <div id="teacherSection" class="teacher-section">
-            <div class="logo">👨‍🏫</div>
-            <h1>TEJAPRATAP Dashboard</h1>
-
-            <div class="tab-buttons">
-                <button class="tab-btn active" onclick="switchTab('questions')">Questions</button>
-                <button class="tab-btn" onclick="switchTab('media')">Media Files</button>
-                <button class="tab-btn" onclick="switchTab('phones')">Phone Numbers</button>
-                <button class="tab-btn" onclick="switchTab('leaderboard')">🏆 Board</button>
-            </div>
-
-            <!-- Questions Tab -->
-            <div id="questionsTab" class="tab-content active">
-                <!-- Sub-tabs for Single vs Bulk -->
-                <div style="display:flex;gap:8px;margin-bottom:18px;">
-                    <button id="singleQBtn" onclick="switchQMode('single')" style="flex:1;padding:10px;background:#e0e0e0;color:#333;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Single Question</button>
-                    <button id="bulkQBtn" onclick="switchQMode('bulk')" style="flex:1;padding:10px;background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">📅 Bulk Upload (10 Questions)</button>
-                </div>
-
-                <!-- Single Question Mode -->
-                <div id="singleQMode">
-                    <h2>📝 Post New Question</h2>
-                    
-                    <div class="input-group">
-                        <label>Today's Question:</label>
-                        <textarea id="newQuestion" placeholder="Enter today's question..."></textarea>
-                    </div>
-
-                    <div class="input-group">
-                        <label>Yesterday's Answer (Optional):</label>
-                        <textarea id="yesterdayAnswer" placeholder="Yesterday's answer..."></textarea>
-                    </div>
-
-                    <button onclick="postQuestion()">Post Question</button>
-                </div>
-
-                <!-- Bulk Upload Mode -->
-                <div id="bulkQMode" style="display:none;">
-                    <div style="background:#1a3a5c;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;color:#7ec8f7;border-left:4px solid #1E5BFF;">
-                        📌 Upload 10 questions at once. They will be auto-posted one per day, starting from tomorrow. Each question must have an answer.
-                    </div>
-                    <div id="bulkQFields"></div>
-                    <div id="bulkScheduledInfo" style="margin-top:10px;"></div>
-                    <button onclick="saveBulkQuestions()" style="background:linear-gradient(135deg,#1E5BFF,#764ba2);">💾 Save & Schedule 10 Questions</button>
-                    <button onclick="checkAndAutoPost()" style="background:#28a745;margin-top:8px;">🔄 Check & Post Today's Scheduled Question</button>
-                </div>
-
-                <div id="teacherContent"></div>
-            </div>
-
-            <!-- Media Tab -->
-            <div id="mediaTab" class="tab-content">
-                <!-- Section 1: Post New Media with Question -->
-                <div style="background:#1a1a2e;border-radius:12px;padding:18px;margin-bottom:20px;border-left:4px solid #ff9800;">
-                    <h2 style="color:#ff9800;margin-bottom:14px;">📤 Post New Media + Question</h2>
-                    
-                    <div class="input-group">
-                        <label style="color:#ccc;">Upload Image or Audio:</label>
-                        <input type="file" id="mediaFile" accept="image/*,audio/*" onchange="previewMedia()">
-                        <div id="mediaPreview"></div>
-                    </div>
-
-                    <div class="input-group">
-                        <label style="color:#ccc;">📝 Question for Students (they will answer this):</label>
-                        <textarea id="mediaQuestion" placeholder="e.g. What do you think this image represents?..." style="border-color:#ff9800;"></textarea>
-                    </div>
-
-                    <div class="input-group">
-                        <label style="color:#ccc;">✅ Expected Answer / Key Points:</label>
-                        <textarea id="mediaAnswer" placeholder="Write the expected answer or key points..."></textarea>
-                    </div>
-
-                    <button onclick="uploadMedia()" style="background:linear-gradient(135deg,#ff9800,#f57c00);">📤 Upload & Post for Students</button>
-                </div>
-
-                <!-- Section 2: Yesterday's Media Feedback -->
-                <div id="yesterdayMediaFeedback"></div>
-
-                <!-- Section 3: All uploaded media list -->
-                <div id="mediaList"></div>
-            </div>
-
-            <!-- Phone Numbers Tab -->
-            <div id="phonesTab" class="tab-content">
-                <h2>📞 Student Contact Information</h2>
-                <div id="phoneNumbersList"></div>
-            </div>
-
-            <!-- Leaderboard Tab -->
-            <div id="leaderboardTab" class="tab-content">
-                <h2>🏆 Leaderboard & Streaks</h2>
-                <div id="leaderboardContent"><div class="loading">Loading...</div></div>
-            </div>
-
-            <button class="warning-btn" onclick="showChangePassword()">Change Password</button>
-            <button class="danger-btn" onclick="resetAllData()">Reset All Data</button>
-            <button class="secondary-btn" onclick="logoutTeacher()">Logout</button>
+        <div class="input-group">
+            <label>📱 Phone Number:</label>
+            <input type="tel" id="studentPhone" placeholder="Enter 10-digit phone number" maxlength="10">
         </div>
-
-        <!-- Password Change Section -->
-        <div id="passwordChangeSection" class="password-change-section">
-            <h2>🔐 Change Password</h2>
-            
-            <div class="input-group">
-                <label>Current Password:</label>
-                <input type="password" id="currentPassword" placeholder="Enter current password">
-            </div>
-
-            <div class="input-group">
-                <label>New Password:</label>
-                <input type="password" id="newPassword" placeholder="Enter new password">
-            </div>
-
-            <div class="input-group">
-                <label>Confirm New Password:</label>
-                <input type="password" id="confirmPassword" placeholder="Confirm new password">
-            </div>
-
-            <button onclick="changePassword()">Change Password</button>
-            <button class="secondary-btn" onclick="backToTeacher()">Back to Dashboard</button>
+        <div class="input-group">
+            <label>🔑 Your PIN (YYYYY-BB-XXX):</label>
+            <input type="text" id="studentPin" placeholder="e.g., 25007-CS-007">
         </div>
-
-        <!-- Designer Footer -->
-        <div class="designer-footer">
-            Designed by <span>SATHWIK__DEENANAATH</span>
-        </div>
+        <button onclick="loginStudent()">Login as Student</button>
+        <p style="text-align:center;margin-top:20px;color:#666;">
+            Are you TEJAPRATAP? <a href="#" class="link-button" onclick="showTeacherLogin();return false;">Login here</a>
+        </p>
     </div>
 
-    <script>
-        // CONFIGURATION
-        const API_URL = 'https://tejapratap-s-quiz.onrender.com';
-        // Backend is deployed on Render - all devices connect to this server
+    <!-- Teacher Login Screen -->
+    <div id="teacherLoginSection" class="teacher-login-section">
+        <div class="logo">👨‍🏫🔒</div>
+        <h1>TEJAPRATAP Login</h1>
+        <p class="subtitle">Manage daily questions and view student responses</p>
+        <div class="input-group" style="background:#fff3cd;padding:12px;border-radius:8px;margin-bottom:15px;">
+            ⚠️ <strong>This website is managed by TEJAPRATAP</strong>
+        </div>
+        <div class="input-group">
+            <label>🔐 TEJAPRATAP Password:</label>
+            <input type="password" id="teacherPassword" placeholder="Enter password">
+        </div>
+        <button onclick="loginTeacher()">Login as TEJAPRATAP</button>
+        <p style="text-align:center;margin-top:15px;">
+            <a href="#" class="link-button" onclick="showForgotPassword();return false;">Forgot Password?</a>
+        </p>
+        <p style="text-align:center;margin-top:10px;color:#666;">
+            Are you a student? <a href="#" class="link-button" onclick="showStudentLogin();return false;">Login here</a>
+        </p>
+    </div>
 
-        // State
-        let currentStudent = null;
-        let currentStudentName = null;
-        let isTeacher = false;
-        let teacherPassword = '11223344@Ttp';
+    <!-- Student Dashboard -->
+    <div id="studentSection" class="student-section">
+        <div class="logo">📚</div>
+        <h2 id="studentWelcome">Welcome!</h2>
+        <div id="studentContent"></div>
+        <button class="secondary-btn" onclick="logoutStudent()">Logout</button>
+    </div>
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            const savedStudent = localStorage.getItem('currentStudent');
-            const savedName = localStorage.getItem('currentStudentName');
-            const savedTeacher = localStorage.getItem('isTeacher');
+    <!-- Teacher Dashboard -->
+    <div id="teacherSection" class="teacher-section">
+        <div class="logo">👨‍🏫</div>
+        <h1>TEJAPRATAP Dashboard</h1>
+        <div class="tab-buttons" style="flex-wrap:wrap;">
+            <button class="tab-btn active" onclick="switchTab('questions')">Questions</button>
+            <button class="tab-btn" onclick="switchTab('media')">Media Files</button>
+            <button class="tab-btn" onclick="switchTab('phones')">Phone Numbers</button>
+            <button class="tab-btn" onclick="switchTab('rank')" style="background:linear-gradient(135deg,#FFD700,#ff9800);color:#333;">🎖️ RANK</button>
+        </div>
 
-            if (savedStudent && savedName) {
-                currentStudent = savedStudent;
-                currentStudentName = savedName;
-                showStudentDashboard();
-                loadStudentData();
-            } else if (savedTeacher === 'true') {
-                isTeacher = true;
-                showTeacherDashboard();
-                loadTeacherData();
-                autoPostCheck(); // Auto-post scheduled questions on page load
+        <!-- Questions Tab -->
+        <div id="questionsTab" class="tab-content active">
+            <div style="display:flex;gap:8px;margin-bottom:18px;">
+                <button id="singleQBtn" onclick="switchQMode('single')" style="flex:1;padding:10px;background:#e0e0e0;color:#333;border:none;border-radius:8px;cursor:pointer;font-weight:600;">Single Question</button>
+                <button id="bulkQBtn" onclick="switchQMode('bulk')" style="flex:1;padding:10px;background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;">🤖 Auto-Post Machine (10 Questions)</button>
+            </div>
+
+            <!-- Single Question Mode -->
+            <div id="singleQMode">
+                <h2>📝 Post New Question</h2>
+                <div class="input-group">
+                    <label>Today's Question:</label>
+                    <textarea id="newQuestion" placeholder="Enter today's question..."></textarea>
+                </div>
+                <div class="input-group">
+                    <label>✅ Today's Answer <span style="color:#28a745;font-size:12px;">(Students will see this only after they submit their answer)</span></label>
+                    <textarea id="todayAnswer" placeholder="Enter the correct answer for today's question..." style="border-color:#28a745;"></textarea>
+                </div>
+                <button onclick="postQuestion()">Post Question</button>
+            </div>
+
+            <!-- Bulk/Auto-Post Mode -->
+            <div id="bulkQMode" style="display:none;">
+                <!-- Auto-Post Machine Status Panel -->
+                <div class="autopost-status" id="autoPostStatusPanel">
+                    <h4>🤖 AUTO-POST MACHINE STATUS</h4>
+                    <div class="autopost-row">
+                        <span class="autopost-label">Engine</span>
+                        <span class="autopost-value" id="apEngineStatus"><span class="pulse-dot off"></span>Idle</span>
+                    </div>
+                    <div class="autopost-row">
+                        <span class="autopost-label">Schedule Loaded</span>
+                        <span class="autopost-value" id="apScheduleLoaded">—</span>
+                    </div>
+                    <div class="autopost-row">
+                        <span class="autopost-label">Questions Posted</span>
+                        <span class="autopost-value cyan" id="apPostedCount">0 / 10</span>
+                    </div>
+                    <div class="autopost-row">
+                        <span class="autopost-label">Next Scheduled Post</span>
+                        <span class="autopost-value yellow" id="apNextPost">—</span>
+                    </div>
+                    <div class="autopost-row">
+                        <span class="autopost-label">Last Auto-Post</span>
+                        <span class="autopost-value green" id="apLastPost">—</span>
+                    </div>
+                    <div class="autopost-row">
+                        <span class="autopost-label">Auto-Check Timer</span>
+                        <span class="autopost-value" id="apTimerStatus">—</span>
+                    </div>
+                    <div class="progress-bar-wrap">
+                        <div class="progress-bar-fill" id="apProgressBar" style="width:0%"></div>
+                    </div>
+                    <div style="text-align:center;font-size:11px;color:#aaa;margin-top:6px;" id="apProgressLabel">0 of 10 posted</div>
+                </div>
+
+                <div style="background:#e7f3ff;padding:12px;border-radius:8px;margin-bottom:16px;font-size:13px;color:#0066cc;border-left:4px solid #1E5BFF;">
+                    📌 Fill 10 questions + answers. They post <strong>one per day</strong> automatically. The machine checks every <strong>60 seconds</strong> and also runs on every page load.
+                </div>
+
+                <div id="bulkQFields"></div>
+                <div id="bulkScheduledInfo" style="margin-top:10px;"></div>
+
+                <button onclick="saveBulkQuestions()" style="background:linear-gradient(135deg,#1E5BFF,#764ba2);">💾 Save & Activate Auto-Post Machine</button>
+                <button onclick="manualCheckAndPost()" style="background:#28a745;margin-top:8px;">🔄 Manual Check: Post Today's Question Now</button>
+                <button onclick="resetBulkSchedule()" style="background:#dc3545;margin-top:8px;">🗑️ Reset Schedule</button>
+            </div>
+
+            <div id="teacherContent"></div>
+        </div>
+
+        <!-- Media Tab -->
+        <div id="mediaTab" class="tab-content">
+            <div style="background:#1a1a2e;border-radius:12px;padding:18px;margin-bottom:20px;border-left:4px solid #ff9800;">
+                <h2 style="color:#ff9800;margin-bottom:14px;">📤 Post New Media + Question</h2>
+                <div class="input-group">
+                    <label style="color:#ccc;">Upload Image or Audio:</label>
+                    <input type="file" id="mediaFile" accept="image/*,audio/*" onchange="previewMedia()">
+                    <div id="mediaPreview"></div>
+                </div>
+                <div class="input-group">
+                    <label style="color:#ccc;">📝 Question for Students:</label>
+                    <textarea id="mediaQuestion" placeholder="e.g. What do you think this image represents?..." style="border-color:#ff9800;"></textarea>
+                </div>
+                <div class="input-group">
+                    <label style="color:#ccc;">✅ Expected Answer / Key Points:</label>
+                    <textarea id="mediaAnswer" placeholder="Write the expected answer or key points..."></textarea>
+                </div>
+                <button onclick="uploadMedia()" style="background:linear-gradient(135deg,#ff9800,#f57c00);">📤 Upload & Post for Students</button>
+            </div>
+            <div id="yesterdayMediaFeedback"></div>
+            <div id="mediaList"></div>
+        </div>
+
+        <!-- Phone Numbers Tab -->
+        <div id="phonesTab" class="tab-content">
+            <h2>📞 Student Contact Information</h2>
+            <div id="phoneNumbersList"></div>
+        </div>
+
+        <!-- Leaderboard Tab -->
+        <div id="leaderboardTab" class="tab-content">
+            <h2>🏆 Leaderboard & Streaks</h2>
+            <div id="leaderboardContent"><div class="loading">Loading...</div></div>
+        </div>
+
+        <!-- RANK Tab -->
+        <div id="rankTab" class="tab-content">
+            <div style="text-align:center;margin-bottom:20px;">
+                <div style="font-size:32px;">🎖️</div>
+                <h2 style="color:#ff9800;margin:0;">RANK</h2>
+                <p style="color:#999;font-size:13px;margin-top:4px;">Student recognition & activity ranking</p>
+            </div>
+
+            <!-- Block 1: First Answerer of Yesterday -->
+            <div id="rankFirstAnswerer" style="
+                background: linear-gradient(135deg, #1a1a2e, #16213e);
+                border-radius: 16px;
+                padding: 20px;
+                margin-bottom: 20px;
+                border: 2px solid #FFD700;
+                position: relative;
+                overflow: hidden;
+            ">
+                <div style="position:absolute;top:-10px;right:-10px;font-size:60px;opacity:0.08;">⚡</div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                    <span style="font-size:26px;">⚡</span>
+                    <div>
+                        <div style="color:#FFD700;font-weight:700;font-size:16px;letter-spacing:1px;">FASTEST FINGER FIRST — TOP 3</div>
+                        <div style="color:#aaa;font-size:12px;">Who answered yesterday's question 1st, 2nd & 3rd?</div>
+                    </div>
+                </div>
+                <div id="rankFirstAnswererContent"><div class="loading" style="color:#aaa;">Loading...</div></div>
+            </div>
+
+            <!-- Block 2: Top 3 Most Active (15 days) -->
+            <div id="rankMostActive" style="
+                background: linear-gradient(135deg, #0d1b2a, #1a3a1a);
+                border-radius: 16px;
+                padding: 20px;
+                margin-bottom: 20px;
+                border: 2px solid #69f0ae;
+                position: relative;
+                overflow: hidden;
+            ">
+                <div style="position:absolute;top:-10px;right:-10px;font-size:60px;opacity:0.08;">🔥</div>
+                <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+                    <span style="font-size:26px;">🔥</span>
+                    <div>
+                        <div style="color:#69f0ae;font-weight:700;font-size:16px;letter-spacing:1px;">TOP 3 MOST ACTIVE</div>
+                        <div style="color:#aaa;font-size:12px;">Most answers submitted in the last 15 days</div>
+                    </div>
+                </div>
+                <div id="rankMostActiveContent"><div class="loading" style="color:#aaa;">Loading...</div></div>
+            </div>
+
+            <button onclick="loadRankTab()" style="background:linear-gradient(135deg,#FFD700,#ff9800);color:#333;font-weight:700;">🔄 Refresh Rankings</button>
+        </div>
+
+        <button class="warning-btn" onclick="showChangePassword()">Change Password</button>
+        <button class="danger-btn" onclick="resetAllData()">Reset All Data</button>
+        <button class="secondary-btn" onclick="logoutTeacher()">Logout</button>
+    </div>
+
+    <!-- Password Change Section -->
+    <div id="passwordChangeSection" class="password-change-section">
+        <h2>🔐 Change Password</h2>
+        <div class="input-group">
+            <label>Current Password:</label>
+            <input type="password" id="currentPassword" placeholder="Enter current password">
+        </div>
+        <div class="input-group">
+            <label>New Password:</label>
+            <input type="password" id="newPassword" placeholder="Enter new password">
+        </div>
+        <div class="input-group">
+            <label>Confirm New Password:</label>
+            <input type="password" id="confirmPassword" placeholder="Confirm new password">
+        </div>
+        <button onclick="changePassword()">Change Password</button>
+        <button class="secondary-btn" onclick="backToTeacher()">Back to Dashboard</button>
+    </div>
+
+    <div class="designer-footer">
+        Designed by <span>SATHWIK__DEENANAATH</span>
+    </div>
+</div>
+
+<script>
+// =====================================================
+// CONFIGURATION
+// =====================================================
+const API_URL = 'https://tejapratap-s-quiz.onrender.com';
+
+let currentStudent = null;
+let currentStudentName = null;
+let isTeacher = false;
+let teacherPassword = '11223344@Ttp';
+let autoPostInterval = null; // Global interval handle
+
+// =====================================================
+// INIT
+// =====================================================
+document.addEventListener('DOMContentLoaded', function () {
+    autoDeleteOldData();
+
+    const savedStudent = localStorage.getItem('currentStudent');
+    const savedName = localStorage.getItem('currentStudentName');
+    const savedTeacher = localStorage.getItem('isTeacher');
+    const savedPassword = localStorage.getItem('teacherPassword');
+    if (savedPassword) teacherPassword = savedPassword;
+
+    if (savedStudent && savedName) {
+        currentStudent = savedStudent;
+        currentStudentName = savedName;
+        showStudentDashboard();
+        loadStudentData();
+    } else if (savedTeacher === 'true') {
+        isTeacher = true;
+        showTeacherDashboard();
+        loadTeacherData();
+        startAutoPostMachine(); // 🤖 Start the machine
+    }
+});
+
+// =====================================================
+// 🤖 AUTO-POST MACHINE (CORE)
+// =====================================================
+
+function getTodayStr() {
+    return new Date().toISOString().split('T')[0];
+}
+
+function getBulkSchedule() {
+    try { return JSON.parse(localStorage.getItem('bulkSchedule') || 'null'); } catch { return null; }
+}
+
+function saveBulkSchedule(data) {
+    localStorage.setItem('bulkSchedule', JSON.stringify(data));
+}
+
+/**
+ * Main auto-post engine.
+ * Checks if a question is scheduled for TODAY and hasn't been posted yet.
+ * Posts it, marks it posted, and records the timestamp.
+ */
+async function runAutoPostCheck(silent = false) {
+    const schedule = getBulkSchedule();
+    if (!schedule || !schedule.questions) {
+        if (!silent) updateAutoPostStatusUI();
+        return false;
+    }
+
+    const today = getTodayStr();
+    for (let i = 0; i < schedule.questions.length; i++) {
+        const q = schedule.questions[i];
+        if (!q.posted && q.date === today) {
+            try {
+                // Post question then set its own answer via PUT
+                const postResult = await apiPost('/questions', { question: q.question, answer: null });
+                if (postResult && postResult.question && postResult.question.id && q.answer) {
+                    await fetch(API_URL + '/questions/' + postResult.question.id + '/answer', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ answer: q.answer })
+                    });
+                }
+                schedule.questions[i].posted = true;
+                schedule.questions[i].postedAt = new Date().toLocaleString('en-IN');
+                schedule.lastAutoPost = { question: q.question.substring(0, 50) + '...', time: new Date().toLocaleString('en-IN'), day: i + 1 };
+                saveBulkSchedule(schedule);
+                updateAutoPostStatusUI();
+                if (!silent) {
+                    console.log(`[AutoPost] ✅ Question ${i+1} posted for ${today}`);
+                }
+                return true;
+            } catch (err) {
+                console.error('[AutoPost] ❌ Failed:', err);
+                return false;
             }
+        }
+    }
+    if (!silent) updateAutoPostStatusUI();
+    return false;
+}
 
-            const savedPassword = localStorage.getItem('teacherPassword');
-            if (savedPassword) {
-                teacherPassword = savedPassword;
+/**
+ * Starts the repeating auto-post timer (every 60 seconds).
+ * Clears any existing timer first to avoid duplicates.
+ */
+function startAutoPostMachine() {
+    // Run immediately on start
+    runAutoPostCheck(true);
+
+    // Then every 60 seconds
+    if (autoPostInterval) clearInterval(autoPostInterval);
+    autoPostInterval = setInterval(() => {
+        runAutoPostCheck(true).then(posted => {
+            if (posted) {
+                // Refresh teacher view if a question was auto-posted
+                loadTeacherQuestions();
+                showToast('🤖 Auto-Post: Today\'s question was posted automatically!', 'success');
             }
         });
+        updateAutoPostStatusUI();
+    }, 60000);
 
-        // API Helper Functions
-        async function apiGet(endpoint) {
-            try {
-                const response = await fetch(`${API_URL}${endpoint}`);
-                if (!response.ok) {
-                    if (response.status === 404) {
-                        return null;
-                    }
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                return await response.json();
-            } catch (error) {
-                console.error('API GET Error:', error);
-                return null;
-            }
+    updateAutoPostStatusUI();
+    console.log('[AutoPost Machine] 🤖 Engine started. Checking every 60 seconds.');
+}
+
+function stopAutoPostMachine() {
+    if (autoPostInterval) {
+        clearInterval(autoPostInterval);
+        autoPostInterval = null;
+    }
+}
+
+/**
+ * Updates the status panel UI
+ */
+function updateAutoPostStatusUI() {
+    const schedule = getBulkSchedule();
+    const panel = document.getElementById('autoPostStatusPanel');
+    if (!panel) return;
+
+    const engineEl = document.getElementById('apEngineStatus');
+    const scheduleEl = document.getElementById('apScheduleLoaded');
+    const postedCountEl = document.getElementById('apPostedCount');
+    const nextPostEl = document.getElementById('apNextPost');
+    const lastPostEl = document.getElementById('apLastPost');
+    const timerEl = document.getElementById('apTimerStatus');
+    const progressBar = document.getElementById('apProgressBar');
+    const progressLabel = document.getElementById('apProgressLabel');
+
+    // Engine status
+    if (engineEl) {
+        if (autoPostInterval) {
+            engineEl.innerHTML = '<span class="pulse-dot"></span>Running ✅';
+            engineEl.className = 'autopost-value green';
+        } else {
+            engineEl.innerHTML = '<span class="pulse-dot off"></span>Stopped';
+            engineEl.className = 'autopost-value red';
         }
+    }
 
-        async function apiPost(endpoint, data) {
-            try {
-                const response = await fetch(`${API_URL}${endpoint}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(data)
-                });
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
-                }
-                return await response.json();
-            } catch (error) {
-                console.error('API POST Error:', error);
-                throw error;
-            }
+    if (!schedule) {
+        if (scheduleEl) { scheduleEl.textContent = 'No schedule saved'; scheduleEl.className = 'autopost-value red'; }
+        if (postedCountEl) postedCountEl.textContent = '0 / 10';
+        if (nextPostEl) nextPostEl.textContent = '—';
+        if (lastPostEl) lastPostEl.textContent = '—';
+        if (timerEl) timerEl.textContent = autoPostInterval ? 'Every 60s' : 'Not running';
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressLabel) progressLabel.textContent = '0 of 10 posted';
+        return;
+    }
+
+    const total = schedule.questions.length;
+    const posted = schedule.questions.filter(q => q.posted).length;
+    const remaining = total - posted;
+    const today = getTodayStr();
+
+    if (scheduleEl) {
+        const savedOn = schedule.savedOn ? new Date(schedule.savedOn).toLocaleDateString('en-IN') : '?';
+        scheduleEl.textContent = `Yes (saved ${savedOn})`;
+        scheduleEl.className = 'autopost-value green';
+    }
+
+    if (postedCountEl) {
+        postedCountEl.textContent = `${posted} / ${total}`;
+        postedCountEl.className = posted === total ? 'autopost-value green' : 'autopost-value cyan';
+    }
+
+    // Next pending question
+    const nextQ = schedule.questions.find(q => !q.posted);
+    if (nextPostEl) {
+        if (nextQ) {
+            const d = new Date(nextQ.date + 'T00:00:00');
+            const label = nextQ.date === today ? '⚡ TODAY!' : d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+            nextPostEl.textContent = label;
+            nextPostEl.className = nextQ.date === today ? 'autopost-value green' : 'autopost-value yellow';
+        } else {
+            nextPostEl.textContent = 'All done! 🎉';
+            nextPostEl.className = 'autopost-value green';
         }
+    }
 
-        // Login Functions
-        function loginStudent() {
-            const name = document.getElementById('studentName').value.trim();
-            const phone = document.getElementById('studentPhone').value.trim();
-            const pin = document.getElementById('studentPin').value.trim();
-
-            if (!name) {
-                alert('Please enter your name!');
-                return;
-            }
-
-            if (!phone || phone.length !== 10 || !/^\d{10}$/.test(phone)) {
-                alert('Please enter a valid 10-digit phone number!');
-                return;
-            }
-
-            if (!pin) {
-                alert('Please enter your PIN!');
-                return;
-            }
-
-            const pinRegex = /^(2[2-9]|30)\d{3}-(CS|EE|ME|EI|CE|EC|cs|ee|me|ei|ce|ec|DAEC|DAUT|DAU|DCHE|DCSE|DECE|DEIE|DEVE|DEMB|DWT|DFT|DGT|DHMCT|DSC|DLT|DMNG|DMET|DPKT|DPT|DTXT|daec|daut|dau|dche|dcse|dece|deie|deve|demb|dwt|dft|dgt|dhmct|dsc|dlt|dmng|dmet|dpkt|dpt|dtxt)-\d{3}$/;
-            if (!pinRegex.test(pin)) {
-                alert('Invalid PIN format! Please use YYYYY-BB-XXX format.\nExample: 23007-CS-001');
-                return;
-            }
-
-            currentStudent = pin;
-            currentStudentName = name;
-            
-            localStorage.setItem('currentStudent', pin);
-            localStorage.setItem('currentStudentName', name);
-
-            apiPost('/phones', { pin, name, phone })
-                .catch(error => console.error('Error registering phone:', error));
-
-            showStudentDashboard();
-            loadStudentData();
+    // Last auto-post
+    if (lastPostEl) {
+        if (schedule.lastAutoPost) {
+            lastPostEl.textContent = `Day ${schedule.lastAutoPost.day} — ${schedule.lastAutoPost.time}`;
+            lastPostEl.className = 'autopost-value green';
+        } else {
+            lastPostEl.textContent = 'None yet';
+            lastPostEl.className = 'autopost-value';
         }
+    }
 
-        function loginTeacher() {
-            const password = document.getElementById('teacherPassword').value;
+    if (timerEl) {
+        timerEl.textContent = autoPostInterval ? '⏱ Every 60 seconds' : '⛔ Not running';
+        timerEl.className = autoPostInterval ? 'autopost-value green' : 'autopost-value red';
+    }
 
-            if (password === teacherPassword) {
-                isTeacher = true;
-                localStorage.setItem('isTeacher', 'true');
-                showTeacherDashboard();
-                loadTeacherData();
-                autoPostCheck(); // Auto-post scheduled questions
+    if (progressBar) progressBar.style.width = `${(posted / total) * 100}%`;
+    if (progressLabel) progressLabel.textContent = `${posted} of ${total} questions posted`;
+}
+
+// Manual trigger button
+async function manualCheckAndPost() {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = '⏳ Checking...';
+
+    const posted = await runAutoPostCheck(false);
+
+    if (posted) {
+        showToast('✅ Today\'s question posted successfully!', 'success');
+        loadTeacherQuestions();
+        renderBulkFields();
+    } else {
+        const schedule = getBulkSchedule();
+        if (!schedule) {
+            showToast('⚠️ No schedule saved yet. Fill in the questions first.', 'warn');
+        } else {
+            const today = getTodayStr();
+            const todayQ = schedule.questions.find(q => q.date === today);
+            if (todayQ && todayQ.posted) {
+                showToast('✅ Today\'s question was already posted!', 'success');
             } else {
-                alert('Incorrect password!');
+                const next = schedule.questions.find(q => !q.posted);
+                if (next) {
+                    const d = new Date(next.date + 'T00:00:00');
+                    showToast(`📅 Next question is scheduled for ${d.toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' })}`, 'info');
+                } else {
+                    showToast('🎉 All 10 questions have been posted!', 'success');
+                }
             }
         }
+    }
 
-        function logoutStudent() {
-            currentStudent = null;
-            currentStudentName = null;
-            localStorage.removeItem('currentStudent');
-            localStorage.removeItem('currentStudentName');
-            showStudentLogin();
+    btn.disabled = false;
+    btn.textContent = '🔄 Manual Check: Post Today\'s Question Now';
+}
+
+function resetBulkSchedule() {
+    if (!confirm('Are you sure you want to reset the bulk schedule? All 10 question slots will be cleared.')) return;
+    localStorage.removeItem('bulkSchedule');
+    stopAutoPostMachine();
+    showToast('🗑️ Schedule reset. Fill in new questions to restart.', 'warn');
+    renderBulkFields();
+    updateAutoPostStatusUI();
+}
+
+// =====================================================
+// BULK FIELDS RENDER
+// =====================================================
+function switchQMode(mode) {
+    if (mode === 'single') {
+        document.getElementById('singleQMode').style.display = 'block';
+        document.getElementById('bulkQMode').style.display = 'none';
+        document.getElementById('singleQBtn').style.cssText = 'flex:1;padding:10px;background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;';
+        document.getElementById('bulkQBtn').style.cssText = 'flex:1;padding:10px;background:#e0e0e0;color:#333;border:none;border-radius:8px;cursor:pointer;font-weight:600;';
+    } else {
+        document.getElementById('singleQMode').style.display = 'none';
+        document.getElementById('bulkQMode').style.display = 'block';
+        document.getElementById('bulkQBtn').style.cssText = 'flex:1;padding:10px;background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;';
+        document.getElementById('singleQBtn').style.cssText = 'flex:1;padding:10px;background:#e0e0e0;color:#333;border:none;border-radius:8px;cursor:pointer;font-weight:600;';
+        renderBulkFields();
+        updateAutoPostStatusUI();
+    }
+}
+
+function renderBulkFields() {
+    const container = document.getElementById('bulkQFields');
+    const existing = getBulkSchedule();
+    const today = getTodayStr();
+    let html = '';
+
+    for (let i = 0; i < 10; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() + i + 1); // Day 1 = tomorrow
+        const isoDate = d.toISOString().split('T')[0];
+        const dateLabel = d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+        const existingQ = existing ? existing.questions[i] : null;
+        const posted = existingQ && existingQ.posted;
+        const isToday = existingQ && existingQ.date === today && !posted;
+
+        const cardClass = posted ? 'bulk-day-card posted' : (isToday ? 'bulk-day-card today-card' : 'bulk-day-card');
+        const chipHtml = posted
+            ? '<span class="status-chip chip-posted">✅ Posted</span>'
+            : (isToday ? '<span class="status-chip chip-today">⚡ Due Today</span>' : '<span class="status-chip chip-pending">⏳ Pending</span>');
+        const postedAtHtml = posted && existingQ.postedAt ? `<div style="font-size:11px;color:#388e3c;margin-top:2px;">Posted at: ${existingQ.postedAt}</div>` : '';
+
+        html += `<div class="${cardClass}" id="dayCard_${i}">
+            <div class="bulk-day-header">
+                <span>Day ${i + 1} — ${dateLabel}</span>
+                ${chipHtml}
+            </div>
+            ${postedAtHtml}
+            <label style="font-size:13px;color:#555;">Question ${i + 1}:</label>
+            <textarea id="bq_${i}" placeholder="Enter question ${i + 1}..." style="width:100%;padding:8px;border:1.5px solid #ccc;border-radius:6px;margin:4px 0 8px;font-family:inherit;font-size:14px;${posted ? 'background:#f0fff0;' : ''}" ${posted ? 'readonly' : ''}>${existingQ ? existingQ.question : ''}</textarea>
+            <label style="font-size:13px;color:#28a745;font-weight:700;">Answer ${i + 1} (revealed after student submits):</label>
+            <textarea id="ba_${i}" placeholder="Enter answer ${i + 1}..." style="width:100%;padding:8px;border:1.5px solid #ccc;border-radius:6px;margin:4px 0;font-family:inherit;font-size:14px;${posted ? 'background:#f0fff0;' : ''}" ${posted ? 'readonly' : ''}>${existingQ ? existingQ.answer : ''}</textarea>
+            <input type="hidden" id="bd_${i}" value="${existingQ ? existingQ.date : isoDate}">
+        </div>`;
+    }
+
+    container.innerHTML = html;
+    renderScheduleInfo();
+}
+
+function renderScheduleInfo() {
+    const schedule = getBulkSchedule();
+    const info = document.getElementById('bulkScheduledInfo');
+    if (!info) return;
+    if (!schedule) { info.innerHTML = ''; return; }
+    const total = schedule.questions.length;
+    const posted = schedule.questions.filter(q => q.posted).length;
+    const remaining = total - posted;
+    info.innerHTML = `<div style="background:#e7f3ff;border-left:4px solid #1E5BFF;padding:10px;border-radius:6px;margin-bottom:10px;font-size:13px;color:#0066cc;">
+        📊 Schedule: <strong>${posted}/${total}</strong> posted &nbsp;|&nbsp; <strong>${remaining}</strong> remaining
+        ${schedule.lastAutoPost ? `<br>🤖 Last auto-post: <strong>Day ${schedule.lastAutoPost.day}</strong> — ${schedule.lastAutoPost.time}` : ''}
+    </div>`;
+}
+
+function saveBulkQuestions() {
+    const existingSchedule = getBulkSchedule();
+    const questions = [];
+    let valid = true;
+
+    for (let i = 0; i < 10; i++) {
+        const qEl = document.getElementById('bq_' + i);
+        const aEl = document.getElementById('ba_' + i);
+        const dEl = document.getElementById('bd_' + i);
+
+        // If already posted (readonly), keep existing data
+        if (existingSchedule && existingSchedule.questions[i] && existingSchedule.questions[i].posted) {
+            questions.push(existingSchedule.questions[i]);
+            continue;
         }
 
-        function logoutTeacher() {
-            isTeacher = false;
-            localStorage.removeItem('isTeacher');
-            showStudentLogin();
-        }
+        if (!qEl.value.trim()) { alert(`Please fill Question ${i + 1}`); valid = false; break; }
+        if (!aEl.value.trim()) { alert(`Please fill Answer ${i + 1}`); valid = false; break; }
 
-        // Navigation Functions
-        function showStudentLogin() {
-            document.getElementById('loginSection').classList.add('active');
-            document.getElementById('teacherLoginSection').classList.remove('active');
-            document.getElementById('studentSection').classList.remove('active');
-            document.getElementById('teacherSection').classList.remove('active');
-            document.getElementById('passwordChangeSection').classList.remove('active');
-        }
+        questions.push({
+            question: qEl.value.trim(),
+            answer: aEl.value.trim(),
+            date: dEl.value,
+            posted: false,
+            postedAt: null
+        });
+    }
 
-        function showTeacherLogin() {
-            document.getElementById('loginSection').classList.remove('active');
-            document.getElementById('teacherLoginSection').classList.add('active');
-            document.getElementById('studentSection').classList.remove('active');
-            document.getElementById('teacherSection').classList.remove('active');
-            document.getElementById('passwordChangeSection').classList.remove('active');
-        }
+    if (!valid) return;
 
-        function showStudentDashboard() {
-            document.getElementById('loginSection').classList.remove('active');
-            document.getElementById('teacherLoginSection').classList.remove('active');
-            document.getElementById('studentSection').classList.add('active');
-            document.getElementById('teacherSection').classList.remove('active');
-            document.getElementById('passwordChangeSection').classList.remove('active');
-            
-            document.getElementById('studentWelcome').textContent = `Welcome, ${currentStudentName}!`;
-        }
+    saveBulkSchedule({ savedOn: new Date().toISOString(), questions, lastAutoPost: existingSchedule ? existingSchedule.lastAutoPost : null });
+    startAutoPostMachine(); // Restart engine with new schedule
 
-        function showTeacherDashboard() {
-            document.getElementById('loginSection').classList.remove('active');
-            document.getElementById('teacherLoginSection').classList.remove('active');
-            document.getElementById('studentSection').classList.remove('active');
-            document.getElementById('teacherSection').classList.add('active');
-            document.getElementById('passwordChangeSection').classList.remove('active');
-        }
+    showToast('✅ 10 questions saved! Auto-Post Machine is now ACTIVE. Questions will post one per day automatically.', 'success');
+    renderBulkFields();
+    updateAutoPostStatusUI();
+}
 
-        function showChangePassword() {
-            document.getElementById('teacherSection').classList.remove('active');
-            document.getElementById('passwordChangeSection').classList.add('active');
-        }
+// =====================================================
+// TOAST NOTIFICATIONS
+// =====================================================
+function showToast(msg, type = 'info') {
+    const colors = { success: '#28a745', warn: '#ffc107', info: '#1E5BFF', error: '#dc3545' };
+    const toast = document.createElement('div');
+    toast.style.cssText = `
+        position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+        background:${colors[type] || '#333'};color:white;
+        padding:12px 20px;border-radius:10px;font-size:14px;font-weight:600;
+        box-shadow:0 4px 20px rgba(0,0,0,0.3);z-index:9999;
+        animation:slideUp 0.3s ease;max-width:90vw;text-align:center;
+    `;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.5s'; setTimeout(() => toast.remove(), 500); }, 3500);
+}
 
-        function backToTeacher() {
-            document.getElementById('passwordChangeSection').classList.remove('active');
-            document.getElementById('teacherSection').classList.add('active');
-        }
+// =====================================================
+// API HELPERS
+// =====================================================
+async function apiGet(endpoint) {
+    try {
+        const response = await fetch(`${API_URL}${endpoint}`);
+        if (!response.ok) { if (response.status === 404) return null; throw new Error(`HTTP ${response.status}`); }
+        return await response.json();
+    } catch (error) { console.error('API GET Error:', error); return null; }
+}
 
-        function showForgotPassword() {
-            alert('Please contact the administrator to reset your password.');
-        }
+async function apiPost(endpoint, data) {
+    try {
+        const response = await fetch(`${API_URL}${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        if (!response.ok) { const e = await response.json(); throw new Error(e.error || `HTTP ${response.status}`); }
+        return await response.json();
+    } catch (error) { console.error('API POST Error:', error); throw error; }
+}
 
-        function switchTab(tab) {
-            document.getElementById('questionsTab').classList.remove('active');
-            document.getElementById('mediaTab').classList.remove('active');
-            document.getElementById('phonesTab').classList.remove('active');
-            document.getElementById('leaderboardTab').classList.remove('active');
+// =====================================================
+// LOGIN & NAVIGATION
+// =====================================================
+function loginStudent() {
+    const name = document.getElementById('studentName').value.trim();
+    const phone = document.getElementById('studentPhone').value.trim();
+    const pin = document.getElementById('studentPin').value.trim();
+    if (!name) { alert('Please enter your name!'); return; }
+    if (!phone || phone.length !== 10 || !/^\d{10}$/.test(phone)) { alert('Please enter a valid 10-digit phone number!'); return; }
+    if (!pin) { alert('Please enter your PIN!'); return; }
+    const pinRegex = /^(2[2-9]|30)\d{3}-(CS|EE|ME|EI|CE|EC|cs|ee|me|ei|ce|ec|DAEC|DAUT|DAU|DCHE|DCSE|DECE|DEIE|DEVE|DEMB|DWT|DFT|DGT|DHMCT|DSC|DLT|DMNG|DMET|DPKT|DPT|DTXT|daec|daut|dau|dche|dcse|dece|deie|deve|demb|dwt|dft|dgt|dhmct|dsc|dlt|dmng|dmet|dpkt|dpt|dtxt)-\d{3}$/;
+    if (!pinRegex.test(pin)) { alert('Invalid PIN format! Please use YYYYY-BB-XXX format.\nExample: 23007-CS-001'); return; }
+    currentStudent = pin;
+    currentStudentName = name;
+    localStorage.setItem('currentStudent', pin);
+    localStorage.setItem('currentStudentName', name);
+    apiPost('/phones', { pin, name, phone }).catch(e => console.error('Phone reg error:', e));
+    showStudentDashboard();
+    loadStudentData();
+}
 
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+function loginTeacher() {
+    const password = document.getElementById('teacherPassword').value;
+    if (password === teacherPassword) {
+        isTeacher = true;
+        localStorage.setItem('isTeacher', 'true');
+        showTeacherDashboard();
+        loadTeacherData();
+        startAutoPostMachine(); // 🤖 Start on login
+    } else { alert('Incorrect password!'); }
+}
 
-            if (tab === 'questions') {
-                document.getElementById('questionsTab').classList.add('active');
-                document.querySelectorAll('.tab-btn')[0].classList.add('active');
-                loadTeacherQuestions();
-            } else if (tab === 'media') {
-                document.getElementById('mediaTab').classList.add('active');
-                document.querySelectorAll('.tab-btn')[1].classList.add('active');
-                loadMediaList();
-            } else if (tab === 'phones') {
-                document.getElementById('phonesTab').classList.add('active');
-                document.querySelectorAll('.tab-btn')[2].classList.add('active');
-                loadPhoneNumbers();
-            } else if (tab === 'leaderboard') {
-                document.getElementById('leaderboardTab').classList.add('active');
-                document.querySelectorAll('.tab-btn')[3].classList.add('active');
-                loadLeaderboard();
-            }
-        }
+function logoutStudent() {
+    currentStudent = null; currentStudentName = null;
+    localStorage.removeItem('currentStudent'); localStorage.removeItem('currentStudentName');
+    showStudentLogin();
+}
 
-        // Student Functions
-        async function loadStudentData() {
-            const content = document.getElementById('studentContent');
-            content.innerHTML = '<div class="loading">Loading...</div>';
+function logoutTeacher() {
+    stopAutoPostMachine();
+    isTeacher = false;
+    localStorage.removeItem('isTeacher');
+    showStudentLogin();
+}
 
-            try {
-                const latestMedia = await apiGet('/media/latest');
-                const questions = await apiGet('/questions') || [];
-                const answers = await apiGet('/answers') || [];
+function showStudentLogin() {
+    ['loginSection','teacherLoginSection','studentSection','teacherSection','passwordChangeSection'].forEach(id => document.getElementById(id).classList.remove('active'));
+    document.getElementById('loginSection').classList.add('active');
+}
+function showTeacherLogin() {
+    ['loginSection','teacherLoginSection','studentSection','teacherSection','passwordChangeSection'].forEach(id => document.getElementById(id).classList.remove('active'));
+    document.getElementById('teacherLoginSection').classList.add('active');
+}
+function showStudentDashboard() {
+    ['loginSection','teacherLoginSection','studentSection','teacherSection','passwordChangeSection'].forEach(id => document.getElementById(id).classList.remove('active'));
+    document.getElementById('studentSection').classList.add('active');
+    document.getElementById('studentWelcome').textContent = `Welcome, ${currentStudentName}!`;
+}
+function showTeacherDashboard() {
+    ['loginSection','teacherLoginSection','studentSection','teacherSection','passwordChangeSection'].forEach(id => document.getElementById(id).classList.remove('active'));
+    document.getElementById('teacherSection').classList.add('active');
+}
+function showChangePassword() {
+    document.getElementById('teacherSection').classList.remove('active');
+    document.getElementById('passwordChangeSection').classList.add('active');
+}
+function backToTeacher() {
+    document.getElementById('passwordChangeSection').classList.remove('active');
+    document.getElementById('teacherSection').classList.add('active');
+}
+function showForgotPassword() { alert('Please contact the administrator to reset your password.'); }
 
-                displayStudentView(latestMedia, questions, answers);
-            } catch (error) {
-                content.innerHTML = '<div class="error-msg">Unable to connect to server. Please try again later.</div>';
-            }
-        }
+function switchTab(tab) {
+    ['questionsTab','mediaTab','phonesTab','rankTab'].forEach(id => document.getElementById(id).classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    const map = { questions:0, media:1, phones:2, rank:3 };
+    document.getElementById(tab + 'Tab').classList.add('active');
+    document.querySelectorAll('.tab-btn')[map[tab]].classList.add('active');
+    if (tab === 'questions') loadTeacherQuestions();
+    else if (tab === 'media') loadMediaList();
+    else if (tab === 'phones') loadPhoneNumbers();
+    else if (tab === 'rank') loadRankTab();
+}
 
-        function displayStudentView(latestMedia, questions, answers) {
-            const content = document.getElementById('studentContent');
-            let html = '';
+// =====================================================
+// STUDENT FUNCTIONS
+// =====================================================
+async function loadStudentData() {
+    const content = document.getElementById('studentContent');
+    content.innerHTML = '<div class="loading">Loading...</div>';
+    try {
+        const latestMedia = await apiGet('/media/latest');
+        const questions = await apiGet('/questions') || [];
+        const answers = await apiGet('/answers') || [];
+        displayStudentView(latestMedia, questions, answers);
+    } catch (error) {
+        content.innerHTML = '<div class="error-msg">Unable to connect to server. Please try again later.</div>';
+    }
+}
 
-            // Streak & Score badge
-            autoDeleteOldData();
-            const streak = getStreak(currentStudent);
-            const myTotal = getTotalScore(currentStudent);
-            const allStats = getAllStudentStats();
-            const myRank = allStats.findIndex(s => s.pin === currentStudent) + 1;
+function displayStudentView(latestMedia, questions, answers) {
+    const content = document.getElementById('studentContent');
+    let html = '';
+    autoDeleteOldData();
+    const streak = getStreak(currentStudent);
+    const myTotal = getTotalScore(currentStudent);
+    const allStats = getAllStudentStats();
+    const myRank = allStats.findIndex(s => s.pin === currentStudent) + 1;
 
-            html += `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;justify-content:center;">
-                <div style="background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;padding:10px 18px;border-radius:12px;text-align:center;min-width:90px;">
-                    <div style="font-size:11px;opacity:0.85;">MY SCORE</div>
-                    <div style="font-size:22px;font-weight:700;">${myTotal}</div>
-                    <div style="font-size:11px;opacity:0.85;">pts</div>
-                </div>
-                ${streak > 0 ? `<div style="background:linear-gradient(135deg,#ff9800,#f44336);color:white;padding:10px 18px;border-radius:12px;text-align:center;min-width:90px;">
-                    <div style="font-size:11px;opacity:0.85;">STREAK</div>
-                    <div style="font-size:22px;font-weight:700;">🔥${streak}</div>
-                    <div style="font-size:11px;opacity:0.85;">days</div>
-                </div>` : ''}
-                ${myRank > 0 ? `<div style="background:linear-gradient(135deg,#28a745,#218838);color:white;padding:10px 18px;border-radius:12px;text-align:center;min-width:90px;">
-                    <div style="font-size:11px;opacity:0.85;">MY RANK</div>
-                    <div style="font-size:22px;font-weight:700;">#${myRank}</div>
-                    <div style="font-size:11px;opacity:0.85;">of ${allStats.length}</div>
-                </div>` : ''}
+    html += `<div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;justify-content:center;">
+        <div style="background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;padding:10px 18px;border-radius:12px;text-align:center;min-width:90px;">
+            <div style="font-size:11px;opacity:0.85;">MY SCORE</div>
+            <div style="font-size:22px;font-weight:700;">${myTotal}</div>
+            <div style="font-size:11px;opacity:0.85;">pts</div>
+        </div>
+        ${streak > 0 ? `<div style="background:linear-gradient(135deg,#ff9800,#f44336);color:white;padding:10px 18px;border-radius:12px;text-align:center;min-width:90px;">
+            <div style="font-size:11px;opacity:0.85;">STREAK</div>
+            <div style="font-size:22px;font-weight:700;">🔥${streak}</div>
+            <div style="font-size:11px;opacity:0.85;">days</div>
+        </div>` : ''}
+        ${myRank > 0 ? `<div style="background:linear-gradient(135deg,#28a745,#218838);color:white;padding:10px 18px;border-radius:12px;text-align:center;min-width:90px;">
+            <div style="font-size:11px;opacity:0.85;">MY RANK</div>
+            <div style="font-size:22px;font-weight:700;">#${myRank}</div>
+            <div style="font-size:11px;opacity:0.85;">of ${allStats.length}</div>
+        </div>` : ''}
+    </div>`;
+
+    if (allStats.length > 0) {
+        const medals = ['🥇','🥈','🥉'];
+        html += '<div style="background:#f8f9fa;border-radius:12px;padding:14px;margin-bottom:16px;">';
+        html += '<div style="font-weight:700;color:#1E5BFF;margin-bottom:10px;text-align:center;">🏆 Top 3 Students</div>';
+        allStats.slice(0, 3).forEach((s, i) => {
+            const isMe = s.pin === currentStudent;
+            html += `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;margin-bottom:6px;border-radius:8px;background:${isMe?'rgba(30,91,255,0.1)':'white'};border:1px solid ${isMe?'#1E5BFF':'#eee'};">
+                <span style="font-size:16px;">${medals[i]||i+1}</span>
+                <span style="flex:1;font-weight:${isMe?700:500};color:${isMe?'#1E5BFF':'#333'};">${s.name}${isMe?' (You)':''} <span style="font-size:11px;color:#999;">(${s.pin})</span></span>
+                ${s.streak>0?`<span style="font-size:12px;color:#ff9800;">🔥${s.streak}</span>`:''}
+                <span style="font-weight:700;color:#764ba2;font-size:14px;">${s.total}pts</span>
             </div>`;
+        });
+        html += '</div>';
+    }
 
-            // Mini Leaderboard (top 3 with PIN)
-            if (allStats.length > 0) {
-                const medals = ['🥇','🥈','🥉'];
-                html += '<div style="background:#f8f9fa;border-radius:12px;padding:14px;margin-bottom:16px;">';
-                html += '<div style="font-weight:700;color:#1E5BFF;margin-bottom:10px;text-align:center;">🏆 Top 3 Students</div>';
-                allStats.slice(0, 3).forEach((s, i) => {
-                    const isMe = s.pin === currentStudent;
-                    html += `<div style="display:flex;align-items:center;gap:8px;padding:7px 10px;margin-bottom:6px;border-radius:8px;background:${isMe?'rgba(30,91,255,0.1)':'white'};border:1px solid ${isMe?'#1E5BFF':'#eee'};">
-                        <span style="font-size:16px;">${medals[i]||i+1}</span>
-                        <span style="flex:1;font-weight:${isMe?700:500};color:${isMe?'#1E5BFF':'#333'};">${s.name}${isMe?' (You)':''} <span style="font-size:11px;color:#999;">(${s.pin})</span></span>
-                        ${s.streak>0?`<span style="font-size:12px;color:#ff9800;">🔥${s.streak}</span>`:''}
-                        <span style="font-weight:700;color:#764ba2;font-size:14px;">${s.total}pts</span>
-                    </div>`;
-                });
-                html += '</div>';
-            }
+    if (isDay14()) html += renderRankingSection(getAllStudentStats());
 
-            // Day-14 ranking alert for students
-            if (isDay14()) {
-                const dayStudents = getAllStudentStats();
-                html += renderRankingSection(dayStudents);
-            }
+    if (latestMedia) {
+        const hasAnsweredMedia = answers.some(a => a.questionId === latestMedia.id && a.studentPin === currentStudent && a.type === 'media');
+        html += '<div class="media-box"><h3>🎵 Latest Media from TEJAPRATAP</h3>';
+        html += '<div style="color:#999;font-size:13px;margin:8px 0;">📅 ' + latestMedia.date + '</div>';
+        html += '<h4>📎 ' + latestMedia.fileName + '</h4>';
+        if (latestMedia.type === 'image') {
+            html += '<img src="' + latestMedia.data + '" class="media-preview" alt="' + latestMedia.fileName + '">';
+        } else {
+            html += '<audio controls><source src="' + latestMedia.data + '"></audio>';
+        }
+        html += '<div class="opinion-box"><strong>TEJAPRATAP\'s Opinion:</strong><br>' + latestMedia.opinion + '</div>';
+        if (hasAnsweredMedia) {
+            const myAns = answers.find(a => a.questionId === latestMedia.id && a.studentPin === currentStudent && a.type === 'media');
+            html += '<div class="success-msg" style="margin-top:15px;">✓ You already responded!<br><strong>Your response:</strong> ' + myAns.answer + '</div>';
+        } else {
+            html += '<div class="media-answer-section"><label style="display:block;margin-bottom:8px;font-weight:600;color:#ff9800;">💬 Your Response:</label>';
+            html += '<textarea id="mediaAnswer-' + latestMedia.id + '" placeholder="Share your thoughts..." style="width:100%;padding:10px;border:2px solid #ff9800;border-radius:6px;min-height:80px;"></textarea>';
+            html += '<button onclick="submitMediaAnswer(' + latestMedia.id + ')" style="margin-top:10px;background:linear-gradient(135deg,#ff9800,#f57c00);">Submit Response</button></div>';
+        }
+        html += '</div>';
+    }
 
-            // Display latest media with answer box
-            if (latestMedia) {
-                const hasAnsweredMedia = answers.some(a => 
-                    a.questionId === latestMedia.id && 
-                    a.studentPin === currentStudent &&
-                    a.type === 'media'
-                );
+    if (questions.length === 0) {
+        html += '<p style="color:#999;text-align:center;margin:30px 0;">No questions available yet. Check back tomorrow!</p>';
+        content.innerHTML = html;
+        return;
+    }
 
-                html += '<div class="media-box">';
-                html += '<h3>🎵 Latest Media from TEJAPRATAP</h3>';
-                html += '<div style="color: #999; font-size: 13px; margin: 8px 0;">📅 ' + latestMedia.date + '</div>';
-                html += '<h4>📎 ' + latestMedia.fileName + '</h4>';
-                
-                if (latestMedia.type === 'image') {
-                    html += '<img src="' + latestMedia.data + '" class="media-preview" alt="' + latestMedia.fileName + '">';
-                } else {
-                    html += '<audio controls><source src="' + latestMedia.data + '"></audio>';
-                }
-                
-                html += '<div class="opinion-box">';
-                html += '<strong>TEJAPRATAP\'s Opinion:</strong><br>';
-                html += latestMedia.opinion;
-                html += '</div>';
+    const latestQuestion = questions[questions.length - 1];
+    const hasAnswered = answers.some(a => a.questionId === latestQuestion.id && a.studentPin === currentStudent && (!a.type || a.type === 'question'));
 
-                // Add answer box for media
-                if (hasAnsweredMedia) {
-                    const myAnswer = answers.find(a => 
-                        a.questionId === latestMedia.id && 
-                        a.studentPin === currentStudent &&
-                        a.type === 'media'
-                    );
-                    html += '<div class="success-msg" style="margin-top: 15px;">✓ You already responded to this media!<br><strong>Your response:</strong> ' + myAnswer.answer + '</div>';
-                } else {
-                    html += '<div class="media-answer-section">';
-                    html += '<label style="display: block; margin-bottom: 8px; font-weight: 600; color: #ff9800;">💬 Your Response to this Media:</label>';
-                    html += '<textarea id="mediaAnswer-' + latestMedia.id + '" placeholder="Share your thoughts about this media..." style="width: 100%; padding: 10px; border: 2px solid #ff9800; border-radius: 6px; min-height: 80px;"></textarea>';
-                    html += '<button onclick="submitMediaAnswer(' + latestMedia.id + ')" style="margin-top: 10px; background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);">Submit Response</button>';
-                    html += '</div>';
-                }
+    html += '<div class="question-box"><div style="color:#999;font-size:13px;margin-bottom:8px;">📅 ' + latestQuestion.date + '</div>';
+    html += '<h3>Today\'s Question:</h3><p style="font-size:16px;margin-top:10px;">' + latestQuestion.question + '</p>';
 
-                html += '</div>';
-            }
-
-            // Display questions
-            if (questions.length === 0) {
-                html += '<p style="color: #999; text-align: center; margin: 30px 0;">No questions available yet. Check back tomorrow!</p>';
-                content.innerHTML = html;
-                return;
-            }
-
-            const latestQuestion = questions[questions.length - 1];
-            const hasAnswered = answers.some(a => 
-                a.questionId === latestQuestion.id && 
-                a.studentPin === currentStudent &&
-                (!a.type || a.type === 'question')
-            );
-
-            html += '<div class="question-box">';
-            html += '<div style="color: #999; font-size: 13px; margin-bottom: 8px;">📅 ' + latestQuestion.date + '</div>';
-            html += '<h3>Today\'s Question:</h3>';
-            html += '<p style="font-size: 16px; margin-top: 10px;">' + latestQuestion.question + '</p>';
-
-            if (hasAnswered) {
-                const myAnswer = answers.find(a => 
-                    a.questionId === latestQuestion.id && 
-                    a.studentPin === currentStudent &&
-                    (!a.type || a.type === 'question')
-                );
-                html += '<div class="success-msg" style="margin-top: 15px;">✓ You already answered this question!<br><strong>Your answer:</strong> ' + myAnswer.answer + '</div>';
-            } else {
-                html += '<div class="input-group" style="margin-top: 15px;">';
-                html += '<label>Your Answer:</label>';
-                html += '<textarea id="studentAnswer" placeholder="Type your answer here..."></textarea>';
-                html += '</div>';
-                html += '<button onclick="submitAnswer(' + latestQuestion.id + ')">Submit Answer</button>';
-            }
-
+    if (hasAnswered) {
+        const myAns = answers.find(a => a.questionId === latestQuestion.id && a.studentPin === currentStudent && (!a.type || a.type === 'question'));
+        html += '<div class="success-msg" style="margin-top:15px;">\u2713 You answered!<br><strong>Your answer:</strong> ' + myAns.answer + '</div>';
+        if (latestQuestion.answer) {
+            html += '<div style="background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border-radius:12px;padding:16px;margin-top:14px;border:2px solid #28a745;">';
+            html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span style="font-size:20px;">\u2705</span>';
+            html += '<div style="font-weight:700;color:#1b5e20;font-size:15px;">TODAY\'S CORRECT ANSWER</div></div>';
+            html += '<div style="background:white;border-radius:8px;padding:12px;color:#1b5e20;font-size:15px;font-weight:600;border-left:4px solid #28a745;">' + latestQuestion.answer + '</div>';
             html += '</div>';
-
-            // Show previous question's answer
-            if (questions.length > 1) {
-                const previousQuestion = questions[questions.length - 2];
-                if (previousQuestion.answer) {
-                    html += '<div class="answer-box">';
-                    html += '<div style="color: #666; font-size: 13px; margin-bottom: 8px;">📅 ' + previousQuestion.date + '</div>';
-                    html += '<h4>Previous Question:</h4>';
-                    html += '<p style="margin: 8px 0;">' + previousQuestion.question + '</p>';
-                    html += '<h4 style="margin-top: 15px;">✓ Answer:</h4>';
-                    html += '<p style="background: white; padding: 12px; border-radius: 6px; margin-top: 8px;">' + previousQuestion.answer + '</p>';
-                    html += '</div>';
-                }
-            }
-
-            content.innerHTML = html;
+        } else {
+            html += '<div style="background:#fff3e0;border-radius:8px;padding:12px;margin-top:12px;border-left:4px solid #ff9800;color:#e65100;font-size:13px;">\u23f3 The teacher hasn\'t revealed the answer yet. Check back soon!</div>';
         }
-
-        async function submitAnswer(questionId) {
-            const answerText = document.getElementById('studentAnswer').value.trim();
-
-            if (!answerText) {
-                alert('Please write your answer!');
-                return;
-            }
-
-            try {
-                await apiPost('/answers', {
-                    questionId: questionId,
-                    studentPin: currentStudent,
-                    studentName: currentStudentName,
-                    answer: answerText,
-                    type: 'question'
-                });
-
-                alert('Answer submitted successfully!');
-                loadStudentData();
-            } catch (error) {
-                alert(error.message || 'Error submitting answer. Please try again.');
-            }
+    } else {
+        html += '<div class="input-group" style="margin-top:15px;"><label>Your Answer:</label><textarea id="studentAnswer" placeholder="Type your answer here..."></textarea></div>';
+        html += '<button onclick="submitAnswer(' + latestQuestion.id + ')">Submit Answer</button>';
+        if (latestQuestion.answer) {
+            html += '<div style="background:#e3f2fd;border-radius:8px;padding:10px;margin-top:10px;border-left:4px solid #1E5BFF;color:#1565c0;font-size:13px;">💡 Submit your answer to reveal today\'s correct answer!</div>';
         }
+    }
+    html += '</div>';
 
-        async function submitMediaAnswer(mediaId) {
-            const answerText = document.getElementById('mediaAnswer-' + mediaId).value.trim();
+    content.innerHTML = html;
+}
 
-            if (!answerText) {
-                alert('Please write your response!');
-                return;
-            }
+async function submitAnswer(questionId) {
+    const answerText = document.getElementById('studentAnswer') ? document.getElementById('studentAnswer').value.trim() : '';
+    if (!answerText) { alert('Please write your answer!'); return; }
+    try {
+        await apiPost('/answers', { questionId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText, type: 'question' });
+        awardScoreForAnswer(currentStudent, currentStudentName);
+        alert('Answer submitted successfully!');
+        loadStudentData();
+    } catch (error) { alert(error.message || 'Error submitting answer.'); }
+}
 
-            try {
-                await apiPost('/answers', {
-                    questionId: mediaId,
-                    studentPin: currentStudent,
-                    studentName: currentStudentName,
-                    answer: answerText,
-                    type: 'media'
-                });
+async function submitMediaAnswer(mediaId) {
+    const answerText = document.getElementById('mediaAnswer-' + mediaId) ? document.getElementById('mediaAnswer-' + mediaId).value.trim() : '';
+    if (!answerText) { alert('Please write your response!'); return; }
+    try {
+        await apiPost('/answers', { questionId: mediaId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText, type: 'media' });
+        awardScoreForAnswer(currentStudent, currentStudentName);
+        alert('Response submitted successfully!');
+        loadStudentData();
+    } catch (error) { alert(error.message || 'Error submitting response.'); }
+}
 
-                alert('Response submitted successfully!');
-                loadStudentData();
-            } catch (error) {
-                alert(error.message || 'Error submitting response. Please try again.');
-            }
+// =====================================================
+// TEACHER FUNCTIONS
+// =====================================================
+async function loadTeacherData() { loadTeacherQuestions(); loadMediaList(); loadPhoneNumbers(); }
+
+async function loadTeacherQuestions() {
+    const content = document.getElementById('teacherContent');
+    content.innerHTML = '<div class="loading">Loading...</div>';
+    try {
+        const questions = await apiGet('/questions') || [];
+        const answers = await apiGet('/answers') || [];
+        const phones = await apiGet('/phones') || {};
+        // questions loaded
+        displayTeacherView(questions, answers, phones);
+    } catch (error) { content.innerHTML = '<div class="error-msg">Unable to load questions.</div>'; }
+}
+
+function displayTeacherView(questions, answers, phones) {
+    const content = document.getElementById('teacherContent');
+    if (questions.length === 0) { content.innerHTML = '<p style="color:#999;text-align:center;margin:20px 0;">No questions posted yet.</p>'; return; }
+
+    const latestQuestion = questions[questions.length - 1];
+    const answersForQuestion = answers.filter(a => a.questionId === latestQuestion.id && (!a.type || a.type === 'question'));
+
+    let html = '<h3 style="margin-top:20px;color:#1E5BFF;">📋 Today's Question</h3>';
+    html += '<div class="question-box"><div style="color:#999;font-size:13px;margin-bottom:8px;">📅 ' + latestQuestion.date + '</div>';
+    html += '<h3>Current Question:</h3><p style="font-size:16px;margin-top:8px;">' + latestQuestion.question + '</p>';
+    html += '<p style="margin-top:12px;color:#1E5BFF;font-weight:600;">Total Responses: ' + answersForQuestion.length + '</p></div>';
+
+    // TODAY'S ANSWER BOX
+    const answerBg = latestQuestion.answer ? 'linear-gradient(135deg,#e8f5e9,#f1f8e9)' : 'linear-gradient(135deg,#fff3e0,#fffde7)';
+    const answerBorder = latestQuestion.answer ? '#28a745' : '#ff9800';
+    html += '<div style="background:' + answerBg + ';border-radius:14px;padding:18px;margin:16px 0;border:2px solid ' + answerBorder + ';">';
+    html += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">';
+    html += '<span style="font-size:24px;">' + (latestQuestion.answer ? '✅' : '⏳') + '</span>';
+    html += '<div>';
+    html += '<div style="font-weight:700;font-size:16px;color:' + (latestQuestion.answer ? '#1b5e20' : '#e65100') + ';letter-spacing:0.5px;">TODAY'S ANSWER</div>';
+    html += '<div style="font-size:12px;color:#666;">Students see this ONLY after they submit their own answer</div>';
+    html += '</div></div>';
+    if (latestQuestion.answer) {
+        html += '<div style="background:white;border-radius:8px;padding:14px;font-size:15px;color:#1b5e20;font-weight:600;border-left:4px solid #28a745;margin-bottom:12px;">' + latestQuestion.answer + '</div>';
+        html += '<label style="font-size:13px;color:#555;display:block;margin-bottom:5px;">✏️ Update Answer:</label>';
+        html += '<textarea id="updateAnswerField" style="width:100%;padding:8px;border:2px solid #28a745;border-radius:6px;font-family:inherit;font-size:14px;min-height:60px;">' + latestQuestion.answer + '</textarea>';
+        html += '<button onclick="updateTodaysAnswer(' + latestQuestion.id + ')" style="width:auto;padding:8px 20px;margin-top:8px;background:#28a745;border:none;border-radius:8px;color:white;font-weight:700;cursor:pointer;font-size:14px;">💾 Update Answer</button>';
+    } else {
+        html += '<div style="color:#e65100;font-style:italic;margin-bottom:10px;font-size:13px;">⚠️ No answer set yet — students won't see an answer until you set one.</div>';
+        html += '<textarea id="updateAnswerField" style="width:100%;padding:8px;border:2px solid #ff9800;border-radius:6px;font-family:inherit;font-size:14px;min-height:80px;" placeholder="Type today's correct answer here..."></textarea>';
+        html += '<button onclick="updateTodaysAnswer(' + latestQuestion.id + ')" style="width:auto;padding:8px 20px;margin-top:8px;background:#ff9800;border:none;border-radius:8px;color:white;font-weight:700;cursor:pointer;font-size:14px;">✅ Set Answer Now</button>';
+    }
+    html += '</div>';
+
+    // Student responses
+    html += '<h3 style="color:#1E5BFF;margin-top:4px;">👥 Student Responses (' + answersForQuestion.length + ')</h3>';
+    if (answersForQuestion.length > 0) {
+        answersForQuestion.forEach(answer => {
+            html += '<div class="student-answer"><strong style="color:#1E5BFF;">👤 ' + (answer.studentName || 'Unknown') + '</strong>';
+            html += '<br><span style="color:#999;font-size:14px;">PIN: ' + answer.studentPin + '</span>';
+            if (phones[answer.studentPin]) html += '<br><span style="color:#999;font-size:14px;">📱 ' + phones[answer.studentPin].phone + '</span>';
+            html += '<div style="color:#999;font-size:13px;margin:5px 0;">Submitted: ' + answer.date + '</div>';
+            html += '<p style="margin-top:10px;padding:10px;background:#f8f9fa;border-radius:6px;">' + answer.answer + '</p></div>';
+        });
+    } else {
+        html += '<p style="color:#999;text-align:center;margin:20px 0;">No student responses yet.</p>';
+    }
+    content.innerHTML = html;
+}
+
+async function updateTodaysAnswer(questionId) {
+    const field = document.getElementById('updateAnswerField');
+    const val = field ? field.value.trim() : '';
+    if (!val) { alert('Please enter an answer!'); return; }
+    try {
+        const response = await fetch(API_URL + '/questions/' + questionId + '/answer', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ answer: val })
+        });
+        if (!response.ok) throw new Error('Server error');
+        showToast('✅ Answer saved! Students will see it after they submit.', 'success');
+        loadTeacherQuestions();
+    } catch (e) { alert('Error saving answer: ' + e.message); }
+}
+
+async function postQuestion() {
+    const question = document.getElementById('newQuestion').value.trim();
+    const todayAns = document.getElementById('todayAnswer').value.trim();
+    if (!question) { alert('Please enter a question!'); return; }
+    if (!todayAns) { alert('Please enter today\'s answer! Students will see it after they submit.'); return; }
+    try {
+        // Post the question first, then immediately set its answer
+        const result = await apiPost('/questions', { question, answer: null });
+        // Set the answer on this new question right away
+        if (result && result.question && result.question.id) {
+            await apiPost('/questions/' + result.question.id + '/answer', { answer: todayAns });
         }
+        document.getElementById('newQuestion').value = '';
+        document.getElementById('todayAnswer').value = '';
+        alert('Question posted successfully!');
+        loadTeacherQuestions();
+    } catch (error) { alert('Error posting question: ' + error.message); }
+}
 
-        // Teacher Functions
-        async function loadTeacherData() {
-            loadTeacherQuestions();
+// =====================================================
+// MEDIA FUNCTIONS
+// =====================================================
+function previewMedia() {
+    const fileInput = document.getElementById('mediaFile');
+    const preview = document.getElementById('mediaPreview');
+    if (!fileInput.files || !fileInput.files[0]) { preview.innerHTML = ''; return; }
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        if (file.type.startsWith('image/')) preview.innerHTML = '<img src="' + e.target.result + '" class="media-preview">';
+        else if (file.type.startsWith('audio/')) preview.innerHTML = '<audio controls><source src="' + e.target.result + '"></audio>';
+        else preview.innerHTML = '<p>File selected: ' + file.name + '</p>';
+    };
+    reader.readAsDataURL(file);
+}
+
+async function uploadMedia() {
+    const fileInput = document.getElementById('mediaFile');
+    const question = document.getElementById('mediaQuestion').value.trim();
+    const expectedAnswer = document.getElementById('mediaAnswer').value.trim();
+    if (!fileInput.files || !fileInput.files[0]) { alert('Please select a media file!'); return; }
+    if (!question) { alert('Please write a question for students!'); return; }
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+    reader.onload = async function (e) {
+        try {
+            await apiPost('/media', { type: file.type.startsWith('image/') ? 'image' : 'audio', data: e.target.result, fileName: file.name, opinion: question, expectedAnswer });
+            fileInput.value = ''; document.getElementById('mediaQuestion').value = ''; document.getElementById('mediaAnswer').value = ''; document.getElementById('mediaPreview').innerHTML = '';
+            alert('Media uploaded successfully!');
             loadMediaList();
-            loadPhoneNumbers();
-        }
+        } catch (error) { alert('Error uploading media: ' + error.message); }
+    };
+    reader.readAsDataURL(file);
+}
 
-        async function loadTeacherQuestions() {
-            const content = document.getElementById('teacherContent');
-            content.innerHTML = '<div class="loading">Loading...</div>';
+async function loadMediaList() {
+    const container = document.getElementById('mediaList');
+    const feedbackContainer = document.getElementById('yesterdayMediaFeedback');
+    container.innerHTML = '<div class="loading">Loading...</div>';
+    try {
+        const mediaFiles = await apiGet('/media') || [];
+        const answers = await apiGet('/answers') || [];
+        if (mediaFiles.length === 0) { feedbackContainer.innerHTML = ''; container.innerHTML = '<p style="color:#999;text-align:center;margin-top:20px;">No media files uploaded yet.</p>'; return; }
+        const reversedMedia = [...mediaFiles].reverse();
+        const yesterdayMedia = reversedMedia[0];
+        let feedbackHtml = `<div style="background:#1a1a2e;border-radius:12px;padding:18px;margin-bottom:20px;border-left:4px solid #4caf50;">
+            <h2 style="color:#4caf50;margin-bottom:14px;">💬 Give Explanation for Yesterday's Media</h2>
+            <div style="color:#999;font-size:13px;margin-bottom:8px;">📅 ${yesterdayMedia.date} — ${yesterdayMedia.fileName}</div>`;
+        if (yesterdayMedia.type === 'image') feedbackHtml += `<img src="${yesterdayMedia.data}" class="media-preview" alt="${yesterdayMedia.fileName}" style="margin-bottom:12px;">`;
+        else feedbackHtml += `<audio controls style="width:100%;margin-bottom:12px;"><source src="${yesterdayMedia.data}"></audio>`;
+        feedbackHtml += `<div class="input-group"><label style="color:#ccc;">📖 Your Explanation:</label>
+            <textarea id="mediaExplanation" placeholder="Write your explanation..." style="border-color:#4caf50;"></textarea></div>
+            <button onclick="saveMediaFeedback(${yesterdayMedia.id})" style="background:linear-gradient(135deg,#4caf50,#388e3c);">💾 Save Explanation</button></div>`;
+        feedbackContainer.innerHTML = feedbackHtml;
 
-            try {
-                const questions = await apiGet('/questions') || [];
-                const answers = await apiGet('/answers') || [];
-                const phones = await apiGet('/phones') || {};
-
-                // Set yesterday's question as placeholder in the answer textarea
-                if (questions.length > 0) {
-                    const lastQ = questions[questions.length - 1];
-                    const answerField = document.getElementById('yesterdayAnswer');
-                    if (answerField) {
-                        answerField.placeholder = `Yesterday's question: "${lastQ.question}" — Enter the answer here...`;
-                    }
-                }
-
-                displayTeacherView(questions, answers, phones);
-            } catch (error) {
-                content.innerHTML = '<div class="error-msg">Unable to load questions.</div>';
-            }
-        }
-
-        function displayTeacherView(questions, answers, phones) {
-            const content = document.getElementById('teacherContent');
-
-            if (questions.length === 0) {
-                content.innerHTML = '<p style="color: #999; text-align: center; margin: 20px 0;">No questions posted yet.</p>';
-                return;
-            }
-
-            let html = '<h3 style="margin-top: 20px; color: #1E5BFF;">📊 Student Responses</h3>';
-
-            const latestQuestion = questions[questions.length - 1];
-            const answersForQuestion = answers.filter(a => 
-                a.questionId === latestQuestion.id && (!a.type || a.type === 'question')
-            );
-
-            html += '<div class="question-box">';
-            html += '<div style="color: #999; font-size: 13px; margin-bottom: 8px;">📅 ' + latestQuestion.date + '</div>';
-            html += '<h3>Current Question:</h3>';
-            html += '<p style="font-size: 16px; margin-top: 8px;">' + latestQuestion.question + '</p>';
-            html += '<p style="margin-top: 12px; color: #1E5BFF; font-weight: 600;">Total Responses: ' + answersForQuestion.length + '</p>';
+        let html = '<h3 style="margin-top:10px;color:#ff9800;">📁 Uploaded Media & Student Responses</h3>';
+        reversedMedia.forEach(media => {
+            const mediaAnswers = answers.filter(a => a.questionId === media.id && a.type === 'media');
+            html += '<div class="media-box" style="margin-top:12px;"><div style="color:#999;font-size:13px;margin-bottom:8px;">📅 ' + media.date + ' — ' + media.fileName + '</div>';
+            if (media.type === 'image') html += '<img src="' + media.data + '" class="media-preview" alt="' + media.fileName + '">';
+            else html += '<audio controls><source src="' + media.data + '"></audio>';
+            html += '<div class="opinion-box" style="margin-top:10px;"><strong>📝 Question:</strong> ' + (media.opinion || '—');
+            if (media.expectedAnswer) html += '<br><strong>✅ Expected Answer:</strong> ' + media.expectedAnswer;
+            if (media.explanation) html += '<br><strong>💬 Explanation:</strong> ' + media.explanation;
             html += '</div>';
+            if (mediaAnswers.length > 0) {
+                html += '<div style="margin-top:10px;padding:10px;background:#e3f2fd;border-radius:6px;"><strong style="color:#1976d2;">👥 Student Responses (' + mediaAnswers.length + '):</strong>';
+                mediaAnswers.forEach(ans => { html += '<div style="margin-top:8px;padding:8px;background:white;border-radius:4px;"><strong>' + ans.studentName + '</strong> (' + ans.studentPin + '):<br><span style="font-size:14px;">' + ans.answer + '</span></div>'; });
+                html += '</div>';
+            } else { html += '<p style="color:#999;font-size:13px;margin-top:8px;">No student responses yet.</p>'; }
+            html += '</div>';
+        });
+        container.innerHTML = html;
+    } catch (error) { container.innerHTML = '<div class="error-msg">Unable to load media files.</div>'; }
+}
 
-            if (answersForQuestion.length > 0) {
-                answersForQuestion.forEach(answer => {
-                    html += '<div class="student-answer">';
-                    html += '<strong style="color: #1E5BFF;">👤 ' + (answer.studentName || 'Unknown') + '</strong>';
-                    html += '<br><span style="color: #999; font-size: 14px;">PIN: ' + answer.studentPin + '</span>';
+async function saveMediaFeedback(mediaId) {
+    const explanation = document.getElementById('mediaExplanation').value.trim();
+    if (!explanation) { alert('Please write your explanation first!'); return; }
+    try {
+        await apiPost('/media/' + mediaId + '/explanation', { explanation });
+        alert('Explanation saved for students!');
+        document.getElementById('mediaExplanation').value = '';
+        loadMediaList();
+    } catch (error) { alert('Explanation saved locally!'); }
+}
 
-                    if (phones[answer.studentPin]) {
-                        html += '<br><span style="color: #999; font-size: 14px;">📱 ' + phones[answer.studentPin].phone + '</span>';
-                    }
+async function loadPhoneNumbers() {
+    const container = document.getElementById('phoneNumbersList');
+    container.innerHTML = '<div class="loading">Loading...</div>';
+    try {
+        const phones = await apiGet('/phones') || {};
+        const phoneList = Object.entries(phones);
+        if (phoneList.length === 0) { container.innerHTML = '<p class="date-info">No student phone numbers available yet.</p>'; return; }
+        let html = '<div style="margin-bottom:10px;color:#666;"><strong>Total Students: ' + phoneList.length + '</strong></div>';
+        phoneList.forEach(([pin, data]) => {
+            html += '<div class="phone-item"><div><strong>' + data.name + '</strong><br><span style="color:#666;font-size:14px;">PIN: ' + pin + '</span><br><span style="color:#666;font-size:13px;">Last Login: ' + data.lastLogin + '</span></div>';
+            html += '<div style="font-size:18px;color:#1E5BFF;font-weight:600;">📱 ' + data.phone + '</div></div>';
+        });
+        container.innerHTML = html;
+    } catch (error) { container.innerHTML = '<div class="error-msg">Unable to load phone numbers.</div>'; }
+}
 
-                    html += '<div style="color: #999; font-size: 13px; margin: 5px 0;">Submitted: ' + answer.date + '</div>';
-                    html += '<p style="margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 6px;">' + answer.answer + '</p>';
-                    html += '</div>';
-                });
+function changePassword() {
+    const current = document.getElementById('currentPassword').value;
+    const newPass = document.getElementById('newPassword').value;
+    const confirm = document.getElementById('confirmPassword').value;
+    if (!current || !newPass || !confirm) { alert('Please fill all fields!'); return; }
+    if (current !== teacherPassword) { alert('Current password is incorrect!'); return; }
+    if (newPass !== confirm) { alert('New passwords do not match!'); return; }
+    if (newPass.length < 6) { alert('Password must be at least 6 characters long!'); return; }
+    teacherPassword = newPass;
+    localStorage.setItem('teacherPassword', newPass);
+    document.getElementById('currentPassword').value = ''; document.getElementById('newPassword').value = ''; document.getElementById('confirmPassword').value = '';
+    alert('Password changed successfully!');
+    backToTeacher();
+}
+
+function resetAllData() {
+    if (!confirm('Are you sure you want to reset ALL data? This action cannot be undone!')) return;
+    if (!confirm('This will delete all questions, answers, media, and phone numbers. Are you absolutely sure?')) return;
+    alert('For security reasons, data reset must be done on the server. Please contact your administrator.');
+}
+
+// =====================================================
+// LEADERBOARD, STREAKS & 15-DAY AUTO-DELETE
+// =====================================================
+function daysBetween(d1, d2) {
+    return Math.round(Math.abs(new Date(d2) - new Date(d1)) / (1000 * 60 * 60 * 24));
+}
+
+function getStreaks() { try { return JSON.parse(localStorage.getItem('studentStreaks') || '{}'); } catch { return {}; } }
+function saveStreaks(s) { localStorage.setItem('studentStreaks', JSON.stringify(s)); }
+
+function updateStreak(pin) {
+    const streaks = getStreaks(); const today = getTodayStr();
+    if (!streaks[pin]) { streaks[pin] = { count: 1, lastDate: today }; }
+    else {
+        const diff = daysBetween(streaks[pin].lastDate, today);
+        if (diff === 0) {} else if (diff === 1) { streaks[pin].count += 1; streaks[pin].lastDate = today; }
+        else { streaks[pin].count = 1; streaks[pin].lastDate = today; }
+    }
+    saveStreaks(streaks);
+}
+
+function getStreak(pin) { const s = getStreaks(); return s[pin] ? s[pin].count : 0; }
+
+function getScores() { try { return JSON.parse(localStorage.getItem('studentScores') || '{}'); } catch { return {}; } }
+function saveScores(s) { localStorage.setItem('studentScores', JSON.stringify(s)); }
+
+function autoDeleteOldData() {
+    const scores = getScores(); const today = getTodayStr(); let changed = false;
+    for (const pin in scores) {
+        const before = scores[pin].scores.length;
+        scores[pin].scores = scores[pin].scores.filter(s => daysBetween(s.date, today) <= 15);
+        if (scores[pin].scores.length !== before) changed = true;
+    }
+    if (changed) saveScores(scores);
+    const streaks = getStreaks();
+    for (const pin in streaks) { if (daysBetween(streaks[pin].lastDate, today) > 15) streaks[pin].count = 0; }
+    saveStreaks(streaks);
+}
+
+function addScore(pin, name, points) {
+    autoDeleteOldData();
+    const scores = getScores(); if (!scores[pin]) scores[pin] = { name, scores: [] };
+    scores[pin].name = name;
+    const today = getTodayStr();
+    if (!scores[pin].scores.find(s => s.date === today)) scores[pin].scores.push({ date: today, points });
+    saveScores(scores);
+}
+
+function getTotalScore(pin) { const s = getScores(); if (!s[pin]) return 0; return s[pin].scores.reduce((sum, x) => sum + (x.points || 0), 0); }
+
+function getAllStudentStats() {
+    autoDeleteOldData();
+    const scores = getScores(); const streaks = getStreaks();
+    return Object.entries(scores).map(([pin, data]) => ({
+        pin, name: data.name,
+        total: data.scores.reduce((s, x) => s + (x.points || 0), 0),
+        days: data.scores.length,
+        streak: streaks[pin] ? streaks[pin].count : 0
+    })).sort((a, b) => b.total - a.total);
+}
+
+function awardScoreForAnswer(pin, name) { addScore(pin, name, 10); updateStreak(pin); }
+
+function getDayNumber() {
+    const scores = getScores(); let firstDate = null;
+    for (const pin in scores) for (const s of scores[pin].scores) if (!firstDate || s.date < firstDate) firstDate = s.date;
+    if (!firstDate) return 1;
+    return daysBetween(firstDate, getTodayStr()) + 1;
+}
+
+function isDay14() { return getDayNumber() === 14; }
+
+function renderRankingSection(students) {
+    const top5 = students.slice(0, 5);
+    const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+    let html = '<div class="ranking-section"><h3>🎖️ Day 14 Final Rankings!</h3>';
+    top5.forEach((s, i) => {
+        html += `<div class="ranking-item"><span class="ranking-badge">${medals[i]}</span><span class="ranking-name">${s.name}</span><span class="ranking-pts">${s.total} pts</span></div>`;
+    });
+    return html + '</div>';
+}
+
+async function loadLeaderboard() {
+    const container = document.getElementById('leaderboardContent');
+    container.innerHTML = '<div class="loading">Loading...</div>';
+    autoDeleteOldData();
+    const students = getAllStudentStats();
+    const medals = ['🥇','🥈','🥉'];
+    const dayNum = getDayNumber();
+    let html = `<div style="text-align:center;color:#999;font-size:13px;margin-bottom:12px;">📅 Day <strong>${dayNum}</strong> of 15 &nbsp;|&nbsp; Data auto-deletes after Day 15</div>`;
+    if (students.length > 0) {
+        html += '<div style="background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;padding:18px;border-radius:14px;margin-bottom:16px;">';
+        html += '<div style="text-align:center;font-size:18px;font-weight:700;margin-bottom:12px;">🏆 Top 3 Champions</div>';
+        students.slice(0, 3).forEach((s, i) => {
+            html += `<div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.15);border-radius:10px;padding:10px 14px;margin-bottom:8px;">
+                <span style="font-size:22px;min-width:36px;">${medals[i]}</span>
+                <span style="flex:1;font-weight:700;font-size:15px;">${s.name} <span style="font-size:12px;opacity:0.8;">(${s.pin})</span></span>
+                ${s.streak>0?`<span style="background:rgba(255,152,0,0.4);padding:3px 8px;border-radius:12px;font-size:12px;">🔥${s.streak}</span>`:''}
+                <span style="font-weight:700;font-size:15px;">${s.total} pts</span>
+            </div>`;
+        });
+        html += '</div>';
+    }
+    html += '<div class="leaderboard-section"><div class="leaderboard-title">🏆 Full Leaderboard</div>';
+    if (students.length === 0) {
+        html += '<p style="color:#999;text-align:center;">No data yet.</p>';
+    } else {
+        students.forEach((s, i) => {
+            const rankClass = i < 3 ? `rank-${i+1}` : '';
+            const streakBadge = s.streak > 0 ? `<span class="streak-badge">🔥 ${s.streak}</span>` : '';
+            html += `<div class="leaderboard-item ${rankClass}">
+                <span class="rank-badge">${medals[i]||`#${i+1}`}</span>
+                <span class="lb-name">${s.name} ${streakBadge}</span>
+                <span style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
+                    <span class="lb-score">${s.total} pts</span>
+                    <span style="color:#999;font-size:12px;">${s.days} day${s.days!==1?'s':''} active</span>
+                </span>
+            </div>`;
+        });
+    }
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+// =====================================================
+// 🎖️ RANK TAB — Fastest Finger + Most Active
+// =====================================================
+async function loadRankTab() {
+    const firstEl = document.getElementById('rankFirstAnswererContent');
+    const activeEl = document.getElementById('rankMostActiveContent');
+    firstEl.innerHTML = '<div class="loading" style="color:#aaa;">Loading...</div>';
+    activeEl.innerHTML = '<div class="loading" style="color:#aaa;">Loading...</div>';
+
+    try {
+        const questions = await apiGet('/questions') || [];
+        const answers = await apiGet('/answers') || [];
+        const phones = await apiGet('/phones') || {};
+
+        // Block 1: FASTEST FINGER FIRST — Top 3
+        const yesterdayQ = questions.length >= 2 ? questions[questions.length - 2] : (questions.length === 1 ? questions[0] : null);
+
+        if (!yesterdayQ) {
+            firstEl.innerHTML = '<p style="color:#aaa;text-align:center;padding:10px;">No previous question found yet.</p>';
+        } else {
+            const yAnswers = answers
+                .filter(a => a.questionId === yesterdayQ.id && (!a.type || a.type === 'question'))
+                .sort((a, b) => new Date(a.submittedAt || a.date) - new Date(b.submittedAt || b.date));
+
+            if (yAnswers.length === 0) {
+                firstEl.innerHTML = `
+                    <p style="color:#aaa;text-align:center;padding:10px;">No one answered yesterday's question yet.</p>
+                    <div style="background:rgba(255,255,255,0.06);border-radius:8px;padding:10px;margin-top:8px;">
+                        <div style="color:#FFD700;font-size:13px;font-weight:600;">Yesterday's Question:</div>
+                        <div style="color:#ddd;font-size:14px;margin-top:4px;">${yesterdayQ.question}</div>
+                    </div>`;
             } else {
-                html += '<p style="color: #999; text-align: center; margin: 20px 0;">No student responses yet.</p>';
-            }
-
-            content.innerHTML = html;
-        }
-
-        async function postQuestion() {
-            const question = document.getElementById('newQuestion').value.trim();
-            const answer = document.getElementById('yesterdayAnswer').value.trim();
-
-            if (!question) {
-                alert('Please enter a question!');
-                return;
-            }
-
-            try {
-                await apiPost('/questions', { question, answer });
-
-                document.getElementById('newQuestion').value = '';
-                document.getElementById('yesterdayAnswer').value = '';
-
-                alert('Question posted successfully!');
-                loadTeacherQuestions();
-            } catch (error) {
-                alert('Error posting question: ' + error.message);
-            }
-        }
-
-        // Media Functions
-        function previewMedia() {
-            const fileInput = document.getElementById('mediaFile');
-            const preview = document.getElementById('mediaPreview');
-
-            if (!fileInput.files || !fileInput.files[0]) {
-                preview.innerHTML = '';
-                return;
-            }
-
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = function(e) {
-                if (file.type.startsWith('image/')) {
-                    preview.innerHTML = '<img src="' + e.target.result + '" class="media-preview">';
-                } else if (file.type.startsWith('audio/')) {
-                    preview.innerHTML = '<audio controls><source src="' + e.target.result + '"></audio>';
-                } else {
-                    preview.innerHTML = '<p>File selected: ' + file.name + '</p>';
-                }
-            };
-
-            reader.readAsDataURL(file);
-        }
-
-        async function uploadMedia() {
-            const fileInput = document.getElementById('mediaFile');
-            const question = document.getElementById('mediaQuestion').value.trim();
-            const expectedAnswer = document.getElementById('mediaAnswer').value.trim();
-
-            if (!fileInput.files || !fileInput.files[0]) {
-                alert('Please select a media file!');
-                return;
-            }
-
-            if (!question) {
-                alert('Please write a question for students!');
-                return;
-            }
-
-            const file = fileInput.files[0];
-            const reader = new FileReader();
-
-            reader.onload = async function(e) {
-                try {
-                    await apiPost('/media', {
-                        type: file.type.startsWith('image/') ? 'image' : 'audio',
-                        data: e.target.result,
-                        fileName: file.name,
-                        opinion: question,
-                        expectedAnswer: expectedAnswer
-                    });
-
-                    fileInput.value = '';
-                    document.getElementById('mediaQuestion').value = '';
-                    document.getElementById('mediaAnswer').value = '';
-                    document.getElementById('mediaPreview').innerHTML = '';
-
-                    alert('Media uploaded successfully!');
-                    loadMediaList();
-                } catch (error) {
-                    alert('Error uploading media: ' + error.message);
-                }
-            };
-
-            reader.readAsDataURL(file);
-        }
-
-        async function loadMediaList() {
-            const container = document.getElementById('mediaList');
-            const feedbackContainer = document.getElementById('yesterdayMediaFeedback');
-            container.innerHTML = '<div class="loading">Loading...</div>';
-
-            try {
-                const mediaFiles = await apiGet('/media') || [];
-                const answers = await apiGet('/answers') || [];
-
-                if (mediaFiles.length === 0) {
-                    feedbackContainer.innerHTML = '';
-                    container.innerHTML = '<p style="color: #999; text-align: center; margin-top: 20px;">No media files uploaded yet.</p>';
-                    return;
-                }
-
-                const reversedMedia = [...mediaFiles].reverse();
-
-                // Yesterday's media = the most recently uploaded one (before today's if any)
-                const yesterdayMedia = reversedMedia[0];
-
-                // Section: Give feedback/explanation for yesterday's media
-                let feedbackHtml = `<div style="background:#1a1a2e;border-radius:12px;padding:18px;margin-bottom:20px;border-left:4px solid #4caf50;">
-                    <h2 style="color:#4caf50;margin-bottom:14px;">💬 Give Explanation for Yesterday's Media</h2>
-                    <div style="color:#999;font-size:13px;margin-bottom:8px;">📅 ${yesterdayMedia.date} — ${yesterdayMedia.fileName}</div>`;
-
-                if (yesterdayMedia.type === 'image') {
-                    feedbackHtml += `<img src="${yesterdayMedia.data}" class="media-preview" alt="${yesterdayMedia.fileName}" style="margin-bottom:12px;">`;
-                } else {
-                    feedbackHtml += `<audio controls style="width:100%;margin-bottom:12px;"><source src="${yesterdayMedia.data}"></audio>`;
-                }
-
-                feedbackHtml += `<div class="input-group">
-                        <label style="color:#ccc;">📖 Your Explanation / Opinion:</label>
-                        <textarea id="mediaExplanation" placeholder="Write your explanation or opinion about yesterday's media and its answer..." style="border-color:#4caf50;"></textarea>
+                const top3First = yAnswers.slice(0, 3);
+                const fafMedals = [
+                    { icon: '🥇', label: '1st — FIRST TO ANSWER', color: '#FFD700', bg: 'rgba(255,215,0,0.12)', border: '#FFD700' },
+                    { icon: '🥈', label: '2nd', color: '#C0C0C0', bg: 'rgba(192,192,192,0.12)', border: '#C0C0C0' },
+                    { icon: '🥉', label: '3rd', color: '#cd7f32', bg: 'rgba(205,127,50,0.12)', border: '#cd7f32' }
+                ];
+                let fafHtml = `
+                    <div style="background:rgba(255,255,255,0.06);border-radius:10px;padding:10px;margin-bottom:14px;">
+                        <div style="color:#aaa;font-size:11px;margin-bottom:3px;">📝 Yesterday's Question:</div>
+                        <div style="color:#eee;font-size:13px;">${yesterdayQ.question}</div>
                     </div>
-                    <button onclick="saveMediaFeedback(${yesterdayMedia.id})" style="background:linear-gradient(135deg,#4caf50,#388e3c);">💾 Save Explanation for Students</button>
-                </div>`;
-
-                feedbackContainer.innerHTML = feedbackHtml;
-
-                // Full media list
-                let html = '<h3 style="margin-top: 10px; color: #ff9800;">📁 Uploaded Media & Student Responses</h3>';
-
-                reversedMedia.forEach(media => {
-                    const mediaAnswers = answers.filter(a => a.questionId === media.id && a.type === 'media');
-                    
-                    html += '<div class="media-box" style="margin-top:12px;">';
-                    html += '<div style="color: #999; font-size: 13px; margin-bottom: 8px;">📅 ' + media.date + ' — ' + media.fileName + '</div>';
-
-                    if (media.type === 'image') {
-                        html += '<img src="' + media.data + '" class="media-preview" alt="' + media.fileName + '">';
-                    } else {
-                        html += '<audio controls><source src="' + media.data + '"></audio>';
-                    }
-
-                    html += '<div class="opinion-box" style="margin-top:10px;">';
-                    html += '<strong>📝 Question:</strong> ' + (media.opinion || '—');
-                    if (media.expectedAnswer) html += '<br><strong>✅ Expected Answer:</strong> ' + media.expectedAnswer;
-                    if (media.explanation) html += '<br><strong>💬 Explanation:</strong> ' + media.explanation;
-                    html += '</div>';
-
-                    if (mediaAnswers.length > 0) {
-                        html += '<div style="margin-top: 10px; padding: 10px; background: #e3f2fd; border-radius: 6px;">';
-                        html += '<strong style="color: #1976d2;">👥 Student Responses (' + mediaAnswers.length + '):</strong>';
-                        mediaAnswers.forEach(ans => {
-                            html += '<div style="margin-top: 8px; padding: 8px; background: white; border-radius: 4px;">';
-                            html += '<strong>' + ans.studentName + '</strong> (' + ans.studentPin + '):<br>';
-                            html += '<span style="font-size: 14px;">' + ans.answer + '</span>';
-                            html += '</div>';
-                        });
-                        html += '</div>';
-                    } else {
-                        html += '<p style="color:#999;font-size:13px;margin-top:8px;">No student responses yet.</p>';
-                    }
-
-                    html += '</div>';
+                    <div style="display:flex;flex-direction:column;gap:10px;">`;
+                top3First.forEach((ans, i) => {
+                    const m = fafMedals[i];
+                    const ph = phones[ans.studentPin];
+                    fafHtml += `
+                        <div style="background:${m.bg};border:1.5px solid ${m.border};border-radius:12px;padding:12px;display:flex;align-items:flex-start;gap:12px;">
+                            <div style="font-size:28px;min-width:36px;text-align:center;">${m.icon}</div>
+                            <div style="flex:1;">
+                                <div style="color:${m.color};font-weight:700;font-size:15px;">${ans.studentName || 'Unknown'}</div>
+                                <div style="color:#aaa;font-size:12px;">PIN: ${ans.studentPin}${ph ? ' · 📱 ' + ph.phone : ''}</div>
+                                <div style="background:rgba(255,255,255,0.08);border-radius:8px;padding:7px 10px;margin-top:7px;">
+                                    <div style="color:#bbb;font-size:11px;margin-bottom:2px;">💬 Answer:</div>
+                                    <div style="color:#eee;font-size:13px;">${ans.answer}</div>
+                                </div>
+                                <div style="display:inline-block;background:${m.bg};border:1px solid ${m.border};border-radius:14px;padding:2px 10px;margin-top:6px;font-size:11px;color:${m.color};font-weight:700;">⚡ ${m.label}</div>
+                            </div>
+                        </div>`;
                 });
-
-                container.innerHTML = html;
-            } catch (error) {
-                container.innerHTML = '<div class="error-msg">Unable to load media files.</div>';
-            }
-        }
-
-        async function saveMediaFeedback(mediaId) {
-            const explanation = document.getElementById('mediaExplanation').value.trim();
-            if (!explanation) {
-                alert('Please write your explanation first!');
-                return;
-            }
-            try {
-                await apiPost('/media/' + mediaId + '/explanation', { explanation });
-                alert('Explanation saved for students!');
-                document.getElementById('mediaExplanation').value = '';
-                loadMediaList();
-            } catch (error) {
-                // If server doesn't support this endpoint yet, store locally and inform
-                alert('Explanation saved locally! (Note: server may need updating to persist this)');
-            }
-        }
-
-        async function loadPhoneNumbers() {
-            const container = document.getElementById('phoneNumbersList');
-            container.innerHTML = '<div class="loading">Loading...</div>';
-
-            try {
-                const phones = await apiGet('/phones') || {};
-                const phoneList = Object.entries(phones);
-
-                if (phoneList.length === 0) {
-                    container.innerHTML = '<p class="date-info">No student phone numbers available yet.</p>';
-                    return;
+                fafHtml += `</div>`;
+                if (yAnswers.length > 3) {
+                    fafHtml += `<div style="color:#aaa;font-size:12px;text-align:center;margin-top:10px;">+${yAnswers.length - 3} more student${yAnswers.length - 3 > 1 ? 's' : ''} also answered</div>`;
                 }
-
-                let html = '<div style="margin-bottom: 10px; color: #666;"><strong>Total Students: ' + phoneList.length + '</strong></div>';
-
-                phoneList.forEach(([pin, data]) => {
-                    html += '<div class="phone-item">';
-                    html += '<div>';
-                    html += '<strong>' + data.name + '</strong><br>';
-                    html += '<span style="color: #666; font-size: 14px;">PIN: ' + pin + '</span><br>';
-                    html += '<span style="color: #666; font-size: 13px;">Last Login: ' + data.lastLogin + '</span>';
-                    html += '</div>';
-                    html += '<div style="font-size: 18px; color: #1E5BFF; font-weight: 600;">';
-                    html += '📱 ' + data.phone;
-                    html += '</div>';
-                    html += '</div>';
-                });
-
-                container.innerHTML = html;
-            } catch (error) {
-                container.innerHTML = '<div class="error-msg">Unable to load phone numbers.</div>';
+                firstEl.innerHTML = fafHtml;
             }
         }
 
-        // Password Functions
-        function changePassword() {
-            const current = document.getElementById('currentPassword').value;
-            const newPass = document.getElementById('newPassword').value;
-            const confirm = document.getElementById('confirmPassword').value;
+        // Block 2: TOP 3 MOST ACTIVE (15 days)
+        const today = getTodayStr();
+        const activityMap = {};
 
-            if (!current || !newPass || !confirm) {
-                alert('Please fill all fields!');
-                return;
-            }
+        answers.forEach(a => {
+            const pin = a.studentPin;
+            if (!pin) return;
+            if (!activityMap[pin]) activityMap[pin] = { name: a.studentName || 'Unknown', pin, count: 0, streak: 0 };
+            activityMap[pin].count += 1;
+            if (a.studentName) activityMap[pin].name = a.studentName;
+        });
 
-            if (current !== teacherPassword) {
-                alert('Current password is incorrect!');
-                return;
-            }
+        const localStats = getAllStudentStats();
+        localStats.forEach(s => {
+            if (!activityMap[s.pin]) activityMap[s.pin] = { name: s.name, pin: s.pin, count: 0, streak: 0 };
+            activityMap[s.pin].localDays = s.days;
+            activityMap[s.pin].streak = s.streak;
+        });
 
-            if (newPass !== confirm) {
-                alert('New passwords do not match!');
-                return;
-            }
+        const sorted = Object.values(activityMap).sort((a, b) => {
+            const aScore = a.count + (a.localDays || 0);
+            const bScore = b.count + (b.localDays || 0);
+            return bScore - aScore;
+        });
 
-            if (newPass.length < 6) {
-                alert('Password must be at least 6 characters long!');
-                return;
-            }
+        const top3 = sorted.slice(0, 3);
+        const podiumColors = [
+            { bg: 'rgba(255,215,0,0.15)', border: '#FFD700', medal: '🥇', label: '1st Place', color: '#FFD700' },
+            { bg: 'rgba(192,192,192,0.15)', border: '#C0C0C0', medal: '🥈', label: '2nd Place', color: '#C0C0C0' },
+            { bg: 'rgba(205,127,50,0.15)', border: '#cd7f32', medal: '🥉', label: '3rd Place', color: '#cd7f32' }
+        ];
 
-            teacherPassword = newPass;
-            localStorage.setItem('teacherPassword', newPass);
-
-            document.getElementById('currentPassword').value = '';
-            document.getElementById('newPassword').value = '';
-            document.getElementById('confirmPassword').value = '';
-
-            alert('Password changed successfully!');
-            backToTeacher();
-        }
-
-        function resetAllData() {
-            if (!confirm('Are you sure you want to reset ALL data? This action cannot be undone!')) {
-                return;
-            }
-
-            if (!confirm('This will delete all questions, answers, media, and phone numbers. Are you absolutely sure?')) {
-                return;
-            }
-
-            alert('For security reasons, data reset must be done on the server. Please contact your administrator.');
-        }
-
-        // =====================================================
-        // LEADERBOARD, STREAKS & 15-DAY AUTO-DELETE SYSTEM
-        // =====================================================
-
-        // ---------- Utility ----------
-        function getTodayStr() {
-            return new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-        }
-
-        function daysBetween(dateStr1, dateStr2) {
-            const d1 = new Date(dateStr1);
-            const d2 = new Date(dateStr2);
-            return Math.round(Math.abs(d2 - d1) / (1000 * 60 * 60 * 24));
-        }
-
-        // ---------- Streak Storage ----------
-        // Streaks stored locally per student: { pin: { count, lastDate } }
-        function getStreaks() {
-            try {
-                return JSON.parse(localStorage.getItem('studentStreaks') || '{}');
-            } catch { return {}; }
-        }
-
-        function saveStreaks(streaks) {
-            localStorage.setItem('studentStreaks', JSON.stringify(streaks));
-        }
-
-        function updateStreak(pin) {
-            const streaks = getStreaks();
-            const today = getTodayStr();
-            if (!streaks[pin]) {
-                streaks[pin] = { count: 1, lastDate: today };
-            } else {
-                const diff = daysBetween(streaks[pin].lastDate, today);
-                if (diff === 0) {
-                    // same day, no update
-                } else if (diff === 1) {
-                    streaks[pin].count += 1;
-                    streaks[pin].lastDate = today;
-                } else {
-                    // streak broken
-                    streaks[pin].count = 1;
-                    streaks[pin].lastDate = today;
-                }
-            }
-            saveStreaks(streaks);
-        }
-
-        function getStreak(pin) {
-            const streaks = getStreaks();
-            return streaks[pin] ? streaks[pin].count : 0;
-        }
-
-        // ---------- Score Storage (15 days, auto-delete) ----------
-        // Scores: { pin: { name, scores: [ { date, points } ] } }
-        function getScores() {
-            try {
-                return JSON.parse(localStorage.getItem('studentScores') || '{}');
-            } catch { return {}; }
-        }
-
-        function saveScores(scores) {
-            localStorage.setItem('studentScores', JSON.stringify(scores));
-        }
-
-        function autoDeleteOldData() {
-            // Delete scores older than 15 days
-            const scores = getScores();
-            const today = getTodayStr();
-            let changed = false;
-            for (const pin in scores) {
-                const before = scores[pin].scores.length;
-                scores[pin].scores = scores[pin].scores.filter(s => daysBetween(s.date, today) <= 15);
-                if (scores[pin].scores.length !== before) changed = true;
-            }
-            if (changed) saveScores(scores);
-
-            // Also clear streaks for students who haven't answered in 15+ days
-            const streaks = getStreaks();
-            for (const pin in streaks) {
-                if (daysBetween(streaks[pin].lastDate, today) > 15) {
-                    streaks[pin].count = 0;
-                }
-            }
-            saveStreaks(streaks);
-        }
-
-        function addScore(pin, name, points) {
-            autoDeleteOldData();
-            const scores = getScores();
-            if (!scores[pin]) scores[pin] = { name, scores: [] };
-            scores[pin].name = name; // update name
-            const today = getTodayStr();
-            // Only one score per day
-            const exists = scores[pin].scores.find(s => s.date === today);
-            if (!exists) {
-                scores[pin].scores.push({ date: today, points });
-            }
-            saveScores(scores);
-        }
-
-        function getTotalScore(pin) {
-            const scores = getScores();
-            if (!scores[pin]) return 0;
-            return scores[pin].scores.reduce((sum, s) => sum + (s.points || 0), 0);
-        }
-
-        function getAllStudentStats() {
-            autoDeleteOldData();
-            const scores = getScores();
-            const streaks = getStreaks();
-            return Object.entries(scores).map(([pin, data]) => ({
-                pin,
-                name: data.name,
-                total: data.scores.reduce((s, x) => s + (x.points || 0), 0),
-                days: data.scores.length,
-                streak: streaks[pin] ? streaks[pin].count : 0
-            })).sort((a, b) => b.total - a.total);
-        }
-
-        // Award score when student submits answer
-        function awardScoreForAnswer(pin, name) {
-            addScore(pin, name, 10); // 10 pts per answer
-            updateStreak(pin);
-        }
-
-        // ---------- Day-14 Ranking ----------
-        function getDayNumber() {
-            // Count days since first score entry across all students
-            const scores = getScores();
-            let firstDate = null;
-            for (const pin in scores) {
-                for (const s of scores[pin].scores) {
-                    if (!firstDate || s.date < firstDate) firstDate = s.date;
-                }
-            }
-            if (!firstDate) return 1;
-            return daysBetween(firstDate, getTodayStr()) + 1;
-        }
-
-        function isDay14() {
-            return getDayNumber() === 14;
-        }
-
-        function renderRankingSection(students) {
-            const top5 = students.slice(0, 5);
-            const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
-            let html = '<div class="ranking-section">';
-            html += '<h3>🎖️ Day 14 Final Rankings!</h3>';
-            top5.forEach((s, i) => {
-                html += `<div class="ranking-item">
-                    <span class="ranking-badge">${medals[i]}</span>
-                    <span class="ranking-name">${s.name}</span>
-                    <span class="ranking-pts">${s.total} pts</span>
+        if (top3.length === 0) {
+            activeEl.innerHTML = '<p style="color:#aaa;text-align:center;padding:10px;">No activity data yet. Students need to submit answers!</p>';
+        } else {
+            let html = '<div style="display:flex;flex-direction:column;gap:12px;">';
+            top3.forEach((s, i) => {
+                const c = podiumColors[i];
+                const ph = phones[s.pin];
+                const streak = s.streak || 0;
+                const totalAnswers = s.count;
+                const activeDays = s.localDays || 0;
+                html += `
+                <div style="background:${c.bg};border:1.5px solid ${c.border};border-radius:12px;padding:14px;display:flex;align-items:center;gap:12px;">
+                    <div style="text-align:center;min-width:44px;">
+                        <div style="font-size:32px;">${c.medal}</div>
+                        <div style="font-size:10px;color:${c.color};font-weight:700;margin-top:2px;">${c.label}</div>
+                    </div>
+                    <div style="flex:1;">
+                        <div style="color:#222;font-weight:700;font-size:15px;">${s.name}</div>
+                        <div style="color:#666;font-size:12px;">PIN: ${s.pin} ${ph ? '· 📱 ' + ph.phone : ''}</div>
+                        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
+                            <span style="background:#e8f5e9;padding:2px 8px;border-radius:10px;font-size:12px;color:#2e7d32;">📝 ${totalAnswers} answer${totalAnswers !== 1 ? 's' : ''}</span>
+                            ${activeDays > 0 ? `<span style="background:#e3f2fd;padding:2px 8px;border-radius:10px;font-size:12px;color:#1565c0;">📅 ${activeDays} day${activeDays !== 1 ? 's' : ''} active</span>` : ''}
+                            ${streak > 0 ? `<span style="background:#fff3e0;padding:2px 8px;border-radius:10px;font-size:12px;color:#e65100;">🔥 ${streak} streak</span>` : ''}
+                        </div>
+                    </div>
                 </div>`;
             });
             html += '</div>';
-            return html;
-        }
-
-        // ---------- Leaderboard Render ----------
-        async function loadLeaderboard() {
-            const container = document.getElementById('leaderboardContent');
-            container.innerHTML = '<div class="loading">Loading...</div>';
-            autoDeleteOldData();
-
-            const students = getAllStudentStats();
-            const medals = ['🥇', '🥈', '🥉'];
-            const dayNum = getDayNumber();
-
-            let html = '';
-
-            html += `<div style="text-align:center;color:#999;font-size:13px;margin-bottom:12px;">📅 Day <strong>${dayNum}</strong> of 15 &nbsp;|&nbsp; Data auto-deletes after Day 15</div>`;
-
-            // Always show Top 3 podium if there are students
-            if (students.length > 0) {
-                html += '<div style="background:linear-gradient(135deg,#1E5BFF 0%,#764ba2 100%);color:white;padding:18px;border-radius:14px;margin-bottom:16px;">';
-                html += '<div style="text-align:center;font-size:18px;font-weight:700;margin-bottom:12px;letter-spacing:1px;">🏆 Top 3 Champions</div>';
-                students.slice(0, 3).forEach((s, i) => {
-                    html += `<div style="display:flex;align-items:center;gap:12px;background:rgba(255,255,255,0.15);border-radius:10px;padding:10px 14px;margin-bottom:8px;">
-                        <span style="font-size:22px;min-width:36px;">${medals[i]}</span>
-                        <span style="flex:1;font-weight:700;font-size:15px;">${s.name} <span style="font-size:12px;opacity:0.8;">(${s.pin})</span></span>
-                        ${s.streak > 0 ? `<span style="background:rgba(255,152,0,0.4);padding:3px 8px;border-radius:12px;font-size:12px;">🔥${s.streak}</span>` : ''}
-                        <span style="font-weight:700;font-size:15px;">${s.total} pts</span>
-                    </div>`;
-                });
-                html += '</div>';
+            if (sorted.length > 3) {
+                html += `<div style="text-align:center;color:#999;font-size:12px;margin-top:10px;">+${sorted.length - 3} more student${sorted.length - 3 > 1 ? 's' : ''} participating</div>`;
             }
-
-            html += '<div class="leaderboard-section">';
-            html += '<div class="leaderboard-title">🏆 Full Leaderboard</div>';
-
-            if (students.length === 0) {
-                html += '<p style="color:#999;text-align:center;">No data yet. Students need to submit answers!</p>';
-            } else {
-                students.forEach((s, i) => {
-                    const rankClass = i < 3 ? `rank-${i+1}` : '';
-                    const medal = medals[i] || `#${i+1}`;
-                    const streakBadge = s.streak > 0 ? `<span class="streak-badge">🔥 ${s.streak} day${s.streak>1?'s':''}</span>` : '';
-                    html += `<div class="leaderboard-item ${rankClass}">
-                        <span class="rank-badge">${medal}</span>
-                        <span class="lb-name">${s.name} ${streakBadge}</span>
-                        <span style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">
-                            <span class="lb-score">${s.total} pts</span>
-                            <span style="color:#999;font-size:12px;">${s.days} day${s.days!==1?'s':''} active</span>
-                        </span>
-                    </div>`;
-                });
-            }
-
-            html += '</div>';
-            container.innerHTML = html;
+            activeEl.innerHTML = html;
         }
 
-        // ---------- Hook answer submission to award scores ----------
-        const _originalSubmitAnswer = submitAnswer;
-        async function submitAnswer(questionId) {
-            const answerText = document.getElementById('studentAnswer') ? document.getElementById('studentAnswer').value.trim() : '';
-            if (!answerText) { alert('Please write your answer!'); return; }
-            try {
-                await apiPost('/answers', {
-                    questionId: questionId,
-                    studentPin: currentStudent,
-                    studentName: currentStudentName,
-                    answer: answerText,
-                    type: 'question'
-                });
-                awardScoreForAnswer(currentStudent, currentStudentName);
-                alert('Answer submitted successfully!');
-                loadStudentData();
-            } catch (error) {
-                alert(error.message || 'Error submitting answer. Please try again.');
-            }
+    } catch (error) {
+        firstEl.innerHTML = '<div style="color:#dc3545;padding:10px;">Error loading data. Check connection.</div>';
+        activeEl.innerHTML = '<div style="color:#dc3545;padding:10px;">Error loading data. Check connection.</div>';
+    }
+}
+
+
+autoDeleteOldData();
+
+// =====================================================
+// LOGIN PAGE — FIRST ANSWER FIRST BANNER
+// =====================================================
+async function loadLoginFafBanner() {
+    const el = document.getElementById('loginFafContent');
+    if (!el) return;
+    try {
+        const questions = await apiGet('/questions') || [];
+        const answers = await apiGet('/answers') || [];
+
+        const yesterdayQ = questions.length >= 2 ? questions[questions.length - 2] : (questions.length === 1 ? questions[0] : null);
+
+        if (!yesterdayQ) {
+            el.innerHTML = '<div style="color:#aaa;font-size:12px;text-align:center;">No previous question data yet.</div>';
+            return;
         }
 
-        const _originalSubmitMediaAnswer = submitMediaAnswer;
-        async function submitMediaAnswer(mediaId) {
-            const answerText = document.getElementById('mediaAnswer-' + mediaId) ? document.getElementById('mediaAnswer-' + mediaId).value.trim() : '';
-            if (!answerText) { alert('Please write your response!'); return; }
-            try {
-                await apiPost('/answers', {
-                    questionId: mediaId,
-                    studentPin: currentStudent,
-                    studentName: currentStudentName,
-                    answer: answerText,
-                    type: 'media'
-                });
-                awardScoreForAnswer(currentStudent, currentStudentName);
-                alert('Response submitted successfully!');
-                loadStudentData();
-            } catch (error) {
-                alert(error.message || 'Error submitting response. Please try again.');
-            }
+        const yAnswers = answers
+            .filter(a => a.questionId === yesterdayQ.id && (!a.type || a.type === 'question'))
+            .sort((a, b) => new Date(a.submittedAt || a.date) - new Date(b.submittedAt || b.date));
+
+        if (yAnswers.length === 0) {
+            el.innerHTML = `<div style="color:#aaa;font-size:12px;text-align:center;">No one answered yesterday's question yet.</div>`;
+            return;
         }
 
-        // =====================================================
-        // BULK UPLOAD & AUTO-POST SYSTEM
-        // =====================================================
+        const medals = ['🥇','🥈','🥉'];
+        const colors = ['#FFD700','#C0C0C0','#cd7f32'];
+        const top3 = yAnswers.slice(0, 3);
 
-        function switchQMode(mode) {
-            if (mode === 'single') {
-                document.getElementById('singleQMode').style.display = 'block';
-                document.getElementById('bulkQMode').style.display = 'none';
-                document.getElementById('singleQBtn').style.background = 'linear-gradient(135deg,#1E5BFF,#764ba2)';
-                document.getElementById('singleQBtn').style.color = 'white';
-                document.getElementById('bulkQBtn').style.background = '#e0e0e0';
-                document.getElementById('bulkQBtn').style.color = '#333';
-            } else {
-                document.getElementById('singleQMode').style.display = 'none';
-                document.getElementById('bulkQMode').style.display = 'block';
-                document.getElementById('bulkQBtn').style.background = 'linear-gradient(135deg,#1E5BFF,#764ba2)';
-                document.getElementById('bulkQBtn').style.color = 'white';
-                document.getElementById('singleQBtn').style.background = '#e0e0e0';
-                document.getElementById('singleQBtn').style.color = '#333';
-                renderBulkFields();
-            }
-        }
-
-        function getBulkSchedule() {
-            try { return JSON.parse(localStorage.getItem('bulkSchedule') || 'null'); } catch { return null; }
-        }
-
-        function saveBulkSchedule(data) {
-            localStorage.setItem('bulkSchedule', JSON.stringify(data));
-        }
-
-        function renderBulkFields() {
-            const container = document.getElementById('bulkQFields');
-            const existing = getBulkSchedule();
-            let html = '';
-            const today = new Date();
-
-            for (let i = 0; i < 10; i++) {
-                const d = new Date(today);
-                d.setDate(d.getDate() + i + 1); // starts tomorrow
-                const dateStr = d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
-                const isoDate = d.toISOString().split('T')[0];
-                const existingQ = existing ? existing.questions[i] : null;
-                const posted = existingQ && existingQ.posted;
-
-                html += `<div style="border-left:4px solid ${posted?'#28a745':'#1E5BFF'};padding:12px;margin-bottom:14px;background:${posted?'#e8f5e9':'#f0f4ff'};border-radius:8px;">
-                    <div style="font-weight:700;color:${posted?'#28a745':'#1E5BFF'};margin-bottom:8px;">Day ${i+1} — ${dateStr} ${posted?'✅ Posted':''}</div>
-                    <label style="font-size:13px;color:#555;">Question ${i+1}:</label>
-                    <textarea id="bq_${i}" placeholder="Enter question ${i+1}..." style="width:100%;padding:8px;border:1.5px solid #ccc;border-radius:6px;margin:4px 0 8px;font-family:inherit;font-size:14px;" ${posted?'disabled':''}>${existingQ ? existingQ.question : ''}</textarea>
-                    <label style="font-size:13px;color:#555;">Answer ${i+1}:</label>
-                    <textarea id="ba_${i}" placeholder="Enter answer ${i+1}..." style="width:100%;padding:8px;border:1.5px solid #ccc;border-radius:6px;margin:4px 0;font-family:inherit;font-size:14px;" ${posted?'disabled':''}>${existingQ ? existingQ.answer : ''}</textarea>
-                    <input type="hidden" id="bd_${i}" value="${isoDate}">
-                </div>`;
-            }
-            container.innerHTML = html;
-            renderScheduleInfo();
-        }
-
-        function renderScheduleInfo() {
-            const schedule = getBulkSchedule();
-            const info = document.getElementById('bulkScheduledInfo');
-            if (!schedule) { info.innerHTML = ''; return; }
-            const total = schedule.questions.length;
-            const posted = schedule.questions.filter(q => q.posted).length;
-            const remaining = total - posted;
-            info.innerHTML = `<div style="background:#e7f3ff;border-left:4px solid #1E5BFF;padding:10px;border-radius:6px;margin-bottom:10px;font-size:13px;color:#0066cc;">
-                📊 Schedule: <strong>${posted}/${total}</strong> posted &nbsp;|&nbsp; <strong>${remaining}</strong> remaining
+        let html = `<div style="color:#888;font-size:11px;margin-bottom:8px;font-style:italic;">Q: ${yesterdayQ.question.substring(0,65)}${yesterdayQ.question.length>65?'...':''}</div>`;
+        html += `<div style="display:flex;flex-direction:column;gap:6px;">`;
+        top3.forEach((ans, i) => {
+            html += `
+            <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,0.05);border:1px solid ${colors[i]}55;border-radius:8px;padding:7px 10px;">
+                <span style="font-size:20px;">${medals[i]}</span>
+                <div style="flex:1;">
+                    <span style="color:${colors[i]};font-weight:700;font-size:13px;">${ans.studentName || 'Unknown'}</span>
+                    <span style="color:#888;font-size:11px;margin-left:6px;">(${ans.studentPin})</span>
+                </div>
+                ${i===0?`<span style="background:rgba(255,215,0,0.15);border:1px solid #FFD700;border-radius:10px;padding:1px 8px;font-size:10px;color:#FFD700;font-weight:700;">⚡ FIRST</span>`:''}
             </div>`;
+        });
+        html += `</div>`;
+        if (yAnswers.length > 3) {
+            html += `<div style="color:#666;font-size:11px;text-align:center;margin-top:6px;">+${yAnswers.length-3} more also answered</div>`;
         }
+        el.innerHTML = html;
+    } catch (e) {
+        const el2 = document.getElementById('loginFafContent');
+        if (el2) el2.innerHTML = '<div style="color:#555;font-size:12px;text-align:center;">Could not load.</div>';
+    }
+}
 
-        function saveBulkQuestions() {
-            const questions = [];
-            let valid = true;
-            for (let i = 0; i < 10; i++) {
-                const q = document.getElementById('bq_' + i);
-                const a = document.getElementById('ba_' + i);
-                const d = document.getElementById('bd_' + i);
-                if (q.disabled) {
-                    // already posted, keep existing
-                    const existing = getBulkSchedule();
-                    questions.push(existing.questions[i]);
-                    continue;
-                }
-                if (!q.value.trim()) { alert(`Please fill Question ${i+1}`); valid = false; break; }
-                if (!a.value.trim()) { alert(`Please fill Answer ${i+1}`); valid = false; break; }
-                questions.push({ question: q.value.trim(), answer: a.value.trim(), date: d.value, posted: false });
-            }
-            if (!valid) return;
-            saveBulkSchedule({ savedOn: new Date().toISOString(), questions });
-            alert('✅ 10 questions saved! They will auto-post one per day starting tomorrow.\n\nNote: Auto-post runs when you open this page each day.');
-            renderBulkFields();
-        }
-
-        async function checkAndAutoPost() {
-            const schedule = getBulkSchedule();
-            if (!schedule) return;
-            const today = getTodayStr();
-            let posted = false;
-
-            for (let i = 0; i < schedule.questions.length; i++) {
-                const q = schedule.questions[i];
-                if (!q.posted && q.date === today) {
-                    try {
-                        // Find previous question's answer to attach
-                        const prevAnswer = i > 0 ? schedule.questions[i-1].answer : '';
-                        await apiPost('/questions', { question: q.question, answer: prevAnswer });
-                        schedule.questions[i].posted = true;
-                        saveBulkSchedule(schedule);
-                        posted = true;
-                        console.log('Auto-posted question for', today, ':', q.question);
-                    } catch (err) {
-                        console.error('Auto-post failed:', err);
-                    }
-                    break;
-                }
-            }
-
-            if (posted) {
-                alert('✅ Today\'s scheduled question was posted automatically!');
-                loadTeacherQuestions();
-                renderBulkFields();
-            } else {
-                const pending = schedule.questions.find(q => !q.posted);
-                if (pending) {
-                    alert(`No question scheduled for today. Next question is on ${pending.date}.`);
-                } else {
-                    alert('All 10 questions have been posted!');
-                }
-            }
-        }
-
-        // Auto-check on page load (when teacher is logged in)
-        async function autoPostCheck() {
-            const schedule = getBulkSchedule();
-            if (!schedule) return;
-            const today = getTodayStr();
-            for (let i = 0; i < schedule.questions.length; i++) {
-                const q = schedule.questions[i];
-                if (!q.posted && q.date === today) {
-                    try {
-                        const prevAnswer = i > 0 ? schedule.questions[i-1].answer : '';
-                        await apiPost('/questions', { question: q.question, answer: prevAnswer });
-                        schedule.questions[i].posted = true;
-                        saveBulkSchedule(schedule);
-                        console.log('Auto-posted scheduled question for', today);
-                    } catch (err) {
-                        console.error('Auto-post check failed:', err);
-                    }
-                    break;
-                }
-            }
-        }
-
-        // Run auto-delete on load
-        autoDeleteOldData();
-    </script>
+loadLoginFafBanner();
+</script>
 </body>
 </html>
-
-
-
-
-
-
