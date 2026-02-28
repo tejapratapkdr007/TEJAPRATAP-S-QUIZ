@@ -433,6 +433,8 @@
 // CONFIGURATION
 // =====================================================
 const API_URL = 'https://tejapratap-s-quiz.onrender.com';
+// Keep Render server awake by pinging every 14 minutes
+setInterval(() => fetch(API_URL + '/health').catch(()=>{}), 14 * 60 * 1000);
 
 let currentStudent = null;
 let currentStudentName = null;
@@ -843,9 +845,27 @@ function showToast(msg, type = 'info') {
 // =====================================================
 // API HELPERS
 // =====================================================
+// Wake up the server if it's sleeping (Render free tier spins down)
+let _serverAwake = false;
+async function wakeServer() {
+    if (_serverAwake) return true;
+    try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 65000);
+        const res = await fetch(`${API_URL}/health`, { signal: controller.signal });
+        clearTimeout(timeout);
+        if (res.ok) { _serverAwake = true; return true; }
+    } catch(e) { /* still sleeping */ }
+    return false;
+}
+
 async function apiGet(endpoint) {
     try {
-        const response = await fetch(`${API_URL}${endpoint}`);
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 65000);
+        const response = await fetch(`${API_URL}${endpoint}`, { signal: controller.signal });
+        clearTimeout(timeout);
+        _serverAwake = true;
         if (!response.ok) { if (response.status === 404) return null; throw new Error(`HTTP ${response.status}`); }
         return await response.json();
     } catch (error) { console.error('API GET Error:', error); return null; }
@@ -853,11 +873,16 @@ async function apiGet(endpoint) {
 
 async function apiPost(endpoint, data) {
     try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 65000);
         const response = await fetch(`${API_URL}${endpoint}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify(data),
+            signal: controller.signal
         });
+        clearTimeout(timeout);
+        _serverAwake = true;
         if (!response.ok) { const e = await response.json(); throw new Error(e.error || `HTTP ${response.status}`); }
         return await response.json();
     } catch (error) { console.error('API POST Error:', error); throw error; }
@@ -952,7 +977,7 @@ function switchTab(tab) {
 // =====================================================
 async function loadStudentData() {
     const content = document.getElementById('studentContent');
-    content.innerHTML = '<div class="loading">Loading...</div>';
+    content.innerHTML = '<div class="loading">⏳ Connecting to server...<br><small style="color:#aaa;">Server may take ~60 sec to wake up on first visit. Please wait!</small></div>';
     try {
         const latestMedia = await apiGet('/media/latest');
         const questions = await apiGet('/questions') || [];
