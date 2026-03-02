@@ -555,7 +555,7 @@
         <button class="btn-secondary" onclick="showSection('teacherSection')">↩️ Back to Dashboard</button>
     </div>
 
-    <div class="designer-footer">Designed by <span>SATHWIK</span></div>
+    <div class="designer-footer">Designed by <span>SATHWIK__DEENANAATH</span></div>
 </div>
 
 <script>
@@ -1505,17 +1505,8 @@ async function renderMediaBulkFields() {
             ${postedAtHtml}
             <label style="font-size:13px;color:#aaa;">Caption / Topic (optional):</label>
             <input type="text" id="mc_${i}" placeholder="e.g. Today's engineering tip..." style="margin:4px 0 8px;" ${posted?'readonly':''} value="${item?item.caption||'':''}">
-            <label style="font-size:13px;color:#aaa;">📝 Image/Audio URL or choose a file:</label>
-            <div style="display:flex;gap:8px;align-items:flex-start;margin:4px 0 6px;">
-                <textarea id="mu_${i}" placeholder="Paste image/audio URL, or use Choose File below..." style="min-height:50px;flex:1;" ${posted?'readonly':''}>${item?item.urlOrText||'':''}</textarea>
-            </div>
-            ${posted ? '' : `
-            <div style="margin-bottom:8px;">
-                <input type="file" id="mfile_${i}" accept="image/*,audio/*" style="display:none;" onchange="handleBulkFileSelect(${i}, this)">
-                <button type="button" onclick="document.getElementById('mfile_${i}').click()" style="width:auto;padding:7px 16px;font-size:13px;background:linear-gradient(135deg,#1E5BFF,#764ba2);border-radius:8px;margin:0;">📂 Choose File (Image/Audio)</button>
-                <span id="mfile_name_${i}" style="color:#888;font-size:12px;margin-left:8px;"></span>
-            </div>
-            <div id="mfile_preview_${i}" style="margin-bottom:8px;"></div>`}
+            <label style="font-size:13px;color:#aaa;">📝 Image/Audio URL or short text content:</label>
+            <textarea id="mu_${i}" placeholder="Paste image URL or audio URL, or leave blank for text-only..." style="min-height:50px;margin:4px 0 8px;" ${posted?'readonly':''}>${item?item.urlOrText||'':''}</textarea>
             <label style="font-size:13px;color:#ff9800;font-weight:700;">❓ Question for Students:</label>
             <textarea id="mq_${i}" placeholder="What question will students answer about this media?" style="min-height:60px;margin:4px 0 8px;border-color:#ff9800;" ${posted?'readonly':''}>${item?item.question||'':''}</textarea>
             <label style="font-size:13px;color:#22c55e;font-weight:700;">✅ Answer (shown after student submits):</label>
@@ -1758,6 +1749,7 @@ function switchQMode(mode) {
         document.getElementById('bulkQBtn').style.color = 'white';
         document.getElementById('singleQBtn').style.background = '#2a2a3e';
         document.getElementById('singleQBtn').style.color = '#aaa';
+        window._qSlotCountOverride = null; // reset so existing schedule count or default is used
         renderBulkFields();
     }
 }
@@ -1768,8 +1760,11 @@ async function renderBulkFields() {
     container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading schedule...</div>';
     const existing = await getBulkSchedule();
     const today = getTodayStr();
-    // Determine slot count from existing or default 10, max 60
-    const slotCount = existing ? Math.min(Math.max(existing.questions.length, 10), 60) : 10;
+    // Read dropdown value if it already exists (user changed it), else use existing schedule length or default 10
+    const countEl = document.getElementById('qSlotCount');
+    const userSelected = window._qSlotCountOverride || (countEl ? parseInt(countEl.value) : null);
+    const slotCount = userSelected ? userSelected : (existing ? Math.min(Math.max(existing.questions.length, 10), 60) : 10);
+    window._qSlotCountOverride = slotCount; // keep it sticky
     let html = `<div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
         <label style="color:#aaa;font-size:13px;margin:0;">Number of questions:</label>
         <select id="qSlotCount" onchange="changeQSlotCount()" style="background:#0a0a14;color:#e0e0e0;border:2px solid #333;border-radius:6px;padding:6px 10px;font-size:14px;">
@@ -1805,7 +1800,10 @@ async function renderBulkFields() {
 }
 
 function changeQSlotCount() {
-    // Re-render with new slot count (doesn't save, just re-renders fields)
+    // The dropdown value is read inside renderBulkFields via getElementById('qSlotCount')
+    // We store it in a variable so it survives the innerHTML reset
+    const sel = document.getElementById('qSlotCount');
+    if (sel) window._qSlotCountOverride = parseInt(sel.value);
     renderBulkFields();
 }
 
@@ -2584,43 +2582,6 @@ function showToast(msg, type = 'info') {
     toast.textContent = msg;
     document.body.appendChild(toast);
     setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.4s'; setTimeout(() => toast.remove(), 400); }, 3200);
-}
-
-// =====================================================
-// BULK MEDIA FILE CHOOSE & AUTO-PREVIEW
-// =====================================================
-function handleBulkFileSelect(i, input) {
-    const file = input.files[0];
-    if (!file) return;
-    const nameEl = document.getElementById('mfile_name_' + i);
-    const previewEl = document.getElementById('mfile_preview_' + i);
-    const urlEl = document.getElementById('mu_' + i);
-
-    const isImage = file.type.startsWith('image/');
-    const isAudio = file.type.startsWith('audio/');
-
-    if (!isImage && !isAudio) {
-        showToast('Only image or audio files allowed!', 'error');
-        input.value = '';
-        return;
-    }
-
-    nameEl.textContent = '📎 ' + file.name + ' (' + (file.size > 1024*1024 ? (file.size/1024/1024).toFixed(1)+'MB' : (file.size/1024).toFixed(0)+'KB') + ')';
-
-    const reader = new FileReader();
-    reader.onload = function(e) {
-        const base64 = e.target.result; // full data URL: data:image/...;base64,...
-        urlEl.value = base64;
-
-        // Auto preview
-        if (isImage) {
-            previewEl.innerHTML = `<img src="${base64}" style="max-width:100%;max-height:160px;border-radius:8px;border:2px solid #ff9800;margin-top:4px;" alt="preview">`;
-        } else if (isAudio) {
-            previewEl.innerHTML = `<audio src="${base64}" controls autoplay style="width:100%;margin-top:6px;border-radius:8px;"></audio>
-                <div style="color:#ff9800;font-size:12px;margin-top:4px;">🎵 Audio loaded & auto-playing</div>`;
-        }
-    };
-    reader.readAsDataURL(file);
 }
 
 // Load FAF banner on page load
