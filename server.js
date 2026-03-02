@@ -27,7 +27,9 @@ function saveData() {
     try {
         fs.writeFileSync(DATA_FILE, JSON.stringify({
             questions, studentAnswers, mediaFiles, studentPhones,
-            bulkSchedule, studentScores, studentStreaks
+            bulkSchedule, studentScores, studentStreaks,
+            wordItems, affairsItems,
+            mediaSchedule, wordSchedule, affairsSchedule
         }, null, 2));
     } catch (e) { console.error("Save data error:", e.message); }
 }
@@ -43,6 +45,11 @@ let studentPhones  = saved.studentPhones  || {};
 let bulkSchedule   = saved.bulkSchedule   || null;
 let studentScores  = saved.studentScores  || {};
 let studentStreaks  = saved.studentStreaks || {};
+let wordItems      = saved.wordItems      || [];  // Word of the Day
+let affairsItems   = saved.affairsItems   || [];  // Current Affairs
+let mediaSchedule  = saved.mediaSchedule  || null;
+let wordSchedule   = saved.wordSchedule   || null;
+let affairsSchedule = saved.affairsSchedule || null;
 
 console.log(`✅ Data loaded: ${questions.length} questions, ${studentAnswers.length} answers, ${Object.keys(studentPhones).length} students`);
 
@@ -247,8 +254,127 @@ app.post("/admin/reset-all", (req, res) => {
     if (req.body.confirmPassword !== "RESET_ALL_DATA_TEJAPRATAP") return res.status(403).json({ error: "Wrong password" });
     questions = []; studentAnswers = []; mediaFiles = []; studentPhones = {};
     bulkSchedule = null; studentScores = {}; studentStreaks = {};
+    wordItems = []; affairsItems = []; mediaSchedule = null; wordSchedule = null; affairsSchedule = null;
     saveData();
     res.json({ success: true, message: "All data reset" });
+});
+
+// =====================================================
+// MEDIA SCHEDULE (separate from /schedule)
+// =====================================================
+app.get("/schedule/media", (req, res) => res.json(mediaSchedule || { empty: true }));
+app.post("/schedule/media", (req, res) => { const { schedule } = req.body; if (!schedule) return res.status(400).json({ error: "Schedule required" }); mediaSchedule = schedule; saveData(); res.json({ success: true }); });
+app.delete("/schedule/media", (req, res) => { mediaSchedule = null; saveData(); res.json({ success: true }); });
+app.post("/schedule/media/mark-posted", (req, res) => {
+    const { index, postedAt } = req.body;
+    if (!mediaSchedule || !mediaSchedule.items || index === undefined) return res.status(400).json({ error: "Invalid" });
+    if (mediaSchedule.items[index]) {
+        mediaSchedule.items[index].posted = true;
+        mediaSchedule.items[index].postedAt = postedAt || new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        mediaSchedule.lastAutoPost = { day: index + 1, time: mediaSchedule.items[index].postedAt };
+    }
+    saveData(); res.json({ success: true });
+});
+
+// Media text post (for bulk media schedule)
+app.post("/media/text", (req, res) => {
+    const { question, answer, caption, urlOrText } = req.body;
+    if (!question) return res.status(400).json({ error: "Question required" });
+    const newMedia = {
+        id: Date.now(), type: urlOrText && urlOrText.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? 'image' : urlOrText && urlOrText.match(/\.(mp3|wav|ogg|m4a)$/i) ? 'audio' : 'text',
+        data: urlOrText || '', fileName: caption || 'Media Item',
+        opinion: question, expectedAnswer: answer || null, explanation: null,
+        date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+    };
+    mediaFiles.push(newMedia); saveData();
+    res.json({ success: true, media: newMedia });
+});
+
+// Set/update media expected answer
+const setMediaAnswer = (req, res) => {
+    const { expectedAnswer } = req.body;
+    const m = mediaFiles.find(m => m.id === parseInt(req.params.id));
+    if (!m) return res.status(404).json({ error: "Not found" });
+    m.expectedAnswer = expectedAnswer;
+    saveData(); res.json({ success: true, media: m });
+};
+app.put("/media/:id/answer", setMediaAnswer);
+app.post("/media/:id/answer", setMediaAnswer);
+
+// =====================================================
+// WORD OF THE DAY
+// =====================================================
+app.get("/word", (req, res) => res.json(wordItems));
+
+app.post("/word", (req, res) => {
+    const { word, question, answer } = req.body;
+    if (!word || !question) return res.status(400).json({ error: "Word and question required" });
+    const item = { id: Date.now(), word, question, answer: (answer && answer.trim()) ? answer.trim() : null, date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) };
+    wordItems.push(item); saveData();
+    res.json({ success: true, item });
+});
+
+const setWordAnswer = (req, res) => {
+    const { answer } = req.body;
+    const w = wordItems.find(w => w.id === parseInt(req.params.id));
+    if (!w) return res.status(404).json({ error: "Not found" });
+    if (!answer || !answer.trim()) return res.status(400).json({ error: "Answer required" });
+    w.answer = answer.trim(); saveData();
+    res.json({ success: true, item: w });
+};
+app.put("/word/:id/answer", setWordAnswer);
+app.post("/word/:id/answer", setWordAnswer);
+
+app.get("/schedule/word", (req, res) => res.json(wordSchedule || { empty: true }));
+app.post("/schedule/word", (req, res) => { const { schedule } = req.body; if (!schedule) return res.status(400).json({ error: "Required" }); wordSchedule = schedule; saveData(); res.json({ success: true }); });
+app.delete("/schedule/word", (req, res) => { wordSchedule = null; saveData(); res.json({ success: true }); });
+app.post("/schedule/word/mark-posted", (req, res) => {
+    const { index, postedAt } = req.body;
+    if (!wordSchedule || !wordSchedule.words || index === undefined) return res.status(400).json({ error: "Invalid" });
+    if (wordSchedule.words[index]) {
+        wordSchedule.words[index].posted = true;
+        wordSchedule.words[index].postedAt = postedAt || new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        wordSchedule.lastAutoPost = { day: index + 1, time: wordSchedule.words[index].postedAt };
+    }
+    saveData(); res.json({ success: true });
+});
+
+// =====================================================
+// CURRENT AFFAIRS
+// =====================================================
+app.get("/affairs", (req, res) => res.json(affairsItems));
+
+app.post("/affairs", (req, res) => {
+    const { question, answer } = req.body;
+    if (!question) return res.status(400).json({ error: "Question required" });
+    const item = { id: Date.now(), question, answer: (answer && answer.trim()) ? answer.trim() : null, date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" }) };
+    affairsItems.push(item); saveData();
+    res.json({ success: true, item });
+});
+
+const setAffairsAnswer = (req, res) => {
+    const { answer } = req.body;
+    const a = affairsItems.find(a => a.id === parseInt(req.params.id));
+    if (!a) return res.status(404).json({ error: "Not found" });
+    if (!answer || !answer.trim()) return res.status(400).json({ error: "Answer required" });
+    a.answer = answer.trim(); saveData();
+    res.json({ success: true, item: a });
+};
+app.put("/affairs/:id/answer", setAffairsAnswer);
+app.post("/affairs/:id/answer", setAffairsAnswer);
+
+app.get("/schedule/affairs", (req, res) => res.json(affairsSchedule || { empty: true }));
+app.post("/schedule/affairs", (req, res) => { const { schedule } = req.body; if (!schedule) return res.status(400).json({ error: "Required" }); affairsSchedule = schedule; saveData(); res.json({ success: true }); });
+app.delete("/schedule/affairs", (req, res) => { affairsSchedule = null; saveData(); res.json({ success: true }); });
+app.post("/schedule/affairs/mark-posted", (req, res) => {
+    const { index, postedAt } = req.body;
+    if (!affairsSchedule || !affairsSchedule.questions || index === undefined) return res.status(400).json({ error: "Invalid" });
+    if (affairsSchedule.questions[index]) {
+        affairsSchedule.questions[index].posted = true;
+        affairsSchedule.questions[index].postedAt = postedAt || new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        affairsSchedule.lastAutoPost = { day: index + 1, time: affairsSchedule.questions[index].postedAt };
+    }
+    saveData(); res.json({ success: true });
 });
 
 app.use(express.static(__dirname));
