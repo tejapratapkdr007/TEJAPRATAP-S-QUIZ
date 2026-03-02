@@ -217,6 +217,8 @@
                 <div style="color:#555;font-size:12px;margin-top:8px;" id="wakeMsg">Waking up server...</div>
             </div>
         </div>
+        <div id="studentWordOfDayBox" style="display:none;"></div>
+        <div id="studentAffairsBox" style="display:none;"></div>
         <button class="btn-secondary" onclick="logoutStudent()" style="margin-top:16px;">↩️ Logout</button>
     </div>
 
@@ -227,6 +229,8 @@
         <div class="tab-buttons">
             <button class="tab-btn active" onclick="switchTab('questions')">📝 Questions</button>
             <button class="tab-btn" onclick="switchTab('media')">🎵 Media</button>
+            <button class="tab-btn" onclick="switchTab('word')">📖 Word</button>
+            <button class="tab-btn" onclick="switchTab('affairs')">📰 Affairs</button>
             <button class="tab-btn" onclick="switchTab('phones')">📞 Phones</button>
             <button class="tab-btn" onclick="switchTab('rank')" style="background:linear-gradient(135deg,#854d0e,#b45309);color:#fef9c3;">🎖️ RANK</button>
         </div>
@@ -235,7 +239,7 @@
         <div id="questionsTab" class="tab-content active">
             <div style="display:flex;gap:8px;margin-bottom:16px;">
                 <button id="singleQBtn" onclick="switchQMode('single')" style="flex:1;padding:10px;background:#2a2a3e;color:#aaa;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">Single Question</button>
-                <button id="bulkQBtn" onclick="switchQMode('bulk')" style="flex:1;padding:10px;background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">🤖 Auto-Post (10Qs)</button>
+                <button id="bulkQBtn" onclick="switchQMode('bulk')" style="flex:1;padding:10px;background:linear-gradient(135deg,#1E5BFF,#764ba2);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">🤖 Auto-Post (up to 60Qs)</button>
             </div>
 
             <!-- Single Mode -->
@@ -261,9 +265,9 @@
                     <div class="autopost-row"><span class="autopost-label">Next Scheduled Post</span><span class="autopost-value clr-yellow" id="apNextPost">—</span></div>
                     <div class="autopost-row"><span class="autopost-label">Last Auto-Post</span><span class="autopost-value clr-green" id="apLastPost">—</span></div>
                     <div class="progress-bar-wrap"><div class="progress-bar-fill" id="apProgressBar" style="width:0%"></div></div>
-                    <div style="text-align:center;font-size:11px;color:#aaa;margin-top:5px;" id="apProgressLabel">0 of 10 posted</div>
+                    <div style="text-align:center;font-size:11px;color:#aaa;margin-top:5px;" id="apProgressLabel">0 questions posted</div>
                 </div>
-                <div class="info-msg" style="font-size:13px;">📌 Fill 10 questions + answers. They post <strong>one per day</strong> automatically. Machine checks every 60 seconds.</div>
+                <div class="info-msg" style="font-size:13px;">📌 Fill up to <strong>60 questions</strong> + answers. They post <strong>one per day</strong> automatically. Machine checks every 60 seconds.</div>
                 <div id="bulkQFields"></div>
                 <div id="bulkScheduledInfo"></div>
                 <button onclick="saveBulkQuestions()" style="background:linear-gradient(135deg,#1E5BFF,#764ba2);">💾 Save & Activate Auto-Post Machine</button>
@@ -276,23 +280,107 @@
 
         <!-- Media Tab -->
         <div id="mediaTab" class="tab-content">
-            <div style="background:#1f1208;border-radius:12px;padding:18px;margin-bottom:20px;border-left:4px solid #ff9800;">
-                <h2 style="color:#ff9800;margin-bottom:14px;">📤 Post New Media + Question</h2>
-                <div class="input-group">
-                    <label>Upload Image or Audio:</label>
-                    <input type="file" id="mediaFile" accept="image/*,audio/*" onchange="previewMedia()">
-                    <div id="mediaPreview" style="margin-top:8px;"></div>
-                </div>
-                <div class="input-group">
-                    <label>📝 Question for Students:</label>
-                    <textarea id="mediaQuestion" placeholder="e.g. What do you think this image represents?" style="border-color:#ff9800;"></textarea>
-                </div>
-                <div class="input-group">
-                    <label>✅ Expected Answer / Key Points:</label>
-                    <textarea id="mediaAnswer" placeholder="Write the expected answer..."></textarea>
-                </div>
-                <button onclick="uploadMedia()" class="btn-orange">📤 Upload & Post for Students</button>
+            <!-- Mode switcher -->
+            <div style="display:flex;gap:8px;margin-bottom:16px;">
+                <button id="singleMediaBtn" onclick="switchMediaMode('single')" style="flex:1;padding:10px;background:linear-gradient(135deg,#ff9800,#f57c00);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">📤 Single Upload</button>
+                <button id="bulkMediaBtn" onclick="switchMediaMode('bulk')" style="flex:1;padding:10px;background:#2a2a3e;color:#aaa;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">🤖 Auto-Post Media (60)</button>
             </div>
+
+            <!-- Single Media Upload -->
+            <div id="singleMediaMode">
+                <div style="background:#1f1208;border-radius:16px;padding:20px;margin-bottom:20px;border:2px solid #ff9800;">
+                    <h2 style="color:#ff9800;margin-bottom:18px;text-align:center;">📤 Upload Image or Audio</h2>
+
+                    <!-- Drag & Drop Zone -->
+                    <div id="mediaDropZone"
+                         onclick="document.getElementById('mediaFile').click()"
+                         ondragover="handleDragOver(event)"
+                         ondragleave="handleDragLeave(event)"
+                         ondrop="handleDrop(event)"
+                         style="border:2.5px dashed #ff9800;border-radius:14px;padding:32px 16px;text-align:center;cursor:pointer;background:#140d02;transition:all 0.25s;margin-bottom:16px;position:relative;">
+
+                        <div id="mediaDropContent">
+                            <div style="font-size:48px;margin-bottom:10px;">📁</div>
+                            <div style="color:#ff9800;font-weight:700;font-size:16px;margin-bottom:6px;">Tap to Choose File</div>
+                            <div style="color:#888;font-size:13px;margin-bottom:4px;">or drag & drop here</div>
+                            <div style="display:flex;gap:10px;justify-content:center;margin-top:12px;flex-wrap:wrap;">
+                                <span style="background:#2a1500;border:1px solid #ff9800;border-radius:20px;padding:4px 12px;font-size:12px;color:#ff9800;">🖼️ JPG / PNG / GIF</span>
+                                <span style="background:#2a1500;border:1px solid #ff9800;border-radius:20px;padding:4px 12px;font-size:12px;color:#ff9800;">🎵 MP3 / WAV / OGG</span>
+                            </div>
+                        </div>
+
+                        <!-- Hidden actual file input -->
+                        <input type="file" id="mediaFile"
+                               accept="image/jpeg,image/png,image/gif,image/webp,image/*,audio/mp3,audio/mpeg,audio/wav,audio/ogg,audio/*"
+                               onchange="previewMedia()"
+                               style="position:absolute;width:1px;height:1px;opacity:0;pointer-events:none;">
+                    </div>
+
+                    <!-- Preview zone -->
+                    <div id="mediaPreview" style="margin-bottom:14px;"></div>
+
+                    <!-- File info bar (shown after file selected) -->
+                    <div id="mediaFileInfo" style="display:none;background:#2a1500;border-radius:10px;padding:12px 14px;margin-bottom:14px;border-left:4px solid #ff9800;display:none;align-items:center;gap:10px;">
+                        <span id="mediaFileIcon" style="font-size:24px;"></span>
+                        <div style="flex:1;min-width:0;">
+                            <div id="mediaFileName" style="color:#ff9800;font-weight:700;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
+                            <div id="mediaFileSize" style="color:#888;font-size:12px;"></div>
+                        </div>
+                        <button onclick="clearMediaFile()" style="width:auto;padding:4px 12px;font-size:12px;background:#dc2626;border-radius:8px;margin:0;">✕ Clear</button>
+                    </div>
+
+                    <div class="input-group">
+                        <label style="color:#ff9800;font-weight:700;">📝 Question for Students:</label>
+                        <textarea id="mediaQuestion" placeholder="e.g. What do you think this image represents? What is happening in this audio?" style="border-color:#ff9800;min-height:80px;"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label style="color:#22c55e;font-weight:700;">✅ Answer <span style="color:#888;font-size:12px;font-weight:400;">(Shown to students ONLY after they submit)</span></label>
+                        <textarea id="mediaAnswer" placeholder="Write the correct answer or key points..." style="border-color:#22c55e;min-height:70px;"></textarea>
+                    </div>
+
+                    <button onclick="uploadMedia()" id="uploadMediaBtn" class="btn-orange" style="font-size:16px;padding:15px;">
+                        📤 Upload & Post for Students
+                    </button>
+
+                    <!-- Upload progress bar -->
+                    <div id="uploadProgressWrap" style="display:none;margin-top:12px;">
+                        <div style="background:#333;border-radius:20px;height:8px;overflow:hidden;">
+                            <div id="uploadProgressBar" style="height:100%;border-radius:20px;background:linear-gradient(90deg,#ff9800,#f57c00);width:0%;transition:width 0.3s;"></div>
+                        </div>
+                        <div id="uploadProgressLabel" style="text-align:center;color:#ff9800;font-size:13px;margin-top:6px;">Preparing...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bulk Media Auto-Post Mode -->
+            <div id="bulkMediaMode" style="display:none;">
+                <div class="autopost-status" id="mediaAutoPostStatusPanel">
+                    <h4>🤖 MEDIA AUTO-POST MACHINE</h4>
+                    <div class="autopost-row"><span class="autopost-label">Engine</span><span class="autopost-value" id="mApEngineStatus"><span class="pulse-dot off"></span>Idle</span></div>
+                    <div class="autopost-row"><span class="autopost-label">Schedule Loaded</span><span class="autopost-value" id="mApScheduleLoaded">—</span></div>
+                    <div class="autopost-row"><span class="autopost-label">Items Posted</span><span class="autopost-value clr-cyan" id="mApPostedCount">0 / 0</span></div>
+                    <div class="autopost-row"><span class="autopost-label">Next Post</span><span class="autopost-value clr-yellow" id="mApNextPost">—</span></div>
+                    <div class="autopost-row"><span class="autopost-label">Last Auto-Post</span><span class="autopost-value clr-green" id="mApLastPost">—</span></div>
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="mApProgressBar" style="width:0%"></div></div>
+                    <div style="text-align:center;font-size:11px;color:#aaa;margin-top:5px;" id="mApProgressLabel">0 items posted</div>
+                </div>
+                <div class="info-msg" style="font-size:13px;margin-bottom:12px;">📌 Add up to <strong>60 media items</strong>. Each posts one per day automatically with question + answer.<br>
+                <strong style="color:#ff9800;">Note:</strong> For bulk media, enter the image/audio URL (hosted online) instead of uploading a file.</div>
+                <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+                    <label style="color:#aaa;font-size:13px;margin:0;">Number of items:</label>
+                    <select id="mediaSlotCount" onchange="renderMediaBulkFields()" style="background:#0a0a14;color:#e0e0e0;border:2px solid #333;border-radius:6px;padding:6px 10px;font-size:14px;">
+                        <option value="5">5</option><option value="10" selected>10</option><option value="15">15</option>
+                        <option value="20">20</option><option value="30">30</option><option value="40">40</option>
+                        <option value="50">50</option><option value="60">60</option>
+                    </select>
+                </div>
+                <div id="mediaBulkFields"></div>
+                <div id="mediaBulkScheduleInfo"></div>
+                <button onclick="saveMediaBulkSchedule()" style="background:linear-gradient(135deg,#ff9800,#f57c00);">💾 Save & Activate Media Auto-Post</button>
+                <button onclick="manualMediaCheckAndPost()" class="btn-green" style="margin-top:8px;">🔄 Manual Check: Post Today's Media Now</button>
+                <button onclick="resetMediaBulkSchedule()" class="btn-danger" style="margin-top:8px;">🗑️ Reset Media Schedule</button>
+            </div>
+
             <div id="yesterdayMediaFeedback"></div>
             <div id="mediaList"></div>
         </div>
@@ -336,7 +424,121 @@
             <button onclick="loadRankTab()" style="background:linear-gradient(135deg,#854d0e,#b45309);color:#fef9c3;font-weight:700;">🔄 Refresh Rankings</button>
         </div>
 
-        <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;">
+        <!-- Word of the Day Tab -->
+        <div id="wordTab" class="tab-content">
+            <div style="text-align:center;margin-bottom:18px;">
+                <div style="font-size:36px;">📖</div>
+                <h2 style="color:#a78bfa;margin:0;">WORD OF THE DAY</h2>
+                <p style="color:#888;font-size:13px;margin-top:4px;">Daily vocabulary builder — auto-post up to 10 words</p>
+            </div>
+
+            <!-- Single Word Post -->
+            <div id="singleWordMode">
+                <div style="background:#1a0f2e;border-radius:12px;padding:18px;margin-bottom:16px;border-left:4px solid #a78bfa;">
+                    <h3 style="color:#a78bfa;margin-bottom:12px;">📝 Post Today's Word</h3>
+                    <div class="input-group">
+                        <label>📖 Word / Phrase:</label>
+                        <input type="text" id="wordInput" placeholder="e.g. Ephemeral, Serendipity...">
+                    </div>
+                    <div class="input-group">
+                        <label>❓ Question for Students (e.g. meaning, usage, sentence):</label>
+                        <textarea id="wordQuestion" placeholder="e.g. What does this word mean? Use it in a sentence."></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>✅ Answer <span style="color:#22c55e;font-size:12px;">(Shown ONLY after student submits)</span></label>
+                        <textarea id="wordAnswer" placeholder="Meaning, usage, example sentence..." style="border-color:#22c55e;"></textarea>
+                    </div>
+                    <button onclick="postWordOfDay()" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);margin-bottom:0;">📤 Post Word of the Day</button>
+                </div>
+            </div>
+
+            <!-- Bulk Word Auto-Post -->
+            <div style="display:flex;gap:8px;margin-bottom:14px;">
+                <button id="singleWordBtn" onclick="switchWordMode('single')" style="flex:1;padding:10px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">📝 Single Word</button>
+                <button id="bulkWordBtn" onclick="switchWordMode('bulk')" style="flex:1;padding:10px;background:#2a2a3e;color:#aaa;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">🤖 Auto-Post (10 Words)</button>
+            </div>
+
+            <div id="bulkWordMode" style="display:none;">
+                <div class="autopost-status" id="wordAutoPostStatusPanel">
+                    <h4 style="color:#a78bfa;">🤖 WORD AUTO-POST MACHINE</h4>
+                    <div class="autopost-row"><span class="autopost-label">Engine</span><span class="autopost-value" id="wApEngineStatus"><span class="pulse-dot off"></span>Idle</span></div>
+                    <div class="autopost-row"><span class="autopost-label">Words Posted</span><span class="autopost-value clr-cyan" id="wApPostedCount">0 / 10</span></div>
+                    <div class="autopost-row"><span class="autopost-label">Next Post</span><span class="autopost-value clr-yellow" id="wApNextPost">—</span></div>
+                    <div class="autopost-row"><span class="autopost-label">Last Auto-Post</span><span class="autopost-value clr-green" id="wApLastPost">—</span></div>
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="wApProgressBar" style="width:0%;background:linear-gradient(90deg,#7c3aed,#a78bfa);"></div></div>
+                    <div style="text-align:center;font-size:11px;color:#aaa;margin-top:5px;" id="wApProgressLabel">0 of 10 posted</div>
+                </div>
+                <div class="info-msg" style="font-size:13px;">📌 Fill 10 words + questions + answers. Posts one per day automatically.</div>
+                <div id="wordBulkFields"></div>
+                <div id="wordBulkScheduleInfo"></div>
+                <button onclick="saveWordBulkSchedule()" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);">💾 Save & Activate Word Auto-Post</button>
+                <button onclick="manualWordCheckAndPost()" class="btn-green" style="margin-top:8px;">🔄 Post Today's Word Now</button>
+                <button onclick="resetWordBulkSchedule()" class="btn-danger" style="margin-top:8px;">🗑️ Reset Word Schedule</button>
+            </div>
+
+            <div id="wordContent" style="margin-top:16px;"></div>
+        </div>
+
+        <!-- Current Affairs Tab -->
+        <div id="affairsTab" class="tab-content">
+            <div style="text-align:center;margin-bottom:18px;">
+                <div style="font-size:36px;">📰</div>
+                <h2 style="color:#60a5fa;margin:0;">CURRENT AFFAIRS</h2>
+                <p style="color:#888;font-size:13px;margin-top:4px;">Daily current affairs — auto-post up to 60 questions</p>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-bottom:14px;">
+                <button id="singleAffairsBtn" onclick="switchAffairsMode('single')" style="flex:1;padding:10px;background:linear-gradient(135deg,#1d4ed8,#60a5fa);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">📝 Single Affair</button>
+                <button id="bulkAffairsBtn" onclick="switchAffairsMode('bulk')" style="flex:1;padding:10px;background:#2a2a3e;color:#aaa;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;">🤖 Auto-Post (60 Qs)</button>
+            </div>
+
+            <!-- Single Current Affair -->
+            <div id="singleAffairsMode">
+                <div style="background:#0f1a2e;border-radius:12px;padding:18px;margin-bottom:16px;border-left:4px solid #60a5fa;">
+                    <h3 style="color:#60a5fa;margin-bottom:12px;">📰 Post Today's Current Affairs</h3>
+                    <div class="input-group">
+                        <label>📰 Current Affairs Question:</label>
+                        <textarea id="affairsQuestion" placeholder="e.g. Who became the new Prime Minister of...?"></textarea>
+                    </div>
+                    <div class="input-group">
+                        <label>✅ Answer <span style="color:#22c55e;font-size:12px;">(Shown ONLY after student submits)</span></label>
+                        <textarea id="affairsAnswer" placeholder="The correct answer..." style="border-color:#22c55e;"></textarea>
+                    </div>
+                    <button onclick="postCurrentAffairs()" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);">📤 Post Current Affairs Question</button>
+                </div>
+            </div>
+
+            <!-- Bulk Current Affairs Auto-Post -->
+            <div id="bulkAffairsMode" style="display:none;">
+                <div class="autopost-status" id="affairsAutoPostStatusPanel">
+                    <h4 style="color:#60a5fa;">🤖 CURRENT AFFAIRS AUTO-POST MACHINE</h4>
+                    <div class="autopost-row"><span class="autopost-label">Engine</span><span class="autopost-value" id="aApEngineStatus"><span class="pulse-dot off"></span>Idle</span></div>
+                    <div class="autopost-row"><span class="autopost-label">Questions Posted</span><span class="autopost-value clr-cyan" id="aApPostedCount">0 / 60</span></div>
+                    <div class="autopost-row"><span class="autopost-label">Next Post</span><span class="autopost-value clr-yellow" id="aApNextPost">—</span></div>
+                    <div class="autopost-row"><span class="autopost-label">Last Auto-Post</span><span class="autopost-value clr-green" id="aApLastPost">—</span></div>
+                    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="aApProgressBar" style="width:0%;background:linear-gradient(90deg,#1d4ed8,#60a5fa);"></div></div>
+                    <div style="text-align:center;font-size:11px;color:#aaa;margin-top:5px;" id="aApProgressLabel">0 of 60 posted</div>
+                </div>
+                <div class="info-msg" style="font-size:13px;">📌 Fill up to <strong>60 current affairs</strong> questions + answers. Posts one per day automatically.</div>
+                <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+                    <label style="color:#aaa;font-size:13px;margin:0;">Number of questions:</label>
+                    <select id="affairsSlotCount" onchange="renderAffairsBulkFields()" style="background:#0a0a14;color:#e0e0e0;border:2px solid #333;border-radius:6px;padding:6px 10px;font-size:14px;">
+                        <option value="5">5</option><option value="10" selected>10</option><option value="15">15</option>
+                        <option value="20">20</option><option value="30">30</option><option value="40">40</option>
+                        <option value="50">50</option><option value="60">60</option>
+                    </select>
+                </div>
+                <div id="affairsBulkFields"></div>
+                <div id="affairsBulkScheduleInfo"></div>
+                <button onclick="saveAffairsBulkSchedule()" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);">💾 Save & Activate Affairs Auto-Post</button>
+                <button onclick="manualAffairsCheckAndPost()" class="btn-green" style="margin-top:8px;">🔄 Post Today's Affairs Now</button>
+                <button onclick="resetAffairsBulkSchedule()" class="btn-danger" style="margin-top:8px;">🗑️ Reset Affairs Schedule</button>
+            </div>
+
+            <div id="affairsContent" style="margin-top:16px;"></div>
+        </div>
+
+                <div style="margin-top:20px;display:flex;flex-direction:column;gap:8px;">
             <button class="btn-warning" onclick="showSection('passwordChangeSection')">🔑 Change Password</button>
             <button class="btn-danger" onclick="resetAllData()">⚠️ Reset All Data</button>
             <button class="btn-secondary" onclick="logoutTeacher()">↩️ Logout</button>
@@ -393,6 +595,9 @@ document.addEventListener('DOMContentLoaded', async function () {
         showSection('teacherSection');
         loadTeacherData();
         startAutoPostMachine();
+        startMediaAutoPostMachine();
+        startWordAutoPostMachine();
+        startAffairsAutoPostMachine();
     } else {
         loadLoginFafBanner();
     }
@@ -409,11 +614,15 @@ function showSection(id) {
 function switchTab(tab) {
     document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-    const map = { questions: 0, media: 1, phones: 2, rank: 3 };
-    document.getElementById(tab + 'Tab').classList.add('active');
-    document.querySelectorAll('.tab-btn')[map[tab]].classList.add('active');
+    const map = { questions: 0, media: 1, word: 2, affairs: 3, phones: 4, rank: 5 };
+    const tabEl = document.getElementById(tab + 'Tab');
+    if (tabEl) tabEl.classList.add('active');
+    const btns = document.querySelectorAll('.tab-btn');
+    if (map[tab] !== undefined && btns[map[tab]]) btns[map[tab]].classList.add('active');
     if (tab === 'questions') loadTeacherQuestions();
-    else if (tab === 'media') loadMediaList();
+    else if (tab === 'media') { loadMediaList(); updateMediaAutoPostUI(); }
+    else if (tab === 'word') { loadWordContent(); updateWordAutoPostUI(); }
+    else if (tab === 'affairs') { loadAffairsContent(); updateAffairsAutoPostUI(); }
     else if (tab === 'phones') loadPhoneNumbers();
     else if (tab === 'rank') loadRankTab();
 }
@@ -474,6 +683,9 @@ function loginTeacher() {
         showSection('teacherSection');
         loadTeacherData();
         startAutoPostMachine();
+        startMediaAutoPostMachine();
+        startWordAutoPostMachine();
+        startAffairsAutoPostMachine();
     } else {
         showToast('Incorrect password!', 'error');
     }
@@ -488,6 +700,9 @@ function logoutStudent() {
 
 function logoutTeacher() {
     stopAutoPostMachine();
+    stopMediaAutoPostMachine();
+    stopWordAutoPostMachine();
+    stopAffairsAutoPostMachine();
     isTeacher = false;
     localStorage.removeItem('isTeacher');
     showSection('loginSection');
@@ -580,15 +795,35 @@ async function displayStudentView(latestMedia, questions, answers) {
             <div style="color:#888;font-size:13px;margin:6px 0;">📅 ${latestMedia.date}</div>
             <div style="color:#ccc;font-size:13px;">📎 ${latestMedia.fileName}</div>`;
         if (latestMedia.type === 'image') html += `<img src="${latestMedia.data}" class="media-preview" alt="${latestMedia.fileName}">`;
-        else html += `<audio controls><source src="${latestMedia.data}"></audio>`;
+        else {
+            const audioType = latestMedia.fileName && latestMedia.fileName.toLowerCase().endsWith('.mp3') ? 'audio/mpeg' :
+                              latestMedia.fileName && latestMedia.fileName.toLowerCase().endsWith('.wav') ? 'audio/wav' :
+                              latestMedia.fileName && latestMedia.fileName.toLowerCase().endsWith('.ogg') ? 'audio/ogg' : 'audio/mpeg';
+            html += `<audio controls preload="auto" style="width:100%;margin-top:10px;border-radius:8px;"><source src="${latestMedia.data}" type="${audioType}"></audio>`;
+        }
         if (latestMedia.opinion) html += `<div class="opinion-box"><strong>TEJAPRATAP's Question:</strong><br>${latestMedia.opinion}</div>`;
         if (hasAnsweredMedia) {
             const myAns = answers.find(a => a.questionId === latestMedia.id && a.studentPin === currentStudent && a.type === 'media');
-            html += `<div class="success-msg" style="margin-top:12px;">✅ You already responded!<br><strong>Your response:</strong> ${myAns.answer}</div>`;
+            html += `<div class="success-msg" style="margin-top:12px;">✅ You responded!<br><strong>Your response:</strong> ${myAns.answer}</div>`;
+            if (latestMedia.expectedAnswer) {
+                html += `<div style="background:#0f2a14;border-radius:12px;padding:14px;margin-top:12px;border:2px solid #22c55e;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                        <span style="font-size:18px;">✅</span>
+                        <div style="font-weight:700;color:#22c55e;font-size:14px;">CORRECT ANSWER</div>
+                    </div>
+                    <div style="background:#0a0a14;border-radius:8px;padding:10px;color:#86efac;font-size:14px;font-weight:600;border-left:4px solid #22c55e;">${latestMedia.expectedAnswer}</div>
+                </div>`;
+            } else {
+                html += `<div class="warn-msg" style="margin-top:10px;">⏳ The teacher hasn't revealed the answer yet. Check back soon!</div>`;
+            }
         } else {
             html += `<div class="media-answer-section"><label>💬 Your Response:</label>
                 <textarea id="mediaAnswer-${latestMedia.id}" placeholder="Share your thoughts..."></textarea>
-                <button onclick="submitMediaAnswer(${latestMedia.id})" class="btn-orange" style="margin-top:8px;">Submit Response</button></div>`;
+                <button onclick="submitMediaAnswer(${latestMedia.id})" class="btn-orange" style="margin-top:8px;">Submit Response</button>`;
+            if (latestMedia.expectedAnswer) {
+                html += `<div class="info-msg" style="margin-top:8px;font-size:13px;">💡 Submit your response to reveal the correct answer!</div>`;
+            }
+            html += `</div>`;
         }
         html += '</div>';
     }
@@ -634,6 +869,106 @@ async function displayStudentView(latestMedia, questions, answers) {
     html += `<button class="btn-secondary" onclick="loadStudentData()" style="margin-top:8px;">🔄 Refresh</button>`;
 
     content.innerHTML = html;
+
+    // Load Word of Day and Current Affairs asynchronously after render
+    loadStudentWordOfDay(answers);
+    loadStudentAffairs(answers);
+}
+
+async function loadStudentWordOfDay(answersCache) {
+    const container = document.getElementById('studentWordOfDayBox');
+    if (!container) return;
+    try {
+        const [words, answers] = await Promise.all([apiGet('/word'), answersCache ? Promise.resolve(answersCache) : apiGet('/answers')]);
+        const ws = words || []; const ans = answersCache || answers || [];
+        if (ws.length === 0) { container.style.display = 'none'; return; }
+        const latest = ws[ws.length - 1];
+        const hasAnswered = ans.some(a => a.questionId === latest.id && a.studentPin === currentStudent && a.type === 'word');
+        let html = `<div style="background:#1a0f2e;border-radius:12px;padding:16px;margin:14px 0;border-left:4px solid #a78bfa;border:2px solid #a78bfa;">
+            <div style="color:#888;font-size:13px;margin-bottom:6px;">📅 ${latest.date}</div>
+            <div style="font-size:20px;font-weight:800;color:#a78bfa;margin-bottom:8px;">📖 WORD OF THE DAY: ${latest.word}</div>
+            <p style="font-size:14px;color:#e0e0e0;line-height:1.6;">${latest.question}</p>`;
+        if (hasAnswered) {
+            const myAns = ans.find(a => a.questionId === latest.id && a.studentPin === currentStudent && a.type === 'word');
+            html += `<div class="success-msg" style="margin-top:12px;">✅ You answered!<br><strong>Your answer:</strong> ${myAns.answer}</div>`;
+            if (latest.answer) {
+                html += `<div style="background:#0f2a14;border-radius:10px;padding:12px;margin-top:10px;border:2px solid #22c55e;">
+                    <div style="font-weight:700;color:#22c55e;margin-bottom:6px;">✅ CORRECT ANSWER / MEANING</div>
+                    <div style="background:#0a0a14;border-radius:6px;padding:10px;color:#86efac;font-size:14px;border-left:4px solid #22c55e;">${latest.answer}</div>
+                </div>`;
+            } else { html += `<div class="warn-msg" style="margin-top:10px;">⏳ Answer not revealed yet. Check back soon!</div>`; }
+        } else {
+            html += `<div class="media-answer-section" style="border-color:#a78bfa;background:#1a0f2e;"><label style="color:#a78bfa;">✍️ Your Answer:</label>
+                <textarea id="wordStudentAnswer-${latest.id}" placeholder="Type your answer..."></textarea>
+                <button onclick="submitWordAnswer(${latest.id})" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);margin-top:8px;">Submit Word Answer</button>`;
+            if (latest.answer) html += `<div class="info-msg" style="margin-top:8px;font-size:13px;">💡 Submit to reveal the meaning!</div>`;
+            html += `</div>`;
+        }
+        html += '</div>';
+        container.innerHTML = html;
+        container.style.display = 'block';
+    } catch (e) { container.style.display = 'none'; }
+}
+
+async function loadStudentAffairs(answersCache) {
+    const container = document.getElementById('studentAffairsBox');
+    if (!container) return;
+    try {
+        const [affairs, answers] = await Promise.all([apiGet('/affairs'), answersCache ? Promise.resolve(answersCache) : apiGet('/answers')]);
+        const as = affairs || []; const ans = answersCache || answers || [];
+        if (as.length === 0) { container.style.display = 'none'; return; }
+        const latest = as[as.length - 1];
+        const hasAnswered = ans.some(a => a.questionId === latest.id && a.studentPin === currentStudent && a.type === 'affairs');
+        let html = `<div style="background:#0f1a2e;border-radius:12px;padding:16px;margin:14px 0;border:2px solid #60a5fa;">
+            <div style="color:#888;font-size:13px;margin-bottom:6px;">📅 ${latest.date}</div>
+            <div style="font-size:16px;font-weight:700;color:#60a5fa;margin-bottom:8px;">📰 CURRENT AFFAIRS</div>
+            <p style="font-size:14px;color:#e0e0e0;line-height:1.6;">${latest.question}</p>`;
+        if (hasAnswered) {
+            const myAns = ans.find(a => a.questionId === latest.id && a.studentPin === currentStudent && a.type === 'affairs');
+            html += `<div class="success-msg" style="margin-top:12px;">✅ You answered!<br><strong>Your answer:</strong> ${myAns.answer}</div>`;
+            if (latest.answer) {
+                html += `<div style="background:#0f2a14;border-radius:10px;padding:12px;margin-top:10px;border:2px solid #22c55e;">
+                    <div style="font-weight:700;color:#22c55e;margin-bottom:6px;">✅ CORRECT ANSWER</div>
+                    <div style="background:#0a0a14;border-radius:6px;padding:10px;color:#86efac;font-size:14px;border-left:4px solid #22c55e;">${latest.answer}</div>
+                </div>`;
+            } else { html += `<div class="warn-msg" style="margin-top:10px;">⏳ Answer not revealed yet. Check back soon!</div>`; }
+        } else {
+            html += `<div class="media-answer-section" style="border-color:#60a5fa;background:#0f1a2e;"><label style="color:#60a5fa;">✍️ Your Answer:</label>
+                <textarea id="affairsStudentAnswer-${latest.id}" placeholder="Type your answer..."></textarea>
+                <button onclick="submitAffairsAnswer(${latest.id})" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);margin-top:8px;">Submit Affairs Answer</button>`;
+            if (latest.answer) html += `<div class="info-msg" style="margin-top:8px;font-size:13px;">💡 Submit to reveal the answer!</div>`;
+            html += `</div>`;
+        }
+        html += '</div>';
+        container.innerHTML = html;
+        container.style.display = 'block';
+    } catch (e) { container.style.display = 'none'; }
+}
+
+async function submitWordAnswer(wordId) {
+    const ansEl = document.getElementById('wordStudentAnswer-' + wordId);
+    const answerText = ansEl ? ansEl.value.trim() : '';
+    if (!answerText) return showToast('Please write your answer!', 'error');
+    const btn = event.target; btn.disabled = true; btn.textContent = '⏳ Submitting...';
+    try {
+        await apiPost('/answers', { questionId: wordId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText, type: 'word' });
+        awardScoreForAnswer(currentStudent, currentStudentName);
+        showToast('✅ Word answer submitted!', 'success');
+        loadStudentData();
+    } catch (e) { showToast(e.message || 'Error submitting.', 'error'); btn.disabled = false; btn.textContent = 'Submit Word Answer'; }
+}
+
+async function submitAffairsAnswer(affairsId) {
+    const ansEl = document.getElementById('affairsStudentAnswer-' + affairsId);
+    const answerText = ansEl ? ansEl.value.trim() : '';
+    if (!answerText) return showToast('Please write your answer!', 'error');
+    const btn = event.target; btn.disabled = true; btn.textContent = '⏳ Submitting...';
+    try {
+        await apiPost('/answers', { questionId: affairsId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText, type: 'affairs' });
+        awardScoreForAnswer(currentStudent, currentStudentName);
+        showToast('✅ Affairs answer submitted!', 'success');
+        loadStudentData();
+    } catch (e) { showToast(e.message || 'Error submitting.', 'error'); btn.disabled = false; btn.textContent = 'Submit Affairs Answer'; }
 }
 
 async function submitAnswer(questionId) {
@@ -778,16 +1113,105 @@ async function postQuestion() {
 }
 
 // =====================================================
-// MEDIA
+// MEDIA — DRAG & DROP UPLOAD
 // =====================================================
+function handleDragOver(e) {
+    e.preventDefault(); e.stopPropagation();
+    const zone = document.getElementById('mediaDropZone');
+    zone.style.background = '#2a1500';
+    zone.style.borderColor = '#ffb74d';
+    zone.style.transform = 'scale(1.02)';
+}
+function handleDragLeave(e) {
+    e.preventDefault(); e.stopPropagation();
+    const zone = document.getElementById('mediaDropZone');
+    zone.style.background = '#140d02';
+    zone.style.borderColor = '#ff9800';
+    zone.style.transform = 'scale(1)';
+}
+function handleDrop(e) {
+    e.preventDefault(); e.stopPropagation();
+    handleDragLeave(e);
+    const files = e.dataTransfer.files;
+    if (files && files[0]) {
+        const input = document.getElementById('mediaFile');
+        // Create a DataTransfer to set files on the input
+        const dt = new DataTransfer();
+        dt.items.add(files[0]);
+        input.files = dt.files;
+        previewMedia();
+    }
+}
+
+function clearMediaFile() {
+    document.getElementById('mediaFile').value = '';
+    document.getElementById('mediaPreview').innerHTML = '';
+    document.getElementById('mediaFileInfo').style.display = 'none';
+    const content = document.getElementById('mediaDropContent');
+    if (content) content.style.display = 'block';
+    const zone = document.getElementById('mediaDropZone');
+    zone.style.borderStyle = 'dashed';
+    zone.style.borderColor = '#ff9800';
+}
+
+function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
 function previewMedia() {
-    const file = document.getElementById('mediaFile').files[0];
+    const input = document.getElementById('mediaFile');
+    const file = input.files[0];
     const preview = document.getElementById('mediaPreview');
-    if (!file) { preview.innerHTML = ''; return; }
+    const fileInfo = document.getElementById('mediaFileInfo');
+    const dropContent = document.getElementById('mediaDropContent');
+    const zone = document.getElementById('mediaDropZone');
+
+    if (!file) {
+        preview.innerHTML = '';
+        if (fileInfo) fileInfo.style.display = 'none';
+        if (dropContent) dropContent.style.display = 'block';
+        return;
+    }
+
+    // Update file info bar
+    const isImage = file.type.startsWith('image/');
+    const isAudio = file.type.startsWith('audio/');
+    document.getElementById('mediaFileIcon').textContent = isImage ? '🖼️' : isAudio ? '🎵' : '📄';
+    document.getElementById('mediaFileName').textContent = file.name;
+    document.getElementById('mediaFileSize').textContent = formatFileSize(file.size);
+    if (fileInfo) fileInfo.style.display = 'flex';
+    if (dropContent) dropContent.style.display = 'none';
+
+    // Update drop zone style
+    zone.style.borderStyle = 'solid';
+    zone.style.borderColor = '#22c55e';
+    zone.style.background = '#0a1a0a';
+
+    // Show preview
     const reader = new FileReader();
     reader.onload = e => {
-        if (file.type.startsWith('image/')) preview.innerHTML = `<img src="${e.target.result}" style="max-width:100%;max-height:180px;border-radius:8px;margin-top:8px;">`;
-        else if (file.type.startsWith('audio/')) preview.innerHTML = `<audio controls style="width:100%;margin-top:8px;"><source src="${e.target.result}"></audio>`;
+        if (isImage) {
+            preview.innerHTML = `
+                <div style="position:relative;text-align:center;margin-bottom:8px;">
+                    <img src="${e.target.result}"
+                         style="max-width:100%;max-height:260px;border-radius:12px;border:2px solid #22c55e;box-shadow:0 4px 20px rgba(34,197,94,0.2);"
+                         alt="${file.name}">
+                    <div style="position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.7);color:#22c55e;font-size:12px;font-weight:700;padding:3px 10px;border-radius:10px;border:1px solid #22c55e;">
+                        ✅ Image Ready
+                    </div>
+                </div>`;
+        } else if (isAudio) {
+            preview.innerHTML = `
+                <div style="background:#0f2a0f;border-radius:12px;padding:14px;border:2px solid #22c55e;margin-bottom:8px;">
+                    <div style="color:#22c55e;font-weight:700;font-size:14px;margin-bottom:8px;">🎵 Audio Preview:</div>
+                    <audio controls preload="auto" style="width:100%;border-radius:8px;">
+                        <source src="${e.target.result}" type="${file.type || 'audio/mpeg'}">
+                    </audio>
+                    <div style="color:#888;font-size:12px;margin-top:6px;">✅ Audio ready to upload</div>
+                </div>`;
+        }
     };
     reader.readAsDataURL(file);
 }
@@ -796,17 +1220,71 @@ async function uploadMedia() {
     const fileInput = document.getElementById('mediaFile');
     const question = document.getElementById('mediaQuestion').value.trim();
     const expectedAnswer = document.getElementById('mediaAnswer').value.trim();
-    if (!fileInput.files || !fileInput.files[0]) return showToast('Please select a media file!', 'error');
+
+    if (!fileInput.files || !fileInput.files[0]) {
+        return showToast('Please select an image or audio file first!', 'error');
+    }
     if (!question) return showToast('Please write a question for students!', 'error');
+    if (!expectedAnswer) return showToast('Please write the answer! Students will see it after submitting.', 'error');
+
     const file = fileInput.files[0];
+
+    // Check file size (max 40MB)
+    if (file.size > 40 * 1024 * 1024) return showToast('File is too large! Maximum size is 40MB.', 'error');
+
+    const btn = document.getElementById('uploadMediaBtn');
+    const progressWrap = document.getElementById('uploadProgressWrap');
+    const progressBar = document.getElementById('uploadProgressBar');
+    const progressLabel = document.getElementById('uploadProgressLabel');
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Uploading...';
+    if (progressWrap) progressWrap.style.display = 'block';
+
+    // Animate progress bar while reading file
+    let prog = 0;
+    const progInterval = setInterval(() => {
+        prog = Math.min(prog + 3, 85);
+        if (progressBar) progressBar.style.width = prog + '%';
+        if (progressLabel) progressLabel.textContent = prog < 40 ? 'Reading file...' : prog < 75 ? 'Encoding...' : 'Uploading to server...';
+    }, 100);
+
     const reader = new FileReader();
     reader.onload = async e => {
+        clearInterval(progInterval);
+        if (progressBar) progressBar.style.width = '90%';
+        if (progressLabel) progressLabel.textContent = 'Saving to server...';
         try {
-            await apiPost('/media', { type: file.type.startsWith('image/') ? 'image' : 'audio', data: e.target.result, fileName: file.name, opinion: question, expectedAnswer });
-            fileInput.value = ''; document.getElementById('mediaQuestion').value = ''; document.getElementById('mediaAnswer').value = ''; document.getElementById('mediaPreview').innerHTML = '';
-            showToast('✅ Media uploaded successfully!', 'success');
-            loadMediaList();
-        } catch (error) { showToast('Error uploading: ' + error.message, 'error'); }
+            const mediaType = file.type.startsWith('image/') ? 'image' : 'audio';
+            await apiPost('/media', {
+                type: mediaType,
+                data: e.target.result,
+                fileName: file.name,
+                opinion: question,
+                expectedAnswer
+            });
+            if (progressBar) progressBar.style.width = '100%';
+            if (progressLabel) progressLabel.textContent = '✅ Done!';
+
+            setTimeout(() => {
+                // Reset the form
+                clearMediaFile();
+                document.getElementById('mediaQuestion').value = '';
+                document.getElementById('mediaAnswer').value = '';
+                if (progressWrap) progressWrap.style.display = 'none';
+                if (progressBar) progressBar.style.width = '0%';
+                btn.disabled = false;
+                btn.textContent = '📤 Upload & Post for Students';
+                showToast('✅ Media uploaded successfully!', 'success');
+                loadMediaList();
+            }, 800);
+        } catch (error) {
+            clearInterval(progInterval);
+            if (progressWrap) progressWrap.style.display = 'none';
+            btn.disabled = false;
+            btn.textContent = '📤 Upload & Post for Students';
+            showToast('❌ Upload failed: ' + error.message, 'error');
+        }
     };
     reader.readAsDataURL(file);
 }
@@ -825,7 +1303,7 @@ async function loadMediaList() {
         feedbackContainer.innerHTML = `<div style="background:#1f1208;border-radius:12px;padding:18px;margin-bottom:20px;border-left:4px solid #4caf50;">
             <h3 style="color:#4caf50;margin-bottom:12px;">💬 Add Explanation for Latest Media</h3>
             <div style="color:#888;font-size:13px;margin-bottom:8px;">📅 ${latest.date} — ${latest.fileName}</div>
-            ${latest.type==='image'?`<img src="${latest.data}" style="max-width:100%;max-height:180px;border-radius:8px;margin-bottom:12px;">`:`<audio controls style="width:100%;margin-bottom:12px;"><source src="${latest.data}"></audio>`}
+            ${latest.type==='image'?`<img src="${latest.data}" style="max-width:100%;max-height:180px;border-radius:8px;margin-bottom:12px;">`:`<audio controls preload="auto" style="width:100%;margin-bottom:12px;border-radius:8px;"><source src="${latest.data}" type="audio/mpeg"></audio>`}
             <div class="input-group"><label>📖 Your Explanation:</label><textarea id="mediaExplanation" placeholder="Write your explanation..." style="border-color:#4caf50;"></textarea></div>
             <button onclick="saveMediaFeedback(${latest.id})" class="btn-green">💾 Save Explanation</button>
         </div>`;
@@ -835,12 +1313,17 @@ async function loadMediaList() {
             const mediaAns = ans.filter(a => a.questionId === m.id && a.type === 'media');
             html += `<div class="media-box" style="margin-top:12px;">
                 <div style="color:#888;font-size:13px;margin-bottom:6px;">📅 ${m.date} — ${m.fileName}</div>
-                ${m.type==='image'?`<img src="${m.data}" class="media-preview">`:`<audio controls><source src="${m.data}"></audio>`}
+                ${m.type==='image'?`<img src="${m.data}" class="media-preview">`:`<audio controls preload="auto" style="width:100%;border-radius:8px;"><source src="${m.data}" type="${m.fileName&&m.fileName.toLowerCase().endsWith('.mp3')?'audio/mpeg':m.fileName&&m.fileName.toLowerCase().endsWith('.wav')?'audio/wav':'audio/mpeg'}"></audio>`}
                 <div class="opinion-box" style="margin-top:10px;">
                     <strong>📝 Question:</strong> ${m.opinion||'—'}
-                    ${m.expectedAnswer?`<br><strong>✅ Expected:</strong> ${m.expectedAnswer}`:''}
+                    ${m.expectedAnswer?`<br><strong>✅ Answer (shown to students after they respond):</strong> <span style="color:#22c55e;font-weight:700;">${m.expectedAnswer}</span>`:''}
                     ${m.explanation?`<br><strong>💬 Explanation:</strong> ${m.explanation}`:''}
                 </div>
+                ${!m.expectedAnswer?`<div style="background:#0a2a0a;border-radius:8px;padding:10px;margin-top:8px;border:1px solid #22c55e;">
+                    <label style="font-size:12px;color:#22c55e;font-weight:700;">✅ Set Answer for this Media (shown to students after they respond):</label>
+                    <textarea id="mediaExpectedAnswer_${m.id}" placeholder="Type the answer students will see after submitting..." style="min-height:60px;border-color:#22c55e;margin-top:6px;font-size:13px;"></textarea>
+                    <button onclick="setMediaExpectedAnswer(${m.id})" class="btn-green btn-small" style="width:auto;margin-top:6px;font-size:12px;padding:6px 14px;">💾 Save Answer</button>
+                </div>`:''}
                 ${mediaAns.length>0?`<div style="margin-top:10px;padding:10px;background:#0f1a2e;border-radius:8px;">
                     <strong style="color:#60a5fa;">👥 Responses (${mediaAns.length}):</strong>
                     ${mediaAns.map(a=>`<div style="margin-top:7px;padding:8px;background:#1a1a2e;border-radius:6px;">
@@ -863,6 +1346,251 @@ async function saveMediaFeedback(mediaId) {
         document.getElementById('mediaExplanation').value = '';
         loadMediaList();
     } catch (e) { showToast('Error saving explanation.', 'error'); }
+}
+
+async function setMediaExpectedAnswer(mediaId) {
+    const field = document.getElementById('mediaExpectedAnswer_' + mediaId);
+    const val = field ? field.value.trim() : '';
+    if (!val) return showToast('Please enter the answer!', 'error');
+    try {
+        const res = await fetch(API_URL + '/media/' + mediaId + '/answer', {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ expectedAnswer: val })
+        });
+        if (!res.ok) throw new Error('Server error');
+        showToast('✅ Answer saved! Students will see it after they respond.', 'success');
+        loadMediaList();
+    } catch (e) { showToast('Error saving answer: ' + e.message, 'error'); }
+}
+
+// =====================================================
+// MEDIA AUTO-POST MACHINE
+// =====================================================
+let mediaAutoPostInterval = null;
+let _mediaScheduleCache = null;
+
+async function getMediaBulkSchedule() {
+    try {
+        const res = await fetch(API_URL + '/schedule/media');
+        const data = await res.json();
+        if (data && data.empty) { _mediaScheduleCache = null; return null; }
+        _mediaScheduleCache = data;
+        return data;
+    } catch (e) { return _mediaScheduleCache; }
+}
+
+async function saveMediaBulkScheduleToServer(data) {
+    _mediaScheduleCache = data;
+    await fetch(API_URL + '/schedule/media', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ schedule: data }) });
+}
+
+async function runMediaAutoPostCheck(silent = false) {
+    const schedule = await getMediaBulkSchedule();
+    if (!schedule || !schedule.items) { if (!silent) updateMediaAutoPostUI(null); return false; }
+    const today = getTodayStr();
+    for (let i = 0; i < schedule.items.length; i++) {
+        const item = schedule.items[i];
+        if (!item.posted && item.date === today) {
+            try {
+                // Post as a "media text" entry (URL-based)
+                const postResult = await apiPost('/media/text', {
+                    question: item.question,
+                    answer: item.answer,
+                    caption: item.caption || '',
+                    urlOrText: item.urlOrText || ''
+                });
+                const postedAt = new Date().toLocaleString('en-IN');
+                await fetch(API_URL + '/schedule/media/mark-posted', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ index: i, postedAt })
+                });
+                _mediaScheduleCache = null;
+                const newSchedule = await getMediaBulkSchedule();
+                updateMediaAutoPostUI(newSchedule);
+                return true;
+            } catch (err) { console.error('[MediaAutoPost] Failed:', err); return false; }
+        }
+    }
+    if (!silent) updateMediaAutoPostUI(schedule);
+    return false;
+}
+
+function startMediaAutoPostMachine() {
+    runMediaAutoPostCheck(true).then(() => updateMediaAutoPostUI());
+    if (mediaAutoPostInterval) clearInterval(mediaAutoPostInterval);
+    mediaAutoPostInterval = setInterval(async () => {
+        const posted = await runMediaAutoPostCheck(true);
+        if (posted) { showToast("🤖 Media Auto-Post: Today's media posted!", 'success'); }
+        updateMediaAutoPostUI();
+    }, 60000);
+    updateMediaAutoPostUI();
+}
+
+function stopMediaAutoPostMachine() {
+    if (mediaAutoPostInterval) { clearInterval(mediaAutoPostInterval); mediaAutoPostInterval = null; }
+}
+
+async function updateMediaAutoPostUI(schedule) {
+    if (schedule === undefined) schedule = _mediaScheduleCache;
+    const engineEl = document.getElementById('mApEngineStatus');
+    const scheduleEl = document.getElementById('mApScheduleLoaded');
+    const postedCountEl = document.getElementById('mApPostedCount');
+    const nextPostEl = document.getElementById('mApNextPost');
+    const lastPostEl = document.getElementById('mApLastPost');
+    const progressBar = document.getElementById('mApProgressBar');
+    const progressLabel = document.getElementById('mApProgressLabel');
+    if (engineEl) engineEl.innerHTML = mediaAutoPostInterval ? '<span class="pulse-dot"></span><span class="clr-green">Running ✅</span>' : '<span class="pulse-dot off"></span><span class="clr-red">Stopped</span>';
+    if (!schedule) {
+        if (scheduleEl) { scheduleEl.textContent = 'No schedule'; scheduleEl.className = 'autopost-value clr-red'; }
+        if (postedCountEl) postedCountEl.textContent = '0 / 0';
+        if (nextPostEl) nextPostEl.textContent = '—';
+        if (lastPostEl) lastPostEl.textContent = '—';
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressLabel) progressLabel.textContent = '0 items posted';
+        return;
+    }
+    const total = schedule.items.length;
+    const posted = schedule.items.filter(q => q.posted).length;
+    const today = getTodayStr();
+    if (scheduleEl) { scheduleEl.textContent = `Yes (${total} items)`; scheduleEl.className = 'autopost-value clr-green'; }
+    if (postedCountEl) { postedCountEl.textContent = `${posted} / ${total}`; postedCountEl.className = `autopost-value ${posted===total?'clr-green':'clr-cyan'}`; }
+    const nextItem = schedule.items.find(q => !q.posted);
+    if (nextPostEl) {
+        if (nextItem) { nextPostEl.textContent = nextItem.date === today ? '⚡ TODAY!' : new Date(nextItem.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'}); nextPostEl.className = nextItem.date === today ? 'autopost-value clr-green' : 'autopost-value clr-yellow'; }
+        else { nextPostEl.textContent = 'All done! 🎉'; nextPostEl.className = 'autopost-value clr-green'; }
+    }
+    if (lastPostEl) { if (schedule.lastAutoPost) { lastPostEl.textContent = `Item ${schedule.lastAutoPost.day} — ${schedule.lastAutoPost.time}`; lastPostEl.className = 'autopost-value clr-green'; } else { lastPostEl.textContent = 'None yet'; } }
+    if (progressBar) progressBar.style.width = `${(posted/total)*100}%`;
+    if (progressLabel) progressLabel.textContent = `${posted} of ${total} items posted`;
+}
+
+function switchMediaMode(mode) {
+    if (mode === 'single') {
+        document.getElementById('singleMediaMode').style.display = 'block';
+        document.getElementById('bulkMediaMode').style.display = 'none';
+        document.getElementById('singleMediaBtn').style.cssText = 'flex:1;padding:10px;background:linear-gradient(135deg,#ff9800,#f57c00);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;';
+        document.getElementById('bulkMediaBtn').style.cssText = 'flex:1;padding:10px;background:#2a2a3e;color:#aaa;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;';
+    } else {
+        document.getElementById('singleMediaMode').style.display = 'none';
+        document.getElementById('bulkMediaMode').style.display = 'block';
+        document.getElementById('bulkMediaBtn').style.cssText = 'flex:1;padding:10px;background:linear-gradient(135deg,#ff9800,#f57c00);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;';
+        document.getElementById('singleMediaBtn').style.cssText = 'flex:1;padding:10px;background:#2a2a3e;color:#aaa;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;';
+        renderMediaBulkFields();
+    }
+}
+
+async function renderMediaBulkFields() {
+    const container = document.getElementById('mediaBulkFields');
+    if (!container) return;
+    container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading...</div>';
+    const existing = await getMediaBulkSchedule();
+    const countEl = document.getElementById('mediaSlotCount');
+    const slotCount = existing ? Math.min(Math.max(existing.items.length, parseInt(countEl ? countEl.value : 10)), 60) : parseInt(countEl ? countEl.value : 10);
+    if (countEl) countEl.value = slotCount;
+    const today = getTodayStr();
+    let html = '';
+    for (let i = 0; i < slotCount; i++) {
+        const d = new Date(); d.setDate(d.getDate() + i + 1);
+        const isoDate = d.toISOString().split('T')[0];
+        const item = existing ? existing.items[i] : null;
+        const effectiveDate = item ? item.date : isoDate;
+        const dateLabel = new Date(effectiveDate+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+        const posted = item && item.posted;
+        const isToday = item && item.date === today && !posted;
+        const cardClass = posted ? 'bulk-day-card posted' : (isToday ? 'bulk-day-card today-card' : 'bulk-day-card');
+        const chipHtml = posted ? '<span class="status-chip chip-posted">✅ Posted</span>' : (isToday ? '<span class="status-chip chip-today">⚡ Due Today</span>' : '<span class="status-chip chip-pending">⏳ Pending</span>');
+        const postedAtHtml = posted && item.postedAt ? `<div style="font-size:11px;color:#22c55e;margin-top:2px;">Posted at: ${item.postedAt}</div>` : '';
+        html += `<div class="${cardClass}">
+            <div class="bulk-day-header"><span>📅 Day ${i+1} — ${dateLabel}</span>${chipHtml}</div>
+            ${postedAtHtml}
+            <label style="font-size:13px;color:#aaa;">Caption / Topic (optional):</label>
+            <input type="text" id="mc_${i}" placeholder="e.g. Today's engineering tip..." style="margin:4px 0 8px;" ${posted?'readonly':''} value="${item?item.caption||'':''}">
+            <label style="font-size:13px;color:#aaa;">📝 Image/Audio URL or choose a file:</label>
+            <div style="display:flex;gap:8px;align-items:flex-start;margin:4px 0 6px;">
+                <textarea id="mu_${i}" placeholder="Paste image/audio URL, or use Choose File below..." style="min-height:50px;flex:1;" ${posted?'readonly':''}>${item?item.urlOrText||'':''}</textarea>
+            </div>
+            ${posted ? '' : `
+            <div style="margin-bottom:8px;">
+                <input type="file" id="mfile_${i}" accept="image/*,audio/*" style="display:none;" onchange="handleBulkFileSelect(${i}, this)">
+                <button type="button" onclick="document.getElementById('mfile_${i}').click()" style="width:auto;padding:7px 16px;font-size:13px;background:linear-gradient(135deg,#1E5BFF,#764ba2);border-radius:8px;margin:0;">📂 Choose File (Image/Audio)</button>
+                <span id="mfile_name_${i}" style="color:#888;font-size:12px;margin-left:8px;"></span>
+            </div>
+            <div id="mfile_preview_${i}" style="margin-bottom:8px;"></div>`}
+            <label style="font-size:13px;color:#ff9800;font-weight:700;">❓ Question for Students:</label>
+            <textarea id="mq_${i}" placeholder="What question will students answer about this media?" style="min-height:60px;margin:4px 0 8px;border-color:#ff9800;" ${posted?'readonly':''}>${item?item.question||'':''}</textarea>
+            <label style="font-size:13px;color:#22c55e;font-weight:700;">✅ Answer (shown after student submits):</label>
+            <textarea id="ma_${i}" placeholder="The correct answer..." style="min-height:50px;margin:4px 0;border-color:#22c55e;" ${posted?'readonly':''}>${item?item.answer||'':''}</textarea>
+            <input type="hidden" id="md_${i}" value="${effectiveDate}">
+        </div>`;
+    }
+    container.innerHTML = html;
+    renderMediaBulkScheduleInfo(existing);
+    updateMediaAutoPostUI(existing);
+}
+
+function renderMediaBulkScheduleInfo(schedule) {
+    const info = document.getElementById('mediaBulkScheduleInfo');
+    if (!info) return;
+    if (!schedule) { info.innerHTML = ''; return; }
+    const total = schedule.items.length;
+    const posted = schedule.items.filter(q => q.posted).length;
+    info.innerHTML = `<div class="info-msg" style="font-size:13px;">📊 <strong>${posted}/${total}</strong> posted &nbsp;|&nbsp; <strong>${total-posted}</strong> remaining</div>`;
+}
+
+async function saveMediaBulkSchedule() {
+    const existing = await getMediaBulkSchedule();
+    const items = [];
+    let valid = true;
+    let slotCount = 0;
+    while (document.getElementById('mq_' + slotCount) !== null) slotCount++;
+    if (slotCount === 0) slotCount = 10;
+    for (let i = 0; i < slotCount; i++) {
+        const qEl = document.getElementById('mq_' + i);
+        const aEl = document.getElementById('ma_' + i);
+        const dEl = document.getElementById('md_' + i);
+        const cEl = document.getElementById('mc_' + i);
+        const uEl = document.getElementById('mu_' + i);
+        if (!qEl || !aEl || !dEl) continue;
+        if (existing && existing.items[i] && existing.items[i].posted) { items.push(existing.items[i]); continue; }
+        if (!qEl.value.trim()) { showToast('Please fill Question ' + (i + 1), 'error'); valid = false; break; }
+        if (!aEl.value.trim()) { showToast('Please fill Answer ' + (i + 1), 'error'); valid = false; break; }
+        items.push({ caption: cEl ? cEl.value.trim() : '', urlOrText: uEl ? uEl.value.trim() : '', question: qEl.value.trim(), answer: aEl.value.trim(), date: dEl.value, posted: false, postedAt: null });
+    }
+    if (!valid) return;
+    await saveMediaBulkScheduleToServer({ savedOn: new Date().toISOString(), items, lastAutoPost: existing ? existing.lastAutoPost : null });
+    startMediaAutoPostMachine();
+    showToast(`✅ ${items.length} media items saved! Media Auto-Post is ACTIVE.`, 'success');
+    renderMediaBulkFields();
+}
+
+async function manualMediaCheckAndPost() {
+    const btn = event.target;
+    btn.disabled = true; btn.textContent = '⏳ Checking...';
+    const posted = await runMediaAutoPostCheck(false);
+    const schedule = await getMediaBulkSchedule();
+    if (posted) { showToast("✅ Today's media posted!", 'success'); }
+    else if (!schedule) showToast('⚠️ No media schedule saved.', 'warn');
+    else {
+        const today = getTodayStr();
+        const todayItem = schedule.items.find(q => q.date === today);
+        if (todayItem && todayItem.posted) showToast("✅ Today's media was already posted!", 'success');
+        else {
+            const next = schedule.items.find(q => !q.posted);
+            if (next) showToast(`📅 Next media scheduled for ${new Date(next.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}`, 'info');
+            else showToast('🎉 All media items posted!', 'success');
+        }
+    }
+    btn.disabled = false; btn.textContent = '🔄 Manual Check: Post Today\'s Media Now';
+}
+
+async function resetMediaBulkSchedule() {
+    if (!confirm('Reset media schedule? All slots will be cleared.')) return;
+    await fetch(API_URL + '/schedule/media', { method: 'DELETE' });
+    _mediaScheduleCache = null;
+    stopMediaAutoPostMachine();
+    showToast('🗑️ Media schedule reset.', 'warn');
+    renderMediaBulkFields();
+    updateMediaAutoPostUI(null);
 }
 
 async function loadPhoneNumbers() {
@@ -1040,8 +1768,15 @@ async function renderBulkFields() {
     container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading schedule...</div>';
     const existing = await getBulkSchedule();
     const today = getTodayStr();
-    let html = '';
-    for (let i = 0; i < 10; i++) {
+    // Determine slot count from existing or default 10, max 60
+    const slotCount = existing ? Math.min(Math.max(existing.questions.length, 10), 60) : 10;
+    let html = `<div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+        <label style="color:#aaa;font-size:13px;margin:0;">Number of questions:</label>
+        <select id="qSlotCount" onchange="changeQSlotCount()" style="background:#0a0a14;color:#e0e0e0;border:2px solid #333;border-radius:6px;padding:6px 10px;font-size:14px;">
+            ${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===slotCount?' selected':''}>${n}</option>`).join('')}
+        </select>
+    </div>`;
+    for (let i = 0; i < slotCount; i++) {
         const d = new Date();
         d.setDate(d.getDate() + i + 1);
         const isoDate = d.toISOString().split('T')[0];
@@ -1059,14 +1794,19 @@ async function renderBulkFields() {
             ${postedAtHtml}
             <label style="font-size:13px;color:#aaa;">Question ${i + 1}:</label>
             <textarea id="bq_${i}" placeholder="Enter question ${i + 1}..." style="min-height:70px;margin:4px 0 8px;" ${posted ? 'readonly' : ''}>${existingQ ? existingQ.question : ''}</textarea>
-            <label style="font-size:13px;color:#22c55e;font-weight:700;">Answer ${i + 1}:</label>
-            <textarea id="ba_${i}" placeholder="Enter answer ${i + 1}..." style="min-height:60px;margin:4px 0;" ${posted ? 'readonly' : ''}>${existingQ ? existingQ.answer : ''}</textarea>
+            <label style="font-size:13px;color:#22c55e;font-weight:700;">Answer ${i + 1} (shown to student after submitting):</label>
+            <textarea id="ba_${i}" placeholder="Enter answer ${i + 1}..." style="min-height:60px;margin:4px 0;border-color:#22c55e;" ${posted ? 'readonly' : ''}>${existingQ ? existingQ.answer : ''}</textarea>
             <input type="hidden" id="bd_${i}" value="${effectiveDate}">
         </div>`;
     }
     container.innerHTML = html;
     renderScheduleInfo(existing);
     updateAutoPostStatusUI(existing);
+}
+
+function changeQSlotCount() {
+    // Re-render with new slot count (doesn't save, just re-renders fields)
+    renderBulkFields();
 }
 
 function renderScheduleInfo(schedule) {
@@ -1085,10 +1825,15 @@ async function saveBulkQuestions() {
     const existingSchedule = await getBulkSchedule();
     const questions = [];
     let valid = true;
-    for (let i = 0; i < 10; i++) {
+    // Count how many slots are rendered
+    let slotCount = 0;
+    while (document.getElementById('bq_' + slotCount) !== null) slotCount++;
+    if (slotCount === 0) slotCount = 10;
+    for (let i = 0; i < slotCount; i++) {
         const qEl = document.getElementById('bq_' + i);
         const aEl = document.getElementById('ba_' + i);
         const dEl = document.getElementById('bd_' + i);
+        if (!qEl || !aEl || !dEl) continue;
         if (existingSchedule && existingSchedule.questions[i] && existingSchedule.questions[i].posted) { questions.push(existingSchedule.questions[i]); continue; }
         if (!qEl.value.trim()) { showToast('Please fill Question ' + (i + 1), 'error'); valid = false; break; }
         if (!aEl.value.trim()) { showToast('Please fill Answer ' + (i + 1), 'error'); valid = false; break; }
@@ -1097,7 +1842,7 @@ async function saveBulkQuestions() {
     if (!valid) return;
     await saveBulkSchedule({ savedOn: new Date().toISOString(), questions, lastAutoPost: existingSchedule ? existingSchedule.lastAutoPost : null });
     startAutoPostMachine();
-    showToast('✅ 10 questions saved on SERVER! Auto-Post Machine is ACTIVE.', 'success');
+    showToast(`✅ ${questions.length} questions saved on SERVER! Auto-Post Machine is ACTIVE.`, 'success');
     renderBulkFields();
 }
 
@@ -1280,6 +2025,521 @@ async function loadRankTab() {
 }
 
 // =====================================================
+// WORD OF THE DAY
+// =====================================================
+let wordAutoPostInterval = null;
+let _wordScheduleCache = null;
+
+async function getWordBulkSchedule() {
+    try {
+        const res = await fetch(API_URL + '/schedule/word');
+        const data = await res.json();
+        if (data && data.empty) { _wordScheduleCache = null; return null; }
+        _wordScheduleCache = data;
+        return data;
+    } catch (e) { return _wordScheduleCache; }
+}
+
+async function saveWordBulkScheduleToServer(data) {
+    _wordScheduleCache = data;
+    await fetch(API_URL + '/schedule/word', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ schedule: data }) });
+}
+
+async function postWordOfDay() {
+    const word = document.getElementById('wordInput').value.trim();
+    const question = document.getElementById('wordQuestion').value.trim();
+    const answer = document.getElementById('wordAnswer').value.trim();
+    if (!word) return showToast('Please enter a word!', 'error');
+    if (!question) return showToast('Please enter a question!', 'error');
+    if (!answer) return showToast('Please enter the answer!', 'error');
+    const btn = event.target; btn.disabled = true; btn.textContent = '⏳ Posting...';
+    try {
+        const result = await apiPost('/word', { word, question, answer: null });
+        if (result && result.item && result.item.id) {
+            await fetch(API_URL + '/word/' + result.item.id + '/answer', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answer }) });
+        }
+        document.getElementById('wordInput').value = '';
+        document.getElementById('wordQuestion').value = '';
+        document.getElementById('wordAnswer').value = '';
+        showToast('✅ Word of the Day posted!', 'success');
+        loadWordContent();
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    btn.disabled = false; btn.textContent = '📤 Post Word of the Day';
+}
+
+async function loadWordContent() {
+    const container = document.getElementById('wordContent');
+    if (!container) return;
+    container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading...</div>';
+    try {
+        const [words, answers] = await Promise.all([apiGet('/word'), apiGet('/answers')]);
+        const ws = words || []; const ans = answers || [];
+        if (ws.length === 0) { container.innerHTML = '<div class="info-msg" style="text-align:center;">No words posted yet.</div>'; return; }
+        const latestWord = ws[ws.length - 1];
+        const wordAns = ans.filter(a => a.questionId === latestWord.id && a.type === 'word');
+        let html = `<h3 style="color:#a78bfa;margin-bottom:12px;">📖 Today's Word & Student Responses</h3>
+        <div style="background:#1a0f2e;border-radius:12px;padding:18px;border:2px solid #a78bfa;margin-bottom:14px;">
+            <div style="color:#888;font-size:13px;margin-bottom:6px;">📅 ${latestWord.date}</div>
+            <div style="font-size:22px;font-weight:800;color:#a78bfa;margin-bottom:8px;">📖 ${latestWord.word}</div>
+            <div style="color:#e0e0e0;font-size:14px;line-height:1.6;">${latestWord.question}</div>
+        </div>`;
+        // Answer box
+        const hasAnswer = !!latestWord.answer;
+        html += `<div style="background:${hasAnswer?'#0f2a14':'#1f1208'};border-radius:12px;padding:16px;margin-bottom:14px;border:2px solid ${hasAnswer?'#22c55e':'#ff9800'};">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+                <span style="font-size:18px;">${hasAnswer?'✅':'⏳'}</span>
+                <div style="font-weight:700;color:${hasAnswer?'#22c55e':'#ff9800'};font-size:14px;">TODAY'S ANSWER</div>
+                <div style="font-size:12px;color:#888;margin-left:4px;">Students see this ONLY after they submit</div>
+            </div>`;
+        if (hasAnswer) {
+            html += `<div style="background:#0a0a14;border-radius:8px;padding:10px;color:#86efac;font-size:14px;font-weight:600;border-left:4px solid #22c55e;margin-bottom:10px;">${latestWord.answer}</div>
+            <textarea id="wordUpdateAnswerField" style="border-color:#22c55e;">${latestWord.answer}</textarea>
+            <button onclick="updateWordAnswer(${latestWord.id})" class="btn-green btn-small" style="width:auto;margin-top:6px;">💾 Update Answer</button>`;
+        } else {
+            html += `<div style="color:#ff9800;font-style:italic;margin-bottom:8px;font-size:13px;">⚠️ No answer set yet</div>
+            <textarea id="wordUpdateAnswerField" placeholder="Type the word meaning/answer..." style="border-color:#ff9800;"></textarea>
+            <button onclick="updateWordAnswer(${latestWord.id})" class="btn-orange btn-small" style="width:auto;margin-top:6px;">✅ Set Answer Now</button>`;
+        }
+        html += '</div>';
+        html += `<h3 style="color:#a78bfa;">👥 Student Responses (${wordAns.length})</h3>`;
+        if (wordAns.length > 0) {
+            wordAns.forEach(a => { html += `<div class="student-answer"><strong style="color:#a78bfa;">👤 ${a.studentName||'Unknown'}</strong> <span style="color:#888;font-size:12px;">(${a.studentPin})</span><div style="color:#888;font-size:12px;margin:4px 0;">${a.date}</div><p style="margin-top:6px;padding:8px;background:#0f0f1a;border-radius:6px;color:#e0e0e0;">${a.answer}</p></div>`; });
+        } else {
+            html += '<div class="info-msg" style="text-align:center;">No student responses yet.</div>';
+        }
+        container.innerHTML = html;
+    } catch (e) { container.innerHTML = '<div class="error-msg">Error loading.</div>'; }
+}
+
+async function updateWordAnswer(wordId) {
+    const field = document.getElementById('wordUpdateAnswerField');
+    const val = field ? field.value.trim() : '';
+    if (!val) return showToast('Please enter an answer!', 'error');
+    try {
+        const res = await fetch(API_URL + '/word/' + wordId + '/answer', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answer: val }) });
+        if (!res.ok) throw new Error('Server error');
+        showToast('✅ Word answer saved!', 'success');
+        loadWordContent();
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+function switchWordMode(mode) {
+    if (mode === 'single') {
+        document.getElementById('singleWordMode').style.display = 'block';
+        document.getElementById('bulkWordMode').style.display = 'none';
+        document.getElementById('singleWordBtn').style.cssText = 'flex:1;padding:10px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;';
+        document.getElementById('bulkWordBtn').style.cssText = 'flex:1;padding:10px;background:#2a2a3e;color:#aaa;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;';
+    } else {
+        document.getElementById('singleWordMode').style.display = 'none';
+        document.getElementById('bulkWordMode').style.display = 'block';
+        document.getElementById('bulkWordBtn').style.cssText = 'flex:1;padding:10px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;';
+        document.getElementById('singleWordBtn').style.cssText = 'flex:1;padding:10px;background:#2a2a3e;color:#aaa;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;';
+        renderWordBulkFields();
+    }
+}
+
+async function renderWordBulkFields() {
+    const container = document.getElementById('wordBulkFields');
+    if (!container) return;
+    container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading...</div>';
+    const existing = await getWordBulkSchedule();
+    const today = getTodayStr();
+    const slotCount = 10;
+    let html = '';
+    for (let i = 0; i < slotCount; i++) {
+        const d = new Date(); d.setDate(d.getDate() + i + 1);
+        const isoDate = d.toISOString().split('T')[0];
+        const item = existing ? existing.words[i] : null;
+        const effectiveDate = item ? item.date : isoDate;
+        const dateLabel = new Date(effectiveDate+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+        const posted = item && item.posted;
+        const isToday = item && item.date === today && !posted;
+        const cardClass = posted ? 'bulk-day-card posted' : (isToday ? 'bulk-day-card today-card' : 'bulk-day-card');
+        const chipHtml = posted ? '<span class="status-chip chip-posted">✅ Posted</span>' : (isToday ? '<span class="status-chip chip-today">⚡ Due Today</span>' : '<span class="status-chip chip-pending">⏳ Pending</span>');
+        html += `<div class="${cardClass}">
+            <div class="bulk-day-header"><span>📖 Day ${i+1} — ${dateLabel}</span>${chipHtml}</div>
+            ${posted && item.postedAt ? `<div style="font-size:11px;color:#22c55e;">Posted at: ${item.postedAt}</div>` : ''}
+            <label style="font-size:13px;color:#a78bfa;font-weight:700;">Word ${i+1}:</label>
+            <input type="text" id="ww_${i}" placeholder="e.g. Ephemeral..." style="margin:4px 0 8px;" ${posted?'readonly':''} value="${item?item.word||'':''}">
+            <label style="font-size:13px;color:#aaa;">Question for students:</label>
+            <textarea id="wq_${i}" placeholder="What does this word mean? Use it in a sentence..." style="min-height:60px;margin:4px 0 8px;" ${posted?'readonly':''}>${item?item.question||'':''}</textarea>
+            <label style="font-size:13px;color:#22c55e;font-weight:700;">Answer (shown after student submits):</label>
+            <textarea id="wa_${i}" placeholder="Meaning, usage, example..." style="min-height:50px;margin:4px 0;border-color:#22c55e;" ${posted?'readonly':''}>${item?item.answer||'':''}</textarea>
+            <input type="hidden" id="wd_${i}" value="${effectiveDate}">
+        </div>`;
+    }
+    container.innerHTML = html;
+    renderWordBulkScheduleInfo(existing);
+    updateWordAutoPostUI(existing);
+}
+
+function renderWordBulkScheduleInfo(schedule) {
+    const info = document.getElementById('wordBulkScheduleInfo');
+    if (!info) return;
+    if (!schedule) { info.innerHTML = ''; return; }
+    const total = schedule.words.length;
+    const posted = schedule.words.filter(w => w.posted).length;
+    info.innerHTML = `<div class="info-msg" style="font-size:13px;">📊 <strong>${posted}/${total}</strong> posted &nbsp;|&nbsp; <strong>${total-posted}</strong> remaining</div>`;
+}
+
+async function updateWordAutoPostUI(schedule) {
+    if (schedule === undefined) schedule = _wordScheduleCache;
+    const engineEl = document.getElementById('wApEngineStatus');
+    const postedCountEl = document.getElementById('wApPostedCount');
+    const nextPostEl = document.getElementById('wApNextPost');
+    const lastPostEl = document.getElementById('wApLastPost');
+    const progressBar = document.getElementById('wApProgressBar');
+    const progressLabel = document.getElementById('wApProgressLabel');
+    if (engineEl) engineEl.innerHTML = wordAutoPostInterval ? '<span class="pulse-dot"></span><span class="clr-green">Running ✅</span>' : '<span class="pulse-dot off"></span><span class="clr-red">Stopped</span>';
+    if (!schedule || !schedule.words) {
+        if (postedCountEl) postedCountEl.textContent = '0 / 10';
+        if (nextPostEl) nextPostEl.textContent = '—';
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressLabel) progressLabel.textContent = '0 of 10 posted';
+        return;
+    }
+    const total = schedule.words.length;
+    const posted = schedule.words.filter(w => w.posted).length;
+    const today = getTodayStr();
+    if (postedCountEl) { postedCountEl.textContent = `${posted} / ${total}`; postedCountEl.className = `autopost-value ${posted===total?'clr-green':'clr-cyan'}`; }
+    const nextW = schedule.words.find(w => !w.posted);
+    if (nextPostEl) {
+        if (nextW) { nextPostEl.textContent = nextW.date === today ? '⚡ TODAY!' : new Date(nextW.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'}); nextPostEl.className = nextW.date === today ? 'autopost-value clr-green' : 'autopost-value clr-yellow'; }
+        else { nextPostEl.textContent = 'All done! 🎉'; nextPostEl.className = 'autopost-value clr-green'; }
+    }
+    if (lastPostEl) { if (schedule.lastAutoPost) { lastPostEl.textContent = `Word ${schedule.lastAutoPost.day} — ${schedule.lastAutoPost.time}`; lastPostEl.className = 'autopost-value clr-green'; } else { lastPostEl.textContent = 'None yet'; } }
+    if (progressBar) progressBar.style.width = `${(posted/total)*100}%`;
+    if (progressLabel) progressLabel.textContent = `${posted} of ${total} posted`;
+}
+
+async function runWordAutoPostCheck(silent = false) {
+    const schedule = await getWordBulkSchedule();
+    if (!schedule || !schedule.words) return false;
+    const today = getTodayStr();
+    for (let i = 0; i < schedule.words.length; i++) {
+        const w = schedule.words[i];
+        if (!w.posted && w.date === today) {
+            try {
+                const result = await apiPost('/word', { word: w.word, question: w.question, answer: null });
+                if (result && result.item && result.item.id && w.answer) {
+                    await fetch(API_URL + '/word/' + result.item.id + '/answer', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answer: w.answer }) });
+                }
+                await fetch(API_URL + '/schedule/word/mark-posted', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ index: i, postedAt: new Date().toLocaleString('en-IN') }) });
+                _wordScheduleCache = null;
+                updateWordAutoPostUI(await getWordBulkSchedule());
+                return true;
+            } catch (err) { console.error('[WordAutoPost]', err); return false; }
+        }
+    }
+    if (!silent) updateWordAutoPostUI(schedule);
+    return false;
+}
+
+function startWordAutoPostMachine() {
+    runWordAutoPostCheck(true).then(() => updateWordAutoPostUI());
+    if (wordAutoPostInterval) clearInterval(wordAutoPostInterval);
+    wordAutoPostInterval = setInterval(async () => {
+        const posted = await runWordAutoPostCheck(true);
+        if (posted) { showToast("📖 Word of the Day auto-posted!", 'success'); loadWordContent(); }
+        updateWordAutoPostUI();
+    }, 60000);
+}
+
+function stopWordAutoPostMachine() { if (wordAutoPostInterval) { clearInterval(wordAutoPostInterval); wordAutoPostInterval = null; } }
+
+async function saveWordBulkSchedule() {
+    const existing = await getWordBulkSchedule();
+    const words = [];
+    let valid = true;
+    for (let i = 0; i < 10; i++) {
+        const wwEl = document.getElementById('ww_' + i);
+        const wqEl = document.getElementById('wq_' + i);
+        const waEl = document.getElementById('wa_' + i);
+        const wdEl = document.getElementById('wd_' + i);
+        if (!wwEl) continue;
+        if (existing && existing.words[i] && existing.words[i].posted) { words.push(existing.words[i]); continue; }
+        if (!wwEl.value.trim()) { showToast('Please fill Word ' + (i + 1), 'error'); valid = false; break; }
+        if (!wqEl.value.trim()) { showToast('Please fill Question ' + (i + 1), 'error'); valid = false; break; }
+        if (!waEl.value.trim()) { showToast('Please fill Answer ' + (i + 1), 'error'); valid = false; break; }
+        words.push({ word: wwEl.value.trim(), question: wqEl.value.trim(), answer: waEl.value.trim(), date: wdEl.value, posted: false, postedAt: null });
+    }
+    if (!valid) return;
+    await saveWordBulkScheduleToServer({ savedOn: new Date().toISOString(), words, lastAutoPost: existing ? existing.lastAutoPost : null });
+    startWordAutoPostMachine();
+    showToast('✅ 10 words saved! Word Auto-Post is ACTIVE.', 'success');
+    renderWordBulkFields();
+}
+
+async function manualWordCheckAndPost() {
+    const btn = event.target; btn.disabled = true; btn.textContent = '⏳ Checking...';
+    const posted = await runWordAutoPostCheck(false);
+    if (posted) { showToast("✅ Today's word posted!", 'success'); loadWordContent(); renderWordBulkFields(); }
+    else showToast('No word scheduled for today or already posted.', 'info');
+    btn.disabled = false; btn.textContent = '🔄 Post Today\'s Word Now';
+}
+
+async function resetWordBulkSchedule() {
+    if (!confirm('Reset word schedule?')) return;
+    await fetch(API_URL + '/schedule/word', { method: 'DELETE' });
+    _wordScheduleCache = null; stopWordAutoPostMachine();
+    showToast('🗑️ Word schedule reset.', 'warn');
+    renderWordBulkFields(); updateWordAutoPostUI(null);
+}
+
+// =====================================================
+// CURRENT AFFAIRS
+// =====================================================
+let affairsAutoPostInterval = null;
+let _affairsScheduleCache = null;
+
+async function getAffairsBulkSchedule() {
+    try {
+        const res = await fetch(API_URL + '/schedule/affairs');
+        const data = await res.json();
+        if (data && data.empty) { _affairsScheduleCache = null; return null; }
+        _affairsScheduleCache = data;
+        return data;
+    } catch (e) { return _affairsScheduleCache; }
+}
+
+async function saveAffairsBulkScheduleToServer(data) {
+    _affairsScheduleCache = data;
+    await fetch(API_URL + '/schedule/affairs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ schedule: data }) });
+}
+
+async function postCurrentAffairs() {
+    const question = document.getElementById('affairsQuestion').value.trim();
+    const answer = document.getElementById('affairsAnswer').value.trim();
+    if (!question) return showToast('Please enter a question!', 'error');
+    if (!answer) return showToast('Please enter the answer!', 'error');
+    const btn = event.target; btn.disabled = true; btn.textContent = '⏳ Posting...';
+    try {
+        const result = await apiPost('/affairs', { question, answer: null });
+        if (result && result.item && result.item.id) {
+            await fetch(API_URL + '/affairs/' + result.item.id + '/answer', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answer }) });
+        }
+        document.getElementById('affairsQuestion').value = '';
+        document.getElementById('affairsAnswer').value = '';
+        showToast('✅ Current Affairs posted!', 'success');
+        loadAffairsContent();
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
+    btn.disabled = false; btn.textContent = '📤 Post Current Affairs Question';
+}
+
+async function loadAffairsContent() {
+    const container = document.getElementById('affairsContent');
+    if (!container) return;
+    container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading...</div>';
+    try {
+        const [affairs, answers] = await Promise.all([apiGet('/affairs'), apiGet('/answers')]);
+        const as = affairs || []; const ans = answers || [];
+        if (as.length === 0) { container.innerHTML = '<div class="info-msg" style="text-align:center;">No current affairs posted yet.</div>'; return; }
+        const latest = as[as.length - 1];
+        const affairsAns = ans.filter(a => a.questionId === latest.id && a.type === 'affairs');
+        let html = `<h3 style="color:#60a5fa;margin-bottom:12px;">📰 Today's Current Affairs & Student Responses</h3>
+        <div style="background:#0f1a2e;border-radius:12px;padding:18px;border:2px solid #60a5fa;margin-bottom:14px;">
+            <div style="color:#888;font-size:13px;margin-bottom:8px;">📅 ${latest.date}</div>
+            <p style="font-size:15px;color:#e0e0e0;line-height:1.6;">${latest.question}</p>
+        </div>`;
+        const hasAnswer = !!latest.answer;
+        html += `<div style="background:${hasAnswer?'#0f2a14':'#1f1208'};border-radius:12px;padding:16px;margin-bottom:14px;border:2px solid ${hasAnswer?'#22c55e':'#ff9800'};">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;"><span>${hasAnswer?'✅':'⏳'}</span><div style="font-weight:700;color:${hasAnswer?'#22c55e':'#ff9800'};font-size:14px;">TODAY'S ANSWER</div><div style="font-size:12px;color:#888;margin-left:4px;">Students see this ONLY after they submit</div></div>`;
+        if (hasAnswer) {
+            html += `<div style="background:#0a0a14;border-radius:8px;padding:10px;color:#86efac;font-size:14px;font-weight:600;border-left:4px solid #22c55e;margin-bottom:10px;">${latest.answer}</div>
+            <textarea id="affairsUpdateAnswerField" style="border-color:#22c55e;">${latest.answer}</textarea>
+            <button onclick="updateAffairsAnswer(${latest.id})" class="btn-green btn-small" style="width:auto;margin-top:6px;">💾 Update Answer</button>`;
+        } else {
+            html += `<textarea id="affairsUpdateAnswerField" placeholder="Type the correct answer..." style="border-color:#ff9800;"></textarea>
+            <button onclick="updateAffairsAnswer(${latest.id})" class="btn-orange btn-small" style="width:auto;margin-top:6px;">✅ Set Answer Now</button>`;
+        }
+        html += '</div>';
+        html += `<h3 style="color:#60a5fa;">👥 Student Responses (${affairsAns.length})</h3>`;
+        if (affairsAns.length > 0) {
+            affairsAns.forEach(a => { html += `<div class="student-answer"><strong style="color:#60a5fa;">👤 ${a.studentName||'Unknown'}</strong> <span style="color:#888;font-size:12px;">(${a.studentPin})</span><div style="color:#888;font-size:12px;margin:4px 0;">${a.date}</div><p style="margin-top:6px;padding:8px;background:#0f0f1a;border-radius:6px;color:#e0e0e0;">${a.answer}</p></div>`; });
+        } else {
+            html += '<div class="info-msg" style="text-align:center;">No student responses yet.</div>';
+        }
+        container.innerHTML = html;
+    } catch (e) { container.innerHTML = '<div class="error-msg">Error loading.</div>'; }
+}
+
+async function updateAffairsAnswer(affairsId) {
+    const field = document.getElementById('affairsUpdateAnswerField');
+    const val = field ? field.value.trim() : '';
+    if (!val) return showToast('Please enter an answer!', 'error');
+    try {
+        const res = await fetch(API_URL + '/affairs/' + affairsId + '/answer', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answer: val }) });
+        if (!res.ok) throw new Error('Server error');
+        showToast('✅ Affairs answer saved!', 'success');
+        loadAffairsContent();
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+function switchAffairsMode(mode) {
+    if (mode === 'single') {
+        document.getElementById('singleAffairsMode').style.display = 'block';
+        document.getElementById('bulkAffairsMode').style.display = 'none';
+        document.getElementById('singleAffairsBtn').style.cssText = 'flex:1;padding:10px;background:linear-gradient(135deg,#1d4ed8,#60a5fa);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;';
+        document.getElementById('bulkAffairsBtn').style.cssText = 'flex:1;padding:10px;background:#2a2a3e;color:#aaa;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;';
+    } else {
+        document.getElementById('singleAffairsMode').style.display = 'none';
+        document.getElementById('bulkAffairsMode').style.display = 'block';
+        document.getElementById('bulkAffairsBtn').style.cssText = 'flex:1;padding:10px;background:linear-gradient(135deg,#1d4ed8,#60a5fa);color:white;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;';
+        document.getElementById('singleAffairsBtn').style.cssText = 'flex:1;padding:10px;background:#2a2a3e;color:#aaa;border:none;border-radius:8px;cursor:pointer;font-weight:600;font-size:13px;';
+        renderAffairsBulkFields();
+    }
+}
+
+async function renderAffairsBulkFields() {
+    const container = document.getElementById('affairsBulkFields');
+    if (!container) return;
+    container.innerHTML = '<div class="loading"><div class="spinner"></div><br>Loading...</div>';
+    const existing = await getAffairsBulkSchedule();
+    const countEl = document.getElementById('affairsSlotCount');
+    const slotCount = existing ? Math.min(Math.max(existing.questions.length, parseInt(countEl?countEl.value:10)), 60) : parseInt(countEl?countEl.value:10);
+    if (countEl) countEl.value = slotCount;
+    const today = getTodayStr();
+    let html = '';
+    for (let i = 0; i < slotCount; i++) {
+        const d = new Date(); d.setDate(d.getDate() + i + 1);
+        const isoDate = d.toISOString().split('T')[0];
+        const item = existing ? existing.questions[i] : null;
+        const effectiveDate = item ? item.date : isoDate;
+        const dateLabel = new Date(effectiveDate+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+        const posted = item && item.posted;
+        const isToday = item && item.date === today && !posted;
+        const cardClass = posted ? 'bulk-day-card posted' : (isToday ? 'bulk-day-card today-card' : 'bulk-day-card');
+        const chipHtml = posted ? '<span class="status-chip chip-posted">✅ Posted</span>' : (isToday ? '<span class="status-chip chip-today">⚡ Due Today</span>' : '<span class="status-chip chip-pending">⏳ Pending</span>');
+        html += `<div class="${cardClass}">
+            <div class="bulk-day-header"><span>📰 Day ${i+1} — ${dateLabel}</span>${chipHtml}</div>
+            ${posted&&item.postedAt?`<div style="font-size:11px;color:#22c55e;">Posted at: ${item.postedAt}</div>`:''}
+            <label style="font-size:13px;color:#aaa;">Current Affairs Question ${i+1}:</label>
+            <textarea id="aq_${i}" placeholder="Enter current affairs question..." style="min-height:70px;margin:4px 0 8px;" ${posted?'readonly':''}>${item?item.question||'':''}</textarea>
+            <label style="font-size:13px;color:#22c55e;font-weight:700;">Answer (shown after student submits):</label>
+            <textarea id="aa_${i}" placeholder="The correct answer..." style="min-height:50px;margin:4px 0;border-color:#22c55e;" ${posted?'readonly':''}>${item?item.answer||'':''}</textarea>
+            <input type="hidden" id="ad_${i}" value="${effectiveDate}">
+        </div>`;
+    }
+    container.innerHTML = html;
+    renderAffairsBulkScheduleInfo(existing);
+    updateAffairsAutoPostUI(existing);
+}
+
+function renderAffairsBulkScheduleInfo(schedule) {
+    const info = document.getElementById('affairsBulkScheduleInfo');
+    if (!info) return;
+    if (!schedule) { info.innerHTML = ''; return; }
+    const total = schedule.questions.length;
+    const posted = schedule.questions.filter(q => q.posted).length;
+    info.innerHTML = `<div class="info-msg" style="font-size:13px;">📊 <strong>${posted}/${total}</strong> posted &nbsp;|&nbsp; <strong>${total-posted}</strong> remaining</div>`;
+}
+
+async function updateAffairsAutoPostUI(schedule) {
+    if (schedule === undefined) schedule = _affairsScheduleCache;
+    const engineEl = document.getElementById('aApEngineStatus');
+    const postedCountEl = document.getElementById('aApPostedCount');
+    const nextPostEl = document.getElementById('aApNextPost');
+    const lastPostEl = document.getElementById('aApLastPost');
+    const progressBar = document.getElementById('aApProgressBar');
+    const progressLabel = document.getElementById('aApProgressLabel');
+    if (engineEl) engineEl.innerHTML = affairsAutoPostInterval ? '<span class="pulse-dot"></span><span class="clr-green">Running ✅</span>' : '<span class="pulse-dot off"></span><span class="clr-red">Stopped</span>';
+    if (!schedule || !schedule.questions) {
+        if (postedCountEl) postedCountEl.textContent = '0 / 60';
+        if (nextPostEl) nextPostEl.textContent = '—';
+        if (progressBar) progressBar.style.width = '0%';
+        if (progressLabel) progressLabel.textContent = '0 of 60 posted';
+        return;
+    }
+    const total = schedule.questions.length;
+    const posted = schedule.questions.filter(q => q.posted).length;
+    const today = getTodayStr();
+    if (postedCountEl) { postedCountEl.textContent = `${posted} / ${total}`; postedCountEl.className = `autopost-value ${posted===total?'clr-green':'clr-cyan'}`; }
+    const nextQ = schedule.questions.find(q => !q.posted);
+    if (nextPostEl) {
+        if (nextQ) { nextPostEl.textContent = nextQ.date === today ? '⚡ TODAY!' : new Date(nextQ.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'}); nextPostEl.className = nextQ.date === today ? 'autopost-value clr-green' : 'autopost-value clr-yellow'; }
+        else { nextPostEl.textContent = 'All done! 🎉'; nextPostEl.className = 'autopost-value clr-green'; }
+    }
+    if (lastPostEl) { if (schedule.lastAutoPost) { lastPostEl.textContent = `Q${schedule.lastAutoPost.day} — ${schedule.lastAutoPost.time}`; lastPostEl.className = 'autopost-value clr-green'; } else { lastPostEl.textContent = 'None yet'; } }
+    if (progressBar) progressBar.style.width = `${(posted/total)*100}%`;
+    if (progressLabel) progressLabel.textContent = `${posted} of ${total} posted`;
+}
+
+async function runAffairsAutoPostCheck(silent = false) {
+    const schedule = await getAffairsBulkSchedule();
+    if (!schedule || !schedule.questions) return false;
+    const today = getTodayStr();
+    for (let i = 0; i < schedule.questions.length; i++) {
+        const q = schedule.questions[i];
+        if (!q.posted && q.date === today) {
+            try {
+                const result = await apiPost('/affairs', { question: q.question, answer: null });
+                if (result && result.item && result.item.id && q.answer) {
+                    await fetch(API_URL + '/affairs/' + result.item.id + '/answer', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answer: q.answer }) });
+                }
+                await fetch(API_URL + '/schedule/affairs/mark-posted', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ index: i, postedAt: new Date().toLocaleString('en-IN') }) });
+                _affairsScheduleCache = null;
+                updateAffairsAutoPostUI(await getAffairsBulkSchedule());
+                return true;
+            } catch (err) { console.error('[AffairsAutoPost]', err); return false; }
+        }
+    }
+    if (!silent) updateAffairsAutoPostUI(schedule);
+    return false;
+}
+
+function startAffairsAutoPostMachine() {
+    runAffairsAutoPostCheck(true).then(() => updateAffairsAutoPostUI());
+    if (affairsAutoPostInterval) clearInterval(affairsAutoPostInterval);
+    affairsAutoPostInterval = setInterval(async () => {
+        const posted = await runAffairsAutoPostCheck(true);
+        if (posted) { showToast("📰 Current Affairs auto-posted!", 'success'); loadAffairsContent(); }
+        updateAffairsAutoPostUI();
+    }, 60000);
+}
+
+function stopAffairsAutoPostMachine() { if (affairsAutoPostInterval) { clearInterval(affairsAutoPostInterval); affairsAutoPostInterval = null; } }
+
+async function saveAffairsBulkSchedule() {
+    const existing = await getAffairsBulkSchedule();
+    const questions = [];
+    let valid = true;
+    let slotCount = 0;
+    while (document.getElementById('aq_' + slotCount) !== null) slotCount++;
+    if (slotCount === 0) slotCount = 10;
+    for (let i = 0; i < slotCount; i++) {
+        const aqEl = document.getElementById('aq_' + i);
+        const aaEl = document.getElementById('aa_' + i);
+        const adEl = document.getElementById('ad_' + i);
+        if (!aqEl || !aaEl || !adEl) continue;
+        if (existing && existing.questions[i] && existing.questions[i].posted) { questions.push(existing.questions[i]); continue; }
+        if (!aqEl.value.trim()) { showToast('Please fill Question ' + (i + 1), 'error'); valid = false; break; }
+        if (!aaEl.value.trim()) { showToast('Please fill Answer ' + (i + 1), 'error'); valid = false; break; }
+        questions.push({ question: aqEl.value.trim(), answer: aaEl.value.trim(), date: adEl.value, posted: false, postedAt: null });
+    }
+    if (!valid) return;
+    await saveAffairsBulkScheduleToServer({ savedOn: new Date().toISOString(), questions, lastAutoPost: existing ? existing.lastAutoPost : null });
+    startAffairsAutoPostMachine();
+    showToast(`✅ ${questions.length} affairs questions saved! Auto-Post is ACTIVE.`, 'success');
+    renderAffairsBulkFields();
+}
+
+async function manualAffairsCheckAndPost() {
+    const btn = event.target; btn.disabled = true; btn.textContent = '⏳ Checking...';
+    const posted = await runAffairsAutoPostCheck(false);
+    if (posted) { showToast("✅ Today's affairs posted!", 'success'); loadAffairsContent(); renderAffairsBulkFields(); }
+    else showToast('No affairs question scheduled for today or already posted.', 'info');
+    btn.disabled = false; btn.textContent = '🔄 Post Today\'s Affairs Now';
+}
+
+async function resetAffairsBulkSchedule() {
+    if (!confirm('Reset current affairs schedule?')) return;
+    await fetch(API_URL + '/schedule/affairs', { method: 'DELETE' });
+    _affairsScheduleCache = null; stopAffairsAutoPostMachine();
+    showToast('🗑️ Affairs schedule reset.', 'warn');
+    renderAffairsBulkFields(); updateAffairsAutoPostUI(null);
+}
+
+// =====================================================
 // LOGIN FAF BANNER
 // =====================================================
 async function loadLoginFafBanner() {
@@ -1324,6 +2584,43 @@ function showToast(msg, type = 'info') {
     toast.textContent = msg;
     document.body.appendChild(toast);
     setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.4s'; setTimeout(() => toast.remove(), 400); }, 3200);
+}
+
+// =====================================================
+// BULK MEDIA FILE CHOOSE & AUTO-PREVIEW
+// =====================================================
+function handleBulkFileSelect(i, input) {
+    const file = input.files[0];
+    if (!file) return;
+    const nameEl = document.getElementById('mfile_name_' + i);
+    const previewEl = document.getElementById('mfile_preview_' + i);
+    const urlEl = document.getElementById('mu_' + i);
+
+    const isImage = file.type.startsWith('image/');
+    const isAudio = file.type.startsWith('audio/');
+
+    if (!isImage && !isAudio) {
+        showToast('Only image or audio files allowed!', 'error');
+        input.value = '';
+        return;
+    }
+
+    nameEl.textContent = '📎 ' + file.name + ' (' + (file.size > 1024*1024 ? (file.size/1024/1024).toFixed(1)+'MB' : (file.size/1024).toFixed(0)+'KB') + ')';
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const base64 = e.target.result; // full data URL: data:image/...;base64,...
+        urlEl.value = base64;
+
+        // Auto preview
+        if (isImage) {
+            previewEl.innerHTML = `<img src="${base64}" style="max-width:100%;max-height:160px;border-radius:8px;border:2px solid #ff9800;margin-top:4px;" alt="preview">`;
+        } else if (isAudio) {
+            previewEl.innerHTML = `<audio src="${base64}" controls autoplay style="width:100%;margin-top:6px;border-radius:8px;"></audio>
+                <div style="color:#ff9800;font-size:12px;margin-top:4px;">🎵 Audio loaded & auto-playing</div>`;
+        }
+    };
+    reader.readAsDataURL(file);
 }
 
 // Load FAF banner on page load
