@@ -249,8 +249,22 @@
                     <textarea id="newQuestion" placeholder="Enter today's question..."></textarea>
                 </div>
                 <div class="input-group">
+                    <label style="color:#aaa;">📎 Attach File to Question <span style="color:#666;font-size:12px;font-weight:400;">(optional)</span></label>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
+                        <label for="singleQFile" style="display:inline-flex;align-items:center;gap:6px;background:#0f1a2e;border:1.5px dashed #1E5BFF;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:#7b9fff;font-weight:600;">📎 Choose File</label>
+                        <input type="file" id="singleQFile" accept="image/*,audio/*" style="display:none;" onchange="previewSingleQFile()">
+                        <span id="singleQFileName" style="color:#888;font-size:12px;">No file chosen</span>
+                        <button onclick="clearSingleQFile()" style="display:none;width:auto;padding:3px 10px;font-size:11px;background:#dc2626;border-radius:6px;margin:0;" id="singleQFileClear">✕ Clear</button>
+                    </div>
+                    <div id="singleQFilePreview"></div>
+                </div>
+                <div class="input-group">
                     <label>✅ Today's Answer <span style="color:#22c55e;font-size:12px;">(Shown to students ONLY after they submit)</span></label>
                     <textarea id="todayAnswer" placeholder="Enter the correct answer..." style="border-color:#22c55e;"></textarea>
+                </div>
+                <div class="input-group">
+                    <label style="color:#a78bfa;">💬 Answer Opinion <span style="color:#666;font-size:12px;font-weight:400;">(optional — extra explanation for students)</span></label>
+                    <textarea id="todayAnswerOpinion" placeholder="Add extra explanation, context or opinion..." style="border-color:#a78bfa;min-height:65px;"></textarea>
                 </div>
                 <button onclick="postQuestion()">📤 Post Question</button>
             </div>
@@ -414,7 +428,7 @@
                 <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
                     <span style="font-size:24px;">🔥</span>
                     <div>
-                        <div style="color:#22c55e;font-weight:700;font-size:15px;letter-spacing:1px;">TOP 3 MOST ACTIVE</div>
+                        <div style="color:#22c55e;font-weight:700;font-size:15px;letter-spacing:1px;">MOST ACTIVE STUDENTS</div>
                         <div style="color:#888;font-size:12px;">Most answers submitted in the last 15 days</div>
                     </div>
                 </div>
@@ -555,7 +569,7 @@
         <button class="btn-secondary" onclick="showSection('teacherSection')">↩️ Back to Dashboard</button>
     </div>
 
-    <div class="designer-footer">Designed by <span>SATHWIK__DEENANAATH</span></div>
+    <div class="designer-footer">Designed by <span>SATHWIK</span></div>
 </div>
 
 <script>
@@ -632,23 +646,23 @@ function switchTab(tab) {
 // =====================================================
 async function apiGet(endpoint, timeoutMs = 60000) {
     try {
-        const controller = new AbortController();
-        const t = setTimeout(() => controller.abort(), timeoutMs);
-        const res = await fetch(API_URL + endpoint, { signal: controller.signal });
-        clearTimeout(t);
+        const res = await Promise.race([
+            fetch(API_URL + endpoint),
+            new Promise((_, rej) => setTimeout(() => rej(new Error('Timeout')), timeoutMs))
+        ]);
         if (!res.ok) { if (res.status === 404) return null; throw new Error('HTTP ' + res.status); }
         return await res.json();
     } catch (e) { console.error('GET ' + endpoint, e.message); return null; }
 }
 
 async function apiPost(endpoint, data, timeoutMs = 60000) {
-    const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), timeoutMs);
-    const res = await fetch(API_URL + endpoint, {
-        method: 'POST', headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data), signal: controller.signal
-    });
-    clearTimeout(t);
+    const res = await Promise.race([
+        fetch(API_URL + endpoint, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        }),
+        new Promise((_, rej) => setTimeout(() => rej(new Error('Timeout')), timeoutMs))
+    ]);
     if (!res.ok) { const e = await res.json(); throw new Error(e.error || 'HTTP ' + res.status); }
     return await res.json();
 }
@@ -804,7 +818,20 @@ async function displayStudentView(latestMedia, questions, answers) {
         if (latestMedia.opinion) html += `<div class="opinion-box"><strong>TEJAPRATAP's Question:</strong><br>${latestMedia.opinion}</div>`;
         if (hasAnsweredMedia) {
             const myAns = answers.find(a => a.questionId === latestMedia.id && a.studentPin === currentStudent && a.type === 'media');
-            html += `<div class="success-msg" style="margin-top:12px;">✅ You responded!<br><strong>Your response:</strong> ${myAns.answer}</div>`;
+            const myFileHtml = myAns && myAns.answerFile
+                ? (myAns.answerFileType === 'image'
+                    ? `<div style="margin-top:6px;"><div style="color:#aaa;font-size:12px;">📎 Your attached file:</div><img src="${myAns.answerFile}" style="max-width:100%;max-height:150px;border-radius:8px;margin-top:4px;"></div>`
+                    : `<div style="margin-top:6px;"><div style="color:#aaa;font-size:12px;">📎 Your attached audio:</div><audio controls style="width:100%;margin-top:4px;"><source src="${myAns.answerFile}"></audio></div>`)
+                : '';
+            const myOpinionHtml = myAns && myAns.opinion
+                ? `<div style="margin-top:8px;background:#1a0f2e;border-radius:8px;padding:8px 12px;border-left:3px solid #a78bfa;"><span style="color:#a78bfa;font-weight:700;font-size:12px;">💬 Your Opinion:</span><div style="color:#ccc;font-size:13px;margin-top:3px;">${myAns.opinion}</div></div>`
+                : '';
+            const myOpinionFileHtml = myAns && myAns.opinionFile
+                ? (myAns.opinionFileType === 'image'
+                    ? `<div style="margin-top:6px;"><div style="color:#a78bfa;font-size:12px;">📎 Your opinion file:</div><img src="${myAns.opinionFile}" style="max-width:100%;max-height:150px;border-radius:8px;margin-top:4px;"></div>`
+                    : `<div style="margin-top:6px;"><div style="color:#a78bfa;font-size:12px;">📎 Your opinion audio:</div><audio controls style="width:100%;margin-top:4px;"><source src="${myAns.opinionFile}"></audio></div>`)
+                : '';
+            html += `<div class="success-msg" style="margin-top:12px;">✅ You responded!<br><strong>Your response:</strong> ${myAns.answer}${myFileHtml}${myOpinionHtml}${myOpinionFileHtml}</div>`;
             if (latestMedia.expectedAnswer) {
                 html += `<div style="background:#0f2a14;border-radius:12px;padding:14px;margin-top:12px;border:2px solid #22c55e;">
                     <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
@@ -812,14 +839,30 @@ async function displayStudentView(latestMedia, questions, answers) {
                         <div style="font-weight:700;color:#22c55e;font-size:14px;">CORRECT ANSWER</div>
                     </div>
                     <div style="background:#0a0a14;border-radius:8px;padding:10px;color:#86efac;font-size:14px;font-weight:600;border-left:4px solid #22c55e;">${latestMedia.expectedAnswer}</div>
+                    ${latestMedia.answerOpinion ? `<div style="margin-top:10px;background:#1a0f2e;border-radius:8px;padding:10px 12px;border-left:3px solid #a78bfa;"><span style="color:#a78bfa;font-weight:700;font-size:13px;">💬 Teacher's Opinion:</span><div style="color:#d4b8ff;font-size:13px;margin-top:4px;line-height:1.6;">${latestMedia.answerOpinion}</div></div>` : ''}
+                    ${latestMedia.opinionFile ? (latestMedia.opinionFileType==='image' ? `<div style="margin-top:8px;"><img src="${latestMedia.opinionFile}" style="max-width:100%;max-height:180px;border-radius:8px;border:1px solid #a78bfa44;"></div>` : `<div style="margin-top:8px;"><audio controls style="width:100%;"><source src="${latestMedia.opinionFile}"></audio></div>`) : ''}
                 </div>`;
             } else {
                 html += `<div class="warn-msg" style="margin-top:10px;">⏳ The teacher hasn't revealed the answer yet. Check back soon!</div>`;
             }
         } else {
-            html += `<div class="media-answer-section"><label>💬 Your Response:</label>
-                <textarea id="mediaAnswer-${latestMedia.id}" placeholder="Share your thoughts..."></textarea>
-                <button onclick="submitMediaAnswer(${latestMedia.id})" class="btn-orange" style="margin-top:8px;">Submit Response</button>`;
+            html += `<div class="media-answer-section"><label style="color:#ff9800;font-weight:700;">💬 Your Response:</label>
+                <textarea id="mediaAnswer-${latestMedia.id}" placeholder="Share your thoughts about this media..." style="border-color:#ff9800;"></textarea>
+                <div style="background:#1f1208;border-radius:10px;padding:12px;margin:12px 0;border-left:3px solid #a78bfa;">
+                    <label style="color:#a78bfa;font-weight:700;font-size:13px;display:block;margin-bottom:6px;">💬 Your Opinion <span style="color:#666;font-weight:400;font-size:12px;">(optional)</span></label>
+                    <textarea id="mediaOpinion-${latestMedia.id}" placeholder="Share your deeper thoughts, opinion or analysis..." style="border-color:#a78bfa;min-height:65px;"></textarea>
+                    <label style="color:#aaa;font-size:13px;display:block;margin:10px 0 6px;">📎 Attach Opinion File <span style="color:#666;font-weight:400;">(optional)</span>:</label>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <label for="mediaOpinionFile-${latestMedia.id}" style="display:inline-flex;align-items:center;gap:6px;background:#1f1208;border:1.5px dashed #a78bfa;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:#a78bfa;font-weight:600;">
+                            📎 Choose File
+                        </label>
+                        <input type="file" id="mediaOpinionFile-${latestMedia.id}" accept="image/*,audio/*" style="display:none;" onchange="previewStudentAnswerFile('mediaOpinionFile-${latestMedia.id}','mediaOpinionFilePreview-${latestMedia.id}','mediaOpinionFileName-${latestMedia.id}')">
+                        <span id="mediaOpinionFileName-${latestMedia.id}" style="color:#888;font-size:12px;">No file chosen</span>
+                        <button onclick="clearStudentAnswerFile('mediaOpinionFile-${latestMedia.id}','mediaOpinionFilePreview-${latestMedia.id}','mediaOpinionFileName-${latestMedia.id}')" style="display:none;width:auto;padding:3px 10px;font-size:11px;background:#dc2626;border-radius:6px;margin:0;" id="mediaOpinionFileClear-${latestMedia.id}">✕ Clear</button>
+                    </div>
+                    <div id="mediaOpinionFilePreview-${latestMedia.id}" style="margin-top:8px;"></div>
+                </div>
+                <button onclick="submitMediaAnswer(${latestMedia.id})" class="btn-orange" style="margin-top:4px;">Submit Response</button>`;
             if (latestMedia.expectedAnswer) {
                 html += `<div class="info-msg" style="margin-top:8px;font-size:13px;">💡 Submit your response to reveal the correct answer!</div>`;
             }
@@ -841,11 +884,25 @@ async function displayStudentView(latestMedia, questions, answers) {
     html += `<div class="question-box">
         <div style="color:#888;font-size:13px;margin-bottom:8px;">📅 ${latestQ.date}</div>
         <h3>📌 Today's Question:</h3>
-        <p style="font-size:16px;margin-top:10px;color:#e0e0e0;line-height:1.6;">${latestQ.question}</p>`;
+        <p style="font-size:16px;margin-top:10px;color:#e0e0e0;line-height:1.6;">${latestQ.question}</p>
+        ${latestQ.questionFile ? (latestQ.questionFileType==='image' ? `<img src="${latestQ.questionFile}" style="max-width:100%;max-height:220px;border-radius:10px;margin-top:10px;border:1px solid #1E5BFF33;">` : `<audio controls preload="auto" style="width:100%;margin-top:10px;border-radius:8px;"><source src="${latestQ.questionFile}"></audio>`) : ''}`;
 
     if (hasAnswered) {
         const myAns = answers.find(a => a.questionId === latestQ.id && a.studentPin === currentStudent && (!a.type || a.type === 'question'));
-        html += `<div class="success-msg" style="margin-top:14px;">✅ You answered!<br><strong>Your answer:</strong> ${myAns.answer}</div>`;
+        const myFileHtml = myAns && myAns.answerFile
+            ? (myAns.answerFileType === 'image'
+                ? `<div style="margin-top:8px;"><div style="color:#aaa;font-size:12px;">📎 Your attached file:</div><img src="${myAns.answerFile}" style="max-width:100%;max-height:160px;border-radius:8px;margin-top:4px;"></div>`
+                : `<div style="margin-top:8px;"><div style="color:#aaa;font-size:12px;">📎 Your attached audio:</div><audio controls style="width:100%;margin-top:4px;"><source src="${myAns.answerFile}"></audio></div>`)
+            : '';
+        const myOpinionHtml = myAns && myAns.opinion
+            ? `<div style="margin-top:8px;background:#1a0f2e;border-radius:8px;padding:8px 12px;border-left:3px solid #a78bfa;"><span style="color:#a78bfa;font-weight:700;font-size:12px;">💬 Your Opinion:</span><div style="color:#ccc;font-size:13px;margin-top:3px;">${myAns.opinion}</div></div>`
+            : '';
+        const myOpinionFileHtml = myAns && myAns.opinionFile
+            ? (myAns.opinionFileType === 'image'
+                ? `<div style="margin-top:8px;"><div style="color:#a78bfa;font-size:12px;">📎 Your opinion file:</div><img src="${myAns.opinionFile}" style="max-width:100%;max-height:150px;border-radius:8px;margin-top:4px;"></div>`
+                : `<div style="margin-top:8px;"><div style="color:#a78bfa;font-size:12px;">📎 Your opinion audio:</div><audio controls style="width:100%;margin-top:4px;"><source src="${myAns.opinionFile}"></audio></div>`)
+            : '';
+        html += `<div class="success-msg" style="margin-top:14px;">✅ You answered!<br><strong>Your answer:</strong> ${myAns.answer}${myFileHtml}${myOpinionHtml}${myOpinionFileHtml}</div>`;
         if (latestQ.answer) {
             html += `<div style="background:#0f2a14;border-radius:12px;padding:16px;margin-top:14px;border:2px solid #22c55e;">
                 <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
@@ -853,14 +910,31 @@ async function displayStudentView(latestMedia, questions, answers) {
                     <div style="font-weight:700;color:#22c55e;font-size:15px;">TODAY'S CORRECT ANSWER</div>
                 </div>
                 <div style="background:#0a0a14;border-radius:8px;padding:12px;color:#86efac;font-size:15px;font-weight:600;border-left:4px solid #22c55e;">${latestQ.answer}</div>
+                ${latestQ.answerOpinion ? `<div style="margin-top:10px;background:#1a0f2e;border-radius:8px;padding:10px 12px;border-left:3px solid #a78bfa;"><span style="color:#a78bfa;font-weight:700;font-size:13px;">💬 Teacher's Opinion:</span><div style="color:#d4b8ff;font-size:13px;margin-top:4px;line-height:1.6;">${latestQ.answerOpinion}</div></div>` : ''}
             </div>`;
         } else {
             html += `<div class="warn-msg" style="margin-top:12px;">⏳ The teacher hasn't revealed the answer yet. Check back soon!</div>`;
         }
     } else {
-        html += `<div class="input-group" style="margin-top:14px;"><label>✍️ Your Answer:</label>
-            <textarea id="studentAnswer" placeholder="Type your answer here..."></textarea></div>
-            <button onclick="submitAnswer(${latestQ.id})">📨 Submit Answer</button>`;
+        html += `<div class="input-group" style="margin-top:14px;">
+            <label style="color:#7b9fff;font-weight:700;">✍️ Your Answer:</label>
+            <textarea id="studentAnswer" placeholder="Type your answer here..." style="border-color:#1E5BFF;"></textarea>
+        </div>
+        <div style="background:#0d1b2a;border-radius:10px;padding:14px;margin-bottom:14px;border-left:3px solid #a78bfa;">
+            <label style="color:#a78bfa;font-weight:700;font-size:14px;display:block;margin-bottom:6px;">💬 Your Opinion <span style="color:#666;font-weight:400;font-size:12px;">(optional — share your thoughts)</span></label>
+            <textarea id="studentOpinion" placeholder="Share your thoughts, reasoning or opinion about this question..." style="border-color:#a78bfa;min-height:70px;"></textarea>
+            <label style="color:#aaa;font-size:13px;display:block;margin:10px 0 6px;">📎 Attach Opinion File <span style="color:#666;font-weight:400;">(optional — image or audio)</span>:</label>
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                <label for="studentOpinionFile" style="display:inline-flex;align-items:center;gap:6px;background:#1a0f2e;border:1.5px dashed #a78bfa;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:#a78bfa;font-weight:600;">
+                    📎 Choose File
+                </label>
+                <input type="file" id="studentOpinionFile" accept="image/*,audio/*" style="display:none;" onchange="previewStudentAnswerFile('studentOpinionFile','studentOpinionFilePreview','studentOpinionFileName')">
+                <span id="studentOpinionFileName" style="color:#888;font-size:12px;">No file chosen</span>
+                <button onclick="clearStudentAnswerFile('studentOpinionFile','studentOpinionFilePreview','studentOpinionFileName')" style="display:none;width:auto;padding:3px 10px;font-size:11px;background:#dc2626;border-radius:6px;margin:0;" id="studentOpinionFileClear">✕ Clear</button>
+            </div>
+            <div id="studentOpinionFilePreview" style="margin-top:8px;"></div>
+        </div>
+        <button onclick="submitAnswer(${latestQ.id})">📨 Submit Answer</button>`;
         if (latestQ.answer) html += `<div class="info-msg" style="margin-top:10px;font-size:13px;">💡 Submit your answer to reveal today's correct answer!</div>`;
     }
     html += '</div>';
@@ -900,6 +974,18 @@ async function loadStudentWordOfDay(answersCache) {
         } else {
             html += `<div class="media-answer-section" style="border-color:#a78bfa;background:#1a0f2e;"><label style="color:#a78bfa;">✍️ Your Answer:</label>
                 <textarea id="wordStudentAnswer-${latest.id}" placeholder="Type your answer..."></textarea>
+                <div style="margin:10px 0;">
+                    <label style="color:#aaa;font-size:13px;display:block;margin-bottom:6px;">📎 Attach a File <span style="color:#666;font-weight:400;">(optional)</span>:</label>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <label for="wordAnswerFile-${latest.id}" style="display:inline-flex;align-items:center;gap:6px;background:#1a0f2e;border:1.5px dashed #a78bfa;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:#a78bfa;font-weight:600;">
+                            📤 Choose File
+                        </label>
+                        <input type="file" id="wordAnswerFile-${latest.id}" accept="image/*,audio/*" style="display:none;" onchange="previewStudentAnswerFile('wordAnswerFile-${latest.id}','wordAnswerFilePreview-${latest.id}','wordAnswerFileName-${latest.id}')">
+                        <span id="wordAnswerFileName-${latest.id}" style="color:#888;font-size:12px;">No file chosen</span>
+                        <button onclick="clearStudentAnswerFile('wordAnswerFile-${latest.id}','wordAnswerFilePreview-${latest.id}','wordAnswerFileName-${latest.id}')" style="display:none;width:auto;padding:3px 10px;font-size:11px;background:#dc2626;border-radius:6px;margin:0;" id="wordAnswerFileClear-${latest.id}">✕ Clear</button>
+                    </div>
+                    <div id="wordAnswerFilePreview-${latest.id}" style="margin-top:8px;"></div>
+                </div>
                 <button onclick="submitWordAnswer(${latest.id})" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);margin-top:8px;">Submit Word Answer</button>`;
             if (latest.answer) html += `<div class="info-msg" style="margin-top:8px;font-size:13px;">💡 Submit to reveal the meaning!</div>`;
             html += `</div>`;
@@ -935,6 +1021,18 @@ async function loadStudentAffairs(answersCache) {
         } else {
             html += `<div class="media-answer-section" style="border-color:#60a5fa;background:#0f1a2e;"><label style="color:#60a5fa;">✍️ Your Answer:</label>
                 <textarea id="affairsStudentAnswer-${latest.id}" placeholder="Type your answer..."></textarea>
+                <div style="margin:10px 0;">
+                    <label style="color:#aaa;font-size:13px;display:block;margin-bottom:6px;">📎 Attach a File <span style="color:#666;font-weight:400;">(optional)</span>:</label>
+                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                        <label for="affairsAnswerFile-${latest.id}" style="display:inline-flex;align-items:center;gap:6px;background:#0f1a2e;border:1.5px dashed #60a5fa;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:#60a5fa;font-weight:600;">
+                            📤 Choose File
+                        </label>
+                        <input type="file" id="affairsAnswerFile-${latest.id}" accept="image/*,audio/*" style="display:none;" onchange="previewStudentAnswerFile('affairsAnswerFile-${latest.id}','affairsAnswerFilePreview-${latest.id}','affairsAnswerFileName-${latest.id}')">
+                        <span id="affairsAnswerFileName-${latest.id}" style="color:#888;font-size:12px;">No file chosen</span>
+                        <button onclick="clearStudentAnswerFile('affairsAnswerFile-${latest.id}','affairsAnswerFilePreview-${latest.id}','affairsAnswerFileName-${latest.id}')" style="display:none;width:auto;padding:3px 10px;font-size:11px;background:#dc2626;border-radius:6px;margin:0;" id="affairsAnswerFileClear-${latest.id}">✕ Clear</button>
+                    </div>
+                    <div id="affairsAnswerFilePreview-${latest.id}" style="margin-top:8px;"></div>
+                </div>
                 <button onclick="submitAffairsAnswer(${latest.id})" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);margin-top:8px;">Submit Affairs Answer</button>`;
             if (latest.answer) html += `<div class="info-msg" style="margin-top:8px;font-size:13px;">💡 Submit to reveal the answer!</div>`;
             html += `</div>`;
@@ -948,10 +1046,11 @@ async function loadStudentAffairs(answersCache) {
 async function submitWordAnswer(wordId) {
     const ansEl = document.getElementById('wordStudentAnswer-' + wordId);
     const answerText = ansEl ? ansEl.value.trim() : '';
-    if (!answerText) return showToast('Please write your answer!', 'error');
+    const { fileData, fileType, fileName } = await getStudentFileData('wordAnswerFile-' + wordId);
+    if (!answerText && !fileData) return showToast('Please write your answer or attach a file!', 'error');
     const btn = event.target; btn.disabled = true; btn.textContent = '⏳ Submitting...';
     try {
-        await apiPost('/answers', { questionId: wordId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText, type: 'word' });
+        await apiPost('/answers', { questionId: wordId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText || '(See attached file)', type: 'word', answerFile: fileData, answerFileType: fileType, answerFileName: fileName });
         awardScoreForAnswer(currentStudent, currentStudentName);
         showToast('✅ Word answer submitted!', 'success');
         loadStudentData();
@@ -961,24 +1060,95 @@ async function submitWordAnswer(wordId) {
 async function submitAffairsAnswer(affairsId) {
     const ansEl = document.getElementById('affairsStudentAnswer-' + affairsId);
     const answerText = ansEl ? ansEl.value.trim() : '';
-    if (!answerText) return showToast('Please write your answer!', 'error');
+    const { fileData, fileType, fileName } = await getStudentFileData('affairsAnswerFile-' + affairsId);
+    if (!answerText && !fileData) return showToast('Please write your answer or attach a file!', 'error');
     const btn = event.target; btn.disabled = true; btn.textContent = '⏳ Submitting...';
     try {
-        await apiPost('/answers', { questionId: affairsId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText, type: 'affairs' });
+        await apiPost('/answers', { questionId: affairsId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText || '(See attached file)', type: 'affairs', answerFile: fileData, answerFileType: fileType, answerFileName: fileName });
         awardScoreForAnswer(currentStudent, currentStudentName);
         showToast('✅ Affairs answer submitted!', 'success');
         loadStudentData();
     } catch (e) { showToast(e.message || 'Error submitting.', 'error'); btn.disabled = false; btn.textContent = 'Submit Affairs Answer'; }
 }
 
+// =====================================================
+// STUDENT ANSWER FILE HELPERS
+// =====================================================
+function previewStudentAnswerFile(inputId, previewId, nameId) {
+    const input = document.getElementById(inputId);
+    const file = input && input.files && input.files[0];
+    if (!file) return;
+    if (file.size > 20 * 1024 * 1024) { showToast('File too large! Max 20MB.', 'error'); input.value = ''; return; }
+    const nameEl = document.getElementById(nameId);
+    if (nameEl) nameEl.textContent = '⏳ Loading...';
+    const reader = new FileReader();
+    reader.onload = e => {
+        const isImage = file.type.startsWith('image/');
+        const previewEl = document.getElementById(previewId);
+        if (previewEl) {
+            previewEl.innerHTML = isImage
+                ? `<img src="${e.target.result}" style="max-width:100%;max-height:150px;border-radius:8px;">`
+                : `<audio controls style="width:100%;"><source src="${e.target.result}"></audio>`;
+        }
+        if (nameEl) nameEl.textContent = '✅ ' + file.name;
+        // Show clear button
+        const clearBtnId = inputId
+            .replace('mediaOpinionFile-', 'mediaOpinionFileClear-')
+            .replace('studentOpinionFile', 'studentOpinionFileClear')
+            .replace('wordAnswerFile-', 'wordAnswerFileClear-')
+            .replace('affairsAnswerFile-', 'affairsAnswerFileClear-')
+            .replace(/^mediaAnswerFile-/, 'mediaAnswerFileClear-')
+            .replace(/^studentAnswerFile$/, 'studentAnswerFileClear');
+        const clearBtn = document.getElementById(clearBtnId);
+        if (clearBtn) clearBtn.style.display = 'inline-flex';
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearStudentAnswerFile(inputId, previewId, nameId) {
+    const input = document.getElementById(inputId);
+    const previewEl = document.getElementById(previewId);
+    const nameEl = document.getElementById(nameId);
+    if (input) input.value = '';
+    if (previewEl) previewEl.innerHTML = '';
+    if (nameEl) nameEl.textContent = 'No file chosen';
+    const clearBtnId = inputId
+        .replace('mediaOpinionFile-', 'mediaOpinionFileClear-')
+        .replace('studentOpinionFile', 'studentOpinionFileClear')
+        .replace('wordAnswerFile-', 'wordAnswerFileClear-')
+        .replace('affairsAnswerFile-', 'affairsAnswerFileClear-')
+        .replace(/^mediaAnswerFile-/, 'mediaAnswerFileClear-')
+        .replace(/^studentAnswerFile$/, 'studentAnswerFileClear');
+    const clearBtn = document.getElementById(clearBtnId);
+    if (clearBtn) clearBtn.style.display = 'none';
+}
+
+function getStudentFileData(inputId) {
+    return new Promise(resolve => {
+        const input = document.getElementById(inputId);
+        const file = input && input.files && input.files[0];
+        if (!file) return resolve({ fileData: '', fileType: '', fileName: '' });
+        const reader = new FileReader();
+        reader.onload = e => resolve({
+            fileData: e.target.result,
+            fileType: file.type.startsWith('image/') ? 'image' : 'audio',
+            fileName: file.name
+        });
+        reader.readAsDataURL(file);
+    });
+}
+
 async function submitAnswer(questionId) {
     const ansEl = document.getElementById('studentAnswer');
     const answerText = ansEl ? ansEl.value.trim() : '';
+    const opinionEl = document.getElementById('studentOpinion');
+    const opinionText = opinionEl ? opinionEl.value.trim() : '';
+    const { fileData, fileType, fileName } = await getStudentFileData('studentOpinionFile');
     if (!answerText) return showToast('Please write your answer!', 'error');
     const btn = event.target;
     btn.disabled = true; btn.textContent = '⏳ Submitting...';
     try {
-        await apiPost('/answers', { questionId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText, type: 'question' });
+        await apiPost('/answers', { questionId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText, type: 'question', opinion: opinionText || '', opinionFile: fileData, opinionFileType: fileType, opinionFileName: fileName });
         awardScoreForAnswer(currentStudent, currentStudentName);
         showToast('✅ Answer submitted!', 'success');
         loadStudentData();
@@ -991,11 +1161,14 @@ async function submitAnswer(questionId) {
 async function submitMediaAnswer(mediaId) {
     const ansEl = document.getElementById('mediaAnswer-' + mediaId);
     const answerText = ansEl ? ansEl.value.trim() : '';
+    const opinionEl = document.getElementById('mediaOpinion-' + mediaId);
+    const opinionText = opinionEl ? opinionEl.value.trim() : '';
+    const { fileData, fileType, fileName } = await getStudentFileData('mediaOpinionFile-' + mediaId);
     if (!answerText) return showToast('Please write your response!', 'error');
     const btn = event.target;
     btn.disabled = true; btn.textContent = '⏳ Submitting...';
     try {
-        await apiPost('/answers', { questionId: mediaId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText, type: 'media' });
+        await apiPost('/answers', { questionId: mediaId, studentPin: currentStudent, studentName: currentStudentName, answer: answerText, type: 'media', opinion: opinionText || '', opinionFile: fileData, opinionFileType: fileType, opinionFileName: fileName });
         awardScoreForAnswer(currentStudent, currentStudentName);
         showToast('✅ Response submitted!', 'success');
         loadStudentData();
@@ -1047,12 +1220,17 @@ function displayTeacherView(questions, answers, phones) {
         </div>`;
     if (hasAnswer) {
         html += `<div style="background:#0a0a14;border-radius:8px;padding:12px;font-size:15px;color:#86efac;font-weight:600;border-left:4px solid #22c55e;margin-bottom:12px;">${latestQ.answer}</div>`;
+        if (latestQ.answerOpinion) html += `<div style="background:#1a0f2e;border-radius:8px;padding:10px 12px;border-left:3px solid #a78bfa;margin-bottom:12px;"><span style="color:#a78bfa;font-weight:700;font-size:12px;">💬 Opinion:</span><div style="color:#d4b8ff;font-size:13px;margin-top:3px;">${latestQ.answerOpinion}</div></div>`;
         html += `<label style="font-size:13px;display:block;margin-bottom:5px;">✏️ Update Answer:</label>
             <textarea id="updateAnswerField" style="border-color:#22c55e;">${latestQ.answer}</textarea>
+            <label style="font-size:13px;color:#a78bfa;display:block;margin:8px 0 5px;">💬 Answer Opinion (optional):</label>
+            <textarea id="updateOpinionField" placeholder="Add explanation or opinion..." style="border-color:#a78bfa;min-height:50px;">${latestQ.answerOpinion||''}</textarea>
             <button onclick="updateTodaysAnswer(${latestQ.id})" class="btn-green btn-small" style="width:auto;margin-top:8px;">💾 Update Answer</button>`;
     } else {
         html += `<div style="color:#ff9800;font-style:italic;margin-bottom:10px;font-size:13px;">⚠️ No answer set yet</div>
             <textarea id="updateAnswerField" placeholder="Type today's correct answer here..." style="border-color:#ff9800;"></textarea>
+            <label style="font-size:13px;color:#a78bfa;display:block;margin:8px 0 5px;">💬 Answer Opinion (optional):</label>
+            <textarea id="updateOpinionField" placeholder="Add explanation or opinion for students..." style="border-color:#a78bfa;min-height:50px;"></textarea>
             <button onclick="updateTodaysAnswer(${latestQ.id})" class="btn-orange btn-small" style="width:auto;margin-top:8px;">✅ Set Answer Now</button>`;
     }
     html += '</div>';
@@ -1060,12 +1238,26 @@ function displayTeacherView(questions, answers, phones) {
     html += `<h3>👥 Student Responses (${answersForQ.length})</h3>`;
     if (answersForQ.length > 0) {
         answersForQ.forEach(ans => {
+            const fileHtml = ans.answerFile
+                ? (ans.answerFileType === 'image'
+                    ? `<div style="margin-top:8px;"><div style="color:#ff9800;font-size:12px;margin-bottom:4px;">📎 Attached: ${ans.answerFileName||'image'}</div><img src="${ans.answerFile}" style="max-width:100%;max-height:200px;border-radius:8px;border:1px solid #333;"></div>`
+                    : `<div style="margin-top:8px;"><div style="color:#ff9800;font-size:12px;margin-bottom:4px;">📎 Attached: ${ans.answerFileName||'audio'}</div><audio controls style="width:100%;"><source src="${ans.answerFile}"></audio></div>`)
+                : '';
+            const opinionHtml = ans.opinion
+                ? `<div style="margin-top:8px;background:#1a0f2e;border-radius:8px;padding:8px 12px;border-left:3px solid #a78bfa;"><span style="color:#a78bfa;font-weight:700;font-size:12px;">💬 Opinion:</span><div style="color:#ccc;font-size:13px;margin-top:3px;">${ans.opinion}</div></div>`
+                : '';
+            const opinionFileHtml = ans.opinionFile
+                ? (ans.opinionFileType === 'image'
+                    ? `<div style="margin-top:6px;"><div style="color:#a78bfa;font-size:12px;margin-bottom:3px;">📎 Opinion file:</div><img src="${ans.opinionFile}" style="max-width:100%;max-height:180px;border-radius:8px;border:1px solid #a78bfa33;"></div>`
+                    : `<div style="margin-top:6px;"><div style="color:#a78bfa;font-size:12px;margin-bottom:3px;">📎 Opinion audio:</div><audio controls style="width:100%;"><source src="${ans.opinionFile}"></audio></div>`)
+                : '';
             html += `<div class="student-answer">
                 <strong style="color:#7b9fff;">👤 ${ans.studentName || 'Unknown'}</strong>
                 <br><span style="color:#888;font-size:13px;">PIN: ${ans.studentPin}</span>
                 ${phones[ans.studentPin] ? `<br><span style="color:#888;font-size:13px;">📱 ${phones[ans.studentPin].phone}</span>` : ''}
                 <div style="color:#888;font-size:12px;margin:5px 0;">Submitted: ${ans.date}</div>
                 <p style="margin-top:8px;padding:10px;background:#0f0f1a;border-radius:6px;color:#e0e0e0;">${ans.answer}</p>
+                ${fileHtml}${opinionHtml}${opinionFileHtml}
             </div>`;
         });
     } else {
@@ -1076,12 +1268,14 @@ function displayTeacherView(questions, answers, phones) {
 
 async function updateTodaysAnswer(questionId) {
     const field = document.getElementById('updateAnswerField');
+    const opinionField = document.getElementById('updateOpinionField');
     const val = field ? field.value.trim() : '';
+    const opinion = opinionField ? opinionField.value.trim() : '';
     if (!val) return showToast('Please enter an answer!', 'error');
     try {
         const res = await fetch(API_URL + '/questions/' + questionId + '/answer', {
             method: 'PUT', headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ answer: val })
+            body: JSON.stringify({ answer: val, answerOpinion: opinion })
         });
         if (!res.ok) throw new Error('Server error');
         showToast('✅ Answer saved! Students will see it after they submit.', 'success');
@@ -1092,24 +1286,59 @@ async function updateTodaysAnswer(questionId) {
 async function postQuestion() {
     const question = document.getElementById('newQuestion').value.trim();
     const todayAns = document.getElementById('todayAnswer').value.trim();
+    const opinionEl = document.getElementById('todayAnswerOpinion');
+    const opinion = opinionEl ? opinionEl.value.trim() : '';
     if (!question) return showToast('Please enter a question!', 'error');
     if (!todayAns) return showToast("Please enter today's answer!", 'error');
     const btn = event.target;
     btn.disabled = true; btn.textContent = '⏳ Posting...';
     try {
-        const result = await apiPost('/questions', { question, answer: null });
+        const { fileData: qFile, fileType: qFileType } = await getStudentFileData('singleQFile');
+        const postData = { question, answer: null };
+        if (qFile) { postData.questionFile = qFile; postData.questionFileType = qFileType; }
+        const result = await apiPost('/questions', postData);
         if (result && result.question && result.question.id) {
             await fetch(API_URL + '/questions/' + result.question.id + '/answer', {
                 method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ answer: todayAns })
+                body: JSON.stringify({ answer: todayAns, answerOpinion: opinion })
             });
         }
         document.getElementById('newQuestion').value = '';
         document.getElementById('todayAnswer').value = '';
+        if (opinionEl) opinionEl.value = '';
+        clearSingleQFile();
         showToast('✅ Question posted successfully!', 'success');
         loadTeacherQuestions();
     } catch (error) { showToast('Error posting question: ' + error.message, 'error'); }
     btn.disabled = false; btn.textContent = '📤 Post Question';
+}
+
+function previewSingleQFile() {
+    const input = document.getElementById('singleQFile');
+    const file = input && input.files && input.files[0];
+    if (!file) return;
+    if (file.size > 40 * 1024 * 1024) { showToast('File too large! Max 40MB.', 'error'); input.value = ''; return; }
+    const nameEl = document.getElementById('singleQFileName');
+    if (nameEl) nameEl.textContent = '⏳ Loading...';
+    const reader = new FileReader();
+    reader.onload = e => {
+        const isImage = file.type.startsWith('image/');
+        const previewEl = document.getElementById('singleQFilePreview');
+        if (previewEl) previewEl.innerHTML = isImage
+            ? `<img src="${e.target.result}" style="max-width:100%;max-height:130px;border-radius:8px;margin-top:6px;">`
+            : `<audio controls style="width:100%;margin-top:6px;"><source src="${e.target.result}"></audio>`;
+        if (nameEl) nameEl.textContent = '✅ ' + file.name;
+        const clearBtn = document.getElementById('singleQFileClear');
+        if (clearBtn) clearBtn.style.display = 'inline-flex';
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearSingleQFile() {
+    const input = document.getElementById('singleQFile'); if (input) input.value = '';
+    const preview = document.getElementById('singleQFilePreview'); if (preview) preview.innerHTML = '';
+    const name = document.getElementById('singleQFileName'); if (name) name.textContent = 'No file chosen';
+    const btn = document.getElementById('singleQFileClear'); if (btn) btn.style.display = 'none';
 }
 
 // =====================================================
@@ -1329,6 +1558,9 @@ async function loadMediaList() {
                     ${mediaAns.map(a=>`<div style="margin-top:7px;padding:8px;background:#1a1a2e;border-radius:6px;">
                         <strong style="color:#a78bfa;">${a.studentName}</strong> <span style="color:#888;font-size:12px;">(${a.studentPin})</span>
                         <br><span style="font-size:13px;color:#e0e0e0;">${a.answer}</span>
+                        ${a.answerFile ? (a.answerFileType==='image' ? `<div style="margin-top:6px;"><div style="color:#ff9800;font-size:11px;">📎 ${a.answerFileName||'image'}</div><img src="${a.answerFile}" style="max-width:100%;max-height:160px;border-radius:6px;margin-top:3px;"></div>` : `<div style="margin-top:6px;"><div style="color:#ff9800;font-size:11px;">📎 ${a.answerFileName||'audio'}</div><audio controls style="width:100%;"><source src="${a.answerFile}"></audio></div>`) : ''}
+                        ${a.opinion ? `<div style="margin-top:6px;background:#1a0f2e;border-radius:6px;padding:6px 10px;border-left:2px solid #a78bfa;"><span style="color:#a78bfa;font-size:11px;font-weight:700;">💬 Opinion:</span><div style="color:#ccc;font-size:12px;margin-top:2px;">${a.opinion}</div></div>` : ''}
+                        ${a.opinionFile ? (a.opinionFileType==='image' ? `<div style="margin-top:4px;"><div style="color:#a78bfa;font-size:11px;">📎 Opinion file</div><img src="${a.opinionFile}" style="max-width:100%;max-height:130px;border-radius:6px;margin-top:3px;"></div>` : `<div style="margin-top:4px;"><audio controls style="width:100%;"><source src="${a.opinionFile}"></audio></div>`) : ''}
                     </div>`).join('')}
                 </div>`:'<p style="color:#666;font-size:13px;margin-top:8px;">No responses yet.</p>'}
             </div>`;
@@ -1392,12 +1624,12 @@ async function runMediaAutoPostCheck(silent = false) {
         const item = schedule.items[i];
         if (!item.posted && item.date === today) {
             try {
-                // Post as a "media text" entry (URL-based)
-                const postResult = await apiPost('/media/text', {
+                let postResult;
+                postResult = await apiPost('/media/text', {
                     question: item.question,
                     answer: item.answer,
-                    caption: item.caption || '',
-                    urlOrText: item.urlOrText || ''
+                    opinionFile: item.opinionFile || '',
+                    opinionFileType: item.opinionFileType || ''
                 });
                 const postedAt = new Date().toLocaleString('en-IN');
                 await fetch(API_URL + '/schedule/media/mark-posted', {
@@ -1500,17 +1732,30 @@ async function renderMediaBulkFields() {
         const cardClass = posted ? 'bulk-day-card posted' : (isToday ? 'bulk-day-card today-card' : 'bulk-day-card');
         const chipHtml = posted ? '<span class="status-chip chip-posted">✅ Posted</span>' : (isToday ? '<span class="status-chip chip-today">⚡ Due Today</span>' : '<span class="status-chip chip-pending">⏳ Pending</span>');
         const postedAtHtml = posted && item.postedAt ? `<div style="font-size:11px;color:#22c55e;margin-top:2px;">Posted at: ${item.postedAt}</div>` : '';
-        html += `<div class="${cardClass}">
+        const opFilePreview = item && item.opinionFile
+            ? (item.opinionFileType === 'image'
+                ? `<img src="${item.opinionFile}" style="max-width:100%;max-height:100px;border-radius:8px;margin-top:4px;">`
+                : `<audio controls style="width:100%;margin-top:4px;"><source src="${item.opinionFile}"></audio>`)
+            : '';
+        html += `<div class="${cardClass}" id="mediaBulkCard_${i}">
             <div class="bulk-day-header"><span>📅 Day ${i+1} — ${dateLabel}</span>${chipHtml}</div>
             ${postedAtHtml}
-            <label style="font-size:13px;color:#aaa;">Caption / Topic (optional):</label>
-            <input type="text" id="mc_${i}" placeholder="e.g. Today's engineering tip..." style="margin:4px 0 8px;" ${posted?'readonly':''} value="${item?item.caption||'':''}">
-            <label style="font-size:13px;color:#aaa;">📝 Image/Audio URL or short text content:</label>
-            <textarea id="mu_${i}" placeholder="Paste image URL or audio URL, or leave blank for text-only..." style="min-height:50px;margin:4px 0 8px;" ${posted?'readonly':''}>${item?item.urlOrText||'':''}</textarea>
             <label style="font-size:13px;color:#ff9800;font-weight:700;">❓ Question for Students:</label>
-            <textarea id="mq_${i}" placeholder="What question will students answer about this media?" style="min-height:60px;margin:4px 0 8px;border-color:#ff9800;" ${posted?'readonly':''}>${item?item.question||'':''}</textarea>
-            <label style="font-size:13px;color:#22c55e;font-weight:700;">✅ Answer (shown after student submits):</label>
-            <textarea id="ma_${i}" placeholder="The correct answer..." style="min-height:50px;margin:4px 0;border-color:#22c55e;" ${posted?'readonly':''}>${item?item.answer||'':''}</textarea>
+            <textarea id="mq_${i}" placeholder="Enter the question for students..." style="min-height:65px;margin:4px 0 10px;border-color:#ff9800;" ${posted?'readonly':''}>${item?item.question||'':''}</textarea>
+            <label style="font-size:13px;color:#22c55e;font-weight:700;">✅ Answer <span style="color:#888;font-weight:400;font-size:12px;">(shown after student submits)</span>:</label>
+            <textarea id="ma_${i}" placeholder="The correct answer..." style="min-height:55px;margin:4px 0 10px;border-color:#22c55e;" ${posted?'readonly':''}>${item?item.answer||'':''}</textarea>
+            <label style="font-size:13px;color:#a78bfa;font-weight:700;">📎 Add File <span style="color:#666;font-weight:400;font-size:12px;">(optional — image or audio)</span>:</label>
+            <div style="display:flex;align-items:center;gap:8px;margin:6px 0 4px;flex-wrap:wrap;">
+                <label for="mopfile_${i}" style="display:inline-flex;align-items:center;gap:6px;background:#1a0f2e;border:1.5px dashed #a78bfa;border-radius:8px;padding:7px 16px;cursor:${posted?'not-allowed':'pointer'};font-size:13px;color:#a78bfa;font-weight:600;">
+                    📎 Choose File
+                </label>
+                <input type="file" id="mopfile_${i}" accept="image/*,audio/*" style="display:none;" ${posted?'disabled':''} onchange="previewBulkMediaOpFile(${i})">
+                <span id="mopfile_name_${i}" style="color:#888;font-size:12px;">${item&&item.opinionFile ? '✅ File loaded' : 'No file chosen'}</span>
+                ${item&&item.opinionFile&&!posted ? `<button onclick="clearBulkMediaOpFile(${i})" style="width:auto;padding:3px 10px;font-size:11px;background:#dc2626;border-radius:6px;margin:0;">✕ Clear</button>` : ''}
+            </div>
+            <div id="mopfile_preview_${i}" style="margin-bottom:4px;">${opFilePreview}</div>
+            <input type="hidden" id="mopfile_data_${i}" value="${item&&item.opinionFile ? item.opinionFile : ''}">
+            <input type="hidden" id="mopfile_type_${i}" value="${item&&item.opinionFileType ? item.opinionFileType : ''}">
             <input type="hidden" id="md_${i}" value="${effectiveDate}">
         </div>`;
     }
@@ -1528,6 +1773,72 @@ function renderMediaBulkScheduleInfo(schedule) {
     info.innerHTML = `<div class="info-msg" style="font-size:13px;">📊 <strong>${posted}/${total}</strong> posted &nbsp;|&nbsp; <strong>${total-posted}</strong> remaining</div>`;
 }
 
+function previewBulkMediaFile(i) {
+    const input = document.getElementById('mfile_' + i);
+    const file = input && input.files && input.files[0];
+    if (!file) return;
+    if (file.size > 40 * 1024 * 1024) { showToast('File too large! Max 40MB.', 'error'); input.value = ''; return; }
+    const nameEl = document.getElementById('mfile_name_' + i);
+    if (nameEl) nameEl.textContent = '⏳ Loading...';
+    const reader = new FileReader();
+    reader.onload = e => {
+        const isImage = file.type.startsWith('image/');
+        const dataEl = document.getElementById('mfile_data_' + i);
+        const typeEl = document.getElementById('mfile_type_' + i);
+        const previewEl = document.getElementById('mfile_preview_' + i);
+        if (dataEl) dataEl.value = e.target.result;
+        if (typeEl) typeEl.value = isImage ? 'image' : 'audio';
+        if (nameEl) nameEl.textContent = '✅ ' + file.name;
+        if (previewEl) {
+            previewEl.innerHTML = isImage
+                ? `<img src="${e.target.result}" style="max-width:100%;max-height:120px;border-radius:8px;margin:6px 0;">`
+                : `<audio controls style="width:100%;margin:6px 0;"><source src="${e.target.result}"></audio>`;
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearBulkMediaFile(i) {
+    const dataEl = document.getElementById('mfile_data_' + i);
+    const typeEl = document.getElementById('mfile_type_' + i);
+    const nameEl = document.getElementById('mfile_name_' + i);
+    const previewEl = document.getElementById('mfile_preview_' + i);
+    const inputEl = document.getElementById('mfile_' + i);
+    if (dataEl) dataEl.value = '';
+    if (typeEl) typeEl.value = '';
+    if (nameEl) nameEl.textContent = 'No file chosen';
+    if (previewEl) previewEl.innerHTML = '';
+    if (inputEl) inputEl.value = '';
+}
+
+function previewBulkMediaOpFile(i) {
+    const input = document.getElementById('mopfile_' + i);
+    const file = input && input.files && input.files[0];
+    if (!file) return;
+    if (file.size > 20 * 1024 * 1024) { showToast('File too large! Max 20MB.', 'error'); input.value = ''; return; }
+    const nameEl = document.getElementById('mopfile_name_' + i);
+    if (nameEl) nameEl.textContent = '⏳ Loading...';
+    const reader = new FileReader();
+    reader.onload = e => {
+        const isImage = file.type.startsWith('image/');
+        if (document.getElementById('mopfile_data_' + i)) document.getElementById('mopfile_data_' + i).value = e.target.result;
+        if (document.getElementById('mopfile_type_' + i)) document.getElementById('mopfile_type_' + i).value = isImage ? 'image' : 'audio';
+        if (nameEl) nameEl.textContent = '✅ ' + file.name;
+        const prev = document.getElementById('mopfile_preview_' + i);
+        if (prev) prev.innerHTML = isImage
+            ? `<img src="${e.target.result}" style="max-width:100%;max-height:100px;border-radius:8px;">`
+            : `<audio controls style="width:100%;"><source src="${e.target.result}"></audio>`;
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearBulkMediaOpFile(i) {
+    ['mopfile_data_','mopfile_type_'].forEach(p => { const el = document.getElementById(p+i); if(el) el.value=''; });
+    const n = document.getElementById('mopfile_name_'+i); if(n) n.textContent='No file chosen';
+    const p = document.getElementById('mopfile_preview_'+i); if(p) p.innerHTML='';
+    const inp = document.getElementById('mopfile_'+i); if(inp) inp.value='';
+}
+
 async function saveMediaBulkSchedule() {
     const existing = await getMediaBulkSchedule();
     const items = [];
@@ -1539,13 +1850,19 @@ async function saveMediaBulkSchedule() {
         const qEl = document.getElementById('mq_' + i);
         const aEl = document.getElementById('ma_' + i);
         const dEl = document.getElementById('md_' + i);
-        const cEl = document.getElementById('mc_' + i);
-        const uEl = document.getElementById('mu_' + i);
         if (!qEl || !aEl || !dEl) continue;
         if (existing && existing.items[i] && existing.items[i].posted) { items.push(existing.items[i]); continue; }
         if (!qEl.value.trim()) { showToast('Please fill Question ' + (i + 1), 'error'); valid = false; break; }
         if (!aEl.value.trim()) { showToast('Please fill Answer ' + (i + 1), 'error'); valid = false; break; }
-        items.push({ caption: cEl ? cEl.value.trim() : '', urlOrText: uEl ? uEl.value.trim() : '', question: qEl.value.trim(), answer: aEl.value.trim(), date: dEl.value, posted: false, postedAt: null });
+        const opFdEl = document.getElementById('mopfile_data_' + i);
+        const opFtEl = document.getElementById('mopfile_type_' + i);
+        items.push({
+            question: qEl.value.trim(),
+            answer: aEl.value.trim(),
+            opinionFile: opFdEl ? opFdEl.value : '',
+            opinionFileType: opFtEl ? opFtEl.value : '',
+            date: dEl.value, posted: false, postedAt: null
+        });
     }
     if (!valid) return;
     await saveMediaBulkScheduleToServer({ savedOn: new Date().toISOString(), items, lastAutoPost: existing ? existing.lastAutoPost : null });
@@ -1657,10 +1974,13 @@ async function runAutoPostCheck(silent = false) {
         const q = schedule.questions[i];
         if (!q.posted && q.date === today) {
             try {
-                const postResult = await apiPost('/questions', { question: q.question, answer: null });
+                const postData = { question: q.question, answer: null };
+                if (q.questionFile) { postData.questionFile = q.questionFile; postData.questionFileType = q.questionFileType; }
+                const postResult = await apiPost('/questions', postData);
                 if (postResult && postResult.question && postResult.question.id && q.answer) {
                     await fetch(API_URL + '/questions/' + postResult.question.id + '/answer', {
-                        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ answer: q.answer })
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ answer: q.answer, answerOpinion: q.answerOpinion || '' })
                     });
                 }
                 const postedAt = new Date().toLocaleString('en-IN');
@@ -1789,8 +2109,8 @@ async function renderBulkFields() {
             ${postedAtHtml}
             <label style="font-size:13px;color:#aaa;">Question ${i + 1}:</label>
             <textarea id="bq_${i}" placeholder="Enter question ${i + 1}..." style="min-height:70px;margin:4px 0 8px;" ${posted ? 'readonly' : ''}>${existingQ ? existingQ.question : ''}</textarea>
-            <label style="font-size:13px;color:#22c55e;font-weight:700;">Answer ${i + 1} (shown to student after submitting):</label>
-            <textarea id="ba_${i}" placeholder="Enter answer ${i + 1}..." style="min-height:60px;margin:4px 0;border-color:#22c55e;" ${posted ? 'readonly' : ''}>${existingQ ? existingQ.answer : ''}</textarea>
+            <label style="font-size:13px;color:#22c55e;font-weight:700;">✅ Answer ${i + 1} <span style="color:#888;font-weight:400;">(shown after student submits)</span>:</label>
+            <textarea id="ba_${i}" placeholder="Enter answer ${i + 1}..." style="min-height:60px;margin:4px 0;" border-color:#22c55e;" ${posted ? 'readonly' : ''}>${existingQ ? existingQ.answer : ''}</textarea>
             <input type="hidden" id="bd_${i}" value="${effectiveDate}">
         </div>`;
     }
@@ -1819,11 +2139,40 @@ function renderScheduleInfo(schedule) {
     </div>`;
 }
 
+function previewBulkQFile(i) {
+    const input = document.getElementById('bfile_' + i);
+    const file = input && input.files && input.files[0];
+    if (!file) return;
+    if (file.size > 40 * 1024 * 1024) { showToast('File too large! Max 40MB.', 'error'); input.value = ''; return; }
+    const nameEl = document.getElementById('bfile_name_' + i);
+    if (nameEl) nameEl.textContent = '⏳ Loading...';
+    const reader = new FileReader();
+    reader.onload = e => {
+        const isImage = file.type.startsWith('image/');
+        const dataEl = document.getElementById('bfile_data_' + i);
+        const typeEl = document.getElementById('bfile_type_' + i);
+        const previewEl = document.getElementById('bfile_preview_' + i);
+        if (dataEl) dataEl.value = e.target.result;
+        if (typeEl) typeEl.value = isImage ? 'image' : 'audio';
+        if (nameEl) nameEl.textContent = '✅ ' + file.name;
+        if (previewEl) previewEl.innerHTML = isImage
+            ? `<img src="${e.target.result}" style="max-width:100%;max-height:110px;border-radius:8px;margin:4px 0;">`
+            : `<audio controls style="width:100%;margin:4px 0;"><source src="${e.target.result}"></audio>`;
+    };
+    reader.readAsDataURL(file);
+}
+
+function clearBulkQFile(i) {
+    ['bfile_data_','bfile_type_'].forEach(p => { const el = document.getElementById(p+i); if(el) el.value=''; });
+    const nameEl = document.getElementById('bfile_name_'+i); if(nameEl) nameEl.textContent='No file chosen';
+    const previewEl = document.getElementById('bfile_preview_'+i); if(previewEl) previewEl.innerHTML='';
+    const inputEl = document.getElementById('bfile_'+i); if(inputEl) inputEl.value='';
+}
+
 async function saveBulkQuestions() {
     const existingSchedule = await getBulkSchedule();
     const questions = [];
     let valid = true;
-    // Count how many slots are rendered
     let slotCount = 0;
     while (document.getElementById('bq_' + slotCount) !== null) slotCount++;
     if (slotCount === 0) slotCount = 10;
@@ -1985,6 +2334,7 @@ async function loadRankTab() {
         });
         const sorted = Object.values(activityMap).sort((a, b) => (b.count + (b.localDays||0)) - (a.count + (a.localDays||0)));
         const top3 = sorted.slice(0, 3);
+        const rest = sorted.slice(3);
         const podiumColors = [
             { bg: 'rgba(255,215,0,0.1)', border: '#FFD700', medal: '🥇', label: '1st', color: '#FFD700' },
             { bg: 'rgba(192,192,192,0.1)', border: '#C0C0C0', medal: '🥈', label: '2nd', color: '#C0C0C0' },
@@ -2013,7 +2363,26 @@ async function loadRankTab() {
                 </div>`;
             });
             html += '</div>';
-            if (sorted.length > 3) html += `<div style="color:#888;font-size:12px;text-align:center;margin-top:10px;">+${sorted.length - 3} more participating</div>`;
+            if (rest.length > 0) {
+                html += `<div style="margin-top:14px;"><div style="color:#888;font-size:12px;margin-bottom:8px;text-align:center;">+${rest.length} more participating</div>
+                <div style="display:flex;flex-direction:column;gap:6px;">`;
+                rest.forEach((s, i) => {
+                    const p = ph[s.pin];
+                    html += `<div style="background:rgba(255,255,255,0.04);border:1px solid #333;border-radius:10px;padding:10px 12px;display:flex;align-items:center;gap:10px;">
+                        <div style="min-width:28px;text-align:center;color:#888;font-weight:700;font-size:13px;">#${i+4}</div>
+                        <div style="flex:1;">
+                            <div style="color:#ccc;font-weight:600;font-size:14px;">${s.name}</div>
+                            <div style="color:#666;font-size:11px;">PIN: ${s.pin}${p?' · 📱 '+p.phone:''}</div>
+                            <div style="display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;">
+                                <span style="background:#0f2a14;padding:1px 7px;border-radius:8px;font-size:11px;color:#22c55e;">📝 ${s.count} answers</span>
+                                ${(s.localDays||0)>0?`<span style="background:#0f1a2e;padding:1px 7px;border-radius:8px;font-size:11px;color:#60a5fa;">📅 ${s.localDays} days</span>`:''}
+                                ${(s.streak||0)>0?`<span style="background:#1f1208;padding:1px 7px;border-radius:8px;font-size:11px;color:#ff9800;">🔥 ${s.streak} streak</span>`:''}
+                            </div>
+                        </div>
+                    </div>`;
+                });
+                html += '</div></div>';
+            }
             activeEl.innerHTML = html;
         }
     } catch (e) {
