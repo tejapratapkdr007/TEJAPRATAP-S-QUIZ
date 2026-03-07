@@ -946,18 +946,6 @@ async function loadStudentWordOfDay(answersCache) {
         } else {
             html += `<div class="media-answer-section" style="border-color:#a78bfa;background:#1a0f2e;"><label style="color:#a78bfa;">✍️ Your Answer:</label>
                 <textarea id="wordStudentAnswer-${latest.id}" placeholder="Type your answer..."></textarea>
-                <div style="margin:10px 0;">
-                    <label style="color:#aaa;font-size:13px;display:block;margin-bottom:6px;">📎 Attach a File <span style="color:#666;font-weight:400;">(optional)</span>:</label>
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                        <label for="wordAnswerFile-${latest.id}" style="display:inline-flex;align-items:center;gap:6px;background:#1a0f2e;border:1.5px dashed #a78bfa;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:#a78bfa;font-weight:600;">
-                            📤 Choose File
-                        </label>
-                        <input type="file" id="wordAnswerFile-${latest.id}" accept="image/*,audio/*" style="display:none;" onchange="previewStudentAnswerFile('wordAnswerFile-${latest.id}','wordAnswerFilePreview-${latest.id}','wordAnswerFileName-${latest.id}')">
-                        <span id="wordAnswerFileName-${latest.id}" style="color:#888;font-size:12px;">No file chosen</span>
-                        <button onclick="clearStudentAnswerFile('wordAnswerFile-${latest.id}','wordAnswerFilePreview-${latest.id}','wordAnswerFileName-${latest.id}')" style="display:none;width:auto;padding:3px 10px;font-size:11px;background:#dc2626;border-radius:6px;margin:0;" id="wordAnswerFileClear-${latest.id}">✕ Clear</button>
-                    </div>
-                    <div id="wordAnswerFilePreview-${latest.id}" style="margin-top:8px;"></div>
-                </div>
                 <button onclick="submitWordAnswer(${latest.id})" style="background:linear-gradient(135deg,#7c3aed,#a78bfa);margin-top:8px;">Submit Word Answer</button>`;
             if (latest.answer) html += `<div class="info-msg" style="margin-top:8px;font-size:13px;">💡 Submit to reveal the meaning!</div>`;
             html += `</div>`;
@@ -993,18 +981,6 @@ async function loadStudentAffairs(answersCache) {
         } else {
             html += `<div class="media-answer-section" style="border-color:#60a5fa;background:#0f1a2e;"><label style="color:#60a5fa;">✍️ Your Answer:</label>
                 <textarea id="affairsStudentAnswer-${latest.id}" placeholder="Type your answer..."></textarea>
-                <div style="margin:10px 0;">
-                    <label style="color:#aaa;font-size:13px;display:block;margin-bottom:6px;">📎 Attach a File <span style="color:#666;font-weight:400;">(optional)</span>:</label>
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                        <label for="affairsAnswerFile-${latest.id}" style="display:inline-flex;align-items:center;gap:6px;background:#0f1a2e;border:1.5px dashed #60a5fa;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:#60a5fa;font-weight:600;">
-                            📤 Choose File
-                        </label>
-                        <input type="file" id="affairsAnswerFile-${latest.id}" accept="image/*,audio/*" style="display:none;" onchange="previewStudentAnswerFile('affairsAnswerFile-${latest.id}','affairsAnswerFilePreview-${latest.id}','affairsAnswerFileName-${latest.id}')">
-                        <span id="affairsAnswerFileName-${latest.id}" style="color:#888;font-size:12px;">No file chosen</span>
-                        <button onclick="clearStudentAnswerFile('affairsAnswerFile-${latest.id}','affairsAnswerFilePreview-${latest.id}','affairsAnswerFileName-${latest.id}')" style="display:none;width:auto;padding:3px 10px;font-size:11px;background:#dc2626;border-radius:6px;margin:0;" id="affairsAnswerFileClear-${latest.id}">✕ Clear</button>
-                    </div>
-                    <div id="affairsAnswerFilePreview-${latest.id}" style="margin-top:8px;"></div>
-                </div>
                 <button onclick="submitAffairsAnswer(${latest.id})" style="background:linear-gradient(135deg,#1d4ed8,#60a5fa);margin-top:8px;">Submit Affairs Answer</button>`;
             if (latest.answer) html += `<div class="info-msg" style="margin-top:8px;font-size:13px;">💡 Submit to reveal the answer!</div>`;
             html += `</div>`;
