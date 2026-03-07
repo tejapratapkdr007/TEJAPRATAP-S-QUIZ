@@ -227,7 +227,7 @@
         <div class="logo">👨‍🏫</div>
         <h1>TEJAPRATAP Dashboard</h1>
         <div class="tab-buttons">
-            <button class="tab-btn active" onclick="switchTab('questions')">📝 GK</button>
+            <button class="tab-btn active" onclick="switchTab('questions')">📝 Questions</button>
             <button class="tab-btn" onclick="switchTab('media')">🎵 Media</button>
             <button class="tab-btn" onclick="switchTab('word')">📖 Word</button>
             <button class="tab-btn" onclick="switchTab('affairs')">📰 Affairs</button>
@@ -569,7 +569,7 @@
         <button class="btn-secondary" onclick="showSection('teacherSection')">↩️ Back to Dashboard</button>
     </div>
 
-    <div class="designer-footer">Designed by <span>SATHWIK</span></div>
+    <div class="designer-footer">Designed by <span>SATHWIK__DEENANAATH</span></div>
 </div>
 
 <script>
@@ -1599,6 +1599,7 @@ function startMediaAutoPostMachine() {
     runMediaAutoPostCheck(true).then(() => updateMediaAutoPostUI());
     if (mediaAutoPostInterval) clearInterval(mediaAutoPostInterval);
     mediaAutoPostInterval = setInterval(async () => {
+        if (!isPostingTime()) return;
         const posted = await runMediaAutoPostCheck(true);
         if (posted) { showToast("🤖 Media Auto-Post: Today's media posted!", 'success'); }
         updateMediaAutoPostUI();
@@ -1898,6 +1899,7 @@ function resetAllData() {
 // 🤖 AUTO-POST MACHINE
 // =====================================================
 function getTodayStr() { return new Date().toISOString().split('T')[0]; }
+function isPostingTime() { const h = new Date().getHours(); return h === 5; }
 
 async function getBulkSchedule() {
     try {
@@ -1949,6 +1951,7 @@ function startAutoPostMachine() {
     runAutoPostCheck(true).then(() => updateAutoPostStatusUI());
     if (autoPostInterval) clearInterval(autoPostInterval);
     autoPostInterval = setInterval(async () => {
+        if (!isPostingTime()) return;
         const posted = await runAutoPostCheck(true);
         if (posted) { loadTeacherQuestions(); showToast("🤖 Auto-Post: Today's question was posted!", 'success'); }
         updateAutoPostStatusUI();
@@ -2554,6 +2557,7 @@ function startWordAutoPostMachine() {
     runWordAutoPostCheck(true).then(() => updateWordAutoPostUI());
     if (wordAutoPostInterval) clearInterval(wordAutoPostInterval);
     wordAutoPostInterval = setInterval(async () => {
+        if (!isPostingTime()) return;
         const posted = await runWordAutoPostCheck(true);
         if (posted) { showToast("📖 Word of the Day auto-posted!", 'success'); loadWordContent(); }
         updateWordAutoPostUI();
@@ -2806,6 +2810,7 @@ function startAffairsAutoPostMachine() {
     runAffairsAutoPostCheck(true).then(() => updateAffairsAutoPostUI());
     if (affairsAutoPostInterval) clearInterval(affairsAutoPostInterval);
     affairsAutoPostInterval = setInterval(async () => {
+        if (!isPostingTime()) return;
         const posted = await runAffairsAutoPostCheck(true);
         if (posted) { showToast("📰 Current Affairs auto-posted!", 'success'); loadAffairsContent(); }
         updateAffairsAutoPostUI();
