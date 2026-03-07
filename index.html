@@ -848,20 +848,6 @@ async function displayStudentView(latestMedia, questions, answers) {
         } else {
             html += `<div class="media-answer-section"><label style="color:#ff9800;font-weight:700;">💬 Your Response:</label>
                 <textarea id="mediaAnswer-${latestMedia.id}" placeholder="Share your thoughts about this media..." style="border-color:#ff9800;"></textarea>
-                <div style="background:#1f1208;border-radius:10px;padding:12px;margin:12px 0;border-left:3px solid #a78bfa;">
-                    <label style="color:#a78bfa;font-weight:700;font-size:13px;display:block;margin-bottom:6px;">💬 Your Opinion <span style="color:#666;font-weight:400;font-size:12px;">(optional)</span></label>
-                    <textarea id="mediaOpinion-${latestMedia.id}" placeholder="Share your deeper thoughts, opinion or analysis..." style="border-color:#a78bfa;min-height:65px;"></textarea>
-                    <label style="color:#aaa;font-size:13px;display:block;margin:10px 0 6px;">📎 Attach Opinion File <span style="color:#666;font-weight:400;">(optional)</span>:</label>
-                    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                        <label for="mediaOpinionFile-${latestMedia.id}" style="display:inline-flex;align-items:center;gap:6px;background:#1f1208;border:1.5px dashed #a78bfa;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:#a78bfa;font-weight:600;">
-                            📎 Choose File
-                        </label>
-                        <input type="file" id="mediaOpinionFile-${latestMedia.id}" accept="image/*,audio/*" style="display:none;" onchange="previewStudentAnswerFile('mediaOpinionFile-${latestMedia.id}','mediaOpinionFilePreview-${latestMedia.id}','mediaOpinionFileName-${latestMedia.id}')">
-                        <span id="mediaOpinionFileName-${latestMedia.id}" style="color:#888;font-size:12px;">No file chosen</span>
-                        <button onclick="clearStudentAnswerFile('mediaOpinionFile-${latestMedia.id}','mediaOpinionFilePreview-${latestMedia.id}','mediaOpinionFileName-${latestMedia.id}')" style="display:none;width:auto;padding:3px 10px;font-size:11px;background:#dc2626;border-radius:6px;margin:0;" id="mediaOpinionFileClear-${latestMedia.id}">✕ Clear</button>
-                    </div>
-                    <div id="mediaOpinionFilePreview-${latestMedia.id}" style="margin-top:8px;"></div>
-                </div>
                 <button onclick="submitMediaAnswer(${latestMedia.id})" class="btn-orange" style="margin-top:4px;">Submit Response</button>`;
             if (latestMedia.expectedAnswer) {
                 html += `<div class="info-msg" style="margin-top:8px;font-size:13px;">💡 Submit your response to reveal the correct answer!</div>`;
