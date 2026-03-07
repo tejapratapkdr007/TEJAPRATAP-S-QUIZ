@@ -569,7 +569,7 @@
         <button class="btn-secondary" onclick="showSection('teacherSection')">↩️ Back to Dashboard</button>
     </div>
 
-    <div class="designer-footer">Designed by <span>SATHWIK</span></div>
+    <div class="designer-footer">Designed by <span>SATHWIK__DEENANAATH</span></div>
 </div>
 
 <script>
@@ -905,20 +905,6 @@ async function displayStudentView(latestMedia, questions, answers) {
         html += `<div class="input-group" style="margin-top:14px;">
             <label style="color:#7b9fff;font-weight:700;">✍️ Your Answer:</label>
             <textarea id="studentAnswer" placeholder="Type your answer here..." style="border-color:#1E5BFF;"></textarea>
-        </div>
-        <div style="background:#0d1b2a;border-radius:10px;padding:14px;margin-bottom:14px;border-left:3px solid #a78bfa;">
-            <label style="color:#a78bfa;font-weight:700;font-size:14px;display:block;margin-bottom:6px;">💬 Your Opinion <span style="color:#666;font-weight:400;font-size:12px;">(optional — share your thoughts)</span></label>
-            <textarea id="studentOpinion" placeholder="Share your thoughts, reasoning or opinion about this question..." style="border-color:#a78bfa;min-height:70px;"></textarea>
-            <label style="color:#aaa;font-size:13px;display:block;margin:10px 0 6px;">📎 Attach Opinion File <span style="color:#666;font-weight:400;">(optional — image or audio)</span>:</label>
-            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
-                <label for="studentOpinionFile" style="display:inline-flex;align-items:center;gap:6px;background:#1a0f2e;border:1.5px dashed #a78bfa;border-radius:8px;padding:7px 14px;cursor:pointer;font-size:13px;color:#a78bfa;font-weight:600;">
-                    📎 Choose File
-                </label>
-                <input type="file" id="studentOpinionFile" accept="image/*,audio/*" style="display:none;" onchange="previewStudentAnswerFile('studentOpinionFile','studentOpinionFilePreview','studentOpinionFileName')">
-                <span id="studentOpinionFileName" style="color:#888;font-size:12px;">No file chosen</span>
-                <button onclick="clearStudentAnswerFile('studentOpinionFile','studentOpinionFilePreview','studentOpinionFileName')" style="display:none;width:auto;padding:3px 10px;font-size:11px;background:#dc2626;border-radius:6px;margin:0;" id="studentOpinionFileClear">✕ Clear</button>
-            </div>
-            <div id="studentOpinionFilePreview" style="margin-top:8px;"></div>
         </div>
         <button onclick="submitAnswer(${latestQ.id})">📨 Submit Answer</button>`;
         if (latestQ.answer) html += `<div class="info-msg" style="margin-top:10px;font-size:13px;">💡 Submit your answer to reveal today's correct answer!</div>`;
