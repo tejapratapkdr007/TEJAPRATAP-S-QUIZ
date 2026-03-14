@@ -409,17 +409,17 @@ html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);colo
       <div class="grid4">
         <div class="stat-tile">
           <div class="st-icon">⭐</div>
-          <div class="st-val" id="hScore" style="color:#7b9fff">0</div>
+          <div class="st-val" id="hScoreHome" style="color:#7b9fff">0</div>
           <div class="st-lbl">Total Score</div>
         </div>
         <div class="stat-tile">
           <div class="st-icon">🏆</div>
-          <div class="st-val" id="hRank" style="color:#4ade80">#—</div>
+          <div class="st-val" id="hRankHome" style="color:#4ade80">#—</div>
           <div class="st-lbl">Your Rank</div>
         </div>
         <div class="stat-tile">
           <div class="st-icon">🔥</div>
-          <div class="st-val" id="hStreak" style="color:#f97316">0</div>
+          <div class="st-val" id="hStreakHome" style="color:#f97316">0</div>
           <div class="st-lbl">Day Streak</div>
         </div>
         <div class="stat-tile rk-tile" style="cursor:pointer" onclick="go('s-rank')">
@@ -1025,6 +1025,7 @@ async function loadStats() {
   const rank = all.findIndex(e => e.p === ME) + 1;
   const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
   setEl('hScore', myTotal); setEl('hRank', rank > 0 ? '#' + rank : '#—'); setEl('hStreak', '🔥' + myStreak);
+  setEl('hScoreHome', myTotal); setEl('hRankHome', rank > 0 ? '#' + rank : '#—'); setEl('hStreakHome', '🔥' + myStreak);
 }
 
 // =====================================================
@@ -1041,7 +1042,7 @@ async function loadQuiz() {
     <div class="card-lbl">📅 ${q.date}</div>
     <div class="card-ttl">📌 Today's Question</div>
     <p style="font-size:15px;color:var(--text);line-height:1.7;margin-top:8px">${q.question}</p>
-    ${q.questionFile ? (q.questionFileType === 'image' ? `<img src="${q.questionFile}" class="media-img">` : `<audio controls class="media-aud"><source src="${q.questionFile}"></audio>`) : ''}
+    ${q.questionFile ? (q.questionFileType === 'image' ? `<img src="${q.questionFile}" class="media-img">` : `<audio controls class="media-aud" src="${q.questionFile}"></audio>`) : ''}
   </div>`;
   if (myAns) {
     h += `<div class="ok">✅ Your answer: <strong>${myAns.answer}</strong></div>`;
@@ -1086,7 +1087,7 @@ async function loadMediaStudent() {
   const myAns = (ans || []).find(a => a.questionId === m.id && a.studentPin === ME && a.type === 'media');
   let h = `<div class="card or"><div class="card-lbl">📅 ${m.date}</div><div class="card-ttl">🎵 Media Question</div>`;
   if (m.type === 'image') h += `<img src="${m.data}" class="media-img">`;
-  else h += `<audio controls class="media-aud"><source src="${m.data}"></audio>`;
+  else h += `<audio controls class="media-aud" src="${m.data}"></audio>`;
   if (m.opinion) h += `<p style="font-size:14px;color:var(--text);margin-top:12px;line-height:1.6">${m.opinion}</p>`;
   h += '</div>';
   if (myAns) {
@@ -1361,7 +1362,7 @@ function loadSpeak() {
   const dur   = parseInt(localStorage.getItem('spDur') || '120');
   spDuration = dur;
   const el = document.getElementById('spTopic');
-  if (el) { el.textContent = topic || 'Waiting for teacher to set a topic...'; el.style.color = topic ? 'var(--text)' : 'var(--muted)'; }
+  if (el) { el.textContent = topic || 'Waiting for teacher to set a topic...'; el.style.color = topic ? '#e2e8f0' : '#64748b'; }
   const hel = document.getElementById('spHint');
   if (hel && topic) hel.textContent = `Speak for ${dur/60} min · Errors highlighted live · Full analysis after stop`;
   spReset();
@@ -1376,7 +1377,7 @@ function spReset() {
   if (st) { st.textContent = 'Press 🎙️ to start recording'; st.className = 'sp-status'; }
   const sub = document.getElementById('tSub'); if (sub) sub.textContent = 'READY';
   const tr = document.getElementById('spTranscript');
-  if (tr) tr.innerHTML = '<span style="color:var(--muted2)">Start speaking — words appear here live...</span>';
+  if (tr) tr.innerHTML = '<span style="color:#4a5568">Start speaking — words appear here live...</span>';
   ['spCorrectBox','spAnalysisBox','spSuggestBox'].forEach(id=>{ const el=document.getElementById(id); if(el) el.classList.remove('show'); });
   const eb = document.getElementById('errBadge'); if (eb) eb.style.display='none';
   document.getElementById('spTime').textContent  = '0s';
@@ -1394,7 +1395,7 @@ function spUpdateTimer() {
   disp.textContent = String(Math.floor(rem/60)).padStart(2,'0')+':'+String(rem%60).padStart(2,'0');
   const prog = spDuration > 0 ? spElapsed/spDuration : 0;
   arc.style.strokeDashoffset = 239*(1-prog);
-  arc.style.stroke = prog > .8 ? '#ef4444' : prog > .5 ? '#f97316' : 'var(--blue)';
+  arc.style.stroke = prog > .8 ? '#ef4444' : prog > .5 ? '#f97316' : '#2563eb';
   if (tm) tm.textContent = spElapsed + 's';
 }
 function spToggle() {
@@ -1549,12 +1550,12 @@ function gkMode(m) {
   const sbtn = document.getElementById('gkSBtn'), bbtn = document.getElementById('gkBBtn');
   if (m === 'single') {
     sb.style.display='block'; bb.style.display='none';
-    sbtn.style.background='linear-gradient(135deg,var(--blue),var(--purple))'; sbtn.style.color='#fff';
-    bbtn.style.background='var(--bg3)'; bbtn.style.color='var(--muted)';
+    sbtn.style.background='linear-gradient(135deg,#2563eb,#7c3aed)'; sbtn.style.color='#fff';
+    bbtn.style.background='#161b25'; bbtn.style.color='#64748b';
   } else {
     sb.style.display='none'; bb.style.display='block';
-    bbtn.style.background='linear-gradient(135deg,var(--blue),var(--purple))'; bbtn.style.color='#fff';
-    sbtn.style.background='var(--bg3)'; sbtn.style.color='var(--muted)';
+    bbtn.style.background='linear-gradient(135deg,#2563eb,#7c3aed)'; bbtn.style.color='#fff';
+    sbtn.style.background='#161b25'; sbtn.style.color='#64748b';
     renderGKBulk(); updateGKUI();
   }
 }
@@ -1715,7 +1716,7 @@ function startGKMachine(){
 // TEACHER — MEDIA
 // =====================================================
 function dzOver(e,id){e.preventDefault();document.getElementById(id).style.borderColor='#fbbf24';}
-function dzLeave(id){document.getElementById(id).style.borderColor='var(--orange)';}
+function dzLeave(id){document.getElementById(id).style.borderColor='#ea580c';}
 function dzDrop(e,dzId,inId){
   e.preventDefault();dzLeave(dzId);
   const f=e.dataTransfer.files[0];
@@ -1729,7 +1730,7 @@ function prevMediaFile(){
   if(!f){p.innerHTML='';return;}
   const url=URL.createObjectURL(f);
   if(f.type.startsWith('image/')) p.innerHTML=`<img src="${url}" class="media-img">`;
-  else p.innerHTML=`<audio controls class="media-aud"><source src="${url}"></audio>`;
+  else p.innerHTML=`<audio controls class="media-aud" src="${url}"></audio>`;
   const lbl=document.querySelector('#mediaDZ div:nth-child(2)');
   if(lbl) lbl.textContent='✅ '+f.name;
 }
@@ -1764,7 +1765,7 @@ async function loadMediaList(){
         <span style="font-size:11px;color:var(--muted)">${m.date||''}</span>
       </div>
       <div style="padding:14px">
-        ${m.type==='image'?`<img src="${m.data}" class="media-img">`:`<audio controls class="media-aud"><source src="${m.data}"></audio>`}
+        ${m.type==='image'?`<img src="${m.data}" class="media-img">`:`<audio controls class="media-aud" src="${m.data}"></audio>`}
         ${m.opinion?`<div style="font-size:13px;color:var(--muted);margin-top:8px">Q: ${m.opinion}</div>`:''}
         ${m.expectedAnswer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 9px;font-size:11px;margin-top:8px;display:inline-block">✅ Answer set</span>`:
           `<div style="margin-top:10px;display:flex;gap:8px">
@@ -1790,10 +1791,10 @@ function postSpTopic(){
   if(!t)return toast('Enter a speaking topic!','error');
   localStorage.setItem('spTopic',t); localStorage.setItem('spDur',String(dur));
   spDuration=dur;
-  const tel=document.getElementById('spTopic'); if(tel){tel.textContent=t;tel.style.color='var(--text)';}
+  const tel=document.getElementById('spTopic'); if(tel){tel.textContent=t;tel.style.color='#e2e8f0';}
   const hel=document.getElementById('spHint'); if(hel)hel.textContent=`Speak for ${dur/60} min · Timer starts on Record`;
   const list=document.getElementById('spTopicList');
-  if(list){const d=document.createElement('div');d.style.cssText='background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:13px;color:#c4b5fd;margin-bottom:6px';d.innerHTML=`<strong>${t}</strong> <span style="color:var(--muted);font-size:11px">· ${dur/60} min · ${new Date().toLocaleTimeString('en-IN')}</span>`;list.insertBefore(d,list.firstChild);}
+  if(list){const d=document.createElement('div');d.style.cssText='background:#161b25;border:1px solid #1e2535;border-radius:8px;padding:10px 14px;font-size:13px;color:#c4b5fd;margin-bottom:6px';d.innerHTML=`<strong>${t}</strong> <span style="color:#64748b;font-size:11px">· ${dur/60} min · ${new Date().toLocaleTimeString('en-IN')}</span>`;list.insertBefore(d,list.firstChild);}
   document.getElementById('tSpTopic').value='';
   toast(`✅ Topic "${t}" set for students!`,'success');
 }
@@ -1934,7 +1935,7 @@ function prevFile(inputId,prevId){
   if(!f){p.innerHTML='';return;}
   const url=URL.createObjectURL(f);
   if(f.type.startsWith('image/'))p.innerHTML=`<img src="${url}" class="media-img">`;
-  else if(f.type.startsWith('audio/'))p.innerHTML=`<audio controls class="media-aud"><source src="${url}"></audio>`;
+  else if(f.type.startsWith('audio/'))p.innerHTML=`<audio controls class="media-aud" src="${url}"></audio>`;
   else p.innerHTML=`<div class="inf" style="margin-top:8px">📎 ${f.name}</div>`;
 }
 </script>
