@@ -755,7 +755,7 @@ window.addEventListener('DOMContentLoaded', () => {
   else if (tl === '1') { IS_T = true; enterTeacher(); }
   else { go('s-login'); loadLoginFaf(); }
 });
-setInterval(() => fetch(API + '/health').catch(()=>{}), 10 * 60 * 1000);
+setInterval(() => fetch(API + '/health').catch(()=>{}), 4 * 60 * 1000);
 
 // ═══════════════════════════════════════════════════
 // MOBILE SIDEBAR
@@ -818,9 +818,9 @@ function toast(msg, type='info') {
 async function GET(path) {
   try { const r = await fetch(API + path); if (!r.ok) return null; return r.json(); } catch { return null; }
 }
-async function POST(path, data) {
+async function POST(path, data, _retry=0) {
   const ctrl = new AbortController();
-  const tid = setTimeout(() => ctrl.abort(), 15000);
+  const tid = setTimeout(() => ctrl.abort(), 20000);
   try {
     const r = await fetch(API + path, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:ctrl.signal});
     clearTimeout(tid);
@@ -828,7 +828,13 @@ async function POST(path, data) {
     return r.json();
   } catch(e) {
     clearTimeout(tid);
-    if (e.name === 'AbortError') throw new Error('Server timeout — try again');
+    const timedOut = e.name === 'AbortError' || e.name === 'TypeError';
+    if (timedOut && _retry < 2) {
+      toast(`Server waking up... retrying (${_retry+1}/2)`, 'warn');
+      await new Promise(res => setTimeout(res, 5000));
+      return POST(path, data, _retry + 1);
+    }
+    if (timedOut) throw new Error('Server not responding — check connection');
     throw e;
   }
 }
@@ -2292,5 +2298,8 @@ function startSpAutoMachine(){
   },60000);updateSpUI();
 }
 </script>
+<div style="text-align:center;padding:18px 0 24px;font-size:11px;color:#334155;letter-spacing:1.5px;font-weight:600;text-transform:uppercase">
+  Designed by <span style="background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">SATHWIK</span>
+</div>
 </body>
 </html>
