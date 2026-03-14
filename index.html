@@ -819,9 +819,18 @@ async function GET(path) {
   try { const r = await fetch(API + path); if (!r.ok) return null; return r.json(); } catch { return null; }
 }
 async function POST(path, data) {
-  const r = await fetch(API + path, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
-  if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error || 'Server error'); }
-  return r.json();
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const r = await fetch(API + path, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:ctrl.signal});
+    clearTimeout(tid);
+    if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error || 'Server error'); }
+    return r.json();
+  } catch(e) {
+    clearTimeout(tid);
+    if (e.name === 'AbortError') throw new Error('Server timeout — try again');
+    throw e;
+  }
 }
 function toB64(file) {
   return new Promise((res,rej) => { const rd = new FileReader(); rd.onload = e => res(e.target.result); rd.onerror = rej; rd.readAsDataURL(file); });
