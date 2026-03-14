@@ -1050,8 +1050,9 @@ async function loadQuiz() {
   const body = document.getElementById('quizBody');
   body.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><br>Loading...</div>';
   const [qs,ans] = await Promise.all([GET('/questions'),GET('/answers')]);
-  if (!qs||!qs.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">📭 No question posted yet</div>'; return; }
-  const q = qs[qs.length-1];
+  const realQs=(qs||[]).filter(q=>!q.question||!q.question.startsWith('__SPEAK_TOPIC__:'));
+  if (!realQs.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">📭 No question posted yet</div>'; return; }
+  const q = realQs[realQs.length-1];
   const myAns = (ans||[]).find(a=>a.questionId===q.id&&a.studentPin===ME&&(!a.type||a.type==='question'));
   let h = `<div class="card bl"><div class="card-lbl">📅 ${q.date}</div><div class="card-ttl">📌 Today's Question</div>
     <p style="font-size:15px;color:var(--text);line-height:1.7;margin-top:8px">${q.question}</p>
@@ -1311,16 +1312,20 @@ function spCountErr(text){
 async function loadSpeak() {
   spReset();
   try{
-    const data=await GET('/speak-topic');
-    if(data&&data.topic){
-      const t=data.topic,dur=data.duration||120;
-      localStorage.setItem('spTopic',t);localStorage.setItem('spDur',String(dur));
-      spDuration=dur;
-      const el=document.getElementById('spTopic');
-      if(el){el.textContent=t;el.style.color='#e2e8f0';}
-      const hel=document.getElementById('spHint');
-      if(hel)hel.textContent=`Speak for ${dur/60} min · AI corrects grammar & pronunciation`;
-      return;
+    const qs=await GET('/questions');
+    if(Array.isArray(qs)){
+      const st=qs.slice().reverse().find(q=>q.question&&q.question.startsWith('__SPEAK_TOPIC__:'));
+      if(st){
+        const t=st.question.replace('__SPEAK_TOPIC__:','');
+        const dur=parseInt(st.answer)||120;
+        localStorage.setItem('spTopic',t);localStorage.setItem('spDur',String(dur));
+        spDuration=dur;
+        const el=document.getElementById('spTopic');
+        if(el){el.textContent=t;el.style.color='#e2e8f0';}
+        const hel=document.getElementById('spHint');
+        if(hel)hel.textContent=`Speak for ${dur/60} min · AI corrects grammar & pronunciation`;
+        return;
+      }
     }
   }catch(e){}
   // fallback to localStorage
@@ -1929,7 +1934,7 @@ async function postSpTopic(){
   const dur=parseInt(document.getElementById('tSpDur').value);
   if(!t)return toast('Enter a topic!','error');
   try{
-    await POST('/speak-topic',{topic:t,duration:dur});
+    await POST('/questions',{question:'__SPEAK_TOPIC__:'+t,answer:String(dur),type:'speak-topic'});
     localStorage.setItem('spTopic',t);localStorage.setItem('spDur',String(dur));
     spDuration=dur;
     const tel=document.getElementById('spTopic');if(tel){tel.textContent=t;tel.style.color='#e2e8f0';}
@@ -2296,7 +2301,7 @@ async function manualSpPost(){
   const td=today();const idx=s.items.findIndex(i=>!i.posted&&i.date===td);
   if(idx===-1)return toast("No topic for today or already set.",'info');
   const item=s.items[idx];
-  try{await POST('/speak-topic',{topic:item.topic,duration:item.duration});}catch(e){toast(e.message,'error');return;}
+  try{await POST('/questions',{question:'__SPEAK_TOPIC__:'+item.topic,answer:String(item.duration),type:'speak-topic'});}catch(e){toast(e.message,'error');return;}
   localStorage.setItem('spTopic',item.topic);localStorage.setItem('spDur',String(item.duration));spDuration=item.duration;
   const tel=document.getElementById('spTopic');if(tel){tel.textContent=item.topic;tel.style.color='#e2e8f0';}
   s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost=`Day ${idx+1} — ${s.items[idx].postedAt}`;
@@ -2309,7 +2314,7 @@ function startSpAutoMachine(){
     if(!is5am())return;const s=getSpSchedLocal();if(!s)return;
     const td=today();const idx=s.items.findIndex(i=>!i.posted&&i.date===td);if(idx===-1)return;
     const item=s.items[idx];
-    POST('/speak-topic',{topic:item.topic,duration:item.duration}).catch(()=>{});
+    POST('/questions',{question:'__SPEAK_TOPIC__:'+item.topic,answer:String(item.duration),type:'speak-topic'}).catch(()=>{});
     localStorage.setItem('spTopic',item.topic);localStorage.setItem('spDur',String(item.duration));spDuration=item.duration;
     const tel=document.getElementById('spTopic');if(tel){tel.textContent=item.topic;tel.style.color='#e2e8f0';}
     s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost=`Day ${idx+1} — ${s.items[idx].postedAt}`;
