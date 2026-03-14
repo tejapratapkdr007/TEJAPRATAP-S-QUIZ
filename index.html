@@ -1308,14 +1308,28 @@ function spCountErr(text){
 // ═══════════════════════════════════════════════════
 // SPEAKING — FULLY REBUILT
 // ═══════════════════════════════════════════════════
-function loadSpeak() {
-  const topic=localStorage.getItem('spTopic'), dur=parseInt(localStorage.getItem('spDur')||'120');
+async function loadSpeak() {
+  spReset();
+  try{
+    const data=await GET('/speak-topic');
+    if(data&&data.topic){
+      const t=data.topic,dur=data.duration||120;
+      localStorage.setItem('spTopic',t);localStorage.setItem('spDur',String(dur));
+      spDuration=dur;
+      const el=document.getElementById('spTopic');
+      if(el){el.textContent=t;el.style.color='#e2e8f0';}
+      const hel=document.getElementById('spHint');
+      if(hel)hel.textContent=`Speak for ${dur/60} min · AI corrects grammar & pronunciation`;
+      return;
+    }
+  }catch(e){}
+  // fallback to localStorage
+  const topic=localStorage.getItem('spTopic'),dur=parseInt(localStorage.getItem('spDur')||'120');
   spDuration=dur;
   const el=document.getElementById('spTopic');
   if(el){el.textContent=topic||'Waiting for teacher to set a topic...';el.style.color=topic?'#e2e8f0':'#64748b';}
   const hel=document.getElementById('spHint');
   if(hel&&topic)hel.textContent=`Speak for ${dur/60} min · AI corrects grammar & pronunciation`;
-  spReset();
 }
 
 function spReset() {
@@ -1910,18 +1924,21 @@ function spMode(m){
     renderSpBulk();updateSpUI();
   }
 }
-function postSpTopic(){
+async function postSpTopic(){
   const t=document.getElementById('tSpTopic').value.trim();
   const dur=parseInt(document.getElementById('tSpDur').value);
   if(!t)return toast('Enter a topic!','error');
-  localStorage.setItem('spTopic',t);localStorage.setItem('spDur',String(dur));
-  spDuration=dur;
-  const tel=document.getElementById('spTopic');if(tel){tel.textContent=t;tel.style.color='#e2e8f0';}
-  const hel=document.getElementById('spHint');if(hel)hel.textContent=`Speak for ${dur/60} min · AI corrects grammar`;
-  const list=document.getElementById('spTopicList');
-  if(list){const d=document.createElement('div');d.style.cssText='background:#161b25;border:1px solid #1e2535;border-radius:7px;padding:9px 12px;font-size:12px;color:#c4b5fd;margin-bottom:5px';d.innerHTML=`<strong>${t}</strong> <span style="color:#64748b;font-size:10px">· ${dur/60}min · ${new Date().toLocaleTimeString('en-IN')}</span>`;list.insertBefore(d,list.firstChild);}
-  document.getElementById('tSpTopic').value='';
-  toast(`✅ Topic "${t}" set!`,'success');
+  try{
+    await POST('/speak-topic',{topic:t,duration:dur});
+    localStorage.setItem('spTopic',t);localStorage.setItem('spDur',String(dur));
+    spDuration=dur;
+    const tel=document.getElementById('spTopic');if(tel){tel.textContent=t;tel.style.color='#e2e8f0';}
+    const hel=document.getElementById('spHint');if(hel)hel.textContent=`Speak for ${dur/60} min · AI corrects grammar`;
+    const list=document.getElementById('spTopicList');
+    if(list){const d=document.createElement('div');d.style.cssText='background:#161b25;border:1px solid #1e2535;border-radius:7px;padding:9px 12px;font-size:12px;color:#c4b5fd;margin-bottom:5px';d.innerHTML=`<strong>${t}</strong> <span style="color:#64748b;font-size:10px">· ${dur/60}min · ${new Date().toLocaleTimeString('en-IN')}</span>`;list.insertBefore(d,list.firstChild);}
+    document.getElementById('tSpTopic').value='';
+    toast(`✅ Topic "${t}" set for all students!`,'success');
+  }catch(e){toast(e.message,'error');}
 }
 
 // ═══════════════════════════════════════════════════
@@ -2274,15 +2291,16 @@ function saveSpBulk(){
   saveSpSchedLocal({savedOn:new Date().toISOString(),items,lastPost:s?s.lastPost:null});
   startSpAutoMachine();toast(`✅ ${items.length} topics saved!`,'success');renderSpBulk();
 }
-function manualSpPost(){
+async function manualSpPost(){
   const s=getSpSchedLocal();if(!s)return toast('No schedule saved!','warn');
   const td=today();const idx=s.items.findIndex(i=>!i.posted&&i.date===td);
   if(idx===-1)return toast("No topic for today or already set.",'info');
   const item=s.items[idx];
+  try{await POST('/speak-topic',{topic:item.topic,duration:item.duration});}catch(e){toast(e.message,'error');return;}
   localStorage.setItem('spTopic',item.topic);localStorage.setItem('spDur',String(item.duration));spDuration=item.duration;
   const tel=document.getElementById('spTopic');if(tel){tel.textContent=item.topic;tel.style.color='#e2e8f0';}
   s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost=`Day ${idx+1} — ${s.items[idx].postedAt}`;
-  saveSpSchedLocal(s);toast(`✅ Topic "${item.topic}" set!`,'success');renderSpBulk();
+  saveSpSchedLocal(s);toast(`✅ Topic "${item.topic}" set for all students!`,'success');renderSpBulk();
 }
 function resetSpBulk(){if(!confirm('Reset speaking schedule?'))return;localStorage.removeItem(SP_SCHED_KEY);if(spAutoInterval){clearInterval(spAutoInterval);spAutoInterval=null;}toast('🗑️ Speaking schedule reset.','warn');renderSpBulk();}
 function startSpAutoMachine(){
@@ -2291,6 +2309,7 @@ function startSpAutoMachine(){
     if(!is5am())return;const s=getSpSchedLocal();if(!s)return;
     const td=today();const idx=s.items.findIndex(i=>!i.posted&&i.date===td);if(idx===-1)return;
     const item=s.items[idx];
+    POST('/speak-topic',{topic:item.topic,duration:item.duration}).catch(()=>{});
     localStorage.setItem('spTopic',item.topic);localStorage.setItem('spDur',String(item.duration));spDuration=item.duration;
     const tel=document.getElementById('spTopic');if(tel){tel.textContent=item.topic;tel.style.color='#e2e8f0';}
     s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost=`Day ${idx+1} — ${s.items[idx].postedAt}`;
