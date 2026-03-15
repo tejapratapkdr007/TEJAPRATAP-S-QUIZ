@@ -25,13 +25,8 @@ function loadData() {
 
 function saveData() {
     try {
-        // For media, only save the URL reference not the raw base64
-        const mediaToSave = mediaFiles.map(m => ({
-            ...m,
-            data: m.fileUrl || m.data  // prefer URL over base64
-        }));
         fs.writeFileSync(DATA_FILE, JSON.stringify({
-            questions, studentAnswers, mediaFiles: mediaToSave, studentPhones,
+            questions, studentAnswers, mediaFiles, studentPhones,
             bulkSchedule, studentScores, studentStreaks,
             wordItems, affairsItems,
             mediaSchedule, wordSchedule, affairsSchedule
@@ -338,7 +333,7 @@ app.post("/media/text", (req, res) => {
 
     const newMedia = {
         id: Date.now(), type,
-        data: fileUrl || urlOrText || '',
+        data: urlOrText || '',   // keep full base64 — always works even after redeploy
         fileUrl,
         fileName: caption || 'Media Item',
         opinion: question, expectedAnswer: answer || null, explanation: null,
