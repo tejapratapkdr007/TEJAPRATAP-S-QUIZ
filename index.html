@@ -1249,35 +1249,22 @@ async function loadRank() {
 }
 
 // ═══════════════════════════════════════════════════
-// AI GRAMMAR CORRECTION via Claude API
+// AI GRAMMAR CORRECTION via server proxy
 // ═══════════════════════════════════════════════════
 async function aiCorrectSpeech(text) {
   if (!text || text.trim().length < 5) return null;
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
+    const response = await fetch('/ai/grammar', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: `You are an English grammar and pronunciation expert for Indian students. 
-Analyze the student's spoken English text and provide corrections.
-You MUST respond ONLY with a valid JSON object, no markdown, no extra text.
-Format: {
-  "corrected": "the fully corrected version of the text",
-  "errors": [{"wrong":"exact wrong phrase","right":"corrected phrase","rule":"grammar rule explanation","type":"Tense|Agreement|Article|Comparison|Noun|Preposition|Spelling|Pronunciation|Other"}],
-  "score": 0-100,
-  "suggestions": ["actionable tip 1","actionable tip 2"],
-  "pronunciation_tips": ["tip about how to say difficult words correctly"]
-}
-Be thorough - fix ALL grammar errors including tense, subject-verb agreement, articles (a/an/the), prepositions, and sentence structure.`,
-        messages: [{ role: 'user', content: `Student spoke: "${text}"\n\nAnalyze and correct this.` }]
-      })
+      body: JSON.stringify({ text })
     });
-    const data = await response.json();
-    const txt = data.content?.[0]?.text || '';
-    const clean = txt.replace(/```json|```/g,'').trim();
-    return JSON.parse(clean);
+    if (!response.ok) {
+      const err = await response.json().catch(()=>({}));
+      console.error('AI grammar error:', err.error || response.status);
+      return null;
+    }
+    return await response.json();
   } catch(e) {
     console.error('AI correction failed:', e);
     return null;
