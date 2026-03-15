@@ -384,7 +384,7 @@ app.post("/ai/grammar", async (req, res) => {
     const { text } = req.body;
     if (!text || text.trim().length < 5) return res.status(400).json({ error: "Text too short" });
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return res.status(500).json({ error: "AI not configured. Please set ANTHROPIC_API_KEY in Render environment variables." });
+    if (!apiKey) return res.status(500).json({ error: "AI not configured. Set ANTHROPIC_API_KEY in Render environment variables." });
     try {
         const response = await fetch("https://api.anthropic.com/v1/messages", {
             method: "POST",
@@ -396,7 +396,7 @@ app.post("/ai/grammar", async (req, res) => {
             body: JSON.stringify({
                 model: "claude-haiku-4-5-20251001",
                 max_tokens: 1000,
-                system: `You are an English grammar expert for Indian students. Analyze spoken English and find ALL mistakes.
+                system: `You are an English grammar expert for Indian polytechnic students. Analyze spoken English and find ALL mistakes.
 You MUST respond ONLY with a valid JSON object, no markdown, no extra text.
 Format: {
   "corrected": "the fully corrected version",
@@ -405,7 +405,7 @@ Format: {
   "suggestions": ["tip 1","tip 2"],
   "pronunciation_tips": ["tip"]
 }
-Be thorough - fix ALL grammar errors including tense, subject-verb agreement, articles (a/an/the), prepositions, sentence structure.`,
+Fix ALL errors: tense, subject-verb agreement, articles (a/an/the), prepositions, sentence structure.`,
                 messages: [{ role: "user", content: `Student spoke: "${text}"\n\nAnalyze and correct this.` }]
             })
         });
