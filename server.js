@@ -25,8 +25,13 @@ function loadData() {
 
 function saveData() {
     try {
+        // For media, only save the URL reference not the raw base64
+        const mediaToSave = mediaFiles.map(m => ({
+            ...m,
+            data: m.fileUrl || m.data  // prefer URL over base64
+        }));
         fs.writeFileSync(DATA_FILE, JSON.stringify({
-            questions, studentAnswers, mediaFiles, studentPhones,
+            questions, studentAnswers, mediaFiles: mediaToSave, studentPhones,
             bulkSchedule, studentScores, studentStreaks,
             wordItems, affairsItems,
             mediaSchedule, wordSchedule, affairsSchedule
@@ -186,20 +191,47 @@ app.post("/answers", (req, res) => {
 // =====================================================
 // MEDIA
 // =====================================================
+// =====================================================
+// MEDIA FILE STORAGE (saves files to disk)
+// =====================================================
+const UPLOADS_DIR = path.join(__dirname, 'uploads');
+if (!fs.existsSync(UPLOADS_DIR)) fs.mkdirSync(UPLOADS_DIR, { recursive: true });
+app.use('/uploads', express.static(UPLOADS_DIR));
+
 app.get("/media", (req, res) => res.json(mediaFiles));
 
 app.post("/media", (req, res) => {
     const { type, data, fileName, opinion, expectedAnswer } = req.body;
     if (!type || !data || !fileName || !opinion)
         return res.status(400).json({ error: "All fields are required" });
+
+    let fileUrl = null;
+    try {
+        // Save base64 data as actual file on disk
+        const base64Data = data.includes(',') ? data.split(',')[1] : data;
+        const ext = fileName.split('.').pop().toLowerCase() || (type === 'audio' ? 'mp3' : 'jpg');
+        const uniqueName = `media_${Date.now()}.${ext}`;
+        const filePath = path.join(UPLOADS_DIR, uniqueName);
+        fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+        fileUrl = `/uploads/${uniqueName}`;
+    } catch(e) {
+        console.error('File save error:', e.message);
+        // fallback: store base64 if file save fails
+        fileUrl = null;
+    }
+
     const newMedia = {
-        id: Date.now(), type, data, fileName, opinion,
+        id: Date.now(), type,
+        data: fileUrl || data,   // use URL if saved, else base64
+        fileUrl,
+        fileName, opinion,
         expectedAnswer: expectedAnswer || null, explanation: null,
         date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
     };
     mediaFiles.push(newMedia);
     saveData();
     res.json({ success: true, media: newMedia });
+});
 });
 
 app.get("/media/latest", (req, res) => {
@@ -393,8 +425,7 @@ app.post("/ai/grammar", async (req, res) => {
                 model: "claude-haiku-4-5-20251001",
                 max_tokens: 1000,
                 system: `You are an English grammar expert for Indian polytechnic students. Analyze spoken English and find ALL mistakes.
-Respond ONLY with valid JSON, no markdown:
-{"corrected":"corrected text","errors":[{"wrong":"wrong phrase","right":"correct phrase","rule":"rule explanation","type":"Tense|Agreement|Article|Preposition|Noun|Other"}],"score":0-100,"suggestions":["tip1","tip2"],"pronunciation_tips":["tip"]}`,
+Respond ONLY with valid JSON no markdown: {"corrected":"corrected text","errors":[{"wrong":"wrong phrase","right":"correct phrase","rule":"rule","type":"Tense|Agreement|Article|Preposition|Noun|Other"}],"score":0-100,"suggestions":["tip1","tip2"],"pronunciation_tips":["tip"]}`,
                 messages: [{ role: "user", content: `Student spoke: "${text}"\n\nAnalyze and correct.` }]
             })
         });
