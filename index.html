@@ -15,7 +15,6 @@
   --green:#16a34a;--orange:#ea580c;--amber:#d97706;--gold:#FFD700;
   --sidebar:240px;--topbar:60px;--bnav:64px;
 }
-
 html,body{height:100%;font-family:'DM Sans',sans-serif;background:linear-gradient(145deg,#e8f0fe 0%,#dbeafe 50%,#eff6ff 100%);color:var(--text)}
 body{overflow:hidden}
 
@@ -37,7 +36,7 @@ body{overflow:hidden}
 .topbar-stat .l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}
 .topbar-user{display:flex;align-items:center;gap:8px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;padding:6px 12px;cursor:pointer}
 .topbar-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
-.topbar-uname{font-size:12px;font-weight:600;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b}
+.topbar-uname{font-size:12px;font-weight:600;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 /* Mobile hamburger */
 .ham{display:none;background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:4px;margin-right:4px}
 
@@ -46,7 +45,7 @@ body{overflow:hidden}
 .sidebar::-webkit-scrollbar{width:3px}
 .sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 .nav-section{padding:0 12px;margin-bottom:2px}
-.nav-lbl{font-size:9px;letter-spacing:2px;color:#94a3b8;font-weight:700;text-transform:uppercase;padding:0 8px;margin-bottom:5px;margin-top:8px}
+.nav-lbl{font-size:9px;letter-spacing:2px;color:var(--muted2);font-weight:700;text-transform:uppercase;padding:0 8px;margin-bottom:5px;margin-top:8px}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all 0.15s;border:1px solid transparent;margin-bottom:2px;font-size:13px;font-weight:500;color:#475569}
 .nav-item:hover{background:#eff6ff;color:#1e40af;border-color:#bfdbfe}
 .nav-item.active{background:linear-gradient(135deg,rgba(37,99,235,0.18),rgba(124,58,237,0.12));color:#fff;border-color:rgba(37,99,235,0.35)}
@@ -67,10 +66,10 @@ body{overflow:hidden}
 .main::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
 /* ══ SCREENS ══ */
-.screen{display:none;padding:24px;min-height:calc(100vh - var(--topbar));animation:fadeIn 0.18s ease;background:transparent}
+.screen{display:none;padding:24px;min-height:calc(100vh - var(--topbar));animation:fadeIn 0.18s ease}
 .screen.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
-.fg input::placeholder,.fg textarea::placeholder{color:#94a3b8;opacity:1}
+.fg input::placeholder,.fg textarea::placeholder{color:#94a3b8}
 
 /* ══ PAGE HEADER ══ */
 .page-hdr{margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
@@ -568,51 +567,50 @@ body{overflow:hidden}
       <!-- MEDIA TAB -->
       <div id="tMedia" style="display:none">
         <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
-          <button id="mdSBtn" onclick="mdMode('single')" style="padding:9px 18px;background:linear-gradient(135deg,#ea580c,#c2410c);color:#fff;border:none;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🎵 Single Upload</button>
-          <button id="mdBBtn" onclick="mdMode('bulk')" style="padding:9px 18px;background:#ffffff;color:#475569;border:1.5px solid #bfdbfe;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🤖 Auto-Post Schedule</button>
+          <button id="mdSBtn" onclick="mdMode('single')" style="padding:9px 18px;background:linear-gradient(135deg,#ea580c,#c2410c);color:#fff;border:none;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">&#127925; Single Upload</button>
+          <button id="mdBBtn" onclick="mdMode('bulk')" style="padding:9px 18px;background:#ffffff;color:#475569;border:1.5px solid #bfdbfe;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">&#129302; Auto-Post Schedule</button>
         </div>
         <div class="grid-aside">
           <div>
             <div id="mdSingle">
               <div class="tsec">
-            <h3>🎵 Upload Image or Audio</h3>
-            <div class="drop-zone" id="mediaDZ" onclick="document.getElementById('mediaFile').click()" ondragover="dzOver(event,'mediaDZ')" ondragleave="dzLeave('mediaDZ')" ondrop="dzDrop(event,'mediaDZ','mediaFile')">
-              <div style="font-size:32px;margin-bottom:8px">📁</div>
-              <div id="mediaDZLabel" style="font-size:13px;font-weight:700;color:var(--orange)">Click or Drop File Here</div>
-              <div style="font-size:11px;color:var(--muted);margin-top:3px">JPG · PNG · MP3 · WAV · M4A</div>
-              <input type="file" id="mediaFile" accept="image/*,audio/*" style="display:none" onchange="prevMediaFile()">
-            </div>
-            <div id="mediaPrev"></div>
-            <div class="upload-preview" id="mediaUploadPreview">
-              <div class="upload-name"><span>📎</span><span id="mediaUploadName"></span><span class="upload-size" id="mediaUploadSize"></span></div>
-              <div class="upload-progress" id="mediaUploadProgress"><div class="upload-progress-bar" id="mediaUploadBar"></div></div>
-            </div>
-            <div class="fg" style="margin-top:12px"><label>📝 Question / Caption</label><textarea id="mediaQ" placeholder="What should students observe or answer?"></textarea></div>
-            <div class="fg"><label style="color:#4ade80">✅ Expected Answer (optional)</label><textarea id="mediaA" placeholder="Correct answer..." style="border-color:#22c55e44"></textarea></div>
-                <button class="btn org" onclick="postMedia()">📤 Post Media Question</button>
+                <h3>&#127925; Upload Image or Audio</h3>
+                <div class="drop-zone" id="mediaDZ" onclick="document.getElementById('mediaFile').click()" ondragover="dzOver(event,'mediaDZ')" ondragleave="dzLeave('mediaDZ')" ondrop="dzDrop(event,'mediaDZ','mediaFile')">
+                  <div style="font-size:32px;margin-bottom:8px">&#128193;</div>
+                  <div id="mediaDZLabel" style="font-size:13px;font-weight:700;color:var(--orange)">Click or Drop File Here</div>
+                  <div style="font-size:11px;color:var(--muted);margin-top:3px">JPG &middot; PNG &middot; MP3 &middot; WAV &middot; M4A</div>
+                  <input type="file" id="mediaFile" accept="image/*,audio/*" style="display:none" onchange="prevMediaFile()">
+                </div>
+                <div id="mediaPrev"></div>
+                <div class="upload-preview" id="mediaUploadPreview">
+                  <div class="upload-name"><span>&#128206;</span><span id="mediaUploadName"></span><span class="upload-size" id="mediaUploadSize"></span></div>
+                  <div class="upload-progress" id="mediaUploadProgress"><div class="upload-progress-bar" id="mediaUploadBar"></div></div>
+                </div>
+                <div class="fg" style="margin-top:12px"><label>Question / Caption</label><textarea id="mediaQ" placeholder="What should students observe or answer?"></textarea></div>
+                <div class="fg"><label style="color:#16a34a">Expected Answer (optional)</label><textarea id="mediaA" placeholder="Correct answer..." style="border-color:#22c55e88"></textarea></div>
+                <button class="btn org" onclick="postMedia()">&#128228; Post Media Question</button>
               </div>
             </div>
-            <!-- BULK AUTO-POST MODE -->
             <div id="mdBulk" style="display:none">
               <div class="ap-panel">
-                <div style="font-size:11px;font-weight:700;color:#fbbf24;margin-bottom:10px;letter-spacing:1px">🤖 MEDIA AUTO-POST MACHINE</div>
-                <div class="ap-row"><span style="color:#64748b">Engine</span><span id="mdApEng" style="font-weight:700">⚫ Idle</span></div>
-                <div class="ap-row"><span style="color:#64748b">Posted</span><span id="mdApCnt" style="font-weight:700;color:#00e5ff">0/0</span></div>
-                <div class="ap-row"><span style="color:#64748b">Next</span><span id="mdApNext" style="font-weight:700;color:#ffeb3b">&mdash;</span></div>
-                <div class="ap-row"><span style="color:#64748b">Last</span><span id="mdApLast" style="font-weight:700;color:#69f0ae">&mdash;</span></div>
+                <div style="font-size:11px;font-weight:700;color:#ea580c;margin-bottom:10px;letter-spacing:1px">&#129302; MEDIA AUTO-POST MACHINE</div>
+                <div class="ap-row"><span style="color:#475569">Engine</span><span id="mdApEng" style="font-weight:700">&#9899; Idle</span></div>
+                <div class="ap-row"><span style="color:#475569">Posted</span><span id="mdApCnt" style="font-weight:700;color:#2563eb">0/0</span></div>
+                <div class="ap-row"><span style="color:#475569">Next</span><span id="mdApNext" style="font-weight:700;color:#d97706">&mdash;</span></div>
+                <div class="ap-row"><span style="color:#475569">Last</span><span id="mdApLast" style="font-weight:700;color:#16a34a">&mdash;</span></div>
                 <div class="ap-bar"><div class="ap-fill" id="mdApBar" style="width:0%;background:linear-gradient(90deg,#ea580c,#fbbf24)"></div></div>
                 <div style="text-align:center;font-size:10px;color:#64748b;margin-top:6px" id="mdApLbl">No schedule saved</div>
               </div>
-              <div class="inf" style="font-size:11px">📌 Schedule media posts. Posts <strong>one per day at 5 AM</strong>.</div>
+              <div class="inf" style="font-size:11px">Schedule media posts. Posts <strong>one per day at 5 AM</strong>. Upload image/audio per day.</div>
               <div id="mdBulkFields"></div>
-              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
-                <button class="btn org" onclick="saveMdBulk()">💾 Save &amp; Activate</button>
-                <button class="btn grn" onclick="manualMdPost()">🔄 Post Today Now</button>
-                <button class="btn red" onclick="resetMdBulk()">🗑️ Reset</button>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px">
+                <button class="btn org" onclick="saveMdBulk()">&#128190; Save &amp; Activate</button>
+                <button class="btn grn" onclick="manualMdPost()">&#128260; Post Today Now</button>
+                <button class="btn red" onclick="resetMdBulk()">&#128465; Reset</button>
               </div>
             </div>
           </div>
-          <div class="tsec"><h3>📋 Posted Media</h3><div id="mediaList"><div class="spin-wrap"><div class="spinner"></div></div></div></div>
+          <div class="tsec"><h3>&#128203; Posted Media</h3><div id="mediaList"><div class="spin-wrap"><div class="spinner"></div></div></div></div>
         </div>
       </div>
 
@@ -630,7 +628,7 @@ body{overflow:hidden}
                 <div class="inf" style="font-size:11px;margin-bottom:12px">⚠️ Only you can set the topic.</div>
                 <div class="fg"><label>Speaking Topic</label><input type="text" id="tSpTopic" placeholder="e.g. Environment, My Favourite Book..."></div>
                 <div class="fg"><label>Duration</label>
-                  <select id="tSpDur" style="background:#ffffff;border:2px solid #93c5fd;border-radius:9px;padding:10px 13px;color:#1e293b;width:100%;font-size:14px;font-family:inherit;box-shadow:0 1px 4px rgba(37,99,235,0.08);outline:none">
+                  <select id="tSpDur" style="background:#ffffff;border:2px solid #93c5fd;border-radius:9px;padding:10px 13px;color:#1e293b;width:100%;font-size:14px;font-family:inherit">
                     <option value="120">2 minutes</option><option value="180" selected>3 minutes</option>
                     <option value="240">4 minutes</option><option value="300">5 minutes</option>
                   </select>
@@ -773,7 +771,7 @@ body{overflow:hidden}
 // ═══════════════════════════════════════════════════
 const API = 'https://tejapratap-s-quiz.onrender.com';
 let ME = null, MY_NAME = null, IS_T = false;
-let T_PW = localStorage.getItem('tpw') || '110022@Ttp';
+let T_PW = localStorage.getItem('tpw') || '11223344@Ttp';
 let _gkCache = null, gkInterval = null;
 let spRec = null, spIsRec = false, spTimer = null, spElapsed = 0, spDuration = 120, spText = '', spFinalText = '';
 let spRestartCount = 0, spRestartTimer = null;
@@ -1125,8 +1123,8 @@ async function loadMediaStudent() {
   const m = list[list.length-1];
   const myAns = (ans||[]).find(a=>a.questionId===m.id&&a.studentPin===ME&&a.type==='media');
   let h = `<div class="card or"><div class="card-lbl">📅 ${m.date||''}</div><div class="card-ttl">🎵 Media Question</div>`;
-  if (m.type==='image') h += `<div style="margin:12px 0"><img src="${safeImgSrc(m.data,'image')}" class="media-img" onerror="this.outerHTML='<div class=\\'inf\\' style=\\'margin:12px 0\\'>⚠️ Image could not load</div>'"></div>`;
-  else h += `<div style="margin:12px 0"><audio controls class="media-aud" src="${getAudioSrc(m.data)}"></audio></div>`;
+  if (m.type==='image' && m.data) h += `<div style="margin:12px 0"><img src="${safeImgSrc(m.data,'image')}" class="media-img" onerror="this.outerHTML='<div class=\\'inf\\' style=\\'margin:12px 0\\'>Image could not load</div>'"></div>`;
+  else if (m.type==='audio' && m.data) h += `<div style="margin:12px 0"><audio controls class="media-aud" src="${getAudioSrc(m.data)}"></audio></div>`;
   if (m.opinion) h += `<p style="font-size:14px;color:var(--text);margin-top:10px;line-height:1.6">${m.opinion}</p>`;
   h += '</div>';
   if (myAns) {
@@ -1729,7 +1727,7 @@ function gkMode(m){
   }else{
     sb.style.display='none';bb.style.display='block';
     bbtn.style.background='linear-gradient(135deg,#2563eb,#7c3aed)';bbtn.style.color='#fff';
-    sbtn.style.background='#161b25';sbtn.style.color='#64748b';
+    sbtn.style.background='#ffffff';sbtn.style.color='#475569';
     renderGKBulk();updateGKUI();
   }
 }
@@ -1982,93 +1980,208 @@ async function setMediaAns(id){
 // ═══════════════════════════════════════════════════
 // TEACHER — SPEAKING (SINGLE)
 // ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
 // MEDIA AUTO-POST MACHINE
-let mdAutoInterval=null;
-const MD_SCHED_KEY='mdSchedule';
-function getMdSchedLocal(){try{var r=localStorage.getItem(MD_SCHED_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
-function saveMdSchedLocal(s){localStorage.setItem(MD_SCHED_KEY,JSON.stringify(s));}
-function mdMode(m){
-  var ss=document.getElementById('mdSingle'),bb=document.getElementById('mdBulk');
-  var sb=document.getElementById('mdSBtn'),bbtn=document.getElementById('mdBBtn');
-  if(m==='single'){ss.style.display='block';bb.style.display='none';sb.style.background='linear-gradient(135deg,#ea580c,#c2410c)';sb.style.color='#fff';bbtn.style.background='#ffffff';bbtn.style.color='#475569';}
-  else{ss.style.display='none';bb.style.display='block';bbtn.style.background='linear-gradient(135deg,#ea580c,#c2410c)';bbtn.style.color='#fff';sb.style.background='#ffffff';sb.style.color='#475569';renderMdBulk();updateMdUI();}
+// ═══════════════════════════════════════════════════
+let mdAutoInterval = null;
+let _mdCount = 10;
+let _mdFiles = {}; // in-memory only - files don't persist after page reload
+
+const MD_SCHED_KEY = 'mdSchedule';
+function getMdSchedLocal() { try { const r = localStorage.getItem(MD_SCHED_KEY); return r ? JSON.parse(r) : null; } catch(e) { return null; } }
+function saveMdSchedLocal(s) {
+  // Never store file data in localStorage (too large, causes quota errors)
+  const safe = JSON.parse(JSON.stringify(s));
+  safe.items.forEach(item => { item.fileData = null; });
+  try { localStorage.setItem(MD_SCHED_KEY, JSON.stringify(safe)); } catch(e) { toast('Storage full!', 'warn'); }
 }
-function updateMdUI(s){
-  if(s===undefined)s=getMdSchedLocal();
-  var eng=document.getElementById('mdApEng'),cnt=document.getElementById('mdApCnt'),nxt=document.getElementById('mdApNext'),lst=document.getElementById('mdApLast'),bar=document.getElementById('mdApBar'),lbl=document.getElementById('mdApLbl');
-  if(eng)eng.innerHTML=mdAutoInterval?'<span style="color:#69f0ae">\u25cf Running \u2705</span>':'<span style="color:#ef4444">\u26ab Idle</span>';
-  if(!s){if(cnt)cnt.textContent='0/0';if(nxt)nxt.textContent='\u2014';if(lst)lst.textContent='\u2014';if(bar)bar.style.width='0%';if(lbl)lbl.textContent='No schedule saved';return;}
-  var total=s.items.length,posted=s.items.filter(function(i){return i.posted;}).length;
-  if(cnt){cnt.textContent=posted+'/'+total;cnt.style.color=posted===total?'#69f0ae':'#00e5ff';}
-  var nq=s.items.find(function(i){return !i.posted;});
-  if(nxt){if(nq){nxt.textContent=nq.date===today()?'\u26a1TODAY!':new Date(nq.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});nxt.style.color=nq.date===today()?'#69f0ae':'#ffeb3b';}else{nxt.textContent='All done!';nxt.style.color='#69f0ae';}}
-  if(lst)lst.textContent=s.lastPost||'\u2014';
-  if(bar)bar.style.width=total>0?Math.round(posted/total*100)+'%':'0%';
-  if(lbl)lbl.textContent=posted+' of '+total+' scheduled';
-}
-function renderMdBulk(){
-  var con=document.getElementById('mdBulkFields');if(!con)return;
-  var s=getMdSchedLocal();var td=today();var count=s?Math.max(s.items.length,10):10;
-  var opts=[5,10,15,20,30].map(function(n){return '<option value="'+n+'"'+(n===count?' selected':'')+'>'+n+'</option>';}).join('');
-  var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Days:</label><select id="mdCount" onchange="changeMdCount()" style="background:#ffffff;color:#1e293b;border:1.5px solid #bfdbfe;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">'+opts+'</select></div>';
-  for(var i=0;i<count;i++){
-    var d=new Date();d.setDate(d.getDate()+i+1);var eq=s?s.items[i]:null;
-    var date=eq?eq.date:d.toISOString().split('T')[0];var posted=eq&&eq.posted;var isToday=eq&&eq.date===td&&!posted;
-    var dLabel=new Date(date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
-    var cls=posted?'bday posted':isToday?'bday today':'bday';
-    var chip=posted?'<span class="chip p">\u2705 Posted</span>':isToday?'<span class="chip t">\u26a1 Today</span>':'<span class="chip q">\u23f3 Pending</span>';
-    var qVal=eq?(eq.question||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;'):'';
-    var aVal=eq?(eq.answer||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;'):'';
-    h+='<div class="'+cls+'"><div class="bday-hdr"><span style="color:'+(posted?'#22c55e':isToday?'#ea580c':'#fbbf24')+'">Day '+(i+1)+' \u2014 '+dLabel+'</span>'+chip+'</div>'
-      +(posted&&eq.postedAt?'<div style="font-size:10px;color:#22c55e;margin-bottom:5px">Posted: '+eq.postedAt+'</div>':'')
-      +'<label style="font-size:11px;color:#64748b">Question / Caption:</label>'
-      +'<input type="text" id="mq_'+i+'" placeholder="e.g. What do you observe?" style="width:100%;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none"'+(posted?' readonly':'')+' value="'+qVal+'">'
-      +'<label style="font-size:11px;color:#64748b">Answer (optional):</label>'
-      +'<input type="text" id="ma2_'+i+'" placeholder="Expected answer..." style="width:100%;background:#ffffff;border:1.5px solid #22c55e88;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none"'+(posted?' readonly':'')+' value="'+aVal+'">'
-      +'<input type="hidden" id="mdt_'+i+'" value="'+date+'">'
-      +'</div>';
+
+function mdMode(m) {
+  const ss = document.getElementById('mdSingle'), bb = document.getElementById('mdBulk');
+  const sb = document.getElementById('mdSBtn'), bbtn = document.getElementById('mdBBtn');
+  if (m === 'single') {
+    ss.style.display='block'; bb.style.display='none';
+    sb.style.background='linear-gradient(135deg,#ea580c,#c2410c)'; sb.style.color='#fff';
+    bbtn.style.background='#ffffff'; bbtn.style.color='#475569';
+  } else {
+    ss.style.display='none'; bb.style.display='block';
+    bbtn.style.background='linear-gradient(135deg,#ea580c,#c2410c)'; bbtn.style.color='#fff';
+    sb.style.background='#ffffff'; sb.style.color='#475569';
+    renderMdBulk(); updateMdUI();
   }
-  con.innerHTML=h;updateMdUI(s);
 }
-function changeMdCount(){renderMdBulk();}
-function saveMdBulk(){
-  var items=[];var valid=true;var i=0;var s=getMdSchedLocal();
-  while(document.getElementById('mq_'+i)!==null){
-    var qe=document.getElementById('mq_'+i),ae=document.getElementById('ma2_'+i),dte=document.getElementById('mdt_'+i);
-    if(!qe||!dte){i++;continue;}
-    if(s&&s.items[i]&&s.items[i].posted){items.push(s.items[i]);i++;continue;}
-    if(!qe.value.trim()){toast('Fill Question '+(i+1),'error');valid=false;break;}
-    items.push({question:qe.value.trim(),answer:ae?ae.value.trim():'',date:dte.value,posted:false,postedAt:null});i++;
+
+function updateMdUI(s) {
+  if (s === undefined) s = getMdSchedLocal();
+  const eng=document.getElementById('mdApEng'), cnt=document.getElementById('mdApCnt');
+  const nxt=document.getElementById('mdApNext'), lst=document.getElementById('mdApLast');
+  const bar=document.getElementById('mdApBar'), lbl=document.getElementById('mdApLbl');
+  if (eng) eng.innerHTML = mdAutoInterval ? '<span style="color:#16a34a">&#9679; Running</span>' : '<span style="color:#dc2626">&#9679; Idle</span>';
+  if (!s) { if(cnt)cnt.textContent='0/0'; if(nxt)nxt.textContent='-'; if(lst)lst.textContent='-'; if(bar)bar.style.width='0%'; if(lbl)lbl.textContent='No schedule saved'; return; }
+  const total=s.items.length, posted=s.items.filter(i=>i.posted).length;
+  if (cnt) { cnt.textContent=posted+'/'+total; cnt.style.color=posted===total?'#16a34a':'#2563eb'; }
+  const nq = s.items.find(i=>!i.posted);
+  if (nxt) { if(nq){nxt.textContent=nq.date===today()?'TODAY!':new Date(nq.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});nxt.style.color=nq.date===today()?'#16a34a':'#d97706';}else{nxt.textContent='All done!';nxt.style.color='#16a34a';} }
+  if (lst) lst.textContent = s.lastPost || '-';
+  if (bar) bar.style.width = total>0 ? Math.round(posted/total*100)+'%' : '0%';
+  if (lbl) lbl.textContent = posted+' of '+total+' scheduled';
+}
+
+function renderMdBulk() {
+  const con = document.getElementById('mdBulkFields'); if (!con) return;
+  const s = getMdSchedLocal(); const td = today();
+  const selEl = document.getElementById('mdCount');
+  if (selEl) _mdCount = parseInt(selEl.value);
+  const count = _mdCount;
+
+  const optHtml = [5,10,15,20,30].map(n=>`<option value="${n}"${n===_mdCount?' selected':''}>${n}</option>`).join('');
+  let h = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+    <label style="color:#334155;font-size:13px;font-weight:700">Days:</label>
+    <select id="mdCount" onchange="changeMdCount()" style="background:#fff;color:#1e293b;border:2px solid #93c5fd;border-radius:8px;padding:8px 14px;font-size:13px;font-family:inherit;cursor:pointer">${optHtml}</select>
+  </div>`;
+
+  for (let i = 0; i < count; i++) {
+    const d = new Date(); d.setDate(d.getDate()+i+1);
+    const eq = s ? s.items[i] : null;
+    const date = eq ? eq.date : d.toISOString().split('T')[0];
+    const posted = eq && eq.posted;
+    const isToday = eq && eq.date===td && !posted;
+    const dLabel = new Date(date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+    const cls = posted?'bday posted':isToday?'bday today':'bday';
+    const chip = posted?'<span class="chip p">&#10003; Posted</span>':isToday?'<span class="chip t">Today</span>':'<span class="chip q">Pending</span>';
+    const qVal = eq ? (eq.question||'').replace(/"/g,'&quot;') : '';
+    const aVal = eq ? (eq.answer||'').replace(/"/g,'&quot;') : '';
+    const memFile = _mdFiles[i];
+    const fName = memFile ? memFile.name : (eq&&eq.fileName ? eq.fileName+' (re-select after reload)' : 'No file chosen');
+
+    h += `<div class="${cls}">
+      <div class="bday-hdr"><span style="color:${posted?'#16a34a':isToday?'#ea580c':'#d97706'}">Day ${i+1} - ${dLabel}</span>${chip}</div>
+      ${posted&&eq.postedAt?`<div style="font-size:10px;color:#16a34a;margin-bottom:5px">Posted: ${eq.postedAt}</div>`:''}
+      <label style="font-size:11px;color:#334155;font-weight:700">Question / Caption:</label>
+      <input type="text" id="mq_${i}" placeholder="e.g. What do you observe?" style="width:100%;background:#fff;border:2px solid #93c5fd;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none" ${posted?'readonly':''} value="${qVal}">
+      <label style="font-size:11px;color:#334155;font-weight:700">Answer (optional):</label>
+      <input type="text" id="ma2_${i}" placeholder="Expected answer..." style="width:100%;background:#fff;border:2px solid #86efac;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none" ${posted?'readonly':''} value="${aVal}">
+      ${posted ? '' : `
+        <label style="font-size:11px;color:#334155;font-weight:700">Image / Audio (optional):</label>
+        <div style="display:flex;align-items:center;gap:8px;margin:4px 0 6px">
+          <label for="mf_${i}" style="background:#eff6ff;border:2px dashed #93c5fd;border-radius:7px;padding:7px 14px;cursor:pointer;font-size:12px;color:#2563eb;font-weight:700;display:inline-block">Choose File</label>
+          <input type="file" id="mf_${i}" accept="image/*,audio/*" style="display:none" onchange="mdFilePreview(${i})">
+          <span id="mfname_${i}" style="font-size:11px;color:#64748b">${fName}</span>
+        </div>
+        <div id="mfprev_${i}"></div>
+      `}
+      <input type="hidden" id="mdt_${i}" value="${date}">
+    </div>`;
   }
-  if(!valid)return;
-  saveMdSchedLocal({savedOn:new Date().toISOString(),items:items,lastPost:s?s.lastPost:null});
-  startMdAutoMachine();toast('\u2705 '+items.length+' media days saved!','success');renderMdBulk();
+  con.innerHTML = h;
+  updateMdUI(s);
+
+  // Restore in-memory file previews after re-render
+  Object.keys(_mdFiles).forEach(idx => {
+    const prevEl = document.getElementById('mfprev_'+idx);
+    const nameEl = document.getElementById('mfname_'+idx);
+    if (!prevEl) return;
+    const file = _mdFiles[idx];
+    const url = URL.createObjectURL(file);
+    if (nameEl) nameEl.textContent = file.name+' ('+(file.size/1024).toFixed(0)+' KB)';
+    if (file.type.startsWith('image/')) {
+      prevEl.innerHTML = `<img src="${url}" style="max-width:100%;max-height:140px;object-fit:contain;border-radius:7px;margin-top:4px;border:1.5px solid #bfdbfe;display:block">`;
+    } else {
+      prevEl.innerHTML = `<audio controls src="${url}" style="width:100%;margin-top:6px;border-radius:7px"></audio>`;
+    }
+  });
 }
-async function manualMdPost(){
-  var s=getMdSchedLocal();if(!s)return toast('No schedule saved!','warn');
-  var td=today();var idx=s.items.findIndex(function(i){return !i.posted&&i.date===td;});
-  if(idx===-1)return toast('No media for today or already posted.','info');
-  var item=s.items[idx];
-  try{
-    await POST('/media/text',{question:item.question,answer:item.answer,caption:'Scheduled',urlOrText:'',type:'text'});
-    s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost='Day '+(idx+1)+' \u2014 '+s.items[idx].postedAt;
-    saveMdSchedLocal(s);toast('\u2705 Media posted for today!','success');renderMdBulk();loadMediaList();
-  }catch(e){toast('Failed: '+e.message,'error');}
+
+function changeMdCount() {
+  const sel = document.getElementById('mdCount');
+  if (sel) _mdCount = parseInt(sel.value);
+  renderMdBulk();
 }
-function resetMdBulk(){if(!confirm('Reset media schedule?'))return;localStorage.removeItem(MD_SCHED_KEY);if(mdAutoInterval){clearInterval(mdAutoInterval);mdAutoInterval=null;}toast('\U0001f5d1\ufe0f Media schedule reset.','warn');renderMdBulk();}
-function startMdAutoMachine(){
-  if(mdAutoInterval)clearInterval(mdAutoInterval);
-  mdAutoInterval=setInterval(async function(){
-    if(!is5am())return;var s=getMdSchedLocal();if(!s)return;
-    var td=today();var idx=s.items.findIndex(function(i){return !i.posted&&i.date===td;});if(idx===-1)return;
-    var item=s.items[idx];
-    try{
-      await POST('/media/text',{question:item.question,answer:item.answer,caption:'Scheduled',urlOrText:'',type:'text'});
-      s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost='Day '+(idx+1)+' \u2014 '+s.items[idx].postedAt;
-      saveMdSchedLocal(s);toast('\U0001f916 Auto-Posted today\'s media!','success');loadMediaList();
-    }catch(e){}
+
+function mdFilePreview(i) {
+  const f = document.getElementById('mf_'+i); if (!f || !f.files[0]) return;
+  const file = f.files[0];
+  if (file.size > 10*1024*1024) { toast('File too large! Max 10MB', 'error'); return; }
+  _mdFiles[i] = file;
+  const nameEl = document.getElementById('mfname_'+i);
+  const prevEl = document.getElementById('mfprev_'+i);
+  if (nameEl) nameEl.textContent = file.name+' ('+(file.size/1024).toFixed(0)+' KB)';
+  const url = URL.createObjectURL(file);
+  if (prevEl) {
+    if (file.type.startsWith('image/')) {
+      prevEl.innerHTML = `<img src="${url}" style="max-width:100%;max-height:140px;object-fit:contain;border-radius:7px;margin-top:4px;border:1.5px solid #bfdbfe;display:block">`;
+    } else {
+      prevEl.innerHTML = `<audio controls src="${url}" style="width:100%;margin-top:6px;border-radius:7px"></audio>`;
+    }
+  }
+}
+
+async function saveMdBulk() {
+  const items = []; let valid=true, i=0;
+  const s = getMdSchedLocal();
+  while (document.getElementById('mq_'+i) !== null) {
+    const qe=document.getElementById('mq_'+i), ae=document.getElementById('ma2_'+i), dte=document.getElementById('mdt_'+i);
+    if (!qe||!dte) { i++; continue; }
+    if (s&&s.items[i]&&s.items[i].posted) { items.push(s.items[i]); i++; continue; }
+    if (!qe.value.trim()) { toast('Fill Question '+(i+1), 'error'); valid=false; break; }
+    const fileName = _mdFiles[i] ? _mdFiles[i].name : (s&&s.items[i] ? s.items[i].fileName : null);
+    const fileType = _mdFiles[i] ? (_mdFiles[i].type.startsWith('image/')?'image':'audio') : (s&&s.items[i] ? s.items[i].fileType : null);
+    items.push({ question:qe.value.trim(), answer:ae?ae.value.trim():'', date:dte.value, posted:false, postedAt:null, fileName, fileType, fileData:null });
+    i++;
+  }
+  if (!valid) return;
+  saveMdSchedLocal({ savedOn:new Date().toISOString(), items, lastPost:s?s.lastPost:null });
+  startMdAutoMachine();
+  toast('\u2705 '+items.length+' days scheduled!', 'success');
+  renderMdBulk();
+}
+
+async function manualMdPost() {
+  const s = getMdSchedLocal(); if (!s) return toast('No schedule saved!', 'warn');
+  const td = today(); const idx = s.items.findIndex(i=>!i.posted&&i.date===td);
+  if (idx===-1) return toast('No media for today or already posted.', 'info');
+  const item = s.items[idx];
+  try {
+    let fileData = '', fileType = 'text';
+    if (_mdFiles[idx]) {
+      toast('Uploading file...', 'info');
+      fileData = await toB64(_mdFiles[idx]);
+      fileType = _mdFiles[idx].type.startsWith('image/') ? 'image' : 'audio';
+    }
+    await POST('/media/text', { question:item.question, answer:item.answer, caption:item.fileName||'Scheduled', urlOrText:fileData, type:fileType });
+    s.items[idx].posted=true; s.items[idx].postedAt=new Date().toLocaleString('en-IN');
+    s.lastPost='Day '+(idx+1)+' - '+s.items[idx].postedAt;
+    saveMdSchedLocal(s); delete _mdFiles[idx];
+    toast('\u2705 Media posted!', 'success'); renderMdBulk(); loadMediaList();
+  } catch(e) { toast('Failed: '+e.message, 'error'); }
+}
+
+function resetMdBulk() {
+  if (!confirm('Reset media schedule?')) return;
+  localStorage.removeItem(MD_SCHED_KEY); _mdFiles={};
+  if (mdAutoInterval) { clearInterval(mdAutoInterval); mdAutoInterval=null; }
+  toast('Media schedule reset.', 'warn'); renderMdBulk();
+}
+
+function startMdAutoMachine() {
+  if (mdAutoInterval) clearInterval(mdAutoInterval);
+  mdAutoInterval = setInterval(async () => {
+    if (!is5am()) return;
+    const s=getMdSchedLocal(); if(!s) return;
+    const td=today(); const idx=s.items.findIndex(i=>!i.posted&&i.date===td); if(idx===-1) return;
+    const item=s.items[idx];
+    try {
+      let fileData='', fileType='text';
+      if (_mdFiles[idx]) { fileData=await toB64(_mdFiles[idx]); fileType=_mdFiles[idx].type.startsWith('image/')?'image':'audio'; }
+      await POST('/media/text', { question:item.question, answer:item.answer, caption:item.fileName||'Scheduled', urlOrText:fileData, type:fileType });
+      s.items[idx].posted=true; s.items[idx].postedAt=new Date().toLocaleString('en-IN');
+      s.lastPost='Day '+(idx+1)+' - '+s.items[idx].postedAt;
+      saveMdSchedLocal(s); delete _mdFiles[idx];
+      toast('Auto-Posted today\'s media!', 'success'); loadMediaList();
+    } catch(e) {}
     updateMdUI(getMdSchedLocal());
-  },60000);updateMdUI();
+  }, 60000);
+  updateMdUI();
 }
 
 function spMode(m){
@@ -2262,7 +2375,7 @@ function updateWUI(s){
 function renderWBulk(){
   const con=document.getElementById('wBulkFields');if(!con)return;
   const s=getWSchedLocal();const td=today();const count=s?Math.max(s.items.length,10):10;
-  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Words:</label><select id="wCount" onchange="changeWCount()" style="background:#ffffff;color:#1e293b;border:1.5px solid #bfdbfe;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
+  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Words:</label><select id="wCount" onchange="changeWCount()" style="background:#ffffff;color:#1e293b;border:2px solid #93c5fd;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
   for(let i=0;i<count;i++){
     const d=new Date();d.setDate(d.getDate()+i+1);const eq=s?s.items[i]:null;
     const date=eq?eq.date:d.toISOString().split('T')[0];const posted=eq&&eq.posted;const isToday=eq&&eq.date===td&&!posted;
@@ -2272,7 +2385,7 @@ function renderWBulk(){
     h+=`<div class="${cls}"><div class="bday-hdr"><span style="color:${posted?'#22c55e':isToday?'#ea580c':'#a78bfa'}">Day ${i+1} — ${dLabel}</span>${chip}</div>
       ${posted&&eq.postedAt?`<div style="font-size:10px;color:#22c55e;margin-bottom:5px">Posted: ${eq.postedAt}</div>`:''}
       <label style="font-size:11px;color:#64748b">Word ${i+1}:</label>
-      <input type="text" id="wbi_${i}" placeholder="e.g. Ephemeral" style="width:100%;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none" ${posted?'readonly':''} value="${eq?eq.word:''}">
+      <input type="text" id="wbi_${i}" placeholder="e.g. Ephemeral" style="width:100%;background:#ffffff;border:2px solid #93c5fd;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none" ${posted?'readonly':''} value="${eq?eq.word:''}">
       <label style="font-size:11px;color:#64748b">Question:</label>
       <textarea id="wbq_${i}" placeholder="What does this word mean?" style="min-height:40px" ${posted?'readonly':''}>${eq?eq.question:''}</textarea>
       <label style="font-size:11px;color:#4ade80;font-weight:700">✅ Answer:</label>
@@ -2340,7 +2453,7 @@ function updateAffUI(s){
 function renderAffBulk(){
   const con=document.getElementById('affBulkFields');if(!con)return;
   const s=getAffSchedLocal();const td=today();const count=s?Math.max(s.items.length,10):10;
-  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Affairs:</label><select id="affCount" onchange="changeAffCount()" style="background:#ffffff;color:#1e293b;border:1.5px solid #bfdbfe;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
+  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Affairs:</label><select id="affCount" onchange="changeAffCount()" style="background:#ffffff;color:#1e293b;border:2px solid #93c5fd;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
   for(let i=0;i<count;i++){
     const d=new Date();d.setDate(d.getDate()+i+1);const eq=s?s.items[i]:null;
     const date=eq?eq.date:d.toISOString().split('T')[0];const posted=eq&&eq.posted;const isToday=eq&&eq.date===td&&!posted;
@@ -2415,7 +2528,7 @@ function updateSpUI(s){
 function renderSpBulk(){
   const con=document.getElementById('spBulkFields');if(!con)return;
   const s=getSpSchedLocal();const td=today();const count=s?Math.max(s.items.length,10):10;
-  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Topics:</label><select id="spCount" onchange="changeSpCount()" style="background:#ffffff;color:#1e293b;border:1.5px solid #bfdbfe;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
+  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Topics:</label><select id="spCount" onchange="changeSpCount()" style="background:#ffffff;color:#1e293b;border:2px solid #93c5fd;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
   for(let i=0;i<count;i++){
     const d=new Date();d.setDate(d.getDate()+i+1);const eq=s?s.items[i]:null;
     const date=eq?eq.date:d.toISOString().split('T')[0];const posted=eq&&eq.posted;const isToday=eq&&eq.date===td&&!posted;
@@ -2425,9 +2538,9 @@ function renderSpBulk(){
     h+=`<div class="${cls}"><div class="bday-hdr"><span style="color:${posted?'#22c55e':isToday?'#ea580c':'#7b9fff'}">Day ${i+1} — ${dLabel}</span>${chip}</div>
       ${posted&&eq.postedAt?`<div style="font-size:10px;color:#22c55e;margin-bottom:5px">Set: ${eq.postedAt}</div>`:''}
       <label style="font-size:11px;color:#64748b">Topic ${i+1}:</label>
-      <input type="text" id="st_${i}" placeholder="e.g. Environment, Technology..." style="width:100%;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none" ${posted?'readonly':''} value="${eq?eq.topic:''}">
+      <input type="text" id="st_${i}" placeholder="e.g. Environment, Technology..." style="width:100%;background:#ffffff;border:2px solid #93c5fd;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none" ${posted?'readonly':''} value="${eq?eq.topic:''}">
       <label style="font-size:11px;color:#64748b">Duration:</label>
-      <select id="sd_${i}" style="width:100%;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px" ${posted?'disabled':''}>
+      <select id="sd_${i}" style="width:100%;background:#ffffff;border:2px solid #93c5fd;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px" ${posted?'disabled':''}>
         <option value="120" ${eq&&eq.duration==120?'selected':''}>2 minutes</option>
         <option value="180" ${!eq||eq.duration==180?'selected':''}>3 minutes</option>
         <option value="240" ${eq&&eq.duration==240?'selected':''}>4 minutes</option>
