@@ -15,7 +15,7 @@
   --green:#16a34a;--orange:#ea580c;--amber:#d97706;--gold:#FFD700;
   --sidebar:240px;--topbar:60px;--bnav:64px;
 }
-html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text)}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:linear-gradient(to right,#4A78C2,#6C8FD9);color:var(--text)}
 body{overflow:hidden}
 
 /* ══ DESKTOP LAYOUT ══ */
@@ -61,7 +61,7 @@ body{overflow:hidden}
 .sidebar-overlay.show{display:block}
 
 /* ══ MAIN ══ */
-.main{overflow-y:auto;background:var(--bg);-webkit-overflow-scrolling:touch}
+.main{overflow-y:auto;background:transparent;-webkit-overflow-scrolling:touch}
 .main::-webkit-scrollbar{width:5px}
 .main::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
@@ -565,8 +565,14 @@ body{overflow:hidden}
 
       <!-- MEDIA TAB -->
       <div id="tMedia" style="display:none">
+        <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+          <button id="mdSBtn" onclick="mdMode('single')" style="padding:9px 18px;background:linear-gradient(135deg,#ea580c,#c2410c);color:#fff;border:none;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🎵 Single Upload</button>
+          <button id="mdBBtn" onclick="mdMode('bulk')" style="padding:9px 18px;background:#161b25;color:#64748b;border:1px solid #1e2535;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🤖 Auto-Post Schedule</button>
+        </div>
         <div class="grid-aside">
-          <div class="tsec">
+          <div>
+            <div id="mdSingle">
+              <div class="tsec">
             <h3>🎵 Upload Image or Audio</h3>
             <div class="drop-zone" id="mediaDZ" onclick="document.getElementById('mediaFile').click()" ondragover="dzOver(event,'mediaDZ')" ondragleave="dzLeave('mediaDZ')" ondrop="dzDrop(event,'mediaDZ','mediaFile')">
               <div style="font-size:32px;margin-bottom:8px">📁</div>
@@ -581,7 +587,28 @@ body{overflow:hidden}
             </div>
             <div class="fg" style="margin-top:12px"><label>📝 Question / Caption</label><textarea id="mediaQ" placeholder="What should students observe or answer?"></textarea></div>
             <div class="fg"><label style="color:#4ade80">✅ Expected Answer (optional)</label><textarea id="mediaA" placeholder="Correct answer..." style="border-color:#22c55e44"></textarea></div>
-            <button class="btn org" onclick="postMedia()">📤 Post Media Question</button>
+                <button class="btn org" onclick="postMedia()">📤 Post Media Question</button>
+              </div>
+            </div>
+            <!-- BULK AUTO-POST MODE -->
+            <div id="mdBulk" style="display:none">
+              <div class="ap-panel">
+                <div style="font-size:11px;font-weight:700;color:#fbbf24;margin-bottom:10px;letter-spacing:1px">🤖 MEDIA AUTO-POST MACHINE</div>
+                <div class="ap-row"><span style="color:#64748b">Engine</span><span id="mdApEng" style="font-weight:700">⚫ Idle</span></div>
+                <div class="ap-row"><span style="color:#64748b">Posted</span><span id="mdApCnt" style="font-weight:700;color:#00e5ff">0/0</span></div>
+                <div class="ap-row"><span style="color:#64748b">Next</span><span id="mdApNext" style="font-weight:700;color:#ffeb3b">&mdash;</span></div>
+                <div class="ap-row"><span style="color:#64748b">Last</span><span id="mdApLast" style="font-weight:700;color:#69f0ae">&mdash;</span></div>
+                <div class="ap-bar"><div class="ap-fill" id="mdApBar" style="width:0%;background:linear-gradient(90deg,#ea580c,#fbbf24)"></div></div>
+                <div style="text-align:center;font-size:10px;color:#64748b;margin-top:6px" id="mdApLbl">No schedule saved</div>
+              </div>
+              <div class="inf" style="font-size:11px">📌 Schedule media posts. Posts <strong>one per day at 5 AM</strong>.</div>
+              <div id="mdBulkFields"></div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+                <button class="btn org" onclick="saveMdBulk()">💾 Save &amp; Activate</button>
+                <button class="btn grn" onclick="manualMdPost()">🔄 Post Today Now</button>
+                <button class="btn red" onclick="resetMdBulk()">🗑️ Reset</button>
+              </div>
+            </div>
           </div>
           <div class="tsec"><h3>📋 Posted Media</h3><div id="mediaList"><div class="spin-wrap"><div class="spinner"></div></div></div></div>
         </div>
@@ -999,7 +1026,7 @@ function enterTeacher() {
   document.querySelectorAll('#s-login,#s-teacher-login').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('#appMain .screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('s-teacher').classList.add('active');
-  loadGKList(); startGKMachine(); startWMachine(); startAffMachine(); startSpAutoMachine();
+  loadGKList(); startGKMachine(); startWMachine(); startAffMachine(); startSpAutoMachine(); startMdAutoMachine();
   const savedTopic = localStorage.getItem('spTopic');
   if (savedTopic) {
     const el = document.getElementById('spTopicList');
@@ -1953,6 +1980,95 @@ async function setMediaAns(id){
 // ═══════════════════════════════════════════════════
 // TEACHER — SPEAKING (SINGLE)
 // ═══════════════════════════════════════════════════
+// MEDIA AUTO-POST MACHINE
+let mdAutoInterval=null;
+const MD_SCHED_KEY='mdSchedule';
+function getMdSchedLocal(){try{var r=localStorage.getItem(MD_SCHED_KEY);return r?JSON.parse(r):null;}catch(e){return null;}}
+function saveMdSchedLocal(s){localStorage.setItem(MD_SCHED_KEY,JSON.stringify(s));}
+function mdMode(m){
+  var ss=document.getElementById('mdSingle'),bb=document.getElementById('mdBulk');
+  var sb=document.getElementById('mdSBtn'),bbtn=document.getElementById('mdBBtn');
+  if(m==='single'){ss.style.display='block';bb.style.display='none';sb.style.background='linear-gradient(135deg,#ea580c,#c2410c)';sb.style.color='#fff';bbtn.style.background='#161b25';bbtn.style.color='#64748b';}
+  else{ss.style.display='none';bb.style.display='block';bbtn.style.background='linear-gradient(135deg,#ea580c,#c2410c)';bbtn.style.color='#fff';sb.style.background='#161b25';sb.style.color='#64748b';renderMdBulk();updateMdUI();}
+}
+function updateMdUI(s){
+  if(s===undefined)s=getMdSchedLocal();
+  var eng=document.getElementById('mdApEng'),cnt=document.getElementById('mdApCnt'),nxt=document.getElementById('mdApNext'),lst=document.getElementById('mdApLast'),bar=document.getElementById('mdApBar'),lbl=document.getElementById('mdApLbl');
+  if(eng)eng.innerHTML=mdAutoInterval?'<span style="color:#69f0ae">\u25cf Running \u2705</span>':'<span style="color:#ef4444">\u26ab Idle</span>';
+  if(!s){if(cnt)cnt.textContent='0/0';if(nxt)nxt.textContent='\u2014';if(lst)lst.textContent='\u2014';if(bar)bar.style.width='0%';if(lbl)lbl.textContent='No schedule saved';return;}
+  var total=s.items.length,posted=s.items.filter(function(i){return i.posted;}).length;
+  if(cnt){cnt.textContent=posted+'/'+total;cnt.style.color=posted===total?'#69f0ae':'#00e5ff';}
+  var nq=s.items.find(function(i){return !i.posted;});
+  if(nxt){if(nq){nxt.textContent=nq.date===today()?'\u26a1TODAY!':new Date(nq.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});nxt.style.color=nq.date===today()?'#69f0ae':'#ffeb3b';}else{nxt.textContent='All done!';nxt.style.color='#69f0ae';}}
+  if(lst)lst.textContent=s.lastPost||'\u2014';
+  if(bar)bar.style.width=total>0?Math.round(posted/total*100)+'%':'0%';
+  if(lbl)lbl.textContent=posted+' of '+total+' scheduled';
+}
+function renderMdBulk(){
+  var con=document.getElementById('mdBulkFields');if(!con)return;
+  var s=getMdSchedLocal();var td=today();var count=s?Math.max(s.items.length,10):10;
+  var opts=[5,10,15,20,30].map(function(n){return '<option value="'+n+'"'+(n===count?' selected':'')+'>'+n+'</option>';}).join('');
+  var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Days:</label><select id="mdCount" onchange="changeMdCount()" style="background:#161b25;color:#e2e8f0;border:1.5px solid #252f40;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">'+opts+'</select></div>';
+  for(var i=0;i<count;i++){
+    var d=new Date();d.setDate(d.getDate()+i+1);var eq=s?s.items[i]:null;
+    var date=eq?eq.date:d.toISOString().split('T')[0];var posted=eq&&eq.posted;var isToday=eq&&eq.date===td&&!posted;
+    var dLabel=new Date(date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+    var cls=posted?'bday posted':isToday?'bday today':'bday';
+    var chip=posted?'<span class="chip p">\u2705 Posted</span>':isToday?'<span class="chip t">\u26a1 Today</span>':'<span class="chip q">\u23f3 Pending</span>';
+    var qVal=eq?(eq.question||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;'):'';
+    var aVal=eq?(eq.answer||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;'):'';
+    h+='<div class="'+cls+'"><div class="bday-hdr"><span style="color:'+(posted?'#22c55e':isToday?'#ea580c':'#fbbf24')+'">Day '+(i+1)+' \u2014 '+dLabel+'</span>'+chip+'</div>'
+      +(posted&&eq.postedAt?'<div style="font-size:10px;color:#22c55e;margin-bottom:5px">Posted: '+eq.postedAt+'</div>':'')
+      +'<label style="font-size:11px;color:#64748b">Question / Caption:</label>'
+      +'<input type="text" id="mq_'+i+'" placeholder="e.g. What do you observe?" style="width:100%;background:#0f1117;border:1.5px solid #252f40;border-radius:7px;padding:8px 11px;color:#e2e8f0;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none"'+(posted?' readonly':'')+' value="'+qVal+'">'
+      +'<label style="font-size:11px;color:#64748b">Answer (optional):</label>'
+      +'<input type="text" id="ma2_'+i+'" placeholder="Expected answer..." style="width:100%;background:#0f1117;border:1.5px solid #22c55e44;border-radius:7px;padding:8px 11px;color:#e2e8f0;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none"'+(posted?' readonly':'')+' value="'+aVal+'">'
+      +'<input type="hidden" id="mdt_'+i+'" value="'+date+'">'
+      +'</div>';
+  }
+  con.innerHTML=h;updateMdUI(s);
+}
+function changeMdCount(){renderMdBulk();}
+function saveMdBulk(){
+  var items=[];var valid=true;var i=0;var s=getMdSchedLocal();
+  while(document.getElementById('mq_'+i)!==null){
+    var qe=document.getElementById('mq_'+i),ae=document.getElementById('ma2_'+i),dte=document.getElementById('mdt_'+i);
+    if(!qe||!dte){i++;continue;}
+    if(s&&s.items[i]&&s.items[i].posted){items.push(s.items[i]);i++;continue;}
+    if(!qe.value.trim()){toast('Fill Question '+(i+1),'error');valid=false;break;}
+    items.push({question:qe.value.trim(),answer:ae?ae.value.trim():'',date:dte.value,posted:false,postedAt:null});i++;
+  }
+  if(!valid)return;
+  saveMdSchedLocal({savedOn:new Date().toISOString(),items:items,lastPost:s?s.lastPost:null});
+  startMdAutoMachine();toast('\u2705 '+items.length+' media days saved!','success');renderMdBulk();
+}
+async function manualMdPost(){
+  var s=getMdSchedLocal();if(!s)return toast('No schedule saved!','warn');
+  var td=today();var idx=s.items.findIndex(function(i){return !i.posted&&i.date===td;});
+  if(idx===-1)return toast('No media for today or already posted.','info');
+  var item=s.items[idx];
+  try{
+    await POST('/media/text',{question:item.question,answer:item.answer,caption:'Scheduled',urlOrText:'',type:'text'});
+    s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost='Day '+(idx+1)+' \u2014 '+s.items[idx].postedAt;
+    saveMdSchedLocal(s);toast('\u2705 Media posted for today!','success');renderMdBulk();loadMediaList();
+  }catch(e){toast('Failed: '+e.message,'error');}
+}
+function resetMdBulk(){if(!confirm('Reset media schedule?'))return;localStorage.removeItem(MD_SCHED_KEY);if(mdAutoInterval){clearInterval(mdAutoInterval);mdAutoInterval=null;}toast('\U0001f5d1\ufe0f Media schedule reset.','warn');renderMdBulk();}
+function startMdAutoMachine(){
+  if(mdAutoInterval)clearInterval(mdAutoInterval);
+  mdAutoInterval=setInterval(async function(){
+    if(!is5am())return;var s=getMdSchedLocal();if(!s)return;
+    var td=today();var idx=s.items.findIndex(function(i){return !i.posted&&i.date===td;});if(idx===-1)return;
+    var item=s.items[idx];
+    try{
+      await POST('/media/text',{question:item.question,answer:item.answer,caption:'Scheduled',urlOrText:'',type:'text'});
+      s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost='Day '+(idx+1)+' \u2014 '+s.items[idx].postedAt;
+      saveMdSchedLocal(s);toast('\U0001f916 Auto-Posted today\'s media!','success');loadMediaList();
+    }catch(e){}
+    updateMdUI(getMdSchedLocal());
+  },60000);updateMdUI();
+}
+
 function spMode(m){
   const ss=document.getElementById('spSingle'),bb=document.getElementById('spBulk');
   const sb=document.getElementById('spSBtn'),bbtn=document.getElementById('spBBtn');
