@@ -309,11 +309,38 @@ app.post("/schedule/media/mark-posted", (req, res) => {
 
 // Media text post (for bulk media schedule)
 app.post("/media/text", (req, res) => {
-    const { question, answer, caption, urlOrText } = req.body;
+    const { question, answer, caption, urlOrText, type: reqType } = req.body;
     if (!question) return res.status(400).json({ error: "Question required" });
+
+    // Detect type from passed type field, or caption filename, or data prefix
+    let type = reqType || 'text';
+    if (!reqType) {
+        if (caption && caption.match(/\.(jpg|jpeg|png|gif|webp)$/i)) type = 'image';
+        else if (caption && caption.match(/\.(mp3|wav|ogg|m4a|aac)$/i)) type = 'audio';
+        else if (urlOrText && urlOrText.startsWith('data:image')) type = 'image';
+        else if (urlOrText && urlOrText.startsWith('data:audio')) type = 'audio';
+    }
+
+    let fileUrl = null;
+    // Save base64 to disk if it looks like file data
+    if (urlOrText && (urlOrText.startsWith('data:') || urlOrText.length > 200)) {
+        try {
+            const base64Data = urlOrText.includes(',') ? urlOrText.split(',')[1] : urlOrText;
+            const ext = caption ? caption.split('.').pop().toLowerCase() : (type === 'audio' ? 'mp3' : 'jpg');
+            const uniqueName = `media_${Date.now()}.${ext}`;
+            const filePath = path.join(UPLOADS_DIR, uniqueName);
+            fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+            fileUrl = `/uploads/${uniqueName}`;
+        } catch(e) {
+            console.error('File save error:', e.message);
+        }
+    }
+
     const newMedia = {
-        id: Date.now(), type: urlOrText && urlOrText.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? 'image' : urlOrText && urlOrText.match(/\.(mp3|wav|ogg|m4a)$/i) ? 'audio' : 'text',
-        data: urlOrText || '', fileName: caption || 'Media Item',
+        id: Date.now(), type,
+        data: fileUrl || urlOrText || '',
+        fileUrl,
+        fileName: caption || 'Media Item',
         opinion: question, expectedAnswer: answer || null, explanation: null,
         date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
     };
