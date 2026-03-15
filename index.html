@@ -1259,16 +1259,9 @@ async function aiCorrectSpeech(text) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text })
     });
-    if (!response.ok) {
-      const err = await response.json().catch(()=>({}));
-      console.error('AI grammar error:', err.error || response.status);
-      return null;
-    }
+    if (!response.ok) { console.error('AI error:', response.status); return null; }
     return await response.json();
-  } catch(e) {
-    console.error('AI correction failed:', e);
-    return null;
-  }
+  } catch(e) { console.error('AI failed:', e); return null; }
 }
 
 // Fallback local grammar check (when AI is unavailable)
