@@ -378,43 +378,30 @@ app.post("/schedule/affairs/mark-posted", (req, res) => {
 });
 
 // =====================================================
-// AI GRAMMAR CHECK (proxies Anthropic API securely)
+// AI GRAMMAR CHECK
 // =====================================================
 app.post("/ai/grammar", async (req, res) => {
     const { text } = req.body;
     if (!text || text.trim().length < 5) return res.status(400).json({ error: "Text too short" });
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return res.status(500).json({ error: "AI not configured. Set ANTHROPIC_API_KEY in Render environment variables." });
+    if (!apiKey) return res.status(500).json({ error: "Set ANTHROPIC_API_KEY in Render environment variables." });
     try {
         const response = await fetch("https://api.anthropic.com/v1/messages", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "x-api-key": apiKey,
-                "anthropic-version": "2023-06-01"
-            },
+            headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
             body: JSON.stringify({
                 model: "claude-haiku-4-5-20251001",
                 max_tokens: 1000,
                 system: `You are an English grammar expert for Indian polytechnic students. Analyze spoken English and find ALL mistakes.
-You MUST respond ONLY with a valid JSON object, no markdown, no extra text.
-Format: {
-  "corrected": "the fully corrected version",
-  "errors": [{"wrong":"exact wrong phrase","right":"corrected phrase","rule":"grammar rule","type":"Tense|Agreement|Article|Preposition|Noun|Other"}],
-  "score": 0-100,
-  "suggestions": ["tip 1","tip 2"],
-  "pronunciation_tips": ["tip"]
-}
-Fix ALL errors: tense, subject-verb agreement, articles (a/an/the), prepositions, sentence structure.`,
-                messages: [{ role: "user", content: `Student spoke: "${text}"\n\nAnalyze and correct this.` }]
+Respond ONLY with valid JSON, no markdown:
+{"corrected":"corrected text","errors":[{"wrong":"wrong phrase","right":"correct phrase","rule":"rule explanation","type":"Tense|Agreement|Article|Preposition|Noun|Other"}],"score":0-100,"suggestions":["tip1","tip2"],"pronunciation_tips":["tip"]}`,
+                messages: [{ role: "user", content: `Student spoke: "${text}"\n\nAnalyze and correct.` }]
             })
         });
         const data = await response.json();
         const txt = data.content?.[0]?.text || "";
-        const clean = txt.replace(/```json|```/g, "").trim();
-        res.json(JSON.parse(clean));
+        res.json(JSON.parse(txt.replace(/```json|```/g, "").trim()));
     } catch (e) {
-        console.error("AI grammar error:", e.message);
         res.status(500).json({ error: "AI check failed: " + e.message });
     }
 });
