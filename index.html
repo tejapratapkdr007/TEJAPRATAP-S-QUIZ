@@ -1123,8 +1123,26 @@ async function loadMediaStudent() {
   const m = list[list.length-1];
   const myAns = (ans||[]).find(a=>a.questionId===m.id&&a.studentPin===ME&&a.type==='media');
   let h = `<div class="card or"><div class="card-lbl">📅 ${m.date||''}</div><div class="card-ttl">🎵 Media Question</div>`;
-  if (m.type==='image' && m.data) h += `<div style="margin:12px 0"><img src="${safeImgSrc(m.data,'image')}" class="media-img" onerror="this.outerHTML='<div class=\\'inf\\' style=\\'margin:12px 0\\'>Image could not load</div>'"></div>`;
-  else if (m.type==='audio' && m.data) h += `<div style="margin:12px 0"><audio controls class="media-aud" src="${getAudioSrc(m.data)}"></audio></div>`;
+
+  // Show image or audio — support both /uploads/ URL and base64
+  const isUrl = m.data && (m.data.startsWith('/uploads/') || m.data.startsWith('http'));
+  if (m.type==='image') {
+    const src = isUrl ? m.data : safeImgSrc(m.data,'image');
+    if (src) h += `<div style="margin:12px 0"><img src="${src}" style="max-width:100%;border-radius:10px" onerror="this.outerHTML='<div class=\\'inf\\' style=\\'color:#f87171\\'>⚠ Image could not load</div>'"></div>`;
+  } else if (m.type==='audio') {
+    const src = isUrl ? m.data : '';
+    if (src) {
+      h += `<div style="margin:12px 0">
+        <audio controls style="width:100%;border-radius:10px" src="${src}">
+          Your browser does not support audio.
+        </audio>
+        <div style="margin-top:6px"><a href="${src}" target="_blank" style="color:#60a5fa;font-size:12px">🎵 Tap here if audio doesn't play</a></div>
+      </div>`;
+    } else {
+      h += `<div class="inf" style="color:#f87171">⚠ Audio file not available. Teacher needs to re-upload.</div>`;
+    }
+  }
+
   if (m.opinion) h += `<p style="font-size:14px;color:var(--text);margin-top:10px;line-height:1.6">${m.opinion}</p>`;
   h += '</div>';
   if (myAns) {
