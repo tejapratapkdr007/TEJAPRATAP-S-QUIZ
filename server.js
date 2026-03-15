@@ -232,7 +232,6 @@ app.post("/media", (req, res) => {
     saveData();
     res.json({ success: true, media: newMedia });
 });
-});
 
 app.get("/media/latest", (req, res) => {
     mediaFiles.length > 0 ? res.json(mediaFiles[mediaFiles.length - 1]) : res.status(404).json({ error: "No media" });
