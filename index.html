@@ -1933,7 +1933,7 @@ async function postMedia(){
     const b64=await toB64(f);
     if(bar)bar.style.width='85%';
     const type=f.type.startsWith('image/')?'image':'audio';
-    await POST('/media/text',{question:q,answer:a,caption:f.name,urlOrText:b64,type});
+    await POST('/media/text',{question:q,answer:a,caption:f.name,urlOrText:b64,type:type});
     if(bar)bar.style.width='100%';
     toast('✅ Media posted!','success');
     document.getElementById('mediaQ').value='';document.getElementById('mediaA').value='';
