@@ -24,7 +24,7 @@ body{overflow:hidden}
 .topbar{grid-column:1/-1;background:#ffffff;border-bottom:1.5px solid #bfdbfe;display:flex;align-items:center;gap:12px;padding:0 20px;z-index:200;position:relative}
 .topbar-brand{display:flex;align-items:center;gap:10px;min-width:200px}
 .topbar-logo{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
-.topbar-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#fff}
+.topbar-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#1e293b}
 .topbar-sub{font-size:10px;color:var(--muted)}
 .topbar-divider{width:1px;height:32px;background:var(--border);margin:0 4px;flex-shrink:0}
 .topbar-faf{flex:1;background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:7px 14px;display:flex;align-items:center;gap:8px;font-size:12px;min-width:0;overflow:hidden}
@@ -37,7 +37,7 @@ body{overflow:hidden}
 .topbar-stat .l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}
 .topbar-user{display:flex;align-items:center;gap:8px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;padding:6px 12px;cursor:pointer}
 .topbar-avatar{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;color:#fff;flex-shrink:0}
-.topbar-uname{font-size:12px;font-weight:600;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.topbar-uname{font-size:12px;font-weight:600;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1e293b}
 /* Mobile hamburger */
 .ham{display:none;background:none;border:none;color:var(--text);font-size:22px;cursor:pointer;padding:4px;margin-right:4px}
 
@@ -46,8 +46,8 @@ body{overflow:hidden}
 .sidebar::-webkit-scrollbar{width:3px}
 .sidebar::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 .nav-section{padding:0 12px;margin-bottom:2px}
-.nav-lbl{font-size:9px;letter-spacing:2px;color:var(--muted2);font-weight:700;text-transform:uppercase;padding:0 8px;margin-bottom:5px;margin-top:8px}
-.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all 0.15s;border:1px solid transparent;margin-bottom:2px;font-size:13px;font-weight:500;color:var(--muted)}
+.nav-lbl{font-size:9px;letter-spacing:2px;color:#94a3b8;font-weight:700;text-transform:uppercase;padding:0 8px;margin-bottom:5px;margin-top:8px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:10px;cursor:pointer;transition:all 0.15s;border:1px solid transparent;margin-bottom:2px;font-size:13px;font-weight:500;color:#475569}
 .nav-item:hover{background:#eff6ff;color:#1e40af;border-color:#bfdbfe}
 .nav-item.active{background:linear-gradient(135deg,rgba(37,99,235,0.18),rgba(124,58,237,0.12));color:#fff;border-color:rgba(37,99,235,0.35)}
 .nav-item .ni{font-size:16px;width:22px;text-align:center;flex-shrink:0}
@@ -67,13 +67,14 @@ body{overflow:hidden}
 .main::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
 /* ══ SCREENS ══ */
-.screen{display:none;padding:24px;min-height:calc(100vh - var(--topbar));animation:fadeIn 0.18s ease}
+.screen{display:none;padding:24px;min-height:calc(100vh - var(--topbar));animation:fadeIn 0.18s ease;background:transparent}
 .screen.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+.fg input::placeholder,.fg textarea::placeholder{color:#94a3b8;opacity:1}
 
 /* ══ PAGE HEADER ══ */
 .page-hdr{margin-bottom:20px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.page-hdr h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:2px}
+.page-hdr h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#1e293b;margin-bottom:2px}
 .page-hdr p{font-size:13px;color:var(--muted)}
 
 /* ══ GRID LAYOUTS ══ */
@@ -90,14 +91,14 @@ body{overflow:hidden}
 .card.pu{border-left:3px solid #a78bfa}
 .card.am{border-left:3px solid #fbbf24}
 .card-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;font-weight:600}
-.card-ttl{font-size:16px;font-weight:700;color:#fff;margin-bottom:3px}
+.card-ttl{font-size:16px;font-weight:700;color:#1e293b;margin-bottom:3px}
 
 /* ══ STAT TILES ══ */
 .stat-tile{background:#ffffff;border:1px solid #dbeafe;border-radius:13px;padding:18px;transition:all 0.18s;cursor:pointer;user-select:none}
 .stat-tile:hover{border-color:#93c5fd;background:#eff6ff;transform:translateY(-2px)}
 .stat-tile:active{transform:scale(0.97)}
 .st-icon{font-size:26px;margin-bottom:10px}
-.st-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:2px}
+.st-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:2px;color:#1e293b}
 .st-lbl{font-size:12px;color:var(--muted)}
 .st-sub{font-size:10px;color:var(--muted2);margin-top:3px}
 .sp-tile{background:linear-gradient(135deg,rgba(37,99,235,0.1),rgba(37,99,235,0.03));border-color:rgba(59,130,246,0.2)}
@@ -109,12 +110,12 @@ body{overflow:hidden}
 
 /* ══ FORMS ══ */
 .fg{margin-bottom:14px}
-.fg label{display:block;font-size:12px;color:#94a3b8;font-weight:600;margin-bottom:6px}
-.fg input,.fg textarea,.fg select{width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:9px;padding:10px 13px;font-size:14px;color:var(--text);font-family:inherit;transition:border-color 0.2s;outline:none}
-.fg input:focus,.fg textarea:focus,.fg select:focus{border-color:var(--blue)}
+.fg label{display:block;font-size:12px;color:#334155;font-weight:700;margin-bottom:6px}
+.fg input,.fg textarea,.fg select{width:100%;background:#ffffff;border:2px solid #93c5fd;border-radius:9px;padding:10px 13px;font-size:14px;color:#1e293b;font-family:inherit;transition:border-color 0.2s;outline:none;box-shadow:0 1px 4px rgba(37,99,235,0.08)}
+.fg input:focus,.fg textarea:focus,.fg select:focus{border-color:#2563eb;box-shadow:0 0 0 3px rgba(37,99,235,0.15)}
 .fg textarea{resize:vertical;min-height:80px}
 .fg select{cursor:pointer}
-.pin-info{background:rgba(37,99,235,0.07);border:1px solid rgba(37,99,235,0.22);border-radius:9px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#93c5fd;line-height:1.9}
+.pin-info{background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;padding:12px 14px;margin-bottom:14px;font-size:12px;color:#1d4ed8;line-height:1.9}
 
 /* ══ BUTTONS ══ */
 .btn{padding:10px 18px;border:none;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.15s;font-family:inherit;display:inline-flex;align-items:center;justify-content:center;gap:6px;touch-action:manipulation}
@@ -131,10 +132,10 @@ body{overflow:hidden}
 .lbtn{background:none;border:none;color:#60a5fa;font-size:13px;cursor:pointer;text-decoration:underline;font-family:inherit}
 
 /* ══ ALERTS ══ */
-.ok{background:#0a1f0f;border:1px solid #22c55e;border-radius:9px;padding:11px 14px;color:#86efac;font-size:13px;margin:10px 0}
-.err-box{background:#1f0a0a;border:1px solid #dc2626;border-radius:9px;padding:11px 14px;color:#fca5a5;font-size:13px;margin:10px 0}
-.inf{background:rgba(37,99,235,0.07);border:1px solid rgba(37,99,235,0.28);border-radius:9px;padding:11px 14px;color:#93c5fd;font-size:13px;margin:10px 0}
-.wrn{background:rgba(234,88,12,0.07);border:1px solid rgba(234,88,12,0.28);border-radius:9px;padding:11px 14px;color:#fdba74;font-size:13px;margin:10px 0}
+.ok{background:#f0fdf4;border:1px solid #22c55e;border-radius:9px;padding:11px 14px;color:#15803d;font-size:13px;margin:10px 0}
+.err-box{background:#fef2f2;border:1px solid #dc2626;border-radius:9px;padding:11px 14px;color:#dc2626;font-size:13px;margin:10px 0}
+.inf{background:#dbeafe;border:1.5px solid #93c5fd;border-radius:9px;padding:11px 14px;color:#1e40af;font-size:13px;margin:10px 0;font-weight:500}
+.wrn{background:#fff7ed;border:1px solid #fed7aa;border-radius:9px;padding:11px 14px;color:#c2410c;font-size:13px;margin:10px 0}
 
 /* ══ SPINNER ══ */
 .spin-wrap{text-align:center;padding:36px;color:var(--muted)}
@@ -183,24 +184,24 @@ body{overflow:hidden}
 .ttab{padding:8px 14px;border-radius:9px;border:1.5px solid var(--border2);background:none;color:var(--muted);font-size:12px;font-weight:700;cursor:pointer;transition:all 0.15s;white-space:nowrap;font-family:inherit;touch-action:manipulation}
 .ttab:hover{border-color:var(--muted);color:var(--text)}
 .ttab.on{background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-color:transparent}
-.tsec{background:#ffffff;border:1px solid #dbeafe;border-radius:13px;padding:18px;margin-bottom:14px}
-.tsec h3{font-size:10px;font-weight:700;color:#a78bfa;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px}
+.tsec{background:#ffffff;border:1.5px solid #93c5fd;border-radius:13px;padding:18px;margin-bottom:14px;box-shadow:0 2px 12px rgba(37,99,235,0.07)}
+.tsec h3{font-size:10px;font-weight:700;color:#4338ca;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:12px}
 .file-btn{display:inline-flex;align-items:center;gap:6px;background:rgba(37,99,235,0.07);border:1.5px dashed var(--blue);border-radius:9px;padding:8px 14px;cursor:pointer;font-size:13px;color:#7b9fff;font-weight:600}
-.drop-zone{border:2px dashed var(--orange);border-radius:13px;padding:28px;text-align:center;cursor:pointer;background:rgba(234,88,12,0.04);margin-bottom:12px;transition:all 0.2s}
+.drop-zone{border:2px dashed var(--orange);border-radius:13px;padding:28px;text-align:center;cursor:pointer;background:#fff7ed;margin-bottom:12px;transition:all 0.2s}
 .drop-zone:hover,.drop-zone.active{border-color:#fbbf24;background:rgba(234,88,12,0.09)}
 .media-img{width:100%;max-width:100%;max-height:380px;object-fit:contain;border-radius:9px;margin-top:10px;display:block}
 .media-aud{width:100%;margin-top:10px;border-radius:7px}
 .media-err{background:#1f0a0a;border:1px solid #dc2626;border-radius:8px;padding:10px 14px;color:#fca5a5;font-size:12px;margin-top:8px;display:none}
 
 /* ══ AUTO-POST PANEL ══ */
-.ap-panel{background:rgba(37,99,235,0.05);border:1px solid rgba(37,99,235,0.18);border-radius:11px;padding:14px;margin-bottom:14px}
-.ap-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);font-size:12px}
+.ap-panel{background:#eff6ff;border:1px solid #bfdbfe;border-radius:11px;padding:14px;margin-bottom:14px}
+.ap-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #dbeafe;font-size:12px}
 .ap-row:last-child{border-bottom:none}
-.ap-bar{background:rgba(255,255,255,0.05);border-radius:20px;height:6px;margin-top:10px;overflow:hidden}
+.ap-bar{background:#dbeafe;border-radius:20px;height:6px;margin-top:10px;overflow:hidden}
 .ap-fill{height:100%;border-radius:20px;background:linear-gradient(90deg,var(--blue),#a78bfa);transition:width 0.5s}
-.bday{border-radius:9px;padding:14px;margin-bottom:10px;background:rgba(37,99,235,0.03);border:1px solid var(--border);border-left:3px solid var(--blue)}
-.bday.posted{border-left-color:#22c55e;background:rgba(22,163,74,0.03)}
-.bday.today{border-left-color:var(--orange);background:rgba(234,88,12,0.04)}
+.bday{border-radius:9px;padding:14px;margin-bottom:10px;background:#f8faff;border:1px solid #bfdbfe;border-left:3px solid var(--blue)}
+.bday.posted{border-left-color:#22c55e;background:#f0fdf4}
+.bday.today{border-left-color:var(--orange);background:#fff7ed}
 .bday-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:12px;font-weight:700}
 .chip{font-size:10px;padding:2px 8px;border-radius:20px;font-weight:700}
 .chip.p{background:#0a2f14;color:#22c55e;border:1px solid #22c55e}
@@ -522,7 +523,7 @@ body{overflow:hidden}
       <div id="tGK">
         <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
           <button id="gkSBtn" onclick="gkMode('single')" style="padding:9px 18px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border:none;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">📝 Single Post</button>
-          <button id="gkBBtn" onclick="gkMode('bulk')" style="padding:9px 18px;background:#161b25;color:#64748b;border:1px solid #1e2535;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🤖 Auto-Post (60 Qs)</button>
+          <button id="gkBBtn" onclick="gkMode('bulk')" style="padding:9px 18px;background:#ffffff;color:#475569;border:1.5px solid #bfdbfe;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🤖 Auto-Post (60 Qs)</button>
         </div>
         <div class="grid-aside">
           <div>
@@ -568,7 +569,7 @@ body{overflow:hidden}
       <div id="tMedia" style="display:none">
         <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
           <button id="mdSBtn" onclick="mdMode('single')" style="padding:9px 18px;background:linear-gradient(135deg,#ea580c,#c2410c);color:#fff;border:none;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🎵 Single Upload</button>
-          <button id="mdBBtn" onclick="mdMode('bulk')" style="padding:9px 18px;background:#161b25;color:#64748b;border:1px solid #1e2535;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🤖 Auto-Post Schedule</button>
+          <button id="mdBBtn" onclick="mdMode('bulk')" style="padding:9px 18px;background:#ffffff;color:#475569;border:1.5px solid #bfdbfe;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🤖 Auto-Post Schedule</button>
         </div>
         <div class="grid-aside">
           <div>
@@ -619,7 +620,7 @@ body{overflow:hidden}
       <div id="tSpeak" style="display:none">
         <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
           <button id="spSBtn" onclick="spMode('single')" style="padding:9px 18px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border:none;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🎙️ Single Topic</button>
-          <button id="spBBtn" onclick="spMode('bulk')" style="padding:9px 18px;background:#161b25;color:#64748b;border:1px solid #1e2535;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🤖 Auto-Post (60)</button>
+          <button id="spBBtn" onclick="spMode('bulk')" style="padding:9px 18px;background:#ffffff;color:#475569;border:1.5px solid #bfdbfe;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🤖 Auto-Post (60)</button>
         </div>
         <div class="grid-aside">
           <div>
@@ -629,7 +630,7 @@ body{overflow:hidden}
                 <div class="inf" style="font-size:11px;margin-bottom:12px">⚠️ Only you can set the topic.</div>
                 <div class="fg"><label>Speaking Topic</label><input type="text" id="tSpTopic" placeholder="e.g. Environment, My Favourite Book..."></div>
                 <div class="fg"><label>Duration</label>
-                  <select id="tSpDur" style="background:#161b25;border:1.5px solid #252f40;border-radius:9px;padding:10px 13px;color:#e2e8f0;width:100%;font-size:14px;font-family:inherit">
+                  <select id="tSpDur" style="background:#ffffff;border:2px solid #93c5fd;border-radius:9px;padding:10px 13px;color:#1e293b;width:100%;font-size:14px;font-family:inherit;box-shadow:0 1px 4px rgba(37,99,235,0.08);outline:none">
                     <option value="120">2 minutes</option><option value="180" selected>3 minutes</option>
                     <option value="240">4 minutes</option><option value="300">5 minutes</option>
                   </select>
@@ -663,7 +664,7 @@ body{overflow:hidden}
       <div id="tWord" style="display:none">
         <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
           <button id="wSBtn" onclick="wMode('single')" style="padding:9px 18px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;border:none;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">📖 Single Post</button>
-          <button id="wBBtn" onclick="wMode('bulk')" style="padding:9px 18px;background:#161b25;color:#64748b;border:1px solid #1e2535;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🤖 Auto-Post (60)</button>
+          <button id="wBBtn" onclick="wMode('bulk')" style="padding:9px 18px;background:#ffffff;color:#475569;border:1.5px solid #bfdbfe;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🤖 Auto-Post (60)</button>
         </div>
         <div class="grid-aside">
           <div>
@@ -702,7 +703,7 @@ body{overflow:hidden}
       <div id="tAffairs" style="display:none">
         <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
           <button id="affSBtn" onclick="affMode('single')" style="padding:9px 18px;background:linear-gradient(135deg,#1d4ed8,#60a5fa);color:#fff;border:none;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">📰 Single Post</button>
-          <button id="affBBtn" onclick="affMode('bulk')" style="padding:9px 18px;background:#161b25;color:#64748b;border:1px solid #1e2535;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🤖 Auto-Post (60)</button>
+          <button id="affBBtn" onclick="affMode('bulk')" style="padding:9px 18px;background:#ffffff;color:#475569;border:1.5px solid #bfdbfe;border-radius:9px;font-weight:700;font-size:12px;cursor:pointer;font-family:inherit">🤖 Auto-Post (60)</button>
         </div>
         <div class="grid-aside">
           <div>
@@ -1031,7 +1032,7 @@ function enterTeacher() {
   const savedTopic = localStorage.getItem('spTopic');
   if (savedTopic) {
     const el = document.getElementById('spTopicList');
-    if (el) el.innerHTML = `<div style="background:#161b25;border:1px solid #1e2535;border-radius:7px;padding:9px 12px;font-size:12px;color:#c4b5fd"><strong>${savedTopic}</strong> <span style="color:#64748b;font-size:10px">(active)</span></div>`;
+    if (el) el.innerHTML = `<div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:7px;padding:9px 12px;font-size:12px;color:#6d28d9"><strong>${savedTopic}</strong> <span style="color:#64748b;font-size:10px">(active)</span></div>`;
   }
 }
 
@@ -1688,7 +1689,7 @@ async function loadSpSubmissions(){
     const list=(ans||[]).filter(a=>a.type==='speak').sort((a,b)=>new Date(b.submittedAt||0)-new Date(a.submittedAt||0));
     if(!list.length){el.innerHTML='<div style="color:#4a5568;font-size:12px;text-align:center;padding:16px">No submissions yet</div>';return;}
     el.innerHTML=list.map(a=>`
-      <div style="background:#0f1117;border:1px solid #1e2535;border-radius:11px;padding:14px;margin-bottom:10px">
+      <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:11px;padding:14px;margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
           <span style="font-size:12px;font-weight:700;color:#7b9fff">${a.studentName||'Student'}</span>
           <span style="font-size:10px;color:#4a5568">${a.submittedAt||''}</span>
@@ -1724,7 +1725,7 @@ function gkMode(m){
   if(m==='single'){
     sb.style.display='block';bb.style.display='none';
     sbtn.style.background='linear-gradient(135deg,#2563eb,#7c3aed)';sbtn.style.color='#fff';
-    bbtn.style.background='#161b25';bbtn.style.color='#64748b';
+    bbtn.style.background='#ffffff';bbtn.style.color='#475569';
   }else{
     sb.style.display='none';bb.style.display='block';
     bbtn.style.background='linear-gradient(135deg,#2563eb,#7c3aed)';bbtn.style.color='#fff';
@@ -1755,13 +1756,13 @@ async function loadGKList(){
   if(!list.length){el.innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:14px">No questions posted yet</div>';return;}
   el.innerHTML=list.slice().reverse().slice(0,5).map(q=>{
     const qAns=(ans||[]).filter(a=>a.questionId===q.id&&(!a.type||a.type==='question'));
-    return`<div style="background:#161b25;border:1px solid #1e2535;border-radius:9px;padding:12px;margin-bottom:9px">
+    return`<div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
       <div style="font-size:10px;color:#64748b;margin-bottom:4px">📅 ${q.date}</div>
-      <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:6px">${q.question}</div>
+      <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:6px">${q.question}</div>
       <span style="background:rgba(37,99,235,0.1);color:#60a5fa;border:1px solid rgba(37,99,235,0.25);border-radius:20px;padding:2px 8px;font-size:10px">${qAns.length} answers</span>
       ${q.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-left:5px">✅ Answer set</span>`:
       `<div style="margin-top:8px;display:flex;gap:6px">
-        <input type="text" id="ga_${q.id}" placeholder="Set answer..." style="flex:1;background:#0f1117;border:1.5px solid #252f40;border-radius:7px;padding:6px 10px;color:#e2e8f0;font-size:12px;font-family:inherit;outline:none">
+        <input type="text" id="ga_${q.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
         <button onclick="setGKAns(${q.id})" style="background:#16a34a;border:none;border-radius:7px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Set</button>
       </div>`}
     </div>`;
@@ -1803,7 +1804,7 @@ async function renderGKBulk(){
   const count=s?Math.max(s.questions.length,10):10;
   let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
     <label style="color:#64748b;font-size:12px">Questions:</label>
-    <select id="gkCount" onchange="changeGKCount()" style="background:#161b25;color:#e2e8f0;border:1.5px solid #252f40;border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit">
+    <select id="gkCount" onchange="changeGKCount()" style="background:#ffffff;color:#1e293b;border:1.5px solid #bfdbfe;border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit">
       ${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}
     </select></div>`;
   for(let i=0;i<count;i++){
@@ -1954,8 +1955,8 @@ async function loadMediaList(){
   const media=await GET('/media');const list=Array.isArray(media)?media:[];
   if(!list.length){el.innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:14px">No media posted yet</div>';return;}
   el.innerHTML=list.slice().reverse().slice(0,5).map(m=>`
-    <div style="background:#161b25;border:1px solid #1e2535;border-radius:11px;margin-bottom:10px">
-      <div style="background:#0f1117;padding:9px 13px;display:flex;align-items:center;gap:8px;border-radius:11px 11px 0 0">
+    <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:11px;margin-bottom:10px">
+      <div style="background:#eff6ff;padding:9px 13px;display:flex;align-items:center;gap:8px;border-radius:11px 11px 0 0">
         <span style="font-size:16px">${m.type==='image'?'🖼️':'🎵'}</span>
         <span style="flex:1;font-size:12px;font-weight:700;color:#7b9fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.fileName||'Media'}</span>
         <span style="font-size:10px;color:#64748b;flex-shrink:0">${m.date||''}</span>
@@ -1965,7 +1966,7 @@ async function loadMediaList(){
         ${m.opinion?`<div style="font-size:12px;color:#64748b;margin-top:7px">Q: ${m.opinion}</div>`:''}
         ${m.expectedAnswer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-top:7px;display:inline-block">✅ Answer set</span>`:
         `<div style="margin-top:9px;display:flex;gap:6px">
-          <input type="text" id="ma_${m.id}" placeholder="Set answer..." style="flex:1;background:#0f1117;border:1.5px solid #252f40;border-radius:7px;padding:6px 10px;color:#e2e8f0;font-size:12px;font-family:inherit;outline:none">
+          <input type="text" id="ma_${m.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
           <button onclick="setMediaAns(${m.id})" style="background:#16a34a;border:none;border-radius:7px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Set</button>
         </div>`}
       </div>
@@ -1989,8 +1990,8 @@ function saveMdSchedLocal(s){localStorage.setItem(MD_SCHED_KEY,JSON.stringify(s)
 function mdMode(m){
   var ss=document.getElementById('mdSingle'),bb=document.getElementById('mdBulk');
   var sb=document.getElementById('mdSBtn'),bbtn=document.getElementById('mdBBtn');
-  if(m==='single'){ss.style.display='block';bb.style.display='none';sb.style.background='linear-gradient(135deg,#ea580c,#c2410c)';sb.style.color='#fff';bbtn.style.background='#161b25';bbtn.style.color='#64748b';}
-  else{ss.style.display='none';bb.style.display='block';bbtn.style.background='linear-gradient(135deg,#ea580c,#c2410c)';bbtn.style.color='#fff';sb.style.background='#161b25';sb.style.color='#64748b';renderMdBulk();updateMdUI();}
+  if(m==='single'){ss.style.display='block';bb.style.display='none';sb.style.background='linear-gradient(135deg,#ea580c,#c2410c)';sb.style.color='#fff';bbtn.style.background='#ffffff';bbtn.style.color='#475569';}
+  else{ss.style.display='none';bb.style.display='block';bbtn.style.background='linear-gradient(135deg,#ea580c,#c2410c)';bbtn.style.color='#fff';sb.style.background='#ffffff';sb.style.color='#475569';renderMdBulk();updateMdUI();}
 }
 function updateMdUI(s){
   if(s===undefined)s=getMdSchedLocal();
@@ -2009,7 +2010,7 @@ function renderMdBulk(){
   var con=document.getElementById('mdBulkFields');if(!con)return;
   var s=getMdSchedLocal();var td=today();var count=s?Math.max(s.items.length,10):10;
   var opts=[5,10,15,20,30].map(function(n){return '<option value="'+n+'"'+(n===count?' selected':'')+'>'+n+'</option>';}).join('');
-  var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Days:</label><select id="mdCount" onchange="changeMdCount()" style="background:#161b25;color:#e2e8f0;border:1.5px solid #252f40;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">'+opts+'</select></div>';
+  var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Days:</label><select id="mdCount" onchange="changeMdCount()" style="background:#ffffff;color:#1e293b;border:1.5px solid #bfdbfe;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">'+opts+'</select></div>';
   for(var i=0;i<count;i++){
     var d=new Date();d.setDate(d.getDate()+i+1);var eq=s?s.items[i]:null;
     var date=eq?eq.date:d.toISOString().split('T')[0];var posted=eq&&eq.posted;var isToday=eq&&eq.date===td&&!posted;
@@ -2021,9 +2022,9 @@ function renderMdBulk(){
     h+='<div class="'+cls+'"><div class="bday-hdr"><span style="color:'+(posted?'#22c55e':isToday?'#ea580c':'#fbbf24')+'">Day '+(i+1)+' \u2014 '+dLabel+'</span>'+chip+'</div>'
       +(posted&&eq.postedAt?'<div style="font-size:10px;color:#22c55e;margin-bottom:5px">Posted: '+eq.postedAt+'</div>':'')
       +'<label style="font-size:11px;color:#64748b">Question / Caption:</label>'
-      +'<input type="text" id="mq_'+i+'" placeholder="e.g. What do you observe?" style="width:100%;background:#0f1117;border:1.5px solid #252f40;border-radius:7px;padding:8px 11px;color:#e2e8f0;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none"'+(posted?' readonly':'')+' value="'+qVal+'">'
+      +'<input type="text" id="mq_'+i+'" placeholder="e.g. What do you observe?" style="width:100%;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none"'+(posted?' readonly':'')+' value="'+qVal+'">'
       +'<label style="font-size:11px;color:#64748b">Answer (optional):</label>'
-      +'<input type="text" id="ma2_'+i+'" placeholder="Expected answer..." style="width:100%;background:#0f1117;border:1.5px solid #22c55e44;border-radius:7px;padding:8px 11px;color:#e2e8f0;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none"'+(posted?' readonly':'')+' value="'+aVal+'">'
+      +'<input type="text" id="ma2_'+i+'" placeholder="Expected answer..." style="width:100%;background:#ffffff;border:1.5px solid #22c55e88;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none"'+(posted?' readonly':'')+' value="'+aVal+'">'
       +'<input type="hidden" id="mdt_'+i+'" value="'+date+'">'
       +'</div>';
   }
@@ -2076,11 +2077,11 @@ function spMode(m){
   if(m==='single'){
     ss.style.display='block';bb.style.display='none';
     sb.style.background='linear-gradient(135deg,#2563eb,#7c3aed)';sb.style.color='#fff';
-    bbtn.style.background='#161b25';bbtn.style.color='#64748b';
+    bbtn.style.background='#ffffff';bbtn.style.color='#475569';
   }else{
     ss.style.display='none';bb.style.display='block';
     bbtn.style.background='linear-gradient(135deg,#2563eb,#7c3aed)';bbtn.style.color='#fff';
-    sb.style.background='#161b25';sb.style.color='#64748b';
+    sb.style.background='#ffffff';sb.style.color='#475569';
     renderSpBulk();updateSpUI();
   }
 }
@@ -2095,7 +2096,7 @@ async function postSpTopic(){
     const tel=document.getElementById('spTopic');if(tel){tel.textContent=t;tel.style.color='#e2e8f0';}
     const hel=document.getElementById('spHint');if(hel)hel.textContent=`Speak for ${dur/60} min · AI corrects grammar`;
     const list=document.getElementById('spTopicList');
-    if(list){const d=document.createElement('div');d.style.cssText='background:#161b25;border:1px solid #1e2535;border-radius:7px;padding:9px 12px;font-size:12px;color:#c4b5fd;margin-bottom:5px';d.innerHTML=`<strong>${t}</strong> <span style="color:#64748b;font-size:10px">· ${dur/60}min · ${new Date().toLocaleTimeString('en-IN')}</span>`;list.insertBefore(d,list.firstChild);}
+    if(list){const d=document.createElement('div');d.style.cssText='background:#f5f3ff;border:1px solid #ddd6fe;border-radius:7px;padding:9px 12px;font-size:12px;color:#6d28d9;margin-bottom:5px';d.innerHTML=`<strong>${t}</strong> <span style="color:#64748b;font-size:10px">· ${dur/60}min · ${new Date().toLocaleTimeString('en-IN')}</span>`;list.insertBefore(d,list.firstChild);}
     document.getElementById('tSpTopic').value='';
     toast(`✅ Topic "${t}" set for all students!`,'success');
   }catch(e){toast(e.message,'error');}
@@ -2107,8 +2108,8 @@ async function postSpTopic(){
 function wMode(m){
   const ss=document.getElementById('wSingle'),bb=document.getElementById('wBulk');
   const sb=document.getElementById('wSBtn'),bbtn=document.getElementById('wBBtn');
-  if(m==='single'){ss.style.display='block';bb.style.display='none';sb.style.background='linear-gradient(135deg,#7c3aed,#4f46e5)';sb.style.color='#fff';bbtn.style.background='#161b25';bbtn.style.color='#64748b';}
-  else{ss.style.display='none';bb.style.display='block';bbtn.style.background='linear-gradient(135deg,#7c3aed,#4f46e5)';bbtn.style.color='#fff';sb.style.background='#161b25';sb.style.color='#64748b';renderWBulk();updateWUI();}
+  if(m==='single'){ss.style.display='block';bb.style.display='none';sb.style.background='linear-gradient(135deg,#7c3aed,#4f46e5)';sb.style.color='#fff';bbtn.style.background='#ffffff';bbtn.style.color='#475569';}
+  else{ss.style.display='none';bb.style.display='block';bbtn.style.background='linear-gradient(135deg,#7c3aed,#4f46e5)';bbtn.style.color='#fff';sb.style.background='#ffffff';sb.style.color='#475569';renderWBulk();updateWUI();}
 }
 async function postWord(){
   const w=document.getElementById('wWord').value.trim(),q=document.getElementById('wQ').value.trim(),a=document.getElementById('wA').value.trim();
@@ -2120,13 +2121,13 @@ async function loadWordList(){
   const words=await GET('/word');const list=Array.isArray(words)?words:[];
   if(!list.length){el.innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:14px">No words posted yet</div>';return;}
   el.innerHTML=list.slice().reverse().slice(0,5).map(w=>`
-    <div style="background:#161b25;border:1px solid #1e2535;border-radius:9px;padding:12px;margin-bottom:9px">
+    <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
       <div style="font-size:14px;font-weight:700;color:#c4b5fd">${w.word}</div>
       <div style="font-size:10px;color:#64748b">${w.date}</div>
       <div style="font-size:12px;color:#64748b;margin-top:3px">${w.question}</div>
       ${w.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-top:7px;display:inline-block">✅ ${w.answer.substring(0,40)}</span>`:
       `<div style="margin-top:8px;display:flex;gap:6px">
-        <input type="text" id="wsans_${w.id}" placeholder="Set answer..." style="flex:1;background:#0f1117;border:1.5px solid #252f40;border-radius:7px;padding:6px 10px;color:#e2e8f0;font-size:12px;font-family:inherit;outline:none">
+        <input type="text" id="wsans_${w.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
         <button onclick="setWordAns(${w.id})" style="background:#7c3aed;border:none;border-radius:7px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Set</button>
       </div>`}
     </div>`).join('');
@@ -2143,8 +2144,8 @@ async function setWordAns(id){
 function affMode(m){
   const ss=document.getElementById('affSingle'),bb=document.getElementById('affBulk');
   const sb=document.getElementById('affSBtn'),bbtn=document.getElementById('affBBtn');
-  if(m==='single'){ss.style.display='block';bb.style.display='none';sb.style.background='linear-gradient(135deg,#1d4ed8,#60a5fa)';sb.style.color='#fff';bbtn.style.background='#161b25';bbtn.style.color='#64748b';}
-  else{ss.style.display='none';bb.style.display='block';bbtn.style.background='linear-gradient(135deg,#1d4ed8,#60a5fa)';bbtn.style.color='#fff';sb.style.background='#161b25';sb.style.color='#64748b';renderAffBulk();updateAffUI();}
+  if(m==='single'){ss.style.display='block';bb.style.display='none';sb.style.background='linear-gradient(135deg,#1d4ed8,#60a5fa)';sb.style.color='#fff';bbtn.style.background='#ffffff';bbtn.style.color='#475569';}
+  else{ss.style.display='none';bb.style.display='block';bbtn.style.background='linear-gradient(135deg,#1d4ed8,#60a5fa)';bbtn.style.color='#fff';sb.style.background='#ffffff';sb.style.color='#475569';renderAffBulk();updateAffUI();}
 }
 async function postAffairs(){
   const q=document.getElementById('affQ').value.trim(),a=document.getElementById('affA').value.trim();
@@ -2156,12 +2157,12 @@ async function loadAffList(){
   const aff=await GET('/affairs');const list=Array.isArray(aff)?aff:[];
   if(!list.length){el.innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:14px">No affairs posted yet</div>';return;}
   el.innerHTML=list.slice().reverse().slice(0,5).map(a=>`
-    <div style="background:#161b25;border:1px solid #1e2535;border-radius:9px;padding:12px;margin-bottom:9px">
+    <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
       <div style="font-size:10px;color:#64748b">${a.date}</div>
-      <div style="font-size:13px;color:#e2e8f0;margin-top:3px;line-height:1.5">${a.question}</div>
+      <div style="font-size:13px;color:#334155;margin-top:3px;line-height:1.5">${a.question}</div>
       ${a.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-top:7px;display:inline-block">✅ ${a.answer.substring(0,40)}</span>`:
       `<div style="margin-top:8px;display:flex;gap:6px">
-        <input type="text" id="affans_${a.id}" placeholder="Set answer..." style="flex:1;background:#0f1117;border:1.5px solid #252f40;border-radius:7px;padding:6px 10px;color:#e2e8f0;font-size:12px;font-family:inherit;outline:none">
+        <input type="text" id="affans_${a.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
         <button onclick="setAffAns(${a.id})" style="background:#1d4ed8;border:none;border-radius:7px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Set</button>
       </div>`}
     </div>`).join('');
@@ -2261,7 +2262,7 @@ function updateWUI(s){
 function renderWBulk(){
   const con=document.getElementById('wBulkFields');if(!con)return;
   const s=getWSchedLocal();const td=today();const count=s?Math.max(s.items.length,10):10;
-  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Words:</label><select id="wCount" onchange="changeWCount()" style="background:#161b25;color:#e2e8f0;border:1.5px solid #252f40;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
+  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Words:</label><select id="wCount" onchange="changeWCount()" style="background:#ffffff;color:#1e293b;border:1.5px solid #bfdbfe;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
   for(let i=0;i<count;i++){
     const d=new Date();d.setDate(d.getDate()+i+1);const eq=s?s.items[i]:null;
     const date=eq?eq.date:d.toISOString().split('T')[0];const posted=eq&&eq.posted;const isToday=eq&&eq.date===td&&!posted;
@@ -2271,7 +2272,7 @@ function renderWBulk(){
     h+=`<div class="${cls}"><div class="bday-hdr"><span style="color:${posted?'#22c55e':isToday?'#ea580c':'#a78bfa'}">Day ${i+1} — ${dLabel}</span>${chip}</div>
       ${posted&&eq.postedAt?`<div style="font-size:10px;color:#22c55e;margin-bottom:5px">Posted: ${eq.postedAt}</div>`:''}
       <label style="font-size:11px;color:#64748b">Word ${i+1}:</label>
-      <input type="text" id="wbi_${i}" placeholder="e.g. Ephemeral" style="width:100%;background:#0f1117;border:1.5px solid #252f40;border-radius:7px;padding:8px 11px;color:#e2e8f0;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none" ${posted?'readonly':''} value="${eq?eq.word:''}">
+      <input type="text" id="wbi_${i}" placeholder="e.g. Ephemeral" style="width:100%;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none" ${posted?'readonly':''} value="${eq?eq.word:''}">
       <label style="font-size:11px;color:#64748b">Question:</label>
       <textarea id="wbq_${i}" placeholder="What does this word mean?" style="min-height:40px" ${posted?'readonly':''}>${eq?eq.question:''}</textarea>
       <label style="font-size:11px;color:#4ade80;font-weight:700">✅ Answer:</label>
@@ -2339,7 +2340,7 @@ function updateAffUI(s){
 function renderAffBulk(){
   const con=document.getElementById('affBulkFields');if(!con)return;
   const s=getAffSchedLocal();const td=today();const count=s?Math.max(s.items.length,10):10;
-  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Affairs:</label><select id="affCount" onchange="changeAffCount()" style="background:#161b25;color:#e2e8f0;border:1.5px solid #252f40;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
+  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Affairs:</label><select id="affCount" onchange="changeAffCount()" style="background:#ffffff;color:#1e293b;border:1.5px solid #bfdbfe;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
   for(let i=0;i<count;i++){
     const d=new Date();d.setDate(d.getDate()+i+1);const eq=s?s.items[i]:null;
     const date=eq?eq.date:d.toISOString().split('T')[0];const posted=eq&&eq.posted;const isToday=eq&&eq.date===td&&!posted;
@@ -2414,7 +2415,7 @@ function updateSpUI(s){
 function renderSpBulk(){
   const con=document.getElementById('spBulkFields');if(!con)return;
   const s=getSpSchedLocal();const td=today();const count=s?Math.max(s.items.length,10):10;
-  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Topics:</label><select id="spCount" onchange="changeSpCount()" style="background:#161b25;color:#e2e8f0;border:1.5px solid #252f40;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
+  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Topics:</label><select id="spCount" onchange="changeSpCount()" style="background:#ffffff;color:#1e293b;border:1.5px solid #bfdbfe;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
   for(let i=0;i<count;i++){
     const d=new Date();d.setDate(d.getDate()+i+1);const eq=s?s.items[i]:null;
     const date=eq?eq.date:d.toISOString().split('T')[0];const posted=eq&&eq.posted;const isToday=eq&&eq.date===td&&!posted;
@@ -2424,9 +2425,9 @@ function renderSpBulk(){
     h+=`<div class="${cls}"><div class="bday-hdr"><span style="color:${posted?'#22c55e':isToday?'#ea580c':'#7b9fff'}">Day ${i+1} — ${dLabel}</span>${chip}</div>
       ${posted&&eq.postedAt?`<div style="font-size:10px;color:#22c55e;margin-bottom:5px">Set: ${eq.postedAt}</div>`:''}
       <label style="font-size:11px;color:#64748b">Topic ${i+1}:</label>
-      <input type="text" id="st_${i}" placeholder="e.g. Environment, Technology..." style="width:100%;background:#0f1117;border:1.5px solid #252f40;border-radius:7px;padding:8px 11px;color:#e2e8f0;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none" ${posted?'readonly':''} value="${eq?eq.topic:''}">
+      <input type="text" id="st_${i}" placeholder="e.g. Environment, Technology..." style="width:100%;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none" ${posted?'readonly':''} value="${eq?eq.topic:''}">
       <label style="font-size:11px;color:#64748b">Duration:</label>
-      <select id="sd_${i}" style="width:100%;background:#0f1117;border:1.5px solid #252f40;border-radius:7px;padding:8px 11px;color:#e2e8f0;font-size:12px;font-family:inherit;margin:3px 0 7px" ${posted?'disabled':''}>
+      <select id="sd_${i}" style="width:100%;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px" ${posted?'disabled':''}>
         <option value="120" ${eq&&eq.duration==120?'selected':''}>2 minutes</option>
         <option value="180" ${!eq||eq.duration==180?'selected':''}>3 minutes</option>
         <option value="240" ${eq&&eq.duration==240?'selected':''}>4 minutes</option>
@@ -2482,5 +2483,3 @@ function startSpAutoMachine(){
 </div>
 </body>
 </html>
-
-  
