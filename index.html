@@ -1784,10 +1784,11 @@ function updateGKUI(s){
 }
 async function renderGKBulk(){
   const con=document.getElementById('gkBulkFields');if(!con)return;
+  const selEl=document.getElementById('gkCount');
+  if(selEl)_gkCount=parseInt(selEl.value);
   con.innerHTML='<div class="spin-wrap"><div class="spinner"></div></div>';
   const s=await getGKSched();const td=today();
-  const selEl=document.getElementById('gkCount');
-  const count=selEl?parseInt(selEl.value):(s?Math.max(s.questions.length,10):10);
+  const count=_gkCount||10;
   let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
     <label style="color:#64748b;font-size:12px">Questions:</label>
     <select id="gkCount" onchange="changeGKCount()" style="background:#ffffff;color:#1e293b;border:1.5px solid #bfdbfe;border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit">
@@ -1973,6 +1974,10 @@ async function setMediaAns(id){
 // ═══════════════════════════════════════════════════
 let mdAutoInterval = null;
 let _mdCount = 10;
+let _gkCount = 10;
+let _wCount = 10;
+let _affCount = 10;
+let _spCount = 10;
 let _mdFiles = {}; // in-memory only - files don't persist after page reload
 
 const MD_SCHED_KEY = 'mdSchedule';
@@ -2362,9 +2367,10 @@ function updateWUI(s){
 }
 function renderWBulk(){
   const con=document.getElementById('wBulkFields');if(!con)return;
-  const s=getWSchedLocal();const td=today();
   const selEl=document.getElementById('wCount');
-  const count=selEl?parseInt(selEl.value):(s?Math.max(s.items.length,10):10);
+  if(selEl)_wCount=parseInt(selEl.value);
+  const s=getWSchedLocal();const td=today();
+  const count=_wCount||10;
   let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Words:</label><select id="wCount" onchange="changeWCount()" style="background:#ffffff;color:#1e293b;border:2px solid #93c5fd;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
   for(let i=0;i<count;i++){
     const d=new Date();d.setDate(d.getDate()+i+1);const eq=s?s.items[i]:null;
@@ -2442,9 +2448,10 @@ function updateAffUI(s){
 }
 function renderAffBulk(){
   const con=document.getElementById('affBulkFields');if(!con)return;
-  const s=getAffSchedLocal();const td=today();
   const selEl=document.getElementById('affCount');
-  const count=selEl?parseInt(selEl.value):(s?Math.max(s.items.length,10):10);
+  if(selEl)_affCount=parseInt(selEl.value);
+  const s=getAffSchedLocal();const td=today();
+  const count=_affCount||10;
   let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Affairs:</label><select id="affCount" onchange="changeAffCount()" style="background:#ffffff;color:#1e293b;border:2px solid #93c5fd;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
   for(let i=0;i<count;i++){
     const d=new Date();d.setDate(d.getDate()+i+1);const eq=s?s.items[i]:null;
@@ -2519,9 +2526,10 @@ function updateSpUI(s){
 }
 function renderSpBulk(){
   const con=document.getElementById('spBulkFields');if(!con)return;
-  const s=getSpSchedLocal();const td=today();
   const selEl=document.getElementById('spCount');
-  const count=selEl?parseInt(selEl.value):(s?Math.max(s.items.length,10):10);
+  if(selEl)_spCount=parseInt(selEl.value);
+  const s=getSpSchedLocal();const td=today();
+  const count=_spCount||10;
   let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Topics:</label><select id="spCount" onchange="changeSpCount()" style="background:#ffffff;color:#1e293b;border:2px solid #93c5fd;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
   for(let i=0;i<count;i++){
     const d=new Date();d.setDate(d.getDate()+i+1);const eq=s?s.items[i]:null;
