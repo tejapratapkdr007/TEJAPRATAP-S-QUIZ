@@ -654,7 +654,16 @@ body{overflow:hidden}
               </div>
             </div>
           </div>
-          <div><div class="tsec"><h3>📋 Recent Topics</h3><div id="spTopicList"><div style="color:#64748b;font-size:12px;text-align:center;padding:12px">No topics posted yet</div></div></div></div>
+          <div>
+            <div class="tsec"><h3>📋 Recent Topics</h3><div id="spTopicList"><div style="color:#64748b;font-size:12px;text-align:center;padding:12px">No topics posted yet</div></div></div>
+            <div class="tsec" style="margin-top:14px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <h3 style="margin:0">🎙️ Student Speaking Answers</h3>
+                <button onclick="loadSpStudentAnswers()" style="background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border:none;border-radius:7px;padding:5px 12px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">🔄 Refresh</button>
+              </div>
+              <div id="spStudentAnswersList"><div style="color:#64748b;font-size:12px;text-align:center;padding:12px">No answers yet</div></div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1027,6 +1036,7 @@ function enterTeacher() {
   document.querySelectorAll('#appMain .screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('s-teacher').classList.add('active');
   loadGKList(); startGKMachine(); startWMachine(); startAffMachine(); startSpAutoMachine(); startMdAutoMachine();
+  loadSpStudentAnswers();
   const savedTopic = localStorage.getItem('spTopic');
   if (savedTopic) {
     const el = document.getElementById('spTopicList');
@@ -1124,22 +1134,33 @@ async function loadMediaStudent() {
   const myAns = (ans||[]).find(a=>a.questionId===m.id&&a.studentPin===ME&&a.type==='media');
   let h = `<div class="card or"><div class="card-lbl">📅 ${m.date||''}</div><div class="card-ttl">🎵 Media Question</div>`;
 
-  // Show image or audio — support both /uploads/ URL and base64
-  const isUrl = m.data && (m.data.startsWith('/uploads/') || m.data.startsWith('http'));
-  if (m.type==='image') {
-    const src = isUrl ? m.data : safeImgSrc(m.data,'image');
-    if (src) h += `<div style="margin:12px 0"><img src="${src}" style="max-width:100%;border-radius:10px" onerror="this.outerHTML='<div class=\\'inf\\' style=\\'color:#f87171\\'>⚠ Image could not load</div>'"></div>`;
-  } else if (m.type==='audio') {
-    const src = isUrl ? m.data : '';
+  // Detect type from data if type field is wrong
+  let mediaType = m.type;
+  const d = m.data || '';
+  if (!mediaType || mediaType === 'text') {
+    if (d.startsWith('data:image') || d.startsWith('/uploads/') && d.match(/\.(jpg|jpeg|png|gif|webp)$/i)) mediaType = 'image';
+    else if (d.startsWith('data:audio') || d.startsWith('/uploads/') && d.match(/\.(mp3|wav|ogg|m4a)$/i)) mediaType = 'audio';
+    else if (m.fileName && m.fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i)) mediaType = 'image';
+    else if (m.fileName && m.fileName.match(/\.(mp3|wav|ogg|m4a)$/i)) mediaType = 'audio';
+    else if (d.length > 1000) mediaType = (m.fileName||'').match(/\.(mp3|wav|ogg|m4a)/i) ? 'audio' : 'image';
+  }
+
+  const isUrl = d.startsWith('/uploads/') || d.startsWith('http');
+
+  if (mediaType === 'image') {
+    const src = isUrl ? d : (d.startsWith('data:') ? d : safeImgSrc(d,'image'));
+    h += `<div style="margin:12px 0"><img src="${src}" style="max-width:100%;border-radius:10px" onerror="this.outerHTML='<p style=color:#f87171>⚠ Image could not load</p>'"></div>`;
+  } else if (mediaType === 'audio') {
+    const src = isUrl ? d : (d.startsWith('data:') ? d : '');
     if (src) {
       h += `<div style="margin:12px 0">
-        <audio controls style="width:100%;border-radius:10px" src="${src}">
-          Your browser does not support audio.
-        </audio>
-        <div style="margin-top:6px"><a href="${src}" target="_blank" style="color:#60a5fa;font-size:12px">🎵 Tap here if audio doesn't play</a></div>
+        <audio controls style="width:100%" src="${src}"></audio>
+        <div style="margin-top:6px"><a href="${src}" target="_blank" style="color:#60a5fa;font-size:13px;font-weight:700">🎵 Tap here to play audio</a></div>
       </div>`;
     } else {
-      h += `<div class="inf" style="color:#f87171">⚠ Audio file not available. Teacher needs to re-upload.</div>`;
+      h += `<div style="background:#fef3c7;border-radius:8px;padding:10px;margin:10px 0;color:#92400e;font-size:13px">
+        ⚠️ This audio was uploaded before the fix. <strong>Teacher please delete and re-upload.</strong>
+      </div>`;
     }
   }
 
@@ -1705,7 +1726,7 @@ function tTab(id,btn){
   if(btn)btn.classList.add('on');
   if(id==='tGK')loadGKList();
   if(id==='tMedia')loadMediaList();
-  if(id==='tSpeak')updateSpUI();
+  if(id==='tSpeak'){updateSpUI();loadSpStudentAnswers();}
   if(id==='tWord'){loadWordList();updateWUI();}
   if(id==='tAffairs'){loadAffList();updateAffUI();}
   if(id==='tPhones')loadPhones();
@@ -2217,6 +2238,32 @@ async function postSpTopic(){
     document.getElementById('tSpTopic').value='';
     toast(`✅ Topic "${t}" set for all students!`,'success');
   }catch(e){toast(e.message,'error');}
+}
+
+// ═══════════════════════════════════════════════════
+// TEACHER — SPEAKING STUDENT ANSWERS
+// ═══════════════════════════════════════════════════
+async function loadSpStudentAnswers(){
+  const el=document.getElementById('spStudentAnswersList');
+  if(!el)return;
+  el.innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:12px">Loading...</div>';
+  try{
+    const ans=await GET('/answers');
+    const spAns=(ans||[]).filter(a=>a.type==='speak').sort((a,b)=>new Date(b.submittedAt||0)-new Date(a.submittedAt||0));
+    if(!spAns.length){el.innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:12px">No speaking answers yet</div>';return;}
+    el.innerHTML=spAns.map((a,i)=>`
+      <div style="background:#f8fafc;border:1.5px solid #bfdbfe;border-radius:10px;padding:11px 13px;margin-bottom:9px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
+          <span style="font-size:15px">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'👤'}</span>
+          <span style="font-weight:700;color:#1e40af;font-size:13px">${a.studentName||'Unknown'}</span>
+          <span style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700">PIN: ${a.studentPin||'?'}</span>
+          <span style="margin-left:auto;font-size:10px;color:#94a3b8">${a.date||''}</span>
+        </div>
+        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:8px 10px;font-size:12px;color:#334155;line-height:1.5">
+          💬 ${a.answer||'(no answer)'}
+        </div>
+      </div>`).join('');
+  }catch(e){el.innerHTML='<div style="color:#ef4444;font-size:12px;text-align:center;padding:12px">Error loading answers</div>';}
 }
 
 // ═══════════════════════════════════════════════════
