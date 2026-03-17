@@ -1939,9 +1939,8 @@ function spListen() {
 }
 
 async function spSubmit() {
-  if(spElapsed<5)return toast('Record your speech first!','warn');
-  const text=spFinalText.trim()||spText.trim();
-  if(!text)return toast('No speech detected!','warn');
+  const text=spFinalText.trim()||spText.trim()||spDisplayText.trim();
+  if(!text)return toast('Record your speech first!','warn');
   const topic=localStorage.getItem('spTopic')||'Speaking Practice';
   // find the speak-topic question id to attach answer to
   try{
