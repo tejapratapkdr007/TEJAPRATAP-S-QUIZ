@@ -7,10 +7,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1E5BFF">
-<title>TEJAPRATAP QUIZ — Learn · Speak · Excel</title>
+<title>Polytechnic Quiz &amp; Speaking Practice</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{overflow-x:hidden;max-width:100%}
 :root{
   --bg:#e8f0fe;--bg2:#ffffff;--bg3:#eff6ff;
   --border:#bfdbfe;--border2:#93c5fd;
@@ -19,13 +20,18 @@
   --green:#16a34a;--orange:#ea580c;--amber:#d97706;--gold:#FFD700;
   --sidebar:240px;--topbar:60px;--bnav:64px;
 }
-html,body{height:100%;font-family:'DM Sans',sans-serif;background:linear-gradient(to right,#1E5BFF,#A84DFF);color:var(--text)}
-body{overflow:hidden}
+html{overflow-x:hidden}
+html,body{height:100%;overflow-x:hidden;font-family:'DM Sans',sans-serif;background:linear-gradient(to right,#1E5BFF,#A84DFF);color:var(--text)}
+body{overflow-x:hidden;overflow-y:hidden}
+.app-layout{overflow-x:hidden}
+.main{overflow-x:hidden}
+.screen{overflow-x:hidden}
+.topbar{overflow:hidden}
 
 /* ══ DESKTOP LAYOUT ══ */
 .app-layout{display:grid;grid-template-rows:var(--topbar) 1fr;grid-template-columns:var(--sidebar) 1fr;height:100vh}
 .topbar{grid-column:1/-1;background:#ffffff;border-bottom:1.5px solid #bfdbfe;display:flex;align-items:center;gap:12px;padding:0 20px;z-index:200;position:relative}
-.topbar-brand{display:flex;align-items:center;gap:10px;min-width:200px}
+.topbar-brand{display:flex;align-items:center;gap:10px;min-width:0;flex-shrink:1}
 .topbar-logo{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,var(--blue),var(--purple));display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
 .topbar-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:800;color:#1e293b}
 .topbar-sub{font-size:10px;color:var(--muted)}
@@ -65,12 +71,12 @@ body{overflow:hidden}
 .sidebar-overlay.show{display:block}
 
 /* ══ MAIN ══ */
-.main{overflow-y:auto;background:transparent;-webkit-overflow-scrolling:touch}
+.main{overflow-y:auto;overflow-x:hidden;background:transparent;-webkit-overflow-scrolling:touch}
 .main::-webkit-scrollbar{width:5px}
 .main::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
 
 /* ══ SCREENS ══ */
-.screen{display:none;padding:24px;min-height:calc(100vh - var(--topbar));animation:fadeIn 0.18s ease}
+.screen{display:none;padding:24px;min-height:calc(100vh - var(--topbar));animation:fadeIn 0.18s ease;overflow-x:hidden}
 .screen.active{display:block}
 @keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
 .fg input::placeholder,.fg textarea::placeholder{color:#94a3b8}
@@ -81,10 +87,10 @@ body{overflow:hidden}
 .page-hdr p{font-size:13px;color:var(--muted)}
 
 /* ══ GRID LAYOUTS ══ */
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}
-.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
-.grid-aside{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;overflow:hidden}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px;overflow:hidden}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px;overflow:hidden}
+.grid-aside{display:grid;grid-template-columns:1fr 340px;gap:16px;align-items:start;overflow:hidden}
 
 /* ══ CARDS ══ */
 .card{background:#ffffff;border:1px solid #dbeafe;border-radius:13px;padding:18px;margin-bottom:14px}
@@ -349,14 +355,14 @@ body{overflow:hidden}
   <div class="login-wrap">
     <div class="login-hero">
       <div class="ico">📚🏫</div>
-      <h1>TEJAPRATAP QUIZ</h1>
-      <p>Learn · Speak · Excel Every Day</p>
+      <h1>Polytechnic Quiz &amp; Speaking</h1>
+      <p>Quiz &amp; Speaking Practice for Polytechnic Students</p>
     </div>
     <div class="faf-box">
       <div class="faf-ttl">⚡ First Answer First — Yesterday's Top 3</div>
       <div class="faf-body" id="loginFaf">Loading...</div>
     </div>
-    <div class="pin-info">
+    <div class="pin-info" style="word-break:break-word;overflow-wrap:break-word;overflow:hidden">
       📌 <strong>PIN:</strong> YYYYY-BRANCH-XXX &nbsp;|&nbsp; <strong>e.g.</strong> 25007-CS-007<br>
       <strong>Branches:</strong> CS · EE · ME · EI · CE · EC · ETC · DAEC · DAUT · DAU · DCHE · DCSE · DECE · DEIE · DEVE · DEMB · DWT · DFT · DGT · DHMCT · DSC · DLT · DMNG · DMET · DPKT · DPT · DTXT
     </div>
@@ -376,10 +382,10 @@ body{overflow:hidden}
   <div class="login-wrap">
     <div class="login-hero" style="background:linear-gradient(160deg,#4c1d95,#1e40af)">
       <div class="ico">👨‍🏫🔒</div>
-      <h1>TEJAPRATAP</h1>
+      <h1>Quiz &amp; Speaking</h1>
       <p>Teacher Access — Authorized Only</p>
     </div>
-    <div class="wrn">⚠️ This area is for TEJAPRATAP only</div>
+    <div class="wrn">⚠️ This area is for Teacher only</div>
     <div class="fg"><label>🔐 Password</label><input id="tPw" type="password" placeholder="Enter password" onkeydown="if(event.key==='Enter')doTLogin()"></div>
     <button class="btn pri block" onclick="doTLogin()">🔓 Login</button>
     <button class="btn sec block" style="margin-top:8px" onclick="go('s-login')">← Back to Student Login</button>
@@ -392,7 +398,7 @@ body{overflow:hidden}
     <button class="ham" id="hamBtn" onclick="toggleSidebar()">☰</button>
     <div class="topbar-brand">
       <div class="topbar-logo">📚</div>
-      <div><div class="topbar-title">TEJAPRATAP</div><div class="topbar-sub">Quiz Platform</div></div>
+      <div><div class="topbar-title" style="font-size:14px">Quiz & Speaking</div><div class="topbar-sub">Polytechnic Students</div></div>
     </div>
     <div class="topbar-divider"></div>
     <div class="topbar-faf"><div class="topbar-faf-lbl">⚡ FAF</div><div class="topbar-faf-body" id="homeFaf">Loading...</div></div>
@@ -546,7 +552,7 @@ body{overflow:hidden}
     <!-- TEACHER -->
     <div class="screen" id="s-teacher">
       <div class="page-hdr" style="flex-wrap:wrap;gap:10px">
-        <div><div style="font-size:10px;color:var(--muted);letter-spacing:2px;font-weight:700;margin-bottom:3px;text-transform:uppercase">Teacher Dashboard</div><h1>TEJAPRATAP</h1></div>
+        <div><div style="font-size:10px;color:var(--muted);letter-spacing:2px;font-weight:700;margin-bottom:3px;text-transform:uppercase">Teacher Dashboard</div><h1>Quiz & Speaking</h1></div>
         <button class="btn red" onclick="doTLogout()">↩️ Logout</button>
       </div>
       <div class="ttabs" id="teacherTabs">
@@ -1690,8 +1696,7 @@ function spStartSR() {
   if(!SR){ const st=document.getElementById('spStatus'); if(st)st.textContent='⚠ Speech recognition requires Chrome browser'; return; }
   if(!spIsRec) return;
   const mySession = ++_spSessionId;
-  if(spRec && spRec.getTracks){ spRec.getTracks().forEach(t=>t.stop()); spRec=null; }
-  else if(spRec){ try{spRec.abort();}catch(e){} spRec=null; }
+  if(spRec){ try{spRec.abort();}catch(e){} spRec=null; }
 
   const rec = new SR();
   rec.continuous = true;
@@ -1700,39 +1705,24 @@ function spStartSR() {
   rec.maxAlternatives = 1;
   spRec = rec;
 
-  // The ONLY reliable dedup for Chrome Mobile:
-  // Store the total word count we had when this SR instance started.
-  // Chrome always delivers a GROWING cumulative transcript within one instance.
-  // On restart it replays from beginning. So we track a "cursor" of how many
-  // cumulative words we have processed from Chrome, and only append words beyond cursor.
-  let chromeCursor = 0; // words already taken from Chrome's cumulative transcript
+  // Ignore results for 600ms after start — Chrome replays old finals immediately on restart
+  // After 600ms any result is genuinely new speech
+  let ignoreUntil = Date.now() + 600;
 
   rec.onresult = e => {
     if(_spSessionId !== mySession) return;
-
-    // Build Chrome's full cumulative final transcript for this instance
-    let cumFinal = '';
     let interim = '';
-    for(let i = 0; i < e.results.length; i++){
+    for(let i = e.resultIndex; i < e.results.length; i++){
       if(e.results[i].isFinal){
-        cumFinal += (cumFinal?' ':'')+e.results[i][0].transcript.trim();
+        if(Date.now() < ignoreUntil) continue; // skip replays in ignore window
+        const t = e.results[i][0].transcript.trim();
+        if(!t) continue;
+        spFinalText += (spFinalText && !spFinalText.endsWith(' ') ? ' ' : '') + t;
+        spText = spFinalText;
       } else {
         interim = e.results[i][0].transcript;
       }
     }
-
-    // Chrome's cumulative words for this instance
-    const cumWords = cumFinal.trim() ? cumFinal.trim().split(/\s+/) : [];
-
-    // Only words beyond our cursor are new
-    if(cumWords.length > chromeCursor){
-      const newWords = cumWords.slice(chromeCursor);
-      chromeCursor = cumWords.length;
-      const toAdd = newWords.join(' ');
-      spFinalText += (spFinalText && !spFinalText.endsWith(' ') ? ' ' : '') + toAdd;
-      spText = spFinalText;
-    }
-
     const tr = document.getElementById('spTranscript');
     if(tr) tr.innerHTML = spHL(spFinalText) + (interim ? `<span class="sp-interim"> ${interim}</span>` : '');
     const wc = spFinalText.trim().split(/\s+/).filter(Boolean).length;
@@ -1750,7 +1740,6 @@ function spStartSR() {
 
   rec.onend = () => {
     if(_spSessionId !== mySession || !spIsRec) return;
-    // On restart, Chrome replays from beginning — spStartSR captures new wordsBefore snapshot
     clearTimeout(spRestartTimer);
     spRestartTimer = setTimeout(()=>{ if(spIsRec && _spSessionId===mySession) spStartSR(); }, 250);
   };
