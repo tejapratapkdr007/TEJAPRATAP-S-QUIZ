@@ -15,7 +15,7 @@
   --green:#16a34a;--orange:#ea580c;--amber:#d97706;--gold:#FFD700;
   --sidebar:240px;--topbar:60px;--bnav:64px;
 }
-html,body{height:100%;font-family:'DM Sans',sans-serif;background:linear-gradient(145deg,#e8f0fe 0%,#dbeafe 50%,#eff6ff 100%);color:var(--text)}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:linear-gradient(to right,#1E5BFF,#A84DFF);color:var(--text)}
 body{overflow:hidden}
 
 /* ══ DESKTOP LAYOUT ══ */
@@ -100,12 +100,12 @@ body{overflow:hidden}
 .st-val{font-family:'Syne',sans-serif;font-size:22px;font-weight:800;margin-bottom:2px;color:#1e293b}
 .st-lbl{font-size:12px;color:var(--muted)}
 .st-sub{font-size:10px;color:var(--muted2);margin-top:3px}
-.sp-tile{background:linear-gradient(135deg,rgba(37,99,235,0.1),rgba(37,99,235,0.03));border-color:rgba(59,130,246,0.2)}
-.gk-tile{background:linear-gradient(135deg,rgba(124,58,237,0.1),rgba(124,58,237,0.03));border-color:rgba(139,92,246,0.2)}
-.wd-tile{background:linear-gradient(135deg,rgba(5,150,105,0.1),rgba(5,150,105,0.03));border-color:rgba(16,185,129,0.2)}
-.af-tile{background:linear-gradient(135deg,rgba(234,88,12,0.1),rgba(234,88,12,0.03));border-color:rgba(249,115,22,0.2)}
-.md-tile{background:linear-gradient(135deg,rgba(217,119,6,0.1),rgba(217,119,6,0.03));border-color:rgba(251,191,36,0.2)}
-.rk-tile{background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,215,0,0.01));border-color:rgba(255,215,0,0.18)}
+.sp-tile{background:#ffffff!important;border-left:4px solid #2563eb!important;border-top:1px solid #e0e7ff!important;border-right:1px solid #e0e7ff!important;border-bottom:1px solid #e0e7ff!important;box-shadow:0 4px 16px rgba(0,0,0,0.10)!important}
+.gk-tile{background:#ffffff!important;border-left:4px solid #7c3aed!important;border-top:1px solid #e0e7ff!important;border-right:1px solid #e0e7ff!important;border-bottom:1px solid #e0e7ff!important;box-shadow:0 4px 16px rgba(0,0,0,0.10)!important}
+.wd-tile{background:#ffffff!important;border-left:4px solid #16a34a!important;border-top:1px solid #e0e7ff!important;border-right:1px solid #e0e7ff!important;border-bottom:1px solid #e0e7ff!important;box-shadow:0 4px 16px rgba(0,0,0,0.10)!important}
+.af-tile{background:#ffffff!important;border-left:4px solid #ea580c!important;border-top:1px solid #e0e7ff!important;border-right:1px solid #e0e7ff!important;border-bottom:1px solid #e0e7ff!important;box-shadow:0 4px 16px rgba(0,0,0,0.10)!important}
+.md-tile{background:#ffffff!important;border-left:4px solid #d97706!important;border-top:1px solid #e0e7ff!important;border-right:1px solid #e0e7ff!important;border-bottom:1px solid #e0e7ff!important;box-shadow:0 4px 16px rgba(0,0,0,0.10)!important}
+.rk-tile{background:#ffffff!important;border-left:4px solid #FFD700!important;border-top:1px solid #e0e7ff!important;border-right:1px solid #e0e7ff!important;border-bottom:1px solid #e0e7ff!important;box-shadow:0 4px 16px rgba(0,0,0,0.10)!important}
 
 /* ══ FORMS ══ */
 .fg{margin-bottom:14px}
@@ -147,7 +147,7 @@ body{overflow:hidden}
 #toast.show{opacity:1}
 
 /* ══ LOGIN ══ */
-#s-login,#s-teacher-login{display:none;position:fixed;inset:0;background:linear-gradient(145deg,#e8f0fe 0%,#dbeafe 50%,#eff6ff 100%);overflow-y:auto;z-index:300;align-items:center;justify-content:center;flex-direction:column}
+#s-login,#s-teacher-login{display:none;position:fixed;inset:0;background:linear-gradient(to right,#1E5BFF,#A84DFF);overflow-y:auto;z-index:300;align-items:center;justify-content:center;flex-direction:column}
 #s-login.active,#s-teacher-login.active{display:flex}
 .login-wrap{width:100%;max-width:460px;padding:20px}
 .login-hero{text-align:center;padding:28px 20px 24px;background:linear-gradient(160deg,var(--blue),var(--purple));border-radius:16px;margin-bottom:20px}
@@ -209,10 +209,10 @@ body{overflow:hidden}
 .bday textarea,.bday input[type=text]{width:100%;background:var(--bg3);border:1.5px solid var(--border2);border-radius:7px;padding:8px 11px;color:var(--text);font-size:12px;font-family:inherit;margin:3px 0 8px;resize:vertical}
 
 /* ══ SPEAKING ══ */
-.sp-topic{background:rgba(37,99,235,0.05);border:1px solid rgba(37,99,235,0.18);border-radius:13px;padding:14px;margin-bottom:16px}
-.sp-lbl{font-size:9px;color:#60a5fa;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;font-weight:700}
-.sp-txt{font-size:18px;font-weight:700;line-height:1.4;color:var(--text)}
-.sp-hint{font-size:11px;color:var(--muted);margin-top:4px}
+.sp-topic{background:#ffffff;border:2px solid #bfdbfe;border-radius:13px;padding:14px;margin-bottom:16px;box-shadow:0 2px 12px rgba(0,0,0,0.08)}
+.sp-lbl{font-size:9px;color:#2563eb;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;font-weight:700}
+.sp-txt{font-size:18px;font-weight:700;line-height:1.4;color:#1e293b}
+.sp-hint{font-size:11px;color:#475569;margin-top:4px}
 .sp-btn{width:56px;height:56px;border-radius:50%;border:none;cursor:pointer;font-size:22px;display:flex;align-items:center;justify-content:center;transition:transform 0.15s;flex-shrink:0;touch-action:manipulation}
 .sp-btn:active{transform:scale(0.9)}
 .sp-mic{background:#dc2626;box-shadow:0 4px 14px rgba(220,38,38,0.3)}
@@ -224,37 +224,37 @@ body{overflow:hidden}
 .sp-status.live{color:#f87171;font-weight:700}
 .sp-status.done{color:#4ade80;font-weight:700}
 .sp-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.sp-stat{background:var(--bg2);border:1px solid var(--border);border-radius:9px;padding:10px 4px;text-align:center}
-.sp-stat .v{font-size:17px;font-weight:800;font-family:'Syne',sans-serif;color:#7b9fff}
-.sp-stat .l{font-size:9px;color:var(--muted);margin-top:2px;text-transform:uppercase}
-.sp-box{border-radius:13px;padding:14px;margin-bottom:12px;border:1px solid var(--border)}
+.sp-stat{background:#ffffff;border:1px solid #e0e7ff;border-radius:9px;padding:10px 4px;text-align:center;box-shadow:0 1px 6px rgba(0,0,0,0.07)}
+.sp-stat .v{font-size:17px;font-weight:800;font-family:'Syne',sans-serif;color:#2563eb}
+.sp-stat .l{font-size:9px;color:#64748b;margin-top:2px;text-transform:uppercase}
+.sp-box{background:#ffffff;border-radius:13px;padding:14px;margin-bottom:12px;border:1px solid #e0e7ff;box-shadow:0 2px 10px rgba(0,0,0,0.07)}
 .sp-bx-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .sp-bx-ic{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
 .sp-bx-ttl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px}
 .sp-bx-badge{margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
-.sp-what{background:rgba(248,113,113,0.03);border-color:rgba(248,113,113,0.12)}
-.sp-what-txt{font-size:14px;line-height:1.9;color:#aaa;min-height:50px}
-.sp-eword{color:#f87171;background:#2a0a0a;border-radius:3px;padding:1px 4px;border-bottom:2px solid #f87171;cursor:help;font-weight:600;position:relative}
+.sp-what{background:#ffffff;border-color:#fecaca}
+.sp-what-txt{font-size:14px;line-height:1.9;color:#374151;min-height:50px}
+.sp-eword{color:#dc2626;background:#fef2f2;border-radius:3px;padding:1px 4px;border-bottom:2px solid #dc2626;cursor:help;font-weight:600;position:relative}
 .sp-eword::after{content:attr(data-fix);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:#1f2937;color:#4ade80;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;opacity:0;transition:opacity 0.2s;border:1px solid #22c55e;z-index:10;pointer-events:none}
 .sp-eword:hover::after{opacity:1}
-.sp-interim{color:#555;font-style:italic}
-.sp-correct{background:rgba(34,197,94,0.03);border-color:rgba(34,197,94,0.15);display:none}
+.sp-interim{color:#94a3b8;font-style:italic}
+.sp-correct{background:#f0fdf4;border-color:#86efac;display:none}
 .sp-correct.show{display:block}
-.sp-cword{color:#4ade80;background:#0a2f14;border-radius:3px;padding:1px 4px;border-bottom:2px solid #4ade80;font-weight:700}
-.sp-correct-txt{font-size:14px;line-height:1.9;color:#86efac;min-height:36px}
-.sp-analysis{background:rgba(124,58,237,0.03);border-color:rgba(124,58,237,0.15);display:none}
+.sp-cword{color:#15803d;background:#dcfce7;border-radius:3px;padding:1px 4px;border-bottom:2px solid #16a34a;font-weight:700}
+.sp-correct-txt{font-size:14px;line-height:1.9;color:#166534;min-height:36px}
+.sp-analysis{background:#faf5ff;border-color:#ddd6fe;display:none}
 .sp-analysis.show{display:block}
-.sp-err-card{background:rgba(124,58,237,0.05);border-left:3px solid #f87171;border-radius:7px;padding:10px 12px;margin-bottom:8px}
-.sp-err-wrong{font-size:12px;color:#f87171;margin-bottom:3px}
-.sp-err-right{font-size:12px;color:#4ade80;margin-bottom:3px}
-.sp-err-rule{font-size:11px;color:#a78bfa;font-style:italic}
-.sp-suggest{background:rgba(167,139,250,0.03);border-color:rgba(167,139,250,0.15);display:none}
+.sp-err-card{background:#fef2f2;border-left:3px solid #f87171;border-radius:7px;padding:10px 12px;margin-bottom:8px}
+.sp-err-wrong{font-size:12px;color:#dc2626;margin-bottom:3px}
+.sp-err-right{font-size:12px;color:#16a34a;margin-bottom:3px}
+.sp-err-rule{font-size:11px;color:#7c3aed;font-style:italic}
+.sp-suggest{background:#f5f3ff;border-color:#ddd6fe;display:none}
 .sp-suggest.show{display:block}
-.sp-sug-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)}
+.sp-sug-item{display:flex;gap:10px;align-items:flex-start;padding:8px 0;border-bottom:1px solid #ede9fe}
 .sp-sug-item:last-child{border-bottom:none}
 .sp-sug-ic{font-size:14px;flex-shrink:0}
-.sp-sug-txt{font-size:12px;color:#c4b5fd;line-height:1.5}
-.sp-sug-txt strong{color:var(--text)}
+.sp-sug-txt{font-size:12px;color:#5b21b6;line-height:1.5}
+.sp-sug-txt strong{color:#1e293b}
 
 /* AI loading indicator */
 .ai-loading{display:flex;align-items:center;gap:8px;color:#a78bfa;font-size:12px;padding:12px 0}
@@ -376,28 +376,28 @@ body{overflow:hidden}
         <div class="stat-tile"><div class="st-icon">⭐</div><div class="st-val" id="hScoreHome" style="color:#7b9fff">0</div><div class="st-lbl">Score</div></div>
         <div class="stat-tile"><div class="st-icon">🏆</div><div class="st-val" id="hRankHome" style="color:#4ade80">#—</div><div class="st-lbl">Rank</div></div>
         <div class="stat-tile"><div class="st-icon">🔥</div><div class="st-val" id="hStreakHome" style="color:#f97316">0</div><div class="st-lbl">Streak</div></div>
-        <div class="stat-tile rk-tile" onclick="go('s-rank')"><div class="st-icon">🏅</div><div class="st-val" style="color:#FFD700;font-size:16px">Board</div><div class="st-lbl">Leaderboard</div></div>
+        <div class="stat-tile rk-tile" onclick="go('s-rank')"><div class="st-icon">🏅</div><div class="st-val" style="color:#b45309;font-size:16px">Board</div><div class="st-lbl" style="color:#64748b">Leaderboard</div></div>
       </div>
       <div class="grid2">
-        <div class="stat-tile gk-tile" onclick="go('s-quiz')"><div class="st-icon">🧠</div><div class="st-val" style="color:#a78bfa;font-size:17px">GK Quiz</div><div class="st-lbl">Today's Q · +5 pts</div></div>
-        <div class="stat-tile sp-tile" onclick="go('s-speak')"><div class="st-icon">🎙️</div><div class="st-val" style="color:#7b9fff;font-size:17px">Speaking</div><div class="st-lbl">AI Practice · +10 pts</div></div>
-        <div class="stat-tile wd-tile" onclick="go('s-word')"><div class="st-icon">📖</div><div class="st-val" style="color:#34d399;font-size:17px">Word of Day</div><div class="st-lbl">Vocabulary · +3 pts</div></div>
-        <div class="stat-tile af-tile" onclick="go('s-affairs')"><div class="st-icon">📰</div><div class="st-val" style="color:#fb923c;font-size:17px">Current Affairs</div><div class="st-lbl">Daily GK · +3 pts</div></div>
+        <div class="stat-tile gk-tile" onclick="go('s-quiz')"><div class="st-icon">🧠</div><div class="st-val" style="color:#7c3aed;font-size:17px">GK Quiz</div><div class="st-lbl" style="color:#64748b">Today's Q · +5 pts</div></div>
+        <div class="stat-tile sp-tile" onclick="go('s-speak')"><div class="st-icon">🎙️</div><div class="st-val" style="color:#2563eb;font-size:17px">Speaking</div><div class="st-lbl" style="color:#64748b">AI Practice · +20 pts</div></div>
+        <div class="stat-tile wd-tile" onclick="go('s-word')"><div class="st-icon">📖</div><div class="st-val" style="color:#16a34a;font-size:17px">Word of Day</div><div class="st-lbl" style="color:#64748b">Vocabulary · +5 pts</div></div>
+        <div class="stat-tile af-tile" onclick="go('s-affairs')"><div class="st-icon">📰</div><div class="st-val" style="color:#ea580c;font-size:17px">Current Affairs</div><div class="st-lbl" style="color:#64748b">Daily GK · +5 pts</div></div>
       </div>
       <div class="stat-tile md-tile" onclick="go('s-media')" style="margin-bottom:0">
-        <div style="display:flex;align-items:center;gap:12px"><div class="st-icon" style="margin-bottom:0">🎵</div><div><div class="st-val" style="color:#fbbf24;font-size:17px">Media Question</div><div class="st-lbl">Image / Audio from teacher</div></div></div>
+        <div style="display:flex;align-items:center;gap:12px"><div class="st-icon" style="margin-bottom:0">🎵</div><div><div class="st-val" style="color:#d97706;font-size:17px">Media Question</div><div class="st-lbl" style="color:#64748b">Image / Audio from teacher · +5 pts</div></div></div>
       </div>
     </div>
 
     <!-- QUIZ -->
     <div class="screen" id="s-quiz">
-      <div class="page-hdr"><div><h1>Today's GK Quiz</h1><p>Answer to earn +5 points</p></div></div>
+      <div class="page-hdr"><div><h1>Today's GK Quiz</h1><p>Answer to earn +5 points</p></div><button onclick="go('s-home')" style="background:#fff;border:2px solid #2563eb;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)">← Back</button></div>
       <div style="max-width:660px"><div id="quizBody"><div class="spin-wrap"><div class="spinner"></div><br>Loading...</div></div></div>
     </div>
 
     <!-- SPEAKING -->
     <div class="screen" id="s-speak">
-      <div class="page-hdr"><div><h1>AI Speaking Practice</h1><p>Speak · AI Grammar Check · Earn +10 pts</p></div></div>
+      <div class="page-hdr"><div><h1>AI Speaking Practice</h1><p>Speak · AI Grammar Check · Earn +20 pts</p></div><button onclick="go('s-home')" style="background:#fff;border:2px solid #2563eb;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)">← Back</button></div>
       <div class="grid-aside" style="align-items:start" id="speakLayout">
         <!-- Left: transcript & analysis -->
         <div>
@@ -448,11 +448,11 @@ body{overflow:hidden}
         </div>
         <!-- Right: controls + stats -->
         <div>
-          <div style="background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:20px;text-align:center;margin-bottom:14px">
+          <div style="background:#ffffff;border:1px solid #e0e7ff;border-radius:13px;padding:20px;text-align:center;margin-bottom:14px;box-shadow:0 2px 12px rgba(0,0,0,0.08)">
             <svg width="110" height="110" viewBox="0 0 100 100" style="margin-bottom:14px">
-              <circle fill="none" stroke="#1e2535" stroke-width="8" cx="50" cy="50" r="38"/>
+              <circle fill="none" stroke="#e0e7ff" stroke-width="8" cx="50" cy="50" r="38"/>
               <circle id="tArc" fill="none" stroke="#2563eb" stroke-width="8" stroke-linecap="round" stroke-dasharray="239" stroke-dashoffset="0" cx="50" cy="50" r="38" style="transform:rotate(-90deg);transform-origin:50px 50px;transition:stroke-dashoffset 1s linear,stroke .5s"/>
-              <text id="tDisp" x="50" y="46" text-anchor="middle" dominant-baseline="middle" font-size="19" font-weight="800" fill="#e2e8f0">02:00</text>
+              <text id="tDisp" x="50" y="46" text-anchor="middle" dominant-baseline="middle" font-size="19" font-weight="800" fill="#1e293b">02:00</text>
               <text id="tSub" x="50" y="64" text-anchor="middle" font-size="9" fill="#64748b">READY</text>
             </svg>
             <div style="display:flex;justify-content:center;gap:12px;margin-bottom:10px">
@@ -480,25 +480,25 @@ body{overflow:hidden}
 
     <!-- MEDIA -->
     <div class="screen" id="s-media">
-      <div class="page-hdr"><div><h1>Media Question</h1><p>Image & Audio from Teacher</p></div></div>
+      <div class="page-hdr"><div><h1>Media Question</h1><p>Image &amp; Audio from Teacher · +5 pts</p></div><button onclick="go('s-home')" style="background:#fff;border:2px solid #2563eb;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)">← Back</button></div>
       <div style="max-width:660px"><div id="mediaBody"><div class="spin-wrap"><div class="spinner"></div><br>Loading...</div></div></div>
     </div>
 
     <!-- WORD -->
     <div class="screen" id="s-word">
-      <div class="page-hdr"><div><h1>Word of the Day</h1><p>Vocabulary Builder</p></div></div>
+      <div class="page-hdr"><div><h1>Word of the Day</h1><p>Vocabulary Builder · +5 pts</p></div><button onclick="go('s-home')" style="background:#fff;border:2px solid #2563eb;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)">← Back</button></div>
       <div style="max-width:660px"><div id="wordBody"><div class="spin-wrap"><div class="spinner"></div><br>Loading...</div></div></div>
     </div>
 
     <!-- AFFAIRS -->
     <div class="screen" id="s-affairs">
-      <div class="page-hdr"><div><h1>Current Affairs</h1><p>Daily GK Update</p></div></div>
+      <div class="page-hdr"><div><h1>Current Affairs</h1><p>Daily GK Update · +5 pts</p></div><button onclick="go('s-home')" style="background:#fff;border:2px solid #2563eb;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)">← Back</button></div>
       <div style="max-width:660px"><div id="affairsBody"><div class="spin-wrap"><div class="spinner"></div><br>Loading...</div></div></div>
     </div>
 
     <!-- RANK -->
     <div class="screen" id="s-rank">
-      <div class="page-hdr"><div><h1>Leaderboard</h1><p>Rankings & Top Students</p></div></div>
+      <div class="page-hdr"><div><h1>Leaderboard</h1><p>Rankings &amp; Top Students</p></div><button onclick="go('s-home')" style="background:#fff;border:2px solid #2563eb;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)">← Back</button></div>
       <div style="max-width:760px"><div id="rankBody"><div class="spin-wrap"><div class="spinner"></div><br>Loading...</div></div></div>
     </div>
 
@@ -772,6 +772,52 @@ body{overflow:hidden}
   </div>
 </div><!-- /appLayout -->
 
+<!-- ══ PROFILE MODAL ══ -->
+<div id="profileModal" onclick="if(event.target===this)closeProfileModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px">
+  <div style="background:linear-gradient(160deg,#1e1b4b,#0f172a);border:1.5px solid rgba(124,58,237,0.5);border-radius:22px;padding:28px 22px 22px;max-width:370px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.7);position:relative;max-height:92vh;overflow-y:auto">
+    <button onclick="closeProfileModal()" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:32px;height:32px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    <!-- Avatar -->
+    <div style="text-align:center;margin-bottom:20px">
+      <div id="pmAvatar" style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,#1E5BFF,#A84DFF);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#fff;margin:0 auto 12px;border:3px solid rgba(168,77,255,0.7);box-shadow:0 0 28px rgba(168,77,255,0.4)">?</div>
+      <div id="pmName" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:4px">—</div>
+      <div id="pmPin" style="font-size:11px;color:#a78bfa;letter-spacing:1.5px;font-weight:600">PIN: —</div>
+    </div>
+    <!-- 4 stat boxes — big and clear -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+      <div style="background:rgba(30,91,255,0.2);border:2px solid rgba(30,91,255,0.5);border-radius:12px;padding:16px;text-align:center">
+        <div id="pmScore" style="font-size:28px;font-weight:800;color:#93c5fd;font-family:'Syne',sans-serif;line-height:1">0</div>
+        <div style="font-size:11px;color:#bfdbfe;text-transform:uppercase;letter-spacing:1px;margin-top:5px;font-weight:600">Total Points</div>
+      </div>
+      <div style="background:rgba(124,58,237,0.2);border:2px solid rgba(124,58,237,0.5);border-radius:12px;padding:16px;text-align:center">
+        <div id="pmRank" style="font-size:28px;font-weight:800;color:#c4b5fd;font-family:'Syne',sans-serif;line-height:1">#—</div>
+        <div style="font-size:11px;color:#ddd6fe;text-transform:uppercase;letter-spacing:1px;margin-top:5px;font-weight:600">Rank</div>
+      </div>
+      <div style="background:rgba(249,115,22,0.2);border:2px solid rgba(249,115,22,0.5);border-radius:12px;padding:16px;text-align:center">
+        <div id="pmStreak" style="font-size:28px;font-weight:800;color:#fdba74;font-family:'Syne',sans-serif;line-height:1">🔥0</div>
+        <div style="font-size:11px;color:#fed7aa;text-transform:uppercase;letter-spacing:1px;margin-top:5px;font-weight:600">Streak</div>
+      </div>
+      <div style="background:rgba(34,197,94,0.2);border:2px solid rgba(34,197,94,0.5);border-radius:12px;padding:16px;text-align:center">
+        <div id="pmAnswers" style="font-size:28px;font-weight:800;color:#86efac;font-family:'Syne',sans-serif;line-height:1">0</div>
+        <div style="font-size:11px;color:#bbf7d0;text-transform:uppercase;letter-spacing:1px;margin-top:5px;font-weight:600">Answers</div>
+      </div>
+    </div>
+    <!-- Phone -->
+    <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:13px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
+      <span style="font-size:22px">📱</span>
+      <div>
+        <div style="font-size:10px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:4px">Phone Number</div>
+        <div id="pmPhone" style="font-size:16px;font-weight:700;color:#fff">Loading...</div>
+      </div>
+    </div>
+    <!-- Points breakdown -->
+    <div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:14px;margin-bottom:16px">
+      <div style="font-size:10px;color:#fbbf24;font-weight:700;letter-spacing:1px;margin-bottom:10px;text-transform:uppercase">📊 Points Breakdown</div>
+      <div id="pmBreakdown"><div style="color:#64748b;font-size:12px;text-align:center;padding:6px">Loading...</div></div>
+    </div>
+    <button onclick="closeProfileModal();doLogout()" style="width:100%;background:linear-gradient(135deg,#dc2626,#b91c1c);color:#fff;border:none;border-radius:11px;padding:13px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">↩️ Logout</button>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -1003,7 +1049,7 @@ function buildTopbarStudent() {
       <div class="topbar-stat"><div class="v" id="hRank" style="color:#4ade80">#—</div><div class="l">Rank</div></div>
       <div class="topbar-stat"><div class="v" id="hStreak" style="color:#f97316">🔥0</div><div class="l">Streak</div></div>
     </div>
-    <div class="topbar-user" onclick="go('s-home')">
+    <div class="topbar-user" onclick="showProfileModal()" title="My Profile" style="cursor:pointer">
       <div class="topbar-avatar" id="topAvatar">?</div>
       <div class="topbar-uname" id="topName"></div>
     </div>`;
@@ -1083,6 +1129,58 @@ async function loadStats() {
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   set('hScore',myTotal); set('hRank',rank>0?'#'+rank:'#—'); set('hStreak','🔥'+myStreak);
   set('hScoreHome',myTotal); set('hRankHome',rank>0?'#'+rank:'#—'); set('hStreakHome','🔥'+myStreak);
+}
+
+// ═══════════════════════════════════════════════════
+// PROFILE MODAL
+// ═══════════════════════════════════════════════════
+function closeProfileModal(){const m=document.getElementById('profileModal');if(m)m.style.display='none';}
+async function showProfileModal(){
+  if(!ME)return;
+  const modal=document.getElementById('profileModal');if(!modal)return;
+  modal.style.display='flex';
+  const g=id=>document.getElementById(id);
+  const letter=(MY_NAME||'?')[0].toUpperCase();
+  if(g('pmAvatar'))g('pmAvatar').textContent=letter;
+  if(g('pmName'))g('pmName').textContent=MY_NAME||'—';
+  if(g('pmPin'))g('pmPin').textContent='PIN: '+(ME||'—');
+  if(g('pmPhone'))g('pmPhone').textContent='Loading...';
+  if(g('pmScore'))g('pmScore').textContent='...';
+  if(g('pmRank'))g('pmRank').textContent='...';
+  if(g('pmStreak'))g('pmStreak').textContent='...';
+  if(g('pmAnswers'))g('pmAnswers').textContent='...';
+  if(g('pmBreakdown'))g('pmBreakdown').innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:6px">Loading...</div>';
+  try{
+    const [scoreData,phones,answers]=await Promise.all([GET('/scores'),GET('/phones'),GET('/answers')]);
+    if(g('pmPhone'))g('pmPhone').textContent=phones?.[ME]?.phone||'—';
+    const scores=scoreData?.scores||{},streaks=scoreData?.streaks||{};
+    const myObj=scores[ME];
+    const myTotal=myObj?myObj.scores.reduce((s,e)=>s+e.points,0):0;
+    const myStreak=streaks[ME]?.count||0;
+    const all=Object.entries(scores).map(([p,d])=>({p,t:d.scores.reduce((s,e)=>s+e.points,0)})).sort((a,b)=>b.t-a.t);
+    const rank=all.findIndex(e=>e.p===ME)+1;
+    const myAns=(answers||[]).filter(a=>a.studentPin===ME);
+    if(g('pmScore'))g('pmScore').textContent=myTotal;
+    if(g('pmRank'))g('pmRank').textContent=rank>0?'#'+rank:'#—';
+    if(g('pmStreak'))g('pmStreak').textContent='🔥'+myStreak;
+    if(g('pmAnswers'))g('pmAnswers').textContent=myAns.length;
+    const gkN=myAns.filter(a=>!a.type||a.type==='question').length;
+    const spN=myAns.filter(a=>a.type==='speak').length;
+    const wdN=myAns.filter(a=>a.type==='word').length;
+    const afN=myAns.filter(a=>a.type==='affairs').length;
+    const mdN=myAns.filter(a=>a.type==='media').length;
+    const row=(ic,lbl,n,pts,col)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,0.07)"><span style="font-size:13px;color:#e2e8f0">${ic} ${lbl} <span style="color:#64748b;font-size:11px">(×${n})</span></span><span style="font-size:13px;font-weight:800;color:${col}">+${n*pts} pts</span></div>`;
+    if(g('pmBreakdown'))g('pmBreakdown').innerHTML=
+      row('🧠','GK Quiz',gkN,5,'#a78bfa')+
+      row('🎙️','Speaking',spN,20,'#93c5fd')+
+      row('📖','Word of Day',wdN,5,'#86efac')+
+      row('📰','Current Affairs',afN,5,'#fdba74')+
+      row('🎵','Media',mdN,5,'#fde68a')+
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 2px"><span style="font-size:14px;font-weight:700;color:#fff">🏆 Total</span><span style="font-size:18px;font-weight:800;color:#FFD700">${myTotal} pts</span></div>`;
+  }catch(e){
+    if(g('pmPhone'))g('pmPhone').textContent='—';
+    if(g('pmBreakdown'))g('pmBreakdown').innerHTML='<div style="color:#f87171;font-size:12px;text-align:center;padding:6px">Could not load data</div>';
+  }
 }
 
 // ═══════════════════════════════════════════════════
@@ -1292,15 +1390,27 @@ async function loadRank() {
 // ═══════════════════════════════════════════════════
 async function aiCorrectSpeech(text) {
   if (!text || text.trim().length < 5) return null;
-  try {
-    const response = await fetch('/ai/grammar', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
-    });
-    if (!response.ok) { console.error('AI error:', response.status); return null; }
-    return await response.json();
-  } catch(e) { console.error('AI failed:', e); return null; }
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 28000);
+      const response = await fetch(API + '/ai/grammar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text.trim() }),
+        signal: ctrl.signal
+      });
+      clearTimeout(timer);
+      if (!response.ok) { console.error('AI HTTP:', response.status); if (response.status >= 400 && response.status < 500) break; if (attempt < 2) await new Promise(r => setTimeout(r, 1500)); continue; }
+      const result = await response.json();
+      if (!result || typeof result.corrected !== 'string') { if (attempt < 2) { await new Promise(r => setTimeout(r, 1500)); continue; } return null; }
+      return result;
+    } catch(e) {
+      console.error('AI attempt', attempt, e.name === 'AbortError' ? 'timed out' : e.message);
+      if (attempt < 2) await new Promise(r => setTimeout(r, 1500));
+    }
+  }
+  return null;
 }
 
 // Fallback local grammar check (when AI is unavailable)
@@ -1390,6 +1500,7 @@ async function loadSpeak() {
 }
 
 function spReset() {
+  _spSessionId++;
   spElapsed=0; spText=''; spFinalText=''; spIsRec=false; spRestartCount=0;
   clearInterval(spTimer); clearTimeout(spRestartTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
@@ -1447,7 +1558,7 @@ function spStart() {
 }
 
 function spPause() {
-  // Pause just stops SR but keeps timer going
+  _spSessionId++;
   spIsRec=false; clearInterval(spTimer);
   if(spRec){spRec.onend=null;try{spRec.abort();}catch(e){}spRec=null;}
   const btn=document.getElementById('spBtn');
@@ -1456,36 +1567,30 @@ function spPause() {
   if(st){st.textContent='⏸ Paused — press 🎙️ to continue';st.className='sp-status';}
 }
 
+let _spSessionId = 0;
+
 function spStartSR() {
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){
-    const st=document.getElementById('spStatus');
-    if(st)st.textContent='⚠ Speech recognition requires Chrome browser';
-    return;
-  }
+  if(!SR){const st=document.getElementById('spStatus');if(st)st.textContent='⚠ Speech recognition requires Chrome browser';return;}
   if(!spIsRec)return;
+  const mySession=++_spSessionId;
   try {
     spRec=new SR();
-    spRec.continuous=true;      // ← KEY FIX: continuous mode prevents mid-delay restarts
+    spRec.continuous=true;
     spRec.interimResults=true;
     spRec.lang='en-IN';
     spRec.maxAlternatives=1;
-
-    let _sessionText=''; // tracks what this SR session has already added
     spRec.onresult=e=>{
+      if(mySession!==_spSessionId)return;
       let interim='';
       for(let i=e.resultIndex;i<e.results.length;i++){
         if(e.results[i].isFinal){
           const t=e.results[i][0].transcript.trim();
-          // Only add if not already in spFinalText (prevents duplicate on restart)
-          if(t && !spFinalText.endsWith(t+' ')){
-            spFinalText+=t+' ';
-            _sessionText+=t+' ';
-            spText=spFinalText;
-          }
-        } else {
-          interim=e.results[i][0].transcript;
-        }
+          if(!t)continue;
+          if(spFinalText.trimEnd().endsWith(t))continue;
+          spFinalText+=(spFinalText&&!spFinalText.endsWith(' ')?' ':'')+t;
+          spText=spFinalText;
+        } else { interim=e.results[i][0].transcript; }
       }
       const tr=document.getElementById('spTranscript');
       if(tr)tr.innerHTML=spHL(spFinalText)+(interim?`<span class="sp-interim"> ${interim}</span>`:'');
@@ -1496,40 +1601,28 @@ function spStartSR() {
       const eb=document.getElementById('errBadge');
       if(eb){eb.textContent=ec+' error'+(ec!==1?'s':'');eb.style.display=ec>0?'block':'none';}
     };
-
     spRec.onerror=e=>{
+      if(mySession!==_spSessionId)return;
       console.log('SR error:',e.error);
-      if(['no-speech','audio-capture'].includes(e.error)&&spIsRec){
-        // no-speech is normal — just restart
-        clearTimeout(spRestartTimer);
-        spRestartTimer=setTimeout(()=>{if(spIsRec)spStartSR();},500);
-      } else if(e.error==='network'&&spIsRec){
-        clearTimeout(spRestartTimer);
-        spRestartTimer=setTimeout(()=>{if(spIsRec)spStartSR();},1000);
-      } else if(e.error==='not-allowed'){
-        toast('❌ Microphone permission denied. Please allow mic in browser settings.','error');
-        spStop();
-      }
+      if(['no-speech','audio-capture'].includes(e.error)&&spIsRec){clearTimeout(spRestartTimer);spRestartTimer=setTimeout(()=>{if(spIsRec&&mySession===_spSessionId)spStartSR();},500);}
+      else if(e.error==='network'&&spIsRec){clearTimeout(spRestartTimer);spRestartTimer=setTimeout(()=>{if(spIsRec&&mySession===_spSessionId)spStartSR();},1000);}
+      else if(e.error==='not-allowed'){toast('❌ Microphone permission denied. Allow mic in browser settings.','error');spStop();}
     };
-
     spRec.onend=()=>{
-      // Auto-restart if still recording (continuous mode should handle this, but as fallback)
-      if(spIsRec){
-        clearTimeout(spRestartTimer);
-        spRestartTimer=setTimeout(()=>{if(spIsRec)spStartSR();},300);
-      }
+      if(mySession!==_spSessionId)return;
+      if(spIsRec){clearTimeout(spRestartTimer);spRestartTimer=setTimeout(()=>{if(spIsRec&&mySession===_spSessionId)spStartSR();},300);}
     };
-
     spRec.start();
   } catch(err) {
+    if(mySession!==_spSessionId)return;
     console.error('SR start failed:',err);
-    const st=document.getElementById('spStatus');
-    if(st)st.textContent='⚠ Could not start microphone: '+err.message;
+    const st=document.getElementById('spStatus');if(st)st.textContent='⚠ Could not start microphone: '+err.message;
     spStop();
   }
 }
 
 async function spStop() {
+  _spSessionId++;
   spIsRec=false; clearInterval(spTimer); clearTimeout(spRestartTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   const btn=document.getElementById('spBtn');
