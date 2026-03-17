@@ -1705,30 +1705,20 @@ function spStartSR() {
   rec.maxAlternatives = 1;
   spRec = rec;
 
-  // Guard against Chrome replaying old final results when SR restarts.
-  // Two-layer defence:
-  //   1. Time window — ignore all finals for the first 1000ms after restart
-  //      (increased from 600ms; some devices deliver the replay at 700-900ms).
-  //   2. Content check — once the window expires, the very first final result is
-  //      compared against the text we already had at restart time. If it matches
-  //      the end of that snapshot it is a late replay and gets discarded.
-  let ignoreUntil = Date.now() + 1000;
-  const textAtRestart = spFinalText;   // snapshot of accumulated text before this restart
-  let firstAfterWindow = true;         // one-shot flag for the content dedup
-
   rec.onresult = e => {
     if(_spSessionId !== mySession) return;
     let interim = '';
     for(let i = e.resultIndex; i < e.results.length; i++){
       if(e.results[i].isFinal){
-        if(Date.now() < ignoreUntil) continue; // layer 1: time-based block
         const t = e.results[i][0].transcript.trim();
         if(!t) continue;
-        // layer 2: content-based dedup for the first result after the window
-        if(firstAfterWindow) {
-          firstAfterWindow = false;
-          if(textAtRestart && textAtRestart.trimEnd().endsWith(t)) continue;
-        }
+        // Dedup: strip punctuation and compare the tail of spFinalText to the
+        // incoming phrase. Chrome replays the last phrase on every SR restart —
+        // this catches it regardless of timing, capitalisation, or punctuation.
+        const norm = s => s.toLowerCase().replace(/[^\w\s]/g,'').replace(/\s+/g,' ').trim();
+        const tNorm = norm(t);
+        const tailNorm = norm(spFinalText).split(' ').slice(-tNorm.split(' ').length).join(' ');
+        if(tailNorm === tNorm) continue;
         spFinalText += (spFinalText && !spFinalText.endsWith(' ') ? ' ' : '') + t;
         spText = spFinalText;
       } else {
