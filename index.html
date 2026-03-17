@@ -1661,8 +1661,7 @@ function spToggle() {
 }
 
 function spStart() {
-  // Invalidate any old SR session and abort the old recorder BEFORE starting fresh,
-  // so a lingering onend callback cannot trigger a second spStartSR() call.
+  // Kill any stale SR session so its onend cannot fire a duplicate spStartSR().
   _spSessionId++;
   clearTimeout(spRestartTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
@@ -1716,18 +1715,22 @@ function spStartSR() {
   rec.onresult = e => {
     if(_spSessionId !== mySession) return;
     let interim = '';
+    // workingText mirrors spFinalText but is updated within the loop,
+    // so duplicates delivered in the same event batch are also caught.
+    let workingText = spFinalText;
     for(let i = e.resultIndex; i < e.results.length; i++){
       if(e.results[i].isFinal){
         const t = e.results[i][0].transcript.trim();
         if(!t) continue;
-        // Dedup: strip punctuation and compare the tail of spFinalText to the
-        // incoming phrase. Chrome replays the last phrase on every SR restart —
-        // this catches it regardless of timing, capitalisation, or punctuation.
+        // Dedup: compare the tail of workingText (not just spFinalText) to catch
+        // Chrome replaying the last phrase both across restarts AND within the same
+        // onresult batch (the most common cause of double/triple "hello").
         const norm = s => s.toLowerCase().replace(/[^\w\s]/g,'').replace(/\s+/g,' ').trim();
         const tNorm = norm(t);
-        const tailNorm = norm(spFinalText).split(' ').slice(-tNorm.split(' ').length).join(' ');
+        const tailNorm = norm(workingText).split(' ').slice(-tNorm.split(' ').length).join(' ');
         if(tailNorm === tNorm) continue;
-        spFinalText += (spFinalText && !spFinalText.endsWith(' ') ? ' ' : '') + t;
+        workingText += (workingText && !workingText.endsWith(' ') ? ' ' : '') + t;
+        spFinalText = workingText;
         spText = spFinalText;
       } else {
         interim = e.results[i][0].transcript;
