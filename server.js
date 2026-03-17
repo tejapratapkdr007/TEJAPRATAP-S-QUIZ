@@ -431,6 +431,70 @@ app.post("/schedule/affairs/mark-posted", (req, res) => {
 });
 
 // =====================================================
+// TRANSCRIBE AUDIO (Speech-to-Text via Anthropic)
+// =====================================================
+app.post("/transcribe", async (req, res) => {
+    const { audio, mimeType } = req.body;
+    if (!audio) return res.status(400).json({ error: "No audio data" });
+
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: "ANTHROPIC_API_KEY not set" });
+
+    let fetchFn = typeof fetch !== "undefined" ? fetch : null;
+    if (!fetchFn) {
+        try { const nf = await import("node-fetch"); fetchFn = nf.default || nf; }
+        catch { return res.status(500).json({ error: "HTTP client unavailable" }); }
+    }
+
+    // Strip data URL prefix if present, keep only base64
+    const base64Data = audio.includes(",") ? audio.split(",")[1] : audio;
+    const mime = mimeType || "audio/webm";
+
+    try {
+        const response = await fetchFn("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "x-api-key": apiKey,
+                "anthropic-version": "2023-06-01"
+            },
+            body: JSON.stringify({
+                model: "claude-haiku-4-5-20251001",
+                max_tokens: 1024,
+                messages: [{
+                    role: "user",
+                    content: [
+                        {
+                            type: "document",
+                            source: { type: "base64", media_type: mime, data: base64Data }
+                        },
+                        {
+                            type: "text",
+                            text: "Transcribe this audio exactly as spoken. Return ONLY the spoken words — no punctuation changes, no corrections, no commentary. Just the raw transcript."
+                        }
+                    ]
+                }]
+            })
+        });
+
+        if (!response.ok) {
+            const err = await response.text();
+            console.error("[Transcribe] API error:", response.status, err.substring(0, 200));
+            return res.status(500).json({ error: "Transcription failed" });
+        }
+
+        const data = await response.json();
+        const text = (data?.content?.[0]?.text || "").trim();
+        console.log("[Transcribe] Result:", text.substring(0, 100));
+        return res.json({ text });
+
+    } catch (e) {
+        console.error("[Transcribe] Error:", e.message);
+        return res.status(500).json({ error: e.message });
+    }
+});
+
+// =====================================================
 // AI GRAMMAR CHECK
 // =====================================================
 app.post("/ai/grammar", async (req, res) => {
