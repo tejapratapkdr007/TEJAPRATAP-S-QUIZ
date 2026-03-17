@@ -1617,6 +1617,7 @@ async function loadSpeak() {
 
 function spReset() {
   _spSessionId++;
+  _spSeenChunks=new Set();
   spElapsed=0; spText=''; spFinalText=''; spIsRec=false; spRestartCount=0;
   clearInterval(spTimer); clearTimeout(spRestartTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
@@ -1653,6 +1654,7 @@ function spToggle() {
 
 function spStart() {
   spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spRestartCount=0;
+  _spSeenChunks=new Set();
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.add('rec');btn.textContent='⏸';}
   const st=document.getElementById('spStatus');
@@ -1684,29 +1686,37 @@ function spPause() {
 }
 
 let _spSessionId = 0;
+let _spSeenChunks = new Set();
 
 function spStartSR() {
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){const st=document.getElementById('spStatus');if(st)st.textContent='⚠ Speech recognition requires Chrome browser';return;}
   if(!spIsRec)return;
   const mySession=++_spSessionId;
+  // Snapshot length of already-committed text before this SR instance starts
+  const baseLen=spFinalText.length;
+  let _srNew=''; // text added by THIS SR instance only
   try {
     spRec=new SR();
     spRec.continuous=true;
     spRec.interimResults=true;
     spRec.lang='en-IN';
     spRec.maxAlternatives=1;
-    let _lastFinalIndex=-1;
     spRec.onresult=e=>{
       if(mySession!==_spSessionId)return;
       let interim='';
       for(let i=e.resultIndex;i<e.results.length;i++){
         if(e.results[i].isFinal){
-          if(i<=_lastFinalIndex)continue;
-          _lastFinalIndex=i;
           const t=e.results[i][0].transcript.trim();
           if(!t)continue;
-          spFinalText+=(spFinalText&&!spFinalText.endsWith(' ')?' ':'')+t;
+          // Skip if already seen in any previous SR instance
+          if(_spSeenChunks.has(t))continue;
+          // Skip if already appended in this SR instance
+          if(_srNew.includes(t))continue;
+          _spSeenChunks.add(t);
+          _srNew+=(_srNew&&!_srNew.endsWith(' ')?' ':'')+t;
+          const base=spFinalText.slice(0,baseLen);
+          spFinalText=(base+(base&&!base.endsWith(' ')&&_srNew?' ':'')+_srNew).trim();
           spText=spFinalText;
         } else { interim=e.results[i][0].transcript; }
       }
