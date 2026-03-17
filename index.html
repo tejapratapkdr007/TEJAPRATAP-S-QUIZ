@@ -876,6 +876,8 @@ let T_PW = localStorage.getItem('tpw') || '11223344@Ttp';
 let _gkCache = null, gkInterval = null;
 let spRec = null, spIsRec = false, spTimer = null, spElapsed = 0, spDuration = 120, spText = '', spFinalText = '';
 let spRestartCount = 0, spRestartTimer = null;
+// MediaRecorder globals — used for audio-based transcription
+let spMediaRec = null, spAudioChunks = [], spMediaStream = null;
 
 // ═══════════════════════════════════════════════════
 // INIT
@@ -1629,6 +1631,8 @@ function spReset() {
   spElapsed=0; spText=''; spFinalText=''; spIsRec=false; spRestartCount=0;
   clearInterval(spTimer); clearTimeout(spRestartTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+  if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
+  spMediaRec=null; spAudioChunks=[];
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
   const st=document.getElementById('spStatus');
@@ -1661,11 +1665,11 @@ function spToggle() {
 }
 
 function spStart() {
-  // Kill any stale SR session so its onend cannot fire a duplicate spStartSR().
-  _spSessionId++;
+  // Kill any stale session
   clearTimeout(spRestartTimer);
-  if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+  if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spRestartCount=0;
+  spAudioChunks=[];
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.add('rec');btn.textContent='⏸';}
   const st=document.getElementById('spStatus');
@@ -1678,6 +1682,7 @@ function spStart() {
   document.getElementById('spScore').textContent='—';
   document.getElementById('spWords').textContent='0';
   spStartSR();
+  spStartMediaRecorder();
   clearInterval(spTimer);
   spTimer=setInterval(()=>{
     if(!spIsRec)return;
@@ -1689,7 +1694,8 @@ function spStart() {
 function spPause() {
   _spSessionId++;
   spIsRec=false; clearInterval(spTimer);
-  if(spRec){spRec.onend=null;try{spRec.abort();}catch(e){}spRec=null;}
+  if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+  if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
   const st=document.getElementById('spStatus');
@@ -1698,12 +1704,40 @@ function spPause() {
 
 let _spSessionId = 0;
 
+// ─── MediaRecorder: records real audio, used as the FINAL transcript source ───
+function spStartMediaRecorder() {
+  spAudioChunks = [];
+  if(spMediaStream){
+    _doStartMR(spMediaStream);
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    spMediaStream = stream;
+    _doStartMR(stream);
+  }).catch(()=>{
+    // No mic access — SR-only fallback (duplicates may occur but at least it works)
+  });
+}
+function _doStartMR(stream){
+  const mimeTypes = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4',''];
+  let mime = '';
+  for(const m of mimeTypes){ if(m===''||MediaRecorder.isTypeSupported(m)){mime=m;break;} }
+  try{
+    spMediaRec = new MediaRecorder(stream, mime?{mimeType:mime}:{});
+  }catch(e){
+    spMediaRec = new MediaRecorder(stream);
+  }
+  spMediaRec.ondataavailable = e => { if(e.data && e.data.size>0) spAudioChunks.push(e.data); };
+  spMediaRec.start(1000); // collect chunks every 1s
+}
+
+// ─── SR: used ONLY for live interim display, NOT for final text ───
 function spStartSR() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){ const st=document.getElementById('spStatus'); if(st)st.textContent='⚠ Speech recognition requires Chrome browser'; return; }
+  if(!SR) return; // SR optional — MediaRecorder handles accuracy
   if(!spIsRec) return;
   const mySession = ++_spSessionId;
-  if(spRec){ try{spRec.abort();}catch(e){} spRec=null; }
+  if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
 
   const rec = new SR();
   rec.continuous = true;
@@ -1714,50 +1748,28 @@ function spStartSR() {
 
   rec.onresult = e => {
     if(_spSessionId !== mySession) return;
+    // SR is DISPLAY ONLY — we only show interim (live) results here.
+    // Final text comes from audio transcription in spStop().
     let interim = '';
-    // workingText mirrors spFinalText but is updated within the loop,
-    // so duplicates delivered in the same event batch are also caught.
-    let workingText = spFinalText;
     for(let i = e.resultIndex; i < e.results.length; i++){
-      if(e.results[i].isFinal){
-        const t = e.results[i][0].transcript.trim();
-        if(!t) continue;
-        // Dedup: compare the tail of workingText (not just spFinalText) to catch
-        // Chrome replaying the last phrase both across restarts AND within the same
-        // onresult batch (the most common cause of double/triple "hello").
-        const norm = s => s.toLowerCase().replace(/[^\w\s]/g,'').replace(/\s+/g,' ').trim();
-        const tNorm = norm(t);
-        const tailNorm = norm(workingText).split(' ').slice(-tNorm.split(' ').length).join(' ');
-        if(tailNorm === tNorm) continue;
-        workingText += (workingText && !workingText.endsWith(' ') ? ' ' : '') + t;
-        spFinalText = workingText;
-        spText = spFinalText;
-      } else {
-        interim = e.results[i][0].transcript;
-      }
+      if(!e.results[i].isFinal) interim = e.results[i][0].transcript;
     }
     const tr = document.getElementById('spTranscript');
     if(tr) tr.innerHTML = spHL(spFinalText) + (interim ? `<span class="sp-interim"> ${interim}</span>` : '');
-    const wc = spFinalText.trim().split(/\s+/).filter(Boolean).length;
-    const ew = document.getElementById('spWords'); if(ew) ew.textContent = wc;
-    const ec = spCountErr(spFinalText);
-    const errEl = document.getElementById('spErrs'); if(errEl) errEl.textContent = ec;
-    const eb = document.getElementById('errBadge');
-    if(eb){ eb.textContent = ec+' error'+(ec!==1?'s':''); eb.style.display = ec>0?'block':'none'; }
   };
 
   rec.onerror = e => {
     if(_spSessionId !== mySession) return;
-    if(e.error === 'not-allowed'){ toast('❌ Microphone permission denied.','error'); spStop(); }
+    if(e.error==='not-allowed'){toast('❌ Microphone permission denied.','error');spStop();}
   };
 
   rec.onend = () => {
     if(_spSessionId !== mySession || !spIsRec) return;
     clearTimeout(spRestartTimer);
-    spRestartTimer = setTimeout(()=>{ if(spIsRec && _spSessionId===mySession) spStartSR(); }, 250);
+    spRestartTimer = setTimeout(()=>{ if(spIsRec && _spSessionId===mySession) spStartSR(); }, 300);
   };
 
-  try{ rec.start(); } catch(err){ if(_spSessionId !== mySession) return; spStop(); }
+  try{ rec.start(); } catch(err){ /* SR failure is non-fatal, MediaRecorder still runs */ }
 }
 
 async function spStop() {
@@ -1767,22 +1779,49 @@ async function spStop() {
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
   const st=document.getElementById('spStatus');
-  if(st){st.textContent='⏳ Analysing with AI...';st.className='sp-status done';}
+  if(st){st.textContent='⏳ Transcribing your speech...';st.className='sp-status done';}
   const sub=document.getElementById('tSub');if(sub)sub.textContent='DONE';
 
-  // Use accumulated final text
-  const fullText=spFinalText.trim()||spText.trim();
+  // Stop MediaRecorder and wait for final chunk
+  await new Promise(resolve=>{
+    if(!spMediaRec||spMediaRec.state==='inactive'){resolve();return;}
+    spMediaRec.onstop=resolve;
+    try{spMediaRec.stop();}catch(e){resolve();}
+  });
+
+  // ── Transcribe audio via backend ──────────────────────────────────────────
+  let fullText = '';
+  if(spAudioChunks.length > 0){
+    try{
+      const mimeType = spMediaRec ? (spMediaRec.mimeType||'audio/webm') : 'audio/webm';
+      const audioBlob = new Blob(spAudioChunks, {type: mimeType});
+      const formData = new FormData();
+      const ext = mimeType.includes('mp4')?'mp4':mimeType.includes('ogg')?'ogg':'webm';
+      formData.append('audio', audioBlob, 'speech.'+ext);
+      if(st)st.textContent='⏳ Transcribing... please wait';
+      const resp = await fetch(API+'/transcribe', {method:'POST', body:formData});
+      if(resp.ok){
+        const data = await resp.json();
+        fullText = (data.text||data.transcript||'').trim();
+      }
+    }catch(e){console.error('Transcription error:',e);}
+  }
+
+  // ── Fallback to SR text if transcription failed or returned empty ─────────
+  if(!fullText){
+    fullText = spFinalText.trim()||spText.trim();
+  }
+
   if(!fullText){
     if(st)st.textContent='No speech detected. Try again.';
     return;
   }
-  spText=fullText;
 
-  // Show word count
+  // Update displayed transcript with final clean text
+  spFinalText = fullText;
+  spText = fullText;
   const wc=fullText.split(/\s+/).filter(Boolean).length;
   const ew=document.getElementById('spWords');if(ew)ew.textContent=wc;
-
-  // Show transcript with local highlights
   const tr=document.getElementById('spTranscript');
   if(tr)tr.innerHTML=spHL(fullText);
 
@@ -1795,16 +1834,14 @@ async function spStop() {
   if(acl)acl.style.display='flex';
   if(ab)ab.classList.add('show');
   if(aal)aal.style.display='flex';
+  if(st)st.textContent='⏳ AI is analysing your speech...';
 
   // Call AI
   const aiResult=await aiCorrectSpeech(fullText);
 
   if(aiResult){
-    // AI succeeded — use AI results
     const errCount=aiResult.errors?.length||0;
     const score=aiResult.score||Math.max(40,100-errCount*7);
-
-    // Update stats
     const errEl=document.getElementById('spErrs');
     if(errEl){errEl.textContent=errCount;errEl.style.color=errCount>0?'#f87171':'#4ade80';}
     const scEl=document.getElementById('spScore');
@@ -1812,8 +1849,6 @@ async function spStop() {
     const eb=document.getElementById('errBadge');
     if(eb){eb.textContent=errCount+' error'+(errCount!==1?'s':'');eb.style.display=errCount>0?'block':'none';}
     if(st)st.textContent=`✅ AI Analysis Complete — Score: ${score}%`;
-
-    // Box 1: Highlight errors in transcript
     if(tr&&aiResult.errors?.length){
       let highlighted=fullText;
       aiResult.errors.forEach(err=>{
@@ -1824,13 +1859,9 @@ async function spStop() {
       });
       tr.innerHTML=highlighted;
     }
-
-    // Box 2: Corrected version
     if(acl)acl.style.display='none';
     const ct=document.getElementById('spCorrectTxt');
     if(ct)ct.textContent=aiResult.corrected||fullText;
-
-    // Box 3: Error analysis
     if(aal)aal.style.display='none';
     const abg=document.getElementById('spABadge');
     if(abg)abg.textContent=errCount+' mistake'+(errCount!==1?'s':'')+' found';
@@ -1847,8 +1878,6 @@ async function spStop() {
         ac.innerHTML='<div style="color:#4ade80;font-size:13px;padding:8px 0">🎉 No grammar errors! Excellent!</div>';
       }
     }
-
-    // Box 4: AI Suggestions
     const sb=document.getElementById('spSuggestBox'),sc=document.getElementById('spSuggestContent');
     if(sb&&sc){
       const tips=[...(aiResult.suggestions||[]),...(aiResult.pronunciation_tips||[])];
@@ -1856,9 +1885,8 @@ async function spStop() {
       sc.innerHTML=tips.map((t,i)=>`<div class="sp-sug-item"><div class="sp-sug-ic">${icons[i%icons.length]}</div><div class="sp-sug-txt">${t}</div></div>`).join('');
       sb.classList.add('show');
     }
-
   } else {
-    // AI failed — fallback to local grammar check
+    // AI failed — local fallback
     if(acl)acl.style.display='none';
     if(aal)aal.style.display='none';
     const errCount=spCountErr(fullText);
@@ -1867,7 +1895,7 @@ async function spStop() {
     if(errEl){errEl.textContent=errCount;errEl.style.color=errCount>0?'#f87171':'#4ade80';}
     const scEl=document.getElementById('spScore');
     if(scEl){scEl.textContent=score+'%';scEl.style.color=score>=80?'#4ade80':score>=60?'#fbbf24':'#f87171';}
-    if(st)st.textContent=`✅ Analysis Complete (local check) — ${errCount} error${errCount!==1?'s':''}`;
+    if(st)st.textContent=`✅ Analysis Complete (local) — ${errCount} error${errCount!==1?'s':''}`;
     const ct=document.getElementById('spCorrectTxt');if(ct)ct.innerHTML=spFixLocal(fullText);
     const abg=document.getElementById('spABadge');if(abg)abg.textContent=errCount+' mistake'+(errCount!==1?'s':'')+' found';
     const ac=document.getElementById('spAnalysisContent');
