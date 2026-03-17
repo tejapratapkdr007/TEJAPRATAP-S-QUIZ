@@ -1690,36 +1690,44 @@ function spStartSR() {
   if(!SR){const st=document.getElementById('spStatus');if(st)st.textContent='⚠ Speech recognition requires Chrome browser';return;}
   if(!spIsRec)return;
   const mySession=++_spSessionId;
-  // Snapshot of committed text length at start of THIS SR instance
-  // Any final result that is already a suffix of spFinalText is a replay — skip it
+  // Words already committed before this SR instance starts.
+  // Chrome replays ALL buffered results on each new SR instance starting from index 0.
+  // We reconstruct what Chrome will replay and skip those words exactly.
+  const wordsBeforeRestart=spFinalText.trim().split(/\s+/).filter(Boolean);
+  const wordCountBefore=wordsBeforeRestart.length;
   try {
     spRec=new SR();
     spRec.continuous=true;
     spRec.interimResults=true;
     spRec.lang='en-IN';
     spRec.maxAlternatives=1;
-    let _instanceFinals=[]; // finals committed by THIS instance only
+    // Track all words Chrome delivers in this instance (including replays)
+    let allWordsThisInstance=[];
     spRec.onresult=e=>{
       if(mySession!==_spSessionId)return;
       let interim='';
-      for(let i=e.resultIndex;i<e.results.length;i++){
+      // Rebuild full transcript from ALL finals Chrome has delivered so far this instance
+      let instanceFinalText='';
+      for(let i=0;i<e.results.length;i++){
         if(e.results[i].isFinal){
           const t=e.results[i][0].transcript.trim();
-          if(!t)continue;
-          // Deduplicate: skip if this exact text already at the end of spFinalText
-          const norm=t.toLowerCase().replace(/\s+/g,' ');
-          const already=spFinalText.toLowerCase().replace(/\s+/g,' ');
-          if(already.endsWith(norm))continue;
-          // Also skip if already added by this instance (Chrome double-fires)
-          if(_instanceFinals.includes(norm))continue;
-          _instanceFinals.push(norm);
-          spFinalText+=(spFinalText&&!spFinalText.endsWith(' ')?' ':'')+t;
-          spText=spFinalText;
-        } else { interim=e.results[i][0].transcript; }
+          if(t)instanceFinalText+=(instanceFinalText?' ':'')+t;
+        } else {
+          interim=e.results[i][0].transcript;
+        }
       }
+      // instanceFinalText now contains EVERYTHING Chrome has finalized this instance
+      // including replays of previous session words. Split into words.
+      const instanceWords=instanceFinalText.trim().split(/\s+/).filter(Boolean);
+      // Only words BEYOND the pre-restart count are genuinely new
+      const newWords=instanceWords.slice(wordCountBefore);
+      // Rebuild spFinalText = original words + new words
+      const combined=[...wordsBeforeRestart,...newWords];
+      spFinalText=combined.join(' ');
+      spText=spFinalText;
       const tr=document.getElementById('spTranscript');
       if(tr)tr.innerHTML=spHL(spFinalText)+(interim?`<span class="sp-interim"> ${interim}</span>`:'');
-      const wc=spFinalText.trim().split(/\s+/).filter(Boolean).length;
+      const wc=combined.length;
       const ew=document.getElementById('spWords');if(ew)ew.textContent=wc;
       const ec=spCountErr(spFinalText);
       const errEl=document.getElementById('spErrs');if(errEl)errEl.textContent=ec;
