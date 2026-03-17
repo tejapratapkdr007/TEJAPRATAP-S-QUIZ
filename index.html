@@ -1616,7 +1616,7 @@ async function loadSpeak() {
 }
 
 function spReset() {
-  _spSessionId++; _spCommitted=new Set();
+  _spSessionId++;
   spElapsed=0; spText=''; spFinalText=''; spIsRec=false; spRestartCount=0;
   clearInterval(spTimer); clearTimeout(spRestartTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
@@ -1652,7 +1652,7 @@ function spToggle() {
 }
 
 function spStart() {
-  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spRestartCount=0; _spCommitted=new Set(); _spSessionId++;
+  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spRestartCount=0;
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.add('rec');btn.textContent='⏸';}
   const st=document.getElementById('spStatus');
@@ -1684,14 +1684,15 @@ function spPause() {
 }
 
 let _spSessionId = 0;
-let _spCommitted = new Set(); // stores every transcript chunk ever committed this session
 
 function spStartSR() {
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){const st=document.getElementById('spStatus');if(st)st.textContent='⚠ Speech recognition requires Chrome browser';return;}
   if(!spIsRec)return;
-  const mySession=_spSessionId;
+  const mySession=++_spSessionId;
+
   if(spRec){try{spRec.abort();}catch(e){}spRec=null;}
+
   const rec=new SR();
   rec.continuous=true;
   rec.interimResults=true;
@@ -1699,18 +1700,16 @@ function spStartSR() {
   rec.maxAlternatives=1;
   spRec=rec;
 
+  // Use e.resultIndex directly — Chrome guarantees this points to only NEW results
+  // within a single continuous SR instance. No restart = no replay.
   rec.onresult=e=>{
     if(_spSessionId!==mySession)return;
     let interim='';
+    // Only process from e.resultIndex — this is always the NEW result Chrome just finalized
     for(let i=e.resultIndex;i<e.results.length;i++){
       if(e.results[i].isFinal){
         const t=e.results[i][0].transcript.trim();
         if(!t)continue;
-        // Normalize: lowercase, collapse spaces, strip punctuation for comparison
-        const key=t.toLowerCase().replace(/[^\w\s]/g,'').replace(/\s+/g,' ').trim();
-        if(!key)continue;
-        if(_spCommitted.has(key))continue; // already added — Chrome replay
-        _spCommitted.add(key);
         spFinalText+=(spFinalText&&!spFinalText.endsWith(' ')?' ':'')+t;
         spText=spFinalText;
       } else {
@@ -1729,15 +1728,23 @@ function spStartSR() {
 
   rec.onerror=e=>{
     if(_spSessionId!==mySession)return;
-    if(e.error==='not-allowed'){toast('❌ Microphone permission denied.','error');spStop();}
+    if(e.error==='not-allowed'){toast('❌ Microphone permission denied.','error');spStop();return;}
+    // For no-speech: ignore — continuous mode handles silence automatically
   };
 
+  // onend fires when Chrome stops (e.g. silence timeout on mobile)
+  // Instead of creating a NEW SR instance (which causes replay),
+  // we call .start() again on the SAME instance — no replay possible
   rec.onend=()=>{
     if(_spSessionId!==mySession||!spIsRec)return;
     clearTimeout(spRestartTimer);
     spRestartTimer=setTimeout(()=>{
-      if(spIsRec&&_spSessionId===mySession)spStartSR();
-    },300);
+      if(!spIsRec||_spSessionId!==mySession)return;
+      try{rec.start();}catch(err){
+        // If same instance can't restart, only then create new one
+        spStartSR();
+      }
+    },200);
   };
 
   try{rec.start();}catch(err){
