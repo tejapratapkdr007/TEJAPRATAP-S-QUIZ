@@ -417,8 +417,16 @@ body{overflow:hidden}
         <div class="stat-tile wd-tile" onclick="go('s-word')"><div class="st-icon">📖</div><div class="st-val" style="color:#16a34a;font-size:17px">Word of Day</div><div class="st-lbl" style="color:#64748b">Vocabulary · +5 pts</div></div>
         <div class="stat-tile af-tile" onclick="go('s-affairs')"><div class="st-icon">📰</div><div class="st-val" style="color:#ea580c;font-size:17px">Current Affairs</div><div class="st-lbl" style="color:#64748b">Daily GK · +5 pts</div></div>
       </div>
-      <div class="stat-tile md-tile" onclick="go('s-media')" style="margin-bottom:0">
+      <div class="stat-tile md-tile" onclick="go('s-media')" style="margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:12px"><div class="st-icon" style="margin-bottom:0">🎵</div><div><div class="st-val" style="color:#d97706;font-size:17px">Media Question</div><div class="st-lbl" style="color:#64748b">Image / Audio from teacher · +5 pts</div></div></div>
+      </div>
+      <!-- Top 3 Students -->
+      <div style="background:#ffffff;border:1.5px solid rgba(255,215,0,0.3);border-radius:13px;padding:16px;margin-bottom:0">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="font-size:18px">🏆</span>
+          <div style="font-size:11px;font-weight:700;color:#FFD700;letter-spacing:1.5px;text-transform:uppercase">Top 3 Students</div>
+        </div>
+        <div id="homeTop3"><div style="color:#64748b;font-size:12px;text-align:center;padding:8px">Loading...</div></div>
       </div>
     </div>
 
@@ -1080,7 +1088,10 @@ function buildTopbarStudent() {
     </div>
     <div class="topbar-user" onclick="showProfileModal()" title="My Profile" style="cursor:pointer">
       <div class="topbar-avatar" id="topAvatar">?</div>
-      <div class="topbar-uname" id="topName"></div>
+      <div>
+        <div class="topbar-uname" id="topName"></div>
+        <div style="font-size:9px;color:#64748b;letter-spacing:0.5px" id="topPin"></div>
+      </div>
     </div>`;
 }
 function buildTeacherSidebar() {
@@ -1098,6 +1109,7 @@ function enterHome() {
   buildStudentSidebar(); buildTopbarStudent(); go('s-home');
   const av = document.getElementById('topAvatar'); if (av) av.textContent = (MY_NAME||'?')[0].toUpperCase();
   const tn = document.getElementById('topName'); if (tn) tn.textContent = MY_NAME;
+  const tp = document.getElementById('topPin'); if (tp) tp.textContent = ME;
   document.getElementById('hWelcome').textContent = 'Welcome, ' + MY_NAME + '!';
   document.getElementById('hPin').textContent = 'PIN: ' + ME;
   loadLoginFaf(); loadHomeFaf(); loadStats();
@@ -1158,6 +1170,27 @@ async function loadStats() {
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
   set('hScore',myTotal); set('hRank',rank>0?'#'+rank:'#—'); set('hStreak','🔥'+myStreak);
   set('hScoreHome',myTotal); set('hRankHome',rank>0?'#'+rank:'#—'); set('hStreakHome','🔥'+myStreak);
+  // render top 3
+  const medals=['🥇','🥈','🥉'],golds=['#FFD700','#C0C0C0','#cd7f32'];
+  const top3=all.slice(0,3);
+  const el=document.getElementById('homeTop3');
+  if(el){
+    if(!top3.length){el.innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:8px">No data yet</div>';}
+    else{
+      el.innerHTML=top3.map((s,i)=>{
+        const isMe=s.p===ME;
+        const name=(scores[s.p]?.name)||s.p;
+        return`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;margin-bottom:6px;background:${isMe?'rgba(255,215,0,0.06)':'rgba(248,250,252,0.6)'};border:1px solid ${isMe?'rgba(255,215,0,0.25)':'rgba(219,234,254,0.8)'}">
+          <span style="font-size:18px">${medals[i]}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700;color:${golds[i]};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}${isMe?' (You)':''}</div>
+            <div style="font-size:10px;color:#64748b">${s.p}</div>
+          </div>
+          <div style="font-size:14px;font-weight:800;color:#7b9fff">${s.t}pts</div>
+        </div>`;
+      }).join('');
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════
@@ -1415,27 +1448,81 @@ async function loadRank() {
 }
 
 // ═══════════════════════════════════════════════════
-// AI GRAMMAR CORRECTION via server proxy
+// AI GRAMMAR CORRECTION — direct Anthropic API call
 // ═══════════════════════════════════════════════════
 async function aiCorrectSpeech(text) {
   if (!text || text.trim().length < 5) return null;
+  const userPrompt = `You are a strict English grammar teacher. Carefully analyze this spoken English text and find EVERY single mistake — grammar, tense, articles, subject-verb agreement, word choice, prepositions, plurals, spelling (as spoken).
+
+Student's spoken text:
+"${text.trim()}"
+
+Reply ONLY with a valid JSON object — no markdown, no explanation, no extra text. Use this exact format:
+{
+  "corrected": "the fully corrected version of the text",
+  "score": 78,
+  "errors": [
+    {
+      "wrong": "exact phrase from student text",
+      "right": "corrected phrase",
+      "rule": "clear explanation of the error",
+      "type": "Tense|Article|Agreement|Vocabulary|Preposition|Plural|Word Order"
+    }
+  ],
+  "suggestions": ["specific improvement tip 1", "specific improvement tip 2"],
+  "pronunciation_tips": ["pronunciation tip if relevant"]
+}
+
+Important rules:
+- "wrong" must be copied EXACTLY as it appears in the student's text (case-insensitive match)
+- score 100 = perfect, 0 = very poor
+- Find EVERY mistake — do not skip even small errors
+- If text is perfect, return empty errors array and score 95-100`;
+
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
       const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 28000);
-      const response = await fetch(API + '/ai/grammar', {
+      const timer = setTimeout(() => ctrl.abort(), 30000);
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text.trim() }),
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: userPrompt }]
+        }),
         signal: ctrl.signal
       });
       clearTimeout(timer);
-      if (!response.ok) { console.error('AI HTTP:', response.status); if (response.status >= 400 && response.status < 500) break; if (attempt < 2) await new Promise(r => setTimeout(r, 1500)); continue; }
-      const result = await response.json();
-      if (!result || typeof result.corrected !== 'string') { if (attempt < 2) { await new Promise(r => setTimeout(r, 1500)); continue; } return null; }
+      if (!response.ok) {
+        console.error('AI HTTP:', response.status);
+        if (response.status >= 400 && response.status < 500) break;
+        if (attempt < 2) await new Promise(r => setTimeout(r, 1500));
+        continue;
+      }
+      const data = await response.json();
+      const raw = data?.content?.find(b => b.type === 'text')?.text || '';
+      const clean = raw.replace(/```json|```/g, '').trim();
+      const result = JSON.parse(clean);
+      if (!result || typeof result.corrected !== 'string') {
+        if (attempt < 2) { await new Promise(r => setTimeout(r, 1500)); continue; }
+        return null;
+      }
       return result;
     } catch(e) {
       console.error('AI attempt', attempt, e.name === 'AbortError' ? 'timed out' : e.message);
+      // fallback to backend proxy if direct call fails
+      try {
+        const r2 = await fetch(API + '/ai/grammar', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: text.trim() })
+        });
+        if (r2.ok) {
+          const res2 = await r2.json();
+          if (res2 && typeof res2.corrected === 'string') return res2;
+        }
+      } catch(e2) { console.error('Backend AI fallback failed:', e2.message); }
       if (attempt < 2) await new Promise(r => setTimeout(r, 1500));
     }
   }
@@ -1609,14 +1696,16 @@ function spStartSR() {
     spRec.interimResults=true;
     spRec.lang='en-IN';
     spRec.maxAlternatives=1;
+    let _lastFinalIndex=-1;
     spRec.onresult=e=>{
       if(mySession!==_spSessionId)return;
       let interim='';
       for(let i=e.resultIndex;i<e.results.length;i++){
         if(e.results[i].isFinal){
+          if(i<=_lastFinalIndex)continue;
+          _lastFinalIndex=i;
           const t=e.results[i][0].transcript.trim();
           if(!t)continue;
-          if(spFinalText.trimEnd().endsWith(t))continue;
           spFinalText+=(spFinalText&&!spFinalText.endsWith(' ')?' ':'')+t;
           spText=spFinalText;
         } else { interim=e.results[i][0].transcript; }
