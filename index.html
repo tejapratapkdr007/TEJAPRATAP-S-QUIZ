@@ -1686,71 +1686,76 @@ function spPause() {
 let _spSessionId = 0;
 
 function spStartSR() {
-  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-  if(!SR){const st=document.getElementById('spStatus');if(st)st.textContent='⚠ Speech recognition requires Chrome browser';return;}
-  if(!spIsRec)return;
-  const mySession=++_spSessionId;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ const st=document.getElementById('spStatus'); if(st)st.textContent='⚠ Speech recognition requires Chrome browser'; return; }
+  if(!spIsRec) return;
+  const mySession = ++_spSessionId;
+  if(spRec && spRec.getTracks){ spRec.getTracks().forEach(t=>t.stop()); spRec=null; }
+  else if(spRec){ try{spRec.abort();}catch(e){} spRec=null; }
 
-  if(spRec){try{spRec.abort();}catch(e){}spRec=null;}
+  const rec = new SR();
+  rec.continuous = true;
+  rec.interimResults = true;
+  rec.lang = 'en-IN';
+  rec.maxAlternatives = 1;
+  spRec = rec;
 
-  const rec=new SR();
-  rec.continuous=true;
-  rec.interimResults=true;
-  rec.lang='en-IN';
-  rec.maxAlternatives=1;
-  spRec=rec;
+  // The ONLY reliable dedup for Chrome Mobile:
+  // Store the total word count we had when this SR instance started.
+  // Chrome always delivers a GROWING cumulative transcript within one instance.
+  // On restart it replays from beginning. So we track a "cursor" of how many
+  // cumulative words we have processed from Chrome, and only append words beyond cursor.
+  let chromeCursor = 0; // words already taken from Chrome's cumulative transcript
 
-  // Use e.resultIndex directly — Chrome guarantees this points to only NEW results
-  // within a single continuous SR instance. No restart = no replay.
-  rec.onresult=e=>{
-    if(_spSessionId!==mySession)return;
-    let interim='';
-    // Only process from e.resultIndex — this is always the NEW result Chrome just finalized
-    for(let i=e.resultIndex;i<e.results.length;i++){
+  rec.onresult = e => {
+    if(_spSessionId !== mySession) return;
+
+    // Build Chrome's full cumulative final transcript for this instance
+    let cumFinal = '';
+    let interim = '';
+    for(let i = 0; i < e.results.length; i++){
       if(e.results[i].isFinal){
-        const t=e.results[i][0].transcript.trim();
-        if(!t)continue;
-        spFinalText+=(spFinalText&&!spFinalText.endsWith(' ')?' ':'')+t;
-        spText=spFinalText;
+        cumFinal += (cumFinal?' ':'')+e.results[i][0].transcript.trim();
       } else {
-        interim=e.results[i][0].transcript;
+        interim = e.results[i][0].transcript;
       }
     }
-    const tr=document.getElementById('spTranscript');
-    if(tr)tr.innerHTML=spHL(spFinalText)+(interim?`<span class="sp-interim"> ${interim}</span>`:'');
-    const wc=spFinalText.trim().split(/\s+/).filter(Boolean).length;
-    const ew=document.getElementById('spWords');if(ew)ew.textContent=wc;
-    const ec=spCountErr(spFinalText);
-    const errEl=document.getElementById('spErrs');if(errEl)errEl.textContent=ec;
-    const eb=document.getElementById('errBadge');
-    if(eb){eb.textContent=ec+' error'+(ec!==1?'s':'');eb.style.display=ec>0?'block':'none';}
+
+    // Chrome's cumulative words for this instance
+    const cumWords = cumFinal.trim() ? cumFinal.trim().split(/\s+/) : [];
+
+    // Only words beyond our cursor are new
+    if(cumWords.length > chromeCursor){
+      const newWords = cumWords.slice(chromeCursor);
+      chromeCursor = cumWords.length;
+      const toAdd = newWords.join(' ');
+      spFinalText += (spFinalText && !spFinalText.endsWith(' ') ? ' ' : '') + toAdd;
+      spText = spFinalText;
+    }
+
+    const tr = document.getElementById('spTranscript');
+    if(tr) tr.innerHTML = spHL(spFinalText) + (interim ? `<span class="sp-interim"> ${interim}</span>` : '');
+    const wc = spFinalText.trim().split(/\s+/).filter(Boolean).length;
+    const ew = document.getElementById('spWords'); if(ew) ew.textContent = wc;
+    const ec = spCountErr(spFinalText);
+    const errEl = document.getElementById('spErrs'); if(errEl) errEl.textContent = ec;
+    const eb = document.getElementById('errBadge');
+    if(eb){ eb.textContent = ec+' error'+(ec!==1?'s':''); eb.style.display = ec>0?'block':'none'; }
   };
 
-  rec.onerror=e=>{
-    if(_spSessionId!==mySession)return;
-    if(e.error==='not-allowed'){toast('❌ Microphone permission denied.','error');spStop();return;}
-    // For no-speech: ignore — continuous mode handles silence automatically
+  rec.onerror = e => {
+    if(_spSessionId !== mySession) return;
+    if(e.error === 'not-allowed'){ toast('❌ Microphone permission denied.','error'); spStop(); }
   };
 
-  // onend fires when Chrome stops (e.g. silence timeout on mobile)
-  // Instead of creating a NEW SR instance (which causes replay),
-  // we call .start() again on the SAME instance — no replay possible
-  rec.onend=()=>{
-    if(_spSessionId!==mySession||!spIsRec)return;
+  rec.onend = () => {
+    if(_spSessionId !== mySession || !spIsRec) return;
+    // On restart, Chrome replays from beginning — spStartSR captures new wordsBefore snapshot
     clearTimeout(spRestartTimer);
-    spRestartTimer=setTimeout(()=>{
-      if(!spIsRec||_spSessionId!==mySession)return;
-      try{rec.start();}catch(err){
-        // If same instance can't restart, only then create new one
-        spStartSR();
-      }
-    },200);
+    spRestartTimer = setTimeout(()=>{ if(spIsRec && _spSessionId===mySession) spStartSR(); }, 250);
   };
 
-  try{rec.start();}catch(err){
-    if(_spSessionId!==mySession)return;
-    console.error('SR start failed:',err);spStop();
-  }
+  try{ rec.start(); } catch(err){ if(_spSessionId !== mySession) return; spStop(); }
 }
 
 async function spStop() {
