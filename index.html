@@ -2,7 +2,11 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1E5BFF">
 <title>TEJAPRATAP QUIZ — Learn · Speak · Excel</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -232,7 +236,7 @@ body{overflow:hidden}
 .sp-bx-ic{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
 .sp-bx-ttl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.8px}
 .sp-bx-badge{margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
-.sp-what{background:#ffffff;border-color:#fecaca}
+.sp-what{background:#fff;border-color:#fecaca}
 .sp-what-txt{font-size:14px;line-height:1.9;color:#374151;min-height:50px}
 .sp-eword{color:#dc2626;background:#fef2f2;border-radius:3px;padding:1px 4px;border-bottom:2px solid #dc2626;cursor:help;font-weight:600;position:relative}
 .sp-eword::after{content:attr(data-fix);position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);background:#1f2937;color:#4ade80;font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;opacity:0;transition:opacity 0.2s;border:1px solid #22c55e;z-index:10;pointer-events:none}
@@ -273,6 +277,7 @@ body{overflow:hidden}
 
 /* ══ MOBILE RESPONSIVE ══ */
 @media(max-width:768px){
+  :root{--sidebar:240px;--topbar:56px;--bnav:60px}
   .app-layout{grid-template-columns:1fr;grid-template-rows:var(--topbar) 1fr}
   .sidebar{position:fixed;top:0;left:-100%;bottom:0;width:260px;z-index:160;transition:left 0.28s cubic-bezier(0.4,0,0.2,1);padding-top:calc(var(--topbar) + 8px)}
   .sidebar.open{left:0}
@@ -283,20 +288,48 @@ body{overflow:hidden}
   .ham{display:block}
   .bnav{display:block}
   .main{padding-bottom:var(--bnav)}
-  .screen{padding:16px;padding-bottom:calc(var(--bnav) + 16px)}
-  .grid2{grid-template-columns:1fr}
+  .screen{padding:14px;padding-bottom:calc(var(--bnav) + 14px)}
+  .grid2{grid-template-columns:1fr 1fr}
   .grid3{grid-template-columns:1fr 1fr}
   .grid4{grid-template-columns:1fr 1fr}
   .grid-aside{grid-template-columns:1fr}
   #s-speak .grid-aside{grid-template-columns:1fr}
   .topbar-uname{display:none}
-  .page-hdr h1{font-size:18px}
+  .page-hdr h1{font-size:17px}
+  .page-hdr p{font-size:11px}
   .ttabs{gap:4px}
   .ttab{padding:7px 10px;font-size:11px}
+  .card{padding:14px}
+  .stat-tile{padding:14px}
+  .tsec{padding:14px}
+  /* Speaking screen mobile */
+  .sp-stats{grid-template-columns:repeat(4,1fr)}
+  /* Profile modal mobile */
+  #profileModal > div{padding:20px 16px 16px;margin:8px}
 }
-@media(max-width:420px){
-  .grid3,.grid4{grid-template-columns:1fr 1fr}
+
+@media(max-width:480px){
+  :root{--topbar:52px}
+  .grid2{grid-template-columns:1fr 1fr}
+  .grid3{grid-template-columns:1fr 1fr}
+  .grid4{grid-template-columns:1fr 1fr}
   .sp-stats{grid-template-columns:1fr 1fr}
+  .page-hdr{gap:8px}
+  .page-hdr h1{font-size:16px}
+  .screen{padding:12px;padding-bottom:calc(var(--bnav) + 12px)}
+  /* Bigger touch targets */
+  .btn{padding:11px 14px;font-size:13px}
+  .nav-item{padding:12px 12px}
+  /* Speaking controls bigger on mobile */
+  .sp-btn{width:60px;height:60px;font-size:24px}
+  /* Cards full width on small screens */
+  .login-wrap{padding:12px}
+}
+
+@media(max-width:360px){
+  .grid4{grid-template-columns:1fr 1fr}
+  .sp-stats{grid-template-columns:1fr 1fr}
+  .ttab{padding:6px 8px;font-size:10px}
 }
 
 /* ══ MEDIA UPLOAD PREVIEW ══ */
@@ -397,7 +430,7 @@ body{overflow:hidden}
 
     <!-- SPEAKING -->
     <div class="screen" id="s-speak">
-      <div class="page-hdr"><div><h1>AI Speaking Practice</h1><p>Speak · AI Grammar Check · Earn +20 pts</p></div><button onclick="go('s-home')" style="background:#fff;border:2px solid #2563eb;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)">← Back</button></div>
+      <div class="page-hdr"><div><h1>AI Speaking Practice</h1><p>Speak · AI Grammar Check · +20 pts</p></div><button onclick="go('s-home')" style="background:#fff;border:2px solid #2563eb;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)">← Back</button></div>
       <div class="grid-aside" style="align-items:start" id="speakLayout">
         <!-- Left: transcript & analysis -->
         <div>
@@ -480,19 +513,19 @@ body{overflow:hidden}
 
     <!-- MEDIA -->
     <div class="screen" id="s-media">
-      <div class="page-hdr"><div><h1>Media Question</h1><p>Image &amp; Audio from Teacher · +5 pts</p></div><button onclick="go('s-home')" style="background:#fff;border:2px solid #2563eb;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)">← Back</button></div>
+      <div class="page-hdr"><div><h1>Media Question</h1><p>Image &amp; Audio · +5 pts</p></div><button onclick="go('s-home')" style="background:#fff;border:2px solid #2563eb;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)">← Back</button></div>
       <div style="max-width:660px"><div id="mediaBody"><div class="spin-wrap"><div class="spinner"></div><br>Loading...</div></div></div>
     </div>
 
     <!-- WORD -->
     <div class="screen" id="s-word">
-      <div class="page-hdr"><div><h1>Word of the Day</h1><p>Vocabulary Builder · +5 pts</p></div><button onclick="go('s-home')" style="background:#fff;border:2px solid #2563eb;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)">← Back</button></div>
+      <div class="page-hdr"><div><h1>Word of the Day</h1><p>Vocabulary · +5 pts</p></div><button onclick="go('s-home')" style="background:#fff;border:2px solid #2563eb;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)">← Back</button></div>
       <div style="max-width:660px"><div id="wordBody"><div class="spin-wrap"><div class="spinner"></div><br>Loading...</div></div></div>
     </div>
 
     <!-- AFFAIRS -->
     <div class="screen" id="s-affairs">
-      <div class="page-hdr"><div><h1>Current Affairs</h1><p>Daily GK Update · +5 pts</p></div><button onclick="go('s-home')" style="background:#fff;border:2px solid #2563eb;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)">← Back</button></div>
+      <div class="page-hdr"><div><h1>Current Affairs</h1><p>Daily GK · +5 pts</p></div><button onclick="go('s-home')" style="background:#fff;border:2px solid #2563eb;border-radius:10px;padding:8px 18px;font-size:13px;font-weight:700;color:#2563eb;cursor:pointer;white-space:nowrap;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.1)">← Back</button></div>
       <div style="max-width:660px"><div id="affairsBody"><div class="spin-wrap"><div class="spinner"></div><br>Loading...</div></div></div>
     </div>
 
@@ -773,16 +806,14 @@ body{overflow:hidden}
 </div><!-- /appLayout -->
 
 <!-- ══ PROFILE MODAL ══ -->
-<div id="profileModal" onclick="if(event.target===this)closeProfileModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px">
+<div id="profileModal" onclick="if(event.target===this)closeProfileModal()" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.65);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:16px">
   <div style="background:linear-gradient(160deg,#1e1b4b,#0f172a);border:1.5px solid rgba(124,58,237,0.5);border-radius:22px;padding:28px 22px 22px;max-width:370px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,0.7);position:relative;max-height:92vh;overflow-y:auto">
     <button onclick="closeProfileModal()" style="position:absolute;top:14px;right:16px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:50%;width:32px;height:32px;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
-    <!-- Avatar -->
     <div style="text-align:center;margin-bottom:20px">
       <div id="pmAvatar" style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,#1E5BFF,#A84DFF);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;color:#fff;margin:0 auto 12px;border:3px solid rgba(168,77,255,0.7);box-shadow:0 0 28px rgba(168,77,255,0.4)">?</div>
       <div id="pmName" style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:4px">—</div>
       <div id="pmPin" style="font-size:11px;color:#a78bfa;letter-spacing:1.5px;font-weight:600">PIN: —</div>
     </div>
-    <!-- 4 stat boxes — big and clear -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
       <div style="background:rgba(30,91,255,0.2);border:2px solid rgba(30,91,255,0.5);border-radius:12px;padding:16px;text-align:center">
         <div id="pmScore" style="font-size:28px;font-weight:800;color:#93c5fd;font-family:'Syne',sans-serif;line-height:1">0</div>
@@ -801,7 +832,6 @@ body{overflow:hidden}
         <div style="font-size:11px;color:#bbf7d0;text-transform:uppercase;letter-spacing:1px;margin-top:5px;font-weight:600">Answers</div>
       </div>
     </div>
-    <!-- Phone -->
     <div style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);border-radius:12px;padding:13px 16px;margin-bottom:12px;display:flex;align-items:center;gap:12px">
       <span style="font-size:22px">📱</span>
       <div>
@@ -809,7 +839,6 @@ body{overflow:hidden}
         <div id="pmPhone" style="font-size:16px;font-weight:700;color:#fff">Loading...</div>
       </div>
     </div>
-    <!-- Points breakdown -->
     <div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:12px;padding:14px;margin-bottom:16px">
       <div style="font-size:10px;color:#fbbf24;font-weight:700;letter-spacing:1px;margin-bottom:10px;text-transform:uppercase">📊 Points Breakdown</div>
       <div id="pmBreakdown"><div style="color:#64748b;font-size:12px;text-align:center;padding:6px">Loading...</div></div>
