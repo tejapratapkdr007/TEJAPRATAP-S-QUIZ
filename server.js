@@ -435,27 +435,83 @@ app.post("/schedule/affairs/mark-posted", (req, res) => {
 // =====================================================
 app.post("/ai/grammar", async (req, res) => {
     const { text } = req.body;
-    if (!text || text.trim().length < 5) return res.status(400).json({ error: "Text too short" });
+    if (!text || text.trim().length < 5)
+        return res.status(400).json({ error: "Text too short" });
+
     const apiKey = process.env.ANTHROPIC_API_KEY;
-    if (!apiKey) return res.status(500).json({ error: "Set ANTHROPIC_API_KEY in Render environment variables." });
-    try {
-        const response = await fetch("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
-            body: JSON.stringify({
-                model: "claude-haiku-4-5-20251001",
-                max_tokens: 1000,
-                system: `You are an English grammar expert for Indian polytechnic students. Analyze spoken English and find ALL mistakes.
-Respond ONLY with valid JSON no markdown: {"corrected":"corrected text","errors":[{"wrong":"wrong phrase","right":"correct phrase","rule":"rule","type":"Tense|Agreement|Article|Preposition|Noun|Other"}],"score":0-100,"suggestions":["tip1","tip2"],"pronunciation_tips":["tip"]}`,
-                messages: [{ role: "user", content: `Student spoke: "${text}"\n\nAnalyze and correct.` }]
-            })
-        });
-        const data = await response.json();
-        const txt = data.content?.[0]?.text || "";
-        res.json(JSON.parse(txt.replace(/```json|```/g, "").trim()));
-    } catch (e) {
-        res.status(500).json({ error: "AI check failed: " + e.message });
+    if (!apiKey)
+        return res.status(500).json({ error: "ANTHROPIC_API_KEY not set. Add it in Render → Environment Variables." });
+
+    // Node 14/16 don't have fetch built-in — try dynamic import of node-fetch
+    let fetchFn = typeof fetch !== "undefined" ? fetch : null;
+    if (!fetchFn) {
+        try { const nf = await import("node-fetch"); fetchFn = nf.default || nf; }
+        catch { return res.status(500).json({ error: "HTTP client unavailable. Run: npm install node-fetch" }); }
     }
+
+    const SYSTEM = `You are an English grammar expert for Indian polytechnic students. Analyze spoken English and find ALL mistakes.
+Respond ONLY with valid JSON, no markdown fences: {"corrected":"corrected text","errors":[{"wrong":"wrong phrase","right":"correct phrase","rule":"explanation","type":"Tense|Agreement|Article|Preposition|Noun|Other"}],"score":0-100,"suggestions":["tip1","tip2"],"pronunciation_tips":["tip"]}`;
+
+    let lastErr = "";
+    for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+            console.log(`[AI] Attempt ${attempt} for ${text.length} chars`);
+            const ctrl = new AbortController();
+            const timer = setTimeout(() => ctrl.abort(), 25000);
+
+            const response = await fetchFn("https://api.anthropic.com/v1/messages", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-api-key": apiKey,
+                    "anthropic-version": "2023-06-01"
+                },
+                body: JSON.stringify({
+                    model: "claude-haiku-4-5-20251001",
+                    max_tokens: 1200,
+                    system: SYSTEM,
+                    messages: [{ role: "user", content: `Student spoke: "${text.trim()}"\n\nAnalyze and correct ALL mistakes. Return JSON only.` }]
+                }),
+                signal: ctrl.signal
+            });
+            clearTimeout(timer);
+
+            if (!response.ok) {
+                const errBody = await response.text();
+                lastErr = `API HTTP ${response.status}: ${errBody.substring(0, 200)}`;
+                console.error("[AI]", lastErr);
+                if (response.status >= 400 && response.status < 500) break;
+                if (attempt < 2) await new Promise(r => setTimeout(r, 1000));
+                continue;
+            }
+
+            const data = await response.json();
+            const raw = data?.content?.[0]?.text || "";
+            console.log(`[AI] Raw (${raw.length} chars):`, raw.substring(0, 150));
+
+            // Safe JSON extraction — strip markdown fences, find first { ... }
+            const cleaned = raw.replace(/```json|```/g, "").trim();
+            const match = cleaned.match(/\{[\s\S]*\}/);
+            if (!match) { lastErr = "No JSON in response: " + raw.substring(0, 100); if (attempt < 2) { await new Promise(r => setTimeout(r, 1000)); continue; } break; }
+
+            const parsed = JSON.parse(match[0]);
+            return res.json({
+                corrected:          typeof parsed.corrected === "string" ? parsed.corrected : text,
+                errors:             Array.isArray(parsed.errors) ? parsed.errors.filter(e => e && e.wrong && e.right) : [],
+                score:              typeof parsed.score === "number" ? Math.min(100, Math.max(0, parsed.score)) : 70,
+                suggestions:        Array.isArray(parsed.suggestions) ? parsed.suggestions.filter(Boolean) : [],
+                pronunciation_tips: Array.isArray(parsed.pronunciation_tips) ? parsed.pronunciation_tips.filter(Boolean) : []
+            });
+
+        } catch (e) {
+            lastErr = e.name === "AbortError" ? "Timed out (25s)" : e.message;
+            console.error(`[AI] Attempt ${attempt} error:`, lastErr);
+            if (attempt < 2) await new Promise(r => setTimeout(r, 1000));
+        }
+    }
+
+    console.error("[AI] All attempts failed:", lastErr);
+    return res.status(500).json({ error: lastErr });
 });
 
 app.use(express.static(__dirname));
