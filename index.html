@@ -444,7 +444,7 @@ body{overflow:hidden}
         <div>
           <div class="sp-topic">
             <div class="sp-lbl">📌 Today's Topic</div>
-            <div class="sp-txt" id="spTopic" style="color:#64748b">Waiting for teacher to set a topic...</div>
+            <div class="sp-txt" id="spTopic" style="color:#1e293b;font-family:'Bookman Old Style','Bookman',Georgia,serif">Waiting for teacher to set a topic...</div>
             <div class="sp-hint" id="spHint">Speak clearly · AI will correct grammar & pronunciation</div>
           </div>
           <div class="sp-box sp-what">
@@ -1599,7 +1599,7 @@ async function loadSpeak() {
         localStorage.setItem('spTopic',t);localStorage.setItem('spDur',String(dur));
         spDuration=dur;
         const el=document.getElementById('spTopic');
-        if(el){el.textContent=t;el.style.color='#e2e8f0';}
+        if(el){el.textContent=t;el.style.color='#1e293b';}
         const hel=document.getElementById('spHint');
         if(hel)hel.textContent=`Speak for ${dur/60} min · AI corrects grammar & pronunciation`;
         return;
@@ -1610,13 +1610,13 @@ async function loadSpeak() {
   const topic=localStorage.getItem('spTopic'),dur=parseInt(localStorage.getItem('spDur')||'120');
   spDuration=dur;
   const el=document.getElementById('spTopic');
-  if(el){el.textContent=topic||'Waiting for teacher to set a topic...';el.style.color=topic?'#e2e8f0':'#64748b';}
+  if(el){el.textContent=topic||'Waiting for teacher to set a topic...';el.style.color='#1e293b';}
   const hel=document.getElementById('spHint');
   if(hel&&topic)hel.textContent=`Speak for ${dur/60} min · AI corrects grammar & pronunciation`;
 }
 
 function spReset() {
-  _spSessionId++;
+  _spSessionId++; _spCommitted=new Set();
   spElapsed=0; spText=''; spFinalText=''; spIsRec=false; spRestartCount=0;
   clearInterval(spTimer); clearTimeout(spRestartTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
@@ -1652,7 +1652,7 @@ function spToggle() {
 }
 
 function spStart() {
-  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spRestartCount=0;
+  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spRestartCount=0; _spCommitted=new Set(); _spSessionId++;
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.add('rec');btn.textContent='⏸';}
   const st=document.getElementById('spStatus');
@@ -1684,73 +1684,65 @@ function spPause() {
 }
 
 let _spSessionId = 0;
+let _spCommitted = new Set(); // stores every transcript chunk ever committed this session
 
 function spStartSR() {
   const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
   if(!SR){const st=document.getElementById('spStatus');if(st)st.textContent='⚠ Speech recognition requires Chrome browser';return;}
   if(!spIsRec)return;
-  const mySession=++_spSessionId;
-  // Words already committed before this SR instance starts.
-  // Chrome replays ALL buffered results on each new SR instance starting from index 0.
-  // We reconstruct what Chrome will replay and skip those words exactly.
-  const wordsBeforeRestart=spFinalText.trim().split(/\s+/).filter(Boolean);
-  const wordCountBefore=wordsBeforeRestart.length;
-  try {
-    spRec=new SR();
-    spRec.continuous=true;
-    spRec.interimResults=true;
-    spRec.lang='en-IN';
-    spRec.maxAlternatives=1;
-    // Track all words Chrome delivers in this instance (including replays)
-    let allWordsThisInstance=[];
-    spRec.onresult=e=>{
-      if(mySession!==_spSessionId)return;
-      let interim='';
-      // Rebuild full transcript from ALL finals Chrome has delivered so far this instance
-      let instanceFinalText='';
-      for(let i=0;i<e.results.length;i++){
-        if(e.results[i].isFinal){
-          const t=e.results[i][0].transcript.trim();
-          if(t)instanceFinalText+=(instanceFinalText?' ':'')+t;
-        } else {
-          interim=e.results[i][0].transcript;
-        }
+  const mySession=_spSessionId;
+  if(spRec){try{spRec.abort();}catch(e){}spRec=null;}
+  const rec=new SR();
+  rec.continuous=true;
+  rec.interimResults=true;
+  rec.lang='en-IN';
+  rec.maxAlternatives=1;
+  spRec=rec;
+
+  rec.onresult=e=>{
+    if(_spSessionId!==mySession)return;
+    let interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal){
+        const t=e.results[i][0].transcript.trim();
+        if(!t)continue;
+        // Normalize: lowercase, collapse spaces, strip punctuation for comparison
+        const key=t.toLowerCase().replace(/[^\w\s]/g,'').replace(/\s+/g,' ').trim();
+        if(!key)continue;
+        if(_spCommitted.has(key))continue; // already added — Chrome replay
+        _spCommitted.add(key);
+        spFinalText+=(spFinalText&&!spFinalText.endsWith(' ')?' ':'')+t;
+        spText=spFinalText;
+      } else {
+        interim=e.results[i][0].transcript;
       }
-      // instanceFinalText now contains EVERYTHING Chrome has finalized this instance
-      // including replays of previous session words. Split into words.
-      const instanceWords=instanceFinalText.trim().split(/\s+/).filter(Boolean);
-      // Only words BEYOND the pre-restart count are genuinely new
-      const newWords=instanceWords.slice(wordCountBefore);
-      // Rebuild spFinalText = original words + new words
-      const combined=[...wordsBeforeRestart,...newWords];
-      spFinalText=combined.join(' ');
-      spText=spFinalText;
-      const tr=document.getElementById('spTranscript');
-      if(tr)tr.innerHTML=spHL(spFinalText)+(interim?`<span class="sp-interim"> ${interim}</span>`:'');
-      const wc=combined.length;
-      const ew=document.getElementById('spWords');if(ew)ew.textContent=wc;
-      const ec=spCountErr(spFinalText);
-      const errEl=document.getElementById('spErrs');if(errEl)errEl.textContent=ec;
-      const eb=document.getElementById('errBadge');
-      if(eb){eb.textContent=ec+' error'+(ec!==1?'s':'');eb.style.display=ec>0?'block':'none';}
-    };
-    spRec.onerror=e=>{
-      if(mySession!==_spSessionId)return;
-      console.log('SR error:',e.error);
-      if(['no-speech','audio-capture'].includes(e.error)&&spIsRec){clearTimeout(spRestartTimer);spRestartTimer=setTimeout(()=>{if(spIsRec&&mySession===_spSessionId)spStartSR();},500);}
-      else if(e.error==='network'&&spIsRec){clearTimeout(spRestartTimer);spRestartTimer=setTimeout(()=>{if(spIsRec&&mySession===_spSessionId)spStartSR();},1000);}
-      else if(e.error==='not-allowed'){toast('❌ Microphone permission denied. Allow mic in browser settings.','error');spStop();}
-    };
-    spRec.onend=()=>{
-      if(mySession!==_spSessionId)return;
-      if(spIsRec){clearTimeout(spRestartTimer);spRestartTimer=setTimeout(()=>{if(spIsRec&&mySession===_spSessionId)spStartSR();},300);}
-    };
-    spRec.start();
-  } catch(err) {
-    if(mySession!==_spSessionId)return;
-    console.error('SR start failed:',err);
-    const st=document.getElementById('spStatus');if(st)st.textContent='⚠ Could not start microphone: '+err.message;
-    spStop();
+    }
+    const tr=document.getElementById('spTranscript');
+    if(tr)tr.innerHTML=spHL(spFinalText)+(interim?`<span class="sp-interim"> ${interim}</span>`:'');
+    const wc=spFinalText.trim().split(/\s+/).filter(Boolean).length;
+    const ew=document.getElementById('spWords');if(ew)ew.textContent=wc;
+    const ec=spCountErr(spFinalText);
+    const errEl=document.getElementById('spErrs');if(errEl)errEl.textContent=ec;
+    const eb=document.getElementById('errBadge');
+    if(eb){eb.textContent=ec+' error'+(ec!==1?'s':'');eb.style.display=ec>0?'block':'none';}
+  };
+
+  rec.onerror=e=>{
+    if(_spSessionId!==mySession)return;
+    if(e.error==='not-allowed'){toast('❌ Microphone permission denied.','error');spStop();}
+  };
+
+  rec.onend=()=>{
+    if(_spSessionId!==mySession||!spIsRec)return;
+    clearTimeout(spRestartTimer);
+    spRestartTimer=setTimeout(()=>{
+      if(spIsRec&&_spSessionId===mySession)spStartSR();
+    },300);
+  };
+
+  try{rec.start();}catch(err){
+    if(_spSessionId!==mySession)return;
+    console.error('SR start failed:',err);spStop();
   }
 }
 
@@ -1934,10 +1926,10 @@ async function loadSpSubmissions(){
     el.innerHTML=list.map(a=>`
       <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:11px;padding:14px;margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:12px;font-weight:700;color:#7b9fff">${a.studentName||'Student'}</span>
-          <span style="font-size:10px;color:#4a5568">${a.submittedAt||''}</span>
+          <span style="font-size:13px;font-weight:700;color:#2563eb;font-family:'Bookman Old Style','Bookman',Georgia,serif">${a.studentName||'Student'}</span>
+          <span style="font-size:10px;color:#64748b">${a.submittedAt?new Date(a.submittedAt).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</span>
         </div>
-        <div style="font-size:13px;color:#cbd5e1;line-height:1.7">${a.answer}</div>
+        <div style="font-size:14px;color:#1e293b;line-height:1.8;font-family:'Bookman Old Style','Bookman',Georgia,serif;font-weight:500">${a.answer}</div>
       </div>`).join('');
   }catch(e){el.innerHTML='<div style="color:#4a5568;font-size:12px;text-align:center;padding:16px">Could not load submissions</div>';}
 }
@@ -2457,7 +2449,7 @@ async function postSpTopic(){
     await POST('/questions',{question:'__SPEAK_TOPIC__:'+t,answer:String(dur),type:'speak-topic'});
     localStorage.setItem('spTopic',t);localStorage.setItem('spDur',String(dur));
     spDuration=dur;
-    const tel=document.getElementById('spTopic');if(tel){tel.textContent=t;tel.style.color='#e2e8f0';}
+    const tel=document.getElementById('spTopic');if(tel){tel.textContent=t;tel.style.color='#1e293b';}
     const hel=document.getElementById('spHint');if(hel)hel.textContent=`Speak for ${dur/60} min · AI corrects grammar`;
     const list=document.getElementById('spTopicList');
     if(list){const d=document.createElement('div');d.style.cssText='background:#f5f3ff;border:1px solid #ddd6fe;border-radius:7px;padding:9px 12px;font-size:12px;color:#6d28d9;margin-bottom:5px';d.innerHTML=`<strong>${t}</strong> <span style="color:#64748b;font-size:10px">· ${dur/60}min · ${new Date().toLocaleTimeString('en-IN')}</span>`;list.insertBefore(d,list.firstChild);}
@@ -2858,7 +2850,7 @@ async function manualSpPost(){
   const item=s.items[idx];
   try{await POST('/questions',{question:'__SPEAK_TOPIC__:'+item.topic,answer:String(item.duration),type:'speak-topic'});}catch(e){toast(e.message,'error');return;}
   localStorage.setItem('spTopic',item.topic);localStorage.setItem('spDur',String(item.duration));spDuration=item.duration;
-  const tel=document.getElementById('spTopic');if(tel){tel.textContent=item.topic;tel.style.color='#e2e8f0';}
+  const tel=document.getElementById('spTopic');if(tel){tel.textContent=item.topic;tel.style.color='#1e293b';}
   s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost=`Day ${idx+1} — ${s.items[idx].postedAt}`;
   saveSpSchedLocal(s);toast(`✅ Topic "${item.topic}" set for all students!`,'success');renderSpBulk();
 }
@@ -2871,7 +2863,7 @@ function startSpAutoMachine(){
     const item=s.items[idx];
     POST('/questions',{question:'__SPEAK_TOPIC__:'+item.topic,answer:String(item.duration),type:'speak-topic'}).catch(()=>{});
     localStorage.setItem('spTopic',item.topic);localStorage.setItem('spDur',String(item.duration));spDuration=item.duration;
-    const tel=document.getElementById('spTopic');if(tel){tel.textContent=item.topic;tel.style.color='#e2e8f0';}
+    const tel=document.getElementById('spTopic');if(tel){tel.textContent=item.topic;tel.style.color='#1e293b';}
     s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost=`Day ${idx+1} — ${s.items[idx].postedAt}`;
     saveSpSchedLocal(s);toast("🤖 Auto-Set today's topic!",'success');updateSpUI(getSpSchedLocal());
   },60000);updateSpUI();
