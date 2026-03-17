@@ -469,7 +469,10 @@ body{overflow-x:hidden;overflow-y:hidden}
             </div>
             <div class="sp-correct-txt" id="spCorrectTxt"></div>
             <div class="ai-loading" id="aiLoadingCorrect" style="display:none"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span>AI is correcting your speech...</span></div>
-            <button class="btn grn block" style="margin-top:10px" onclick="spListen()">🔊 Listen to Corrected Version</button>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button class="btn grn" id="spListenBtn" style="flex:1" onclick="spListen()">🔊 Listen to Corrected Version</button>
+              <button class="btn red" id="spStopAudioBtn" style="display:none;flex-shrink:0;padding:10px 16px" onclick="spStopAudio()" title="Stop Audio">⏹ Stop</button>
+            </div>
           </div>
           <div class="sp-box sp-analysis" id="spAnalysisBox">
             <div class="sp-bx-hdr">
@@ -1658,6 +1661,11 @@ function spToggle() {
 }
 
 function spStart() {
+  // Invalidate any old SR session and abort the old recorder BEFORE starting fresh,
+  // so a lingering onend callback cannot trigger a second spStartSR() call.
+  _spSessionId++;
+  clearTimeout(spRestartTimer);
+  if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spRestartCount=0;
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.add('rec');btn.textContent='⏸';}
@@ -1884,6 +1892,17 @@ async function spStop() {
   }
 }
 
+function _spSetAudioPlaying(on){
+  const listenBtn=document.getElementById('spListenBtn');
+  const stopBtn=document.getElementById('spStopAudioBtn');
+  if(listenBtn)listenBtn.style.display=on?'none':'flex';
+  if(stopBtn)stopBtn.style.display=on?'flex':'none';
+}
+function spStopAudio(){
+  if('speechSynthesis' in window)window.speechSynthesis.cancel();
+  _spSetAudioPlaying(false);
+  toast('⏹ Audio stopped','info');
+}
 function spListen() {
   const ct=document.getElementById('spCorrectTxt');
   const raw=ct?.innerText?.trim();
@@ -1897,8 +1916,9 @@ function spListen() {
   const voices=window.speechSynthesis.getVoices();
   const eng=voices.find(v=>v.lang.startsWith('en')&&!v.lang.includes('IN'))||voices.find(v=>v.lang.startsWith('en'));
   if(eng)u.voice=eng;
-  u.onstart=()=>toast('🔊 Playing corrected version...','info');
-  u.onerror=()=>toast('Could not play audio','error');
+  u.onstart=()=>{_spSetAudioPlaying(true);toast('🔊 Playing corrected version...','info');};
+  u.onend=()=>_spSetAudioPlaying(false);
+  u.onerror=()=>{_spSetAudioPlaying(false);toast('Could not play audio','error');};
   window.speechSynthesis.speak(u);
 }
 
