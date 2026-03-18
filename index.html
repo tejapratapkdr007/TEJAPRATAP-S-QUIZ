@@ -1737,18 +1737,27 @@ function spStartSR() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR || !spIsRec) return;
   if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+
   const rec = new SR();
   rec.continuous = true; rec.interimResults = true; rec.lang='en-IN'; rec.maxAlternatives=1;
   spRec = rec;
 
+  // Track how many final results this instance has already committed
+  // so on restart of the SAME rec we never re-process old results
+  let committed = 0;
+
   rec.onresult = e => {
     if(!spIsRec || spRec !== rec) return;
-    // e.resultIndex = the ONE new result being reported now
-    const res = e.results[e.resultIndex];
-    const interim = res.isFinal ? '' : res[0].transcript.trim();
-    if(res.isFinal){
-      const t = res[0].transcript.trim();
-      if(t) spDisplayText = spDisplayText ? spDisplayText+' '+t : t;
+    let interim = '';
+    // Only process results we haven't committed yet
+    for(let i = committed; i < e.results.length; i++){
+      if(e.results[i].isFinal){
+        const t = e.results[i][0].transcript.trim();
+        if(t) spDisplayText = spDisplayText ? spDisplayText+' '+t : t;
+        committed = i + 1;  // advance pointer — never process this index again
+      } else {
+        interim = e.results[i][0].transcript.trim();
+      }
     }
     const tr = document.getElementById('spTranscript');
     if(tr) tr.innerHTML = spHL(spDisplayText)+(interim?'<span class="sp-interim"> '+interim+'</span>':'');
@@ -1766,10 +1775,17 @@ function spStartSR() {
   };
 
   rec.onend = () => {
-    // NO RESTART — restarting causes the browser to replay the last
-    // result in the new instance, making words appear twice on screen.
-    // continuous:true means SR only stops on error or when we stop it.
-    spRec = null;
+    if(!spIsRec || spRec !== rec) return;
+    // Restart the SAME rec object — e.results[] resets to [] in new session
+    // but `committed` also resets to 0 via closure... we need a new call
+    // so just call rec.start() again on same object to keep listening
+    clearTimeout(spRestartTimer);
+    spRestartTimer = setTimeout(()=>{
+      if(!spIsRec || spRec !== rec) return;
+      // Reset committed because new rec.start() gives fresh e.results[]
+      committed = 0;
+      try{ rec.start(); }catch(ex){}
+    }, 200);
   };
 
   try{ rec.start(); }catch(e){}
