@@ -470,7 +470,7 @@ app.post("/transcribe", async (req, res) => {
                         },
                         {
                             type: "text",
-                            text: "Transcribe this audio exactly as spoken. Return ONLY the spoken words — no punctuation changes, no corrections, no commentary. Just the raw transcript."
+                            text: "Transcribe this audio exactly as spoken. Return ONLY the spoken words — no punctuation changes, no corrections, no commentary, no repetition. If a word appears to repeat due to audio artifacts or overlapping chunks, write it only ONCE. Just the raw transcript."
                         }
                     ]
                 }]
