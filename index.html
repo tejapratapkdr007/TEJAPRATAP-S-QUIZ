@@ -1675,6 +1675,7 @@ function spStart() {
   if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
   spMediaRec=null; spAudioChunks=[];
+  _spSessionId++;
   spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spRestartCount=0; _spCommittedText='';
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.add('rec');btn.textContent='⏸';}
@@ -1750,7 +1751,7 @@ function spStartSR() {
 
   rec.onresult = e => {
     if(_spSessionId !== mySession) return;
-    // e.resultIndex = first NEW result — only process from there to avoid replaying old ones
+    // e.resultIndex = first NEW result index — never re-process old results
     let newFinals = '';
     let interim = '';
     for(let i = e.resultIndex; i < e.results.length; i++){
@@ -1762,7 +1763,13 @@ function spStartSR() {
       }
     }
     if(newFinals){
-      _spCommittedText += (_spCommittedText && !_spCommittedText.endsWith(' ') ? ' ' : '') + newFinals;
+      // Deduplicate: don't append if the committed text already ends with these words
+      // (some browsers fire the same utterance as both interim then final)
+      const trimmed = _spCommittedText.trimEnd();
+      const already = trimmed.toLowerCase().endsWith(newFinals.toLowerCase());
+      if(!already){
+        _spCommittedText += (_spCommittedText && !_spCommittedText.endsWith(' ') ? ' ' : '') + newFinals;
+      }
     }
     spDisplayText = _spCommittedText;
     const wc = spDisplayText.trim().split(/\s+/).filter(Boolean).length;
