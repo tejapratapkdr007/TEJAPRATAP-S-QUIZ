@@ -460,21 +460,20 @@ app.post("/transcribe", async (req, res) => {
 
         // Build multipart form — Whisper requires a file upload
         const boundary = "----FormBoundary" + Math.random().toString(36).slice(2);
-        const CRLF = "
-";
+        const CRLF = "\r\n";
         const pre = Buffer.from(
-            `--${boundary}${CRLF}` +
-            `Content-Disposition: form-data; name="file"; filename="audio.${ext}"${CRLF}` +
-            `Content-Type: ${mimeType || "audio/webm"}${CRLF}${CRLF}`
+            "--" + boundary + CRLF +
+            "Content-Disposition: form-data; name=\"file\"; filename=\"audio." + ext + "\"" + CRLF +
+            "Content-Type: " + (mimeType || "audio/webm") + CRLF + CRLF
         );
         const model = Buffer.from(
-            `${CRLF}--${boundary}${CRLF}` +
-            `Content-Disposition: form-data; name="model"${CRLF}${CRLF}` +
-            `whisper-1${CRLF}` +
-            `--${boundary}${CRLF}` +
-            `Content-Disposition: form-data; name="language"${CRLF}${CRLF}` +
-            `en${CRLF}` +
-            `--${boundary}--${CRLF}`
+            CRLF + "--" + boundary + CRLF +
+            "Content-Disposition: form-data; name=\"model\"" + CRLF + CRLF +
+            "whisper-1" + CRLF +
+            "--" + boundary + CRLF +
+            "Content-Disposition: form-data; name=\"language\"" + CRLF + CRLF +
+            "en" + CRLF +
+            "--" + boundary + "--" + CRLF
         );
         const body = Buffer.concat([pre, audioBuffer, model]);
 
