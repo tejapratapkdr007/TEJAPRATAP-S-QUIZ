@@ -877,11 +877,13 @@ let ME = null, MY_NAME = null, IS_T = false;
 let T_PW = localStorage.getItem('tpw') || '11223344@Ttp';
 let _gkCache = null, gkInterval = null;
 let spRec = null, spIsRec = false, spTimer = null, spElapsed = 0, spDuration = 120, spText = '', spFinalText = '';
-let spRestartCount = 0, spRestartTimer = null;
+let spRestartTimer = null;
 // Audio recording globals
 let spMediaRec = null, spAudioChunks = [], spMediaStream = null;
-let spDisplayText = ''; // SR display only — not submitted
-let _spCommittedText = ''; // text committed before each SR restart — prevents replay duplication
+let spDisplayText = '';
+// SR state — single source of truth
+let _spWords = [];        // array of finalised word strings, deduplicated
+let _spNextIdx = 0;       // next e.results index we haven't processed yet
 
 // ═══════════════════════════════════════════════════
 // INIT
@@ -1635,7 +1637,7 @@ async function loadSpeak() {
 
 function spReset() {
   _spSessionId++;
-  spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; _spCommittedText=''; spIsRec=false; spRestartCount=0;
+  spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; _spWords=[]; _spNextIdx=0; spIsRec=false;
   clearInterval(spTimer); clearTimeout(spRestartTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
@@ -1676,7 +1678,7 @@ function spStart() {
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
   spMediaRec=null; spAudioChunks=[];
   _spSessionId++;
-  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spRestartCount=0; _spCommittedText='';
+  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; _spWords=[]; _spNextIdx=0;
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.add('rec');btn.textContent='⏸';}
   const st=document.getElementById('spStatus');
@@ -1698,7 +1700,7 @@ function spStart() {
 }
 
 function spPause() {
-  _spSessionId++;
+  _spSessionId++; _spNextIdx=0;
   spIsRec=false; clearInterval(spTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
@@ -1733,79 +1735,76 @@ function _doStartMR(stream){
   spMediaRec.start(500);
 }
 
-// ── SR: DISPLAY ONLY — shows live interim words ──
+// ── SR: live speech-to-text ──
 function spStartSR() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR || !spIsRec) return;
-  const mySession = _spSessionId;
-  if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+  if(!SR){ toast('Speech recognition not supported','error'); return; }
+
+  // Kill any previous instance
+  if(spRec){ spRec.onresult=null; spRec.onend=null; spRec.onerror=null; try{spRec.abort();}catch(e){} spRec=null; }
+
+  // Each new SR instance delivers e.results[] starting from index 0 — reset the pointer
+  _spNextIdx = 0;
+
   const rec = new SR();
-  // continuous:false is critical — with continuous:true the browser keeps ALL results in
-  // e.results[] and re-delivers them every event, causing words to duplicate on screen.
-  // With continuous:false, SR stops after a pause, onend fires, and we restart cleanly.
-  rec.continuous = false;
-  rec.interimResults = true;
-  rec.lang = 'en-IN';
+  rec.continuous      = true;
+  rec.interimResults  = true;
+  rec.lang            = 'en-IN';
   rec.maxAlternatives = 1;
   spRec = rec;
 
   rec.onresult = e => {
-    if(_spSessionId !== mySession) return;
-    // e.resultIndex = first NEW result index — never re-process old results
-    let newFinals = '';
+    if(!spIsRec) return;
     let interim = '';
-    for(let i = e.resultIndex; i < e.results.length; i++){
+    for(let i = _spNextIdx; i < e.results.length; i++){
       if(e.results[i].isFinal){
-        const t = e.results[i][0].transcript.trim();
-        if(t) newFinals += (newFinals ? ' ' : '') + t;
+        const words = e.results[i][0].transcript.trim().split(/\s+/).filter(Boolean);
+        words.forEach(w => _spWords.push(w));
+        _spNextIdx = i + 1;
       } else {
-        interim = e.results[i][0].transcript;
+        interim = e.results[i][0].transcript.trim();
       }
     }
-    if(newFinals){
-      // Deduplicate: don't append if the committed text already ends with these words
-      // (some browsers fire the same utterance as both interim then final)
-      const trimmed = _spCommittedText.trimEnd();
-      const already = trimmed.toLowerCase().endsWith(newFinals.toLowerCase());
-      if(!already){
-        _spCommittedText += (_spCommittedText && !_spCommittedText.endsWith(' ') ? ' ' : '') + newFinals;
-      }
-    }
-    spDisplayText = _spCommittedText;
-    const wc = spDisplayText.trim().split(/\s+/).filter(Boolean).length;
-    const ew = document.getElementById('spWords'); if(ew) ew.textContent = wc;
+    spDisplayText = _spWords.join(' ');
+    const tr = document.getElementById('spTranscript');
+    if(tr) tr.innerHTML = spHL(spDisplayText) + (interim ? `<span class="sp-interim"> ${interim}</span>` : '');
+    const ew = document.getElementById('spWords'); if(ew) ew.textContent = _spWords.length;
     const ec = spCountErr(spDisplayText);
     const errEl = document.getElementById('spErrs'); if(errEl) errEl.textContent = ec;
     const eb = document.getElementById('errBadge');
-    if(eb){eb.textContent = ec+' error'+(ec!==1?'s':''); eb.style.display = ec>0?'block':'none';}
-    const tr = document.getElementById('spTranscript');
-    if(tr) tr.innerHTML = spHL(spDisplayText) + (interim ? `<span class="sp-interim"> ${interim}</span>` : '');
+    if(eb){ eb.textContent = ec+' error'+(ec!==1?'s':''); eb.style.display = ec>0?'block':'none'; }
   };
 
   rec.onerror = e => {
-    if(_spSessionId !== mySession) return;
-    if(e.error==='not-allowed'||e.error==='audio-capture'){
-      toast('❌ Mic denied — please allow microphone access','error'); spStop();
+    if(e.error === 'not-allowed' || e.error === 'audio-capture'){
+      toast('Mic access denied — please allow microphone','error'); spStop(); return;
     }
-    // no-speech / network / aborted → onend fires and we restart cleanly
+    // non-fatal error — restart once
+    if(spIsRec){
+      try{spRec.abort();}catch(ex){}
+      spRec = null;
+      clearTimeout(spRestartTimer);
+      spRestartTimer = setTimeout(()=>{ if(spIsRec) spStartSR(); }, 300);
+    }
   };
 
   rec.onend = () => {
-    if(_spSessionId !== mySession || !spIsRec) return;
-    // _spCommittedText already holds all finalised words — safe to restart immediately
+    // Only restart if we are still supposed to be recording AND this instance wasn't
+    // already replaced (spRec still points to this same rec object)
+    if(!spIsRec || spRec !== rec) return;
     clearTimeout(spRestartTimer);
-    spRestartTimer = setTimeout(() => {
-      if(spIsRec && _spSessionId === mySession) spStartSR();
-    }, 150);
+    spRestartTimer = setTimeout(()=>{ if(spIsRec && spRec === rec) spStartSR(); }, 300);
   };
 
-  try{ rec.start(); } catch(e){}
+  try{ rec.start(); } catch(e){ console.warn('SR start:', e.message); }
 }
+
+
 
 
 async function spStop() {
   _spSessionId++;
-  spIsRec=false; clearInterval(spTimer); clearTimeout(spRestartTimer);
+  spIsRec=false; clearInterval(spTimer); clearTimeout(spRestartTimer); _spNextIdx=0;
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
@@ -1917,25 +1916,32 @@ function _spSetAudioPlaying(on){
 function spStopAudio(){
   if('speechSynthesis' in window)window.speechSynthesis.cancel();
   _spSetAudioPlaying(false);
+  _spListenActive = false;
   toast('⏹ Audio stopped','info');
 }
+let _spListenActive = false;
 function spListen() {
+  if(_spListenActive) return; // prevent double-tap firing two speaks
   const ct=document.getElementById('spCorrectTxt');
   const raw=ct?.innerText?.trim();
-  const text=raw||spFinalText.trim()||spText.trim();
+  const text=raw||spFinalText.trim()||spText.trim()||spDisplayText.trim();
   if(!text)return toast('Record your speech first!','warn');
   if(!('speechSynthesis' in window))return toast('Text-to-speech not supported','warn');
+  _spListenActive = true;
   window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang='en-IN'; u.rate=0.85; u.pitch=1;
-  // Try to find a good English voice
-  const voices=window.speechSynthesis.getVoices();
-  const eng=voices.find(v=>v.lang.startsWith('en')&&!v.lang.includes('IN'))||voices.find(v=>v.lang.startsWith('en'));
-  if(eng)u.voice=eng;
-  u.onstart=()=>{_spSetAudioPlaying(true);toast('🔊 Playing corrected version...','info');};
-  u.onend=()=>_spSetAudioPlaying(false);
-  u.onerror=()=>{_spSetAudioPlaying(false);toast('Could not play audio','error');};
-  window.speechSynthesis.speak(u);
+  // Delay after cancel — Chrome/Android bug: cancel() is async, speaking immediately
+  // after causes the utterance to play 2-3 times
+  setTimeout(() => {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang='en-IN'; u.rate=0.85; u.pitch=1;
+    const voices = window.speechSynthesis.getVoices();
+    const eng = voices.find(v=>v.lang.startsWith('en')&&!v.lang.includes('IN'))||voices.find(v=>v.lang.startsWith('en'));
+    if(eng) u.voice = eng;
+    u.onstart = ()=>{ _spSetAudioPlaying(true); toast('🔊 Playing corrected version...','info'); };
+    u.onend = ()=>{ _spSetAudioPlaying(false); _spListenActive=false; };
+    u.onerror = ()=>{ _spSetAudioPlaying(false); _spListenActive=false; toast('Could not play audio','error'); };
+    window.speechSynthesis.speak(u);
+  }, 300);
 }
 
 async function spSubmit() {
