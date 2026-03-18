@@ -1666,7 +1666,6 @@ function spUpdateTimer() {
 }
 
 function spToggle() {
-  if(!localStorage.getItem('spTopic'))return toast('⚠ Teacher has not set a topic yet!','warn');
   if(spIsRec)spPause();else spStart();
 }
 
@@ -1688,7 +1687,6 @@ function spStart() {
   document.getElementById('spScore').textContent='—';
   document.getElementById('spWords').textContent='0';
   spStartSR();
-  spStartMediaRecorder();
   clearInterval(spTimer);
   spTimer=setInterval(()=>{
     if(!spIsRec)return;
@@ -1737,7 +1735,8 @@ function _doStartMR(stream){
 function spStartSR() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR || !spIsRec) return;
-  const mySession = ++_spSessionId;
+  // NOTE: do NOT increment _spSessionId here — only spStart/spStop/spPause/spReset own the session
+  const mySession = _spSessionId;
   if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   const rec = new SR();
   rec.continuous = true; rec.interimResults = true; rec.lang='en-IN'; rec.maxAlternatives=1;
@@ -1764,7 +1763,11 @@ function spStartSR() {
     const tr=document.getElementById('spTranscript');
     if(tr) tr.innerHTML=spHL(spDisplayText)+(interim?`<span class="sp-interim"> ${interim}</span>`:'');
   };
-  rec.onerror = e=>{ if(_spSessionId!==mySession) return; if(e.error==='not-allowed'){toast('❌ Mic denied','error');spStop();} };
+  rec.onerror = e=>{ 
+    if(_spSessionId!==mySession) return; 
+    if(e.error==='not-allowed'||e.error==='audio-capture'){toast('❌ Mic denied — please allow microphone access','error');spStop();}
+    // for recoverable errors (network, no-speech, aborted) — just let onend restart it
+  };
   rec.onend = ()=>{
     if(_spSessionId!==mySession||!spIsRec) return;
     clearTimeout(spRestartTimer);
@@ -1780,48 +1783,11 @@ async function spStop() {
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
   const st=document.getElementById('spStatus');
-  if(st){st.textContent='⏳ Transcribing your speech...';st.className='sp-status done';}
+  if(st){st.textContent='⏳ Analysing your speech...';st.className='sp-status done';}
   const sub=document.getElementById('tSub');if(sub)sub.textContent='DONE';
 
-  // Stop MediaRecorder and collect all audio
-  await new Promise(resolve=>{
-    if(!spMediaRec||spMediaRec.state==='inactive'){resolve();return;}
-    spMediaRec.onstop=resolve;
-    try{spMediaRec.stop();}catch(e){resolve();}
-  });
-
-  // ── Send audio to /transcribe for clean text ──────────────────────────────
-  let fullText='';
-  if(spAudioChunks.length>0){
-    try{
-      const mimeType=spMediaRec?(spMediaRec.mimeType||'audio/webm'):'audio/webm';
-      const blob=new Blob(spAudioChunks,{type:mimeType});
-      // Convert blob to base64
-      const base64 = await new Promise((res,rej)=>{
-        const reader=new FileReader();
-        reader.onload=()=>res(reader.result);
-        reader.onerror=rej;
-        reader.readAsDataURL(blob);
-      });
-      if(st)st.textContent='⏳ Transcribing... please wait';
-      const resp=await fetch(API+'/transcribe',{
-        method:'POST',
-        headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({audio:base64, mimeType:mimeType})
-      });
-      if(resp.ok){
-        const data=await resp.json();
-        fullText=(data.text||'').trim();
-        console.log('[Transcribe] Got:', fullText);
-      } else {
-        console.error('[Transcribe] HTTP', resp.status);
-      }
-    }catch(e){console.error('[Transcribe] Error:',e.message);}
-  }
-
-  // ── Fallback to SR accumulated text if transcription failed ──────────────
-  // Only use SR text as fallback — never mix it with transcription result
-  if(!fullText) fullText=spDisplayText.trim()||spFinalText.trim()||spText.trim();
+  // ── Use SR-accumulated display text as the final transcript ─────────────
+  let fullText = spDisplayText.trim() || spFinalText.trim() || spText.trim();
 
   if(!fullText){
     if(st)st.textContent='No speech detected. Try again.';
