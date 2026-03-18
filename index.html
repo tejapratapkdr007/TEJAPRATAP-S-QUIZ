@@ -1736,25 +1736,30 @@ function _doStartMR(stream){
 function spStartSR() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR || !spIsRec) return;
-  if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+
+  // Kill old instance
+  if(spRec){
+    spRec.onresult=null; spRec.onend=null; spRec.onerror=null;
+    try{spRec.abort();}catch(e){}
+    spRec=null;
+  }
 
   const rec = new SR();
-  rec.continuous = true; rec.interimResults = true; rec.lang='en-IN'; rec.maxAlternatives=1;
+  // continuous:false — each utterance fires one clean final result then stops.
+  // onend restarts it. No result replay because each new start() = empty e.results[].
+  rec.continuous     = false;
+  rec.interimResults = true;
+  rec.lang           = 'en-IN';
+  rec.maxAlternatives = 1;
   spRec = rec;
-
-  // Track how many final results this instance has already committed
-  // so on restart of the SAME rec we never re-process old results
-  let committed = 0;
 
   rec.onresult = e => {
     if(!spIsRec || spRec !== rec) return;
     let interim = '';
-    // Only process results we haven't committed yet
-    for(let i = committed; i < e.results.length; i++){
+    for(let i = 0; i < e.results.length; i++){
       if(e.results[i].isFinal){
         const t = e.results[i][0].transcript.trim();
         if(t) spDisplayText = spDisplayText ? spDisplayText+' '+t : t;
-        committed = i + 1;  // advance pointer — never process this index again
       } else {
         interim = e.results[i][0].transcript.trim();
       }
@@ -1771,24 +1776,25 @@ function spStartSR() {
 
   rec.onerror = e => {
     if(spRec !== rec) return;
-    if(e.error==='not-allowed'){toast('❌ Mic denied','error');spStop();}
+    if(e.error==='not-allowed'||e.error==='audio-capture'){
+      toast('❌ Mic denied','error'); spStop(); return;
+    }
+    // no-speech or other non-fatal: onend will restart
   };
 
   rec.onend = () => {
     if(!spIsRec || spRec !== rec) return;
-    // Restart the SAME rec object — e.results[] resets to [] in new session
-    // but `committed` also resets to 0 via closure... we need a new call
-    // so just call rec.start() again on same object to keep listening
+    // Safe to restart: continuous:false means each new start() gives a
+    // completely fresh e.results[] — old results are never replayed.
     clearTimeout(spRestartTimer);
     spRestartTimer = setTimeout(()=>{
-      if(!spIsRec || spRec !== rec) return;
-      // Reset committed because new rec.start() gives fresh e.results[]
-      committed = 0;
-      try{ rec.start(); }catch(ex){}
-    }, 200);
+      if(spIsRec && spRec === rec){
+        try{ rec.start(); }catch(e){ spStartSR(); }
+      }
+    }, 100);
   };
 
-  try{ rec.start(); }catch(e){}
+  try{ rec.start(); }catch(e){ console.warn('SR start error:',e.message); }
 }
 
 async function spStop() {
