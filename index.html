@@ -1702,6 +1702,7 @@ function spPause() {
   spIsRec=false; clearInterval(spTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
+  spMediaRec=null; spAudioChunks=[];
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
   const st=document.getElementById('spStatus');
@@ -1819,7 +1820,8 @@ async function spStop() {
   }
 
   // ── Fallback to SR accumulated text if transcription failed ──────────────
-  if(!fullText) fullText=spFinalText.trim()||spText.trim();
+  // Only use SR text as fallback — never mix it with transcription result
+  if(!fullText) fullText=spDisplayText.trim()||spFinalText.trim()||spText.trim();
 
   if(!fullText){
     if(st)st.textContent='No speech detected. Try again.';
