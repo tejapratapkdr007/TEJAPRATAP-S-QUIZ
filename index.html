@@ -1740,26 +1740,31 @@ function spStartSR() {
   const rec = new SR();
   rec.continuous = true; rec.interimResults = true; rec.lang='en-IN'; rec.maxAlternatives=1;
   spRec = rec;
-  // snapshot of committed text before this SR instance started
-  // so on restart we don't lose what was already said
+
+  // baseText = everything committed BEFORE this SR instance started.
+  // Captured once here — never changes for this instance's lifetime.
   const baseText = spDisplayText;
+
   rec.onresult = e => {
     if(!spIsRec || spRec !== rec) return;
-    // Build new finals from this SR instance only (from e.resultIndex onward)
-    let newFinals = '', interim = '';
-    for(let i = e.resultIndex; i < e.results.length; i++){
+    // Loop from 0 — safe because this is a single continuous instance.
+    // e.results[] grows as the student speaks; looping from 0 rebuilds
+    // the full picture each time without double-counting.
+    let instanceFinals = '';
+    let interim = '';
+    for(let i = 0; i < e.results.length; i++){
       if(e.results[i].isFinal){
         const t = e.results[i][0].transcript.trim();
-        if(t) newFinals += (newFinals ? ' ' : '') + t;
+        if(t) instanceFinals += (instanceFinals ? ' ' : '') + t;
       } else {
         interim = e.results[i][0].transcript.trim();
       }
     }
-    // Append new finals to base (what was committed before this instance)
-    if(newFinals){
-      spDisplayText = baseText + (baseText ? ' ' : '') + newFinals;
-    }
-    const display = spDisplayText;
+    // Full display = what was said before this instance + what this instance got
+    const display = baseText
+      ? baseText + (instanceFinals ? ' ' + instanceFinals : '')
+      : instanceFinals;
+    spDisplayText = display;
     const wc = display.trim().split(/\s+/).filter(Boolean).length;
     const ew = document.getElementById('spWords'); if(ew) ew.textContent = wc;
     const ec = spCountErr(display);
@@ -1769,18 +1774,21 @@ function spStartSR() {
     const tr = document.getElementById('spTranscript');
     if(tr) tr.innerHTML = spHL(display) + (interim ? '<span class="sp-interim"> '+interim+'</span>' : '');
   };
+
   rec.onerror = e => {
     if(spRec !== rec) return;
     if(e.error==='not-allowed'){toast('❌ Mic denied','error');spStop();}
   };
+
   rec.onend = () => {
     if(!spIsRec || spRec !== rec) return;
-    // SR stopped (browser paused) — restart so mic keeps working
-    // spDisplayText already holds all committed text so no duplication
+    // SR stopped — restart so mic stays active.
+    // spDisplayText holds all committed text as the new baseText for next instance.
     spRec = null;
     clearTimeout(spRestartTimer);
     spRestartTimer = setTimeout(()=>{ if(spIsRec) spStartSR(); }, 300);
   };
+
   try{ rec.start(); }catch(e){}
 }
 
