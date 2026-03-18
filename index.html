@@ -1634,7 +1634,7 @@ async function loadSpeak() {
 
 function spReset() {
   _spSessionId++;
-  spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spIsRec=false; spRestartCount=0;
+  spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spIsRec=false; spRestartCount=0; _spLastTranscript=''; _spProcessing=false;
   clearInterval(spTimer); clearTimeout(spRestartTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
@@ -1675,7 +1675,7 @@ function spStart() {
   if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
   spMediaRec=null; spAudioChunks=[];
-  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spRestartCount=0;
+  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spRestartCount=0; _spLastTranscript=''; _spProcessing=false;
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.add('rec');btn.textContent='⏸';}
   const st=document.getElementById('spStatus');
@@ -1733,6 +1733,9 @@ function _doStartMR(stream){
 }
 
 // ── SR: live display of speech on screen ──
+let _spLastTranscript = '';      // last committed transcript
+let _spProcessing = false;       // guard flag — blocks duplicate results
+
 function spStartSR() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR || !spIsRec) return;
@@ -1741,30 +1744,26 @@ function spStartSR() {
   rec.continuous = true; rec.interimResults = true; rec.lang='en-IN'; rec.maxAlternatives=1;
   spRec = rec;
 
-  // baseText = everything committed BEFORE this SR instance started.
-  // Captured once here — never changes for this instance's lifetime.
-  const baseText = spDisplayText;
-
   rec.onresult = e => {
     if(!spIsRec || spRec !== rec) return;
-    // Loop from 0 — safe because this is a single continuous instance.
-    // e.results[] grows as the student speaks; looping from 0 rebuilds
-    // the full picture each time without double-counting.
-    let instanceFinals = '';
-    let interim = '';
-    for(let i = 0; i < e.results.length; i++){
-      if(e.results[i].isFinal){
-        const t = e.results[i][0].transcript.trim();
-        if(t) instanceFinals += (instanceFinals ? ' ' : '') + t;
-      } else {
-        interim = e.results[i][0].transcript.trim();
-      }
+    const result = e.results[e.resultIndex];
+    if(result.isFinal){
+      const t = result[0].transcript.trim();
+      // GUARD: skip if this exact transcript was just processed (duplicate block)
+      if(!t || _spProcessing || t === _spLastTranscript) return;
+      _spProcessing = true;
+      _spLastTranscript = t;
+      // append to display
+      spDisplayText = spDisplayText ? spDisplayText + ' ' + t : t;
+      setTimeout(()=>{ _spProcessing = false; }, 1500);
+    } else {
+      // show interim live
+      const interim = result[0].transcript.trim();
+      const tr = document.getElementById('spTranscript');
+      if(tr) tr.innerHTML = spHL(spDisplayText) + (interim ? '<span class="sp-interim"> '+interim+'</span>' : '');
+      return;
     }
-    // Full display = what was said before this instance + what this instance got
-    const display = baseText
-      ? baseText + (instanceFinals ? ' ' + instanceFinals : '')
-      : instanceFinals;
-    spDisplayText = display;
+    const display = spDisplayText;
     const wc = display.trim().split(/\s+/).filter(Boolean).length;
     const ew = document.getElementById('spWords'); if(ew) ew.textContent = wc;
     const ec = spCountErr(display);
@@ -1772,7 +1771,7 @@ function spStartSR() {
     const eb = document.getElementById('errBadge');
     if(eb){eb.textContent=ec+' error'+(ec!==1?'s':'');eb.style.display=ec>0?'block':'none';}
     const tr = document.getElementById('spTranscript');
-    if(tr) tr.innerHTML = spHL(display) + (interim ? '<span class="sp-interim"> '+interim+'</span>' : '');
+    if(tr) tr.innerHTML = spHL(display);
   };
 
   rec.onerror = e => {
@@ -1782,8 +1781,6 @@ function spStartSR() {
 
   rec.onend = () => {
     if(!spIsRec || spRec !== rec) return;
-    // SR stopped — restart so mic stays active.
-    // spDisplayText holds all committed text as the new baseText for next instance.
     spRec = null;
     clearTimeout(spRestartTimer);
     spRestartTimer = setTimeout(()=>{ if(spIsRec) spStartSR(); }, 300);
