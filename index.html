@@ -1737,7 +1737,7 @@ function spStartSR() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR || !spIsRec) return;
 
-  // Kill old instance
+  // Kill any existing instance cleanly
   if(spRec){
     spRec.onresult=null; spRec.onend=null; spRec.onerror=null;
     try{spRec.abort();}catch(e){}
@@ -1745,8 +1745,9 @@ function spStartSR() {
   }
 
   const rec = new SR();
-  // continuous:false — each utterance fires one clean final result then stops.
-  // onend restarts it. No result replay because each new start() = empty e.results[].
+  // continuous:false — browser captures one utterance, fires final result, fires onend.
+  // We create a BRAND NEW instance on every onend restart.
+  // Each new instance has a completely empty e.results[] — zero replay possible.
   rec.continuous     = false;
   rec.interimResults = true;
   rec.lang           = 'en-IN';
@@ -1779,22 +1780,18 @@ function spStartSR() {
     if(e.error==='not-allowed'||e.error==='audio-capture'){
       toast('❌ Mic denied','error'); spStop(); return;
     }
-    // no-speech or other non-fatal: onend will restart
+    // no-speech / network — non-fatal, onend will fire and create new instance
   };
 
   rec.onend = () => {
-    if(!spIsRec || spRec !== rec) return;
-    // Safe to restart: continuous:false means each new start() gives a
-    // completely fresh e.results[] — old results are never replayed.
+    if(spRec === rec) spRec = null; // clear before creating new instance
+    if(!spIsRec) return;
+    // Always create a BRAND NEW instance — never reuse old rec
     clearTimeout(spRestartTimer);
-    spRestartTimer = setTimeout(()=>{
-      if(spIsRec && spRec === rec){
-        try{ rec.start(); }catch(e){ spStartSR(); }
-      }
-    }, 100);
+    spRestartTimer = setTimeout(()=>{ if(spIsRec) spStartSR(); }, 100);
   };
 
-  try{ rec.start(); }catch(e){ console.warn('SR start error:',e.message); }
+  try{ rec.start(); }catch(e){ console.warn('SR start:',e.message); }
 }
 
 async function spStop() {
