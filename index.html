@@ -1732,54 +1732,69 @@ function _doStartMR(stream){
   spMediaRec.start(500);
 }
 
-// ── SR: DISPLAY ONLY — shows live interim words, NOT used for final text ──
+// ── SR: DISPLAY ONLY — shows live interim words ──
 function spStartSR() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR || !spIsRec) return;
-  // NOTE: do NOT increment _spSessionId here — only spStart/spStop/spPause/spReset own the session
   const mySession = _spSessionId;
   if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   const rec = new SR();
-  rec.continuous = true; rec.interimResults = true; rec.lang='en-IN'; rec.maxAlternatives=1;
+  // continuous:false is critical — with continuous:true the browser keeps ALL results in
+  // e.results[] and re-delivers them every event, causing words to duplicate on screen.
+  // With continuous:false, SR stops after a pause, onend fires, and we restart cleanly.
+  rec.continuous = false;
+  rec.interimResults = true;
+  rec.lang = 'en-IN';
+  rec.maxAlternatives = 1;
   spRec = rec;
+
   rec.onresult = e => {
-    if(_spSessionId!==mySession) return;
-    // Build from the committed baseline (text locked in before this SR instance started)
-    // This prevents re-appending words when SR auto-restarts and replays old results
-    let sessionText = _spCommittedText;
-    let interim='';
-    for(let i=0;i<e.results.length;i++){
+    if(_spSessionId !== mySession) return;
+    // e.resultIndex = first NEW result — only process from there to avoid replaying old ones
+    let newFinals = '';
+    let interim = '';
+    for(let i = e.resultIndex; i < e.results.length; i++){
       if(e.results[i].isFinal){
-        const t=e.results[i][0].transcript.trim();
-        if(t) sessionText+=(sessionText&&!sessionText.endsWith(' ')?' ':'')+t;
+        const t = e.results[i][0].transcript.trim();
+        if(t) newFinals += (newFinals ? ' ' : '') + t;
       } else {
-        interim=e.results[i][0].transcript;
+        interim = e.results[i][0].transcript;
       }
     }
-    spDisplayText=sessionText;
-    const wc=spDisplayText.trim().split(/\s+/).filter(Boolean).length;
-    const ew=document.getElementById('spWords');if(ew)ew.textContent=wc;
-    const ec=spCountErr(spDisplayText);
-    const errEl=document.getElementById('spErrs');if(errEl)errEl.textContent=ec;
-    const eb=document.getElementById('errBadge');
-    if(eb){eb.textContent=ec+' error'+(ec!==1?'s':'');eb.style.display=ec>0?'block':'none';}
-    const tr=document.getElementById('spTranscript');
-    if(tr) tr.innerHTML=spHL(spDisplayText)+(interim?`<span class="sp-interim"> ${interim}</span>`:'');
+    if(newFinals){
+      _spCommittedText += (_spCommittedText && !_spCommittedText.endsWith(' ') ? ' ' : '') + newFinals;
+    }
+    spDisplayText = _spCommittedText;
+    const wc = spDisplayText.trim().split(/\s+/).filter(Boolean).length;
+    const ew = document.getElementById('spWords'); if(ew) ew.textContent = wc;
+    const ec = spCountErr(spDisplayText);
+    const errEl = document.getElementById('spErrs'); if(errEl) errEl.textContent = ec;
+    const eb = document.getElementById('errBadge');
+    if(eb){eb.textContent = ec+' error'+(ec!==1?'s':''); eb.style.display = ec>0?'block':'none';}
+    const tr = document.getElementById('spTranscript');
+    if(tr) tr.innerHTML = spHL(spDisplayText) + (interim ? `<span class="sp-interim"> ${interim}</span>` : '');
   };
-  rec.onerror = e=>{ 
-    if(_spSessionId!==mySession) return; 
-    if(e.error==='not-allowed'||e.error==='audio-capture'){toast('❌ Mic denied — please allow microphone access','error');spStop();}
-    // for recoverable errors (network, no-speech, aborted) — just let onend restart it
+
+  rec.onerror = e => {
+    if(_spSessionId !== mySession) return;
+    if(e.error==='not-allowed'||e.error==='audio-capture'){
+      toast('❌ Mic denied — please allow microphone access','error'); spStop();
+    }
+    // no-speech / network / aborted → onend fires and we restart cleanly
   };
-  rec.onend = ()=>{
-    if(_spSessionId!==mySession||!spIsRec) return;
-    // Snapshot whatever text is committed so far — the next SR instance starts AFTER this
-    _spCommittedText = spDisplayText;
+
+  rec.onend = () => {
+    if(_spSessionId !== mySession || !spIsRec) return;
+    // _spCommittedText already holds all finalised words — safe to restart immediately
     clearTimeout(spRestartTimer);
-    spRestartTimer=setTimeout(()=>{ if(spIsRec&&_spSessionId===mySession) spStartSR(); },300);
+    spRestartTimer = setTimeout(() => {
+      if(spIsRec && _spSessionId === mySession) spStartSR();
+    }, 150);
   };
-  try{ rec.start(); }catch(e){}
+
+  try{ rec.start(); } catch(e){}
 }
+
 
 async function spStop() {
   _spSessionId++;
