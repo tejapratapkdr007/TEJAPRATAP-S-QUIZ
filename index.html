@@ -881,6 +881,7 @@ let spRestartCount = 0, spRestartTimer = null;
 // Audio recording globals
 let spMediaRec = null, spAudioChunks = [], spMediaStream = null;
 let spDisplayText = ''; // SR display only — not submitted
+let _spCommittedText = ''; // text committed before each SR restart — prevents replay duplication
 
 // ═══════════════════════════════════════════════════
 // INIT
@@ -1634,7 +1635,7 @@ async function loadSpeak() {
 
 function spReset() {
   _spSessionId++;
-  spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spIsRec=false; spRestartCount=0;
+  spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; _spCommittedText=''; spIsRec=false; spRestartCount=0;
   clearInterval(spTimer); clearTimeout(spRestartTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
@@ -1674,7 +1675,7 @@ function spStart() {
   if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
   spMediaRec=null; spAudioChunks=[];
-  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spRestartCount=0;
+  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spRestartCount=0; _spCommittedText='';
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.add('rec');btn.textContent='⏸';}
   const st=document.getElementById('spStatus');
@@ -1743,17 +1744,19 @@ function spStartSR() {
   spRec = rec;
   rec.onresult = e => {
     if(_spSessionId!==mySession) return;
-    // spDisplayText = what student sees live on screen (SR-based, display only)
-    // spFinalText   = actual submitted text (from audio transcription after stop)
+    // Build from the committed baseline (text locked in before this SR instance started)
+    // This prevents re-appending words when SR auto-restarts and replays old results
+    let sessionText = _spCommittedText;
     let interim='';
-    for(let i=e.resultIndex;i<e.results.length;i++){
+    for(let i=0;i<e.results.length;i++){
       if(e.results[i].isFinal){
         const t=e.results[i][0].transcript.trim();
-        if(t) spDisplayText+=(spDisplayText&&!spDisplayText.endsWith(' ')?' ':'')+t;
+        if(t) sessionText+=(sessionText&&!sessionText.endsWith(' ')?' ':'')+t;
       } else {
         interim=e.results[i][0].transcript;
       }
     }
+    spDisplayText=sessionText;
     const wc=spDisplayText.trim().split(/\s+/).filter(Boolean).length;
     const ew=document.getElementById('spWords');if(ew)ew.textContent=wc;
     const ec=spCountErr(spDisplayText);
@@ -1770,6 +1773,8 @@ function spStartSR() {
   };
   rec.onend = ()=>{
     if(_spSessionId!==mySession||!spIsRec) return;
+    // Snapshot whatever text is committed so far — the next SR instance starts AFTER this
+    _spCommittedText = spDisplayText;
     clearTimeout(spRestartTimer);
     spRestartTimer=setTimeout(()=>{ if(spIsRec&&_spSessionId===mySession) spStartSR(); },300);
   };
