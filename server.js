@@ -431,10 +431,78 @@ app.post("/schedule/affairs/mark-posted", (req, res) => {
 });
 
 // =====================================================
-// TRANSCRIBE AUDIO — removed (Claude API does not support raw audio input)
-// The frontend uses the browser's built-in Web Speech API (SpeechRecognition)
-// for live transcription, which is more reliable and needs no server round-trip.
+// TRANSCRIBE AUDIO via OpenAI Whisper
+// Requires OPENAI_API_KEY environment variable.
+// If not set, returns empty text and frontend falls back to SR display text.
 // =====================================================
+app.post("/transcribe", async (req, res) => {
+    const { audio, mimeType } = req.body;
+    if (!audio) return res.status(400).json({ error: "No audio" });
+
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+        // No key set — tell frontend to use SR fallback
+        return res.json({ text: "" });
+    }
+
+    let fetchFn = typeof fetch !== "undefined" ? fetch : null;
+    if (!fetchFn) {
+        try { const nf = await import("node-fetch"); fetchFn = nf.default || nf; }
+        catch { return res.status(500).json({ error: "HTTP client unavailable" }); }
+    }
+
+    try {
+        // Convert base64 to Buffer
+        const base64Data = audio.includes(",") ? audio.split(",")[1] : audio;
+        const audioBuffer = Buffer.from(base64Data, "base64");
+        const ext = (mimeType || "audio/webm").includes("mp4") ? "mp4"
+                  : (mimeType || "").includes("ogg") ? "ogg" : "webm";
+
+        // Build multipart form — Whisper requires a file upload
+        const boundary = "----FormBoundary" + Math.random().toString(36).slice(2);
+        const CRLF = "
+";
+        const pre = Buffer.from(
+            `--${boundary}${CRLF}` +
+            `Content-Disposition: form-data; name="file"; filename="audio.${ext}"${CRLF}` +
+            `Content-Type: ${mimeType || "audio/webm"}${CRLF}${CRLF}`
+        );
+        const model = Buffer.from(
+            `${CRLF}--${boundary}${CRLF}` +
+            `Content-Disposition: form-data; name="model"${CRLF}${CRLF}` +
+            `whisper-1${CRLF}` +
+            `--${boundary}${CRLF}` +
+            `Content-Disposition: form-data; name="language"${CRLF}${CRLF}` +
+            `en${CRLF}` +
+            `--${boundary}--${CRLF}`
+        );
+        const body = Buffer.concat([pre, audioBuffer, model]);
+
+        const response = await fetchFn("https://api.openai.com/v1/audio/transcriptions", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${apiKey}`,
+                "Content-Type": `multipart/form-data; boundary=${boundary}`
+            },
+            body
+        });
+
+        if (!response.ok) {
+            const err = await response.text();
+            console.error("[Whisper] Error:", response.status, err.substring(0, 200));
+            return res.json({ text: "" }); // fall back to SR
+        }
+
+        const data = await response.json();
+        const text = (data.text || "").trim();
+        console.log("[Whisper] Transcript:", text.substring(0, 100));
+        return res.json({ text });
+
+    } catch (e) {
+        console.error("[Whisper] Exception:", e.message);
+        return res.json({ text: "" }); // fall back to SR
+    }
+});
 
 // =====================================================
 // AI GRAMMAR CHECK
