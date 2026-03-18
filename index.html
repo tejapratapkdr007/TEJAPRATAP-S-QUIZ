@@ -1732,7 +1732,7 @@ function _doStartMR(stream){
   spMediaRec.start(500);
 }
 
-// ── SR: DISPLAY ONLY — shows live words on screen while student speaks ──
+// ── SR: live display of speech on screen ──
 function spStartSR() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   if(!SR || !spIsRec) return;
@@ -1740,40 +1740,46 @@ function spStartSR() {
   const rec = new SR();
   rec.continuous = true; rec.interimResults = true; rec.lang='en-IN'; rec.maxAlternatives=1;
   spRec = rec;
+  // snapshot of committed text before this SR instance started
+  // so on restart we don't lose what was already said
+  const baseText = spDisplayText;
   rec.onresult = e => {
     if(!spIsRec || spRec !== rec) return;
-    // Rebuild full display from ALL results in this single SR instance.
-    // Safe because we never restart — one instance, one e.results[] array, no replay.
-    let finals = '', interim = '';
-    for(let i = 0; i < e.results.length; i++){
+    // Build new finals from this SR instance only (from e.resultIndex onward)
+    let newFinals = '', interim = '';
+    for(let i = e.resultIndex; i < e.results.length; i++){
       if(e.results[i].isFinal){
         const t = e.results[i][0].transcript.trim();
-        if(t) finals += (finals ? ' ' : '') + t;
+        if(t) newFinals += (newFinals ? ' ' : '') + t;
       } else {
         interim = e.results[i][0].transcript.trim();
       }
     }
-    spDisplayText = finals;
-    const wc = finals.trim().split(/\s+/).filter(Boolean).length;
+    // Append new finals to base (what was committed before this instance)
+    if(newFinals){
+      spDisplayText = baseText + (baseText ? ' ' : '') + newFinals;
+    }
+    const display = spDisplayText;
+    const wc = display.trim().split(/\s+/).filter(Boolean).length;
     const ew = document.getElementById('spWords'); if(ew) ew.textContent = wc;
-    const ec = spCountErr(finals);
+    const ec = spCountErr(display);
     const errEl = document.getElementById('spErrs'); if(errEl) errEl.textContent = ec;
     const eb = document.getElementById('errBadge');
     if(eb){eb.textContent=ec+' error'+(ec!==1?'s':'');eb.style.display=ec>0?'block':'none';}
     const tr = document.getElementById('spTranscript');
-    if(tr) tr.innerHTML = spHL(finals) + (interim ? '<span class="sp-interim"> '+interim+'</span>' : '');
+    if(tr) tr.innerHTML = spHL(display) + (interim ? '<span class="sp-interim"> '+interim+'</span>' : '');
   };
   rec.onerror = e => {
     if(spRec !== rec) return;
     if(e.error==='not-allowed'){toast('❌ Mic denied','error');spStop();}
-    // other errors: SR stops but MediaRecorder keeps capturing audio — no restart needed
   };
   rec.onend = () => {
-    // KEY FIX: NO RESTART.
-    // Every previous restart caused the browser to replay the last result
-    // into the new SR instance, making words appear 2-3 times.
-    // SR is display-only. MediaRecorder has the real audio. No restart = no duplication.
+    if(!spIsRec || spRec !== rec) return;
+    // SR stopped (browser paused) — restart so mic keeps working
+    // spDisplayText already holds all committed text so no duplication
     spRec = null;
+    clearTimeout(spRestartTimer);
+    spRestartTimer = setTimeout(()=>{ if(spIsRec) spStartSR(); }, 300);
   };
   try{ rec.start(); }catch(e){}
 }
@@ -1824,8 +1830,8 @@ async function spStop() {
     }catch(e){console.error('[Transcribe] Error:',e.message);}
   }
 
-  // ── Fallback to SR accumulated text if transcription failed ──────────────
-  if(!fullText) fullText=spFinalText.trim()||spText.trim();
+  // ── Fallback to SR display text if transcription failed ──────────────
+  if(!fullText) fullText=spDisplayText.trim()||spFinalText.trim()||spText.trim();
 
   if(!fullText){
     if(st)st.textContent='No speech detected. Try again.';
