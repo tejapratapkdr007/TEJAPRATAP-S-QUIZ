@@ -876,168 +876,734 @@ const API = 'https://tejapratap-s-quiz.onrender.com';
 let ME = null, MY_NAME = null, IS_T = false;
 let T_PW = localStorage.getItem('tpw') || '11223344@Ttp';
 let _gkCache = null, gkInterval = null;
-let spRec = null, spIsRec = false, spTimer = null, spElapsed = 0, spDuration = 120;
-let spFinalText = '', spDisplayText = '';
-let spRestartTimer = null;
-// MediaRecorder — captures real audio for transcription
+let spRec = null, spIsRec = false, spTimer = null, spElapsed = 0, spDuration = 120, spText = '', spFinalText = '';
+let spRestartCount = 0, spRestartTimer = null;
+// Audio recording globals
 let spMediaRec = null, spAudioChunks = [], spMediaStream = null;
-// SR — used ONLY for live interim display, not for submitted text
-let _spStarting = false;
+let spDisplayText = ''; // SR display only — not submitted
 
-// ─────────────────────────────────────────────────────
-// SPEAKING CORE
-// ─────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  const pin = localStorage.getItem('pin'), name = localStorage.getItem('uname');
+  const tl = localStorage.getItem('teacher'), spDur = localStorage.getItem('spDur');
+  if (spDur) spDuration = parseInt(spDur);
+  if (pin && name) { ME = pin; MY_NAME = name; enterHome(); }
+  else if (tl === '1') { IS_T = true; enterTeacher(); }
+  else { go('s-login'); loadLoginFaf(); }
+});
+setInterval(() => fetch(API + '/health').catch(()=>{}), 4 * 60 * 1000);
 
-function spStart() {
-  clearTimeout(spRestartTimer);
-  if(spRec){ spRec.onresult=null; spRec.onend=null; spRec.onerror=null; try{spRec.abort();}catch(e){} spRec=null; }
-  _spStarting=false; spIsRec=true; spElapsed=0; spFinalText=''; spDisplayText=''; spAudioChunks=[];
-  document.getElementById('spBtn').classList.add('rec');
-  document.getElementById('spBtn').textContent='⏸';
-  document.getElementById('spStatus').textContent='🔴 Recording — speak now...';
-  document.getElementById('spStatus').className='sp-status live';
-  document.getElementById('tSub').textContent='SPEAKING';
-  document.getElementById('spTranscript').innerHTML='';
-  ['spCorrectBox','spAnalysisBox','spSuggestBox'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('show');});
-  const eb=document.getElementById('errBadge');if(eb)eb.style.display='none';
-  document.getElementById('spErrs').textContent='0';
-  document.getElementById('spScore').textContent='—';
-  document.getElementById('spWords').textContent='0';
-  spStartMediaRec();   // record real audio
-  spStartSR();         // live display only
-  clearInterval(spTimer);
-  spTimer = setInterval(()=>{
-    if(!spIsRec) return;
-    spElapsed++; spUpdateTimer();
-    if(spElapsed >= spDuration){ spStop(); toast('⏱ Time is up!','warn'); }
-  }, 1000);
+// ═══════════════════════════════════════════════════
+// MOBILE SIDEBAR
+// ═══════════════════════════════════════════════════
+function toggleSidebar() {
+  document.getElementById('appSidebar').classList.toggle('open');
+  document.getElementById('sidebarOverlay').classList.toggle('show');
+}
+function closeSidebar() {
+  document.getElementById('appSidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('show');
 }
 
-function spPause() {
-  _spStarting=false; spIsRec=false; clearInterval(spTimer);
-  if(spRec){ spRec.onresult=null; spRec.onend=null; spRec.onerror=null; try{spRec.abort();}catch(e){} spRec=null; }
-  document.getElementById('spBtn').classList.remove('rec');
-  document.getElementById('spBtn').textContent='🎙️';
-  document.getElementById('spStatus').textContent='⏸ Paused — press 🎙️ to continue';
-  document.getElementById('spStatus').className='sp-status';
+// ═══════════════════════════════════════════════════
+// NAVIGATION
+// ═══════════════════════════════════════════════════
+function go(id) {
+  closeSidebar();
+  const loginScreens = ['s-login','s-teacher-login'];
+  if (loginScreens.includes(id)) {
+    document.getElementById('appLayout').style.display = 'none';
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    const el = document.getElementById(id); if (el) el.classList.add('active');
+    return;
+  }
+  document.getElementById('appLayout').style.display = 'grid';
+  document.querySelectorAll('#s-login,#s-teacher-login').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('#appMain .screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id); if (el) el.classList.add('active');
+  // Update nav active
+  document.querySelectorAll('.nav-item[data-target]').forEach(n => n.classList.remove('active'));
+  const ni = document.querySelector(`.nav-item[data-target="${id}"]`); if (ni) ni.classList.add('active');
+  // Update bottom nav
+  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+  const bn = document.querySelector(`.bnav-btn[data-target="${id}"]`); if (bn) bn.classList.add('active');
+  // Load data
+  if (id === 's-quiz')    loadQuiz();
+  if (id === 's-media')   loadMediaStudent();
+  if (id === 's-word')    loadWordStudent();
+  if (id === 's-affairs') loadAffairsStudent();
+  if (id === 's-rank')    loadRank();
+  if (id === 's-speak')   loadSpeak();
 }
 
-// ── MediaRecorder: captures real audio ──
-function spStartMediaRec() {
-  spAudioChunks = [];
-  const go = stream => {
-    spMediaStream = stream;
-    const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4',''];
-    let mime = types.find(t => t==='' || MediaRecorder.isTypeSupported(t)) || '';
-    try { spMediaRec = mime ? new MediaRecorder(stream,{mimeType:mime}) : new MediaRecorder(stream); }
-    catch(e){ spMediaRec = new MediaRecorder(stream); }
-    spMediaRec.ondataavailable = e => { if(e.data && e.data.size>0) spAudioChunks.push(e.data); };
-    spMediaRec.start(250);
-  };
-  if(spMediaStream && spMediaStream.active){ go(spMediaStream); return; }
-  navigator.mediaDevices.getUserMedia({audio:true}).then(go).catch(e=>{
-    console.warn('Mic denied:', e.message);
-    toast('Mic access denied','error');
-  });
+// ═══════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════
+let toastTm;
+function toast(msg, type='info') {
+  const t = document.getElementById('toast');
+  const bg = {info:'#2563eb',success:'#16a34a',error:'#dc2626',warn:'#d97706'};
+  t.style.background = bg[type] || '#333';
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastTm); toastTm = setTimeout(() => t.classList.remove('show'), 3200);
 }
 
-// ── SR: LIVE DISPLAY ONLY — shows interim words while student speaks ──
-// SR is NOT used for final transcript. MediaRecorder captures real audio.
-// No restarts — if SR stops, it stops. MediaRecorder still has everything.
-function spStartSR() {
-  if(_spStarting) return;
-  _spStarting = true;
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){ _spStarting=false; return; }
-  if(spRec){ spRec.onresult=null; spRec.onend=null; spRec.onerror=null; try{spRec.abort();}catch(e){} spRec=null; }
+// ═══════════════════════════════════════════════════
+// API HELPERS
+// ═══════════════════════════════════════════════════
+async function GET(path) {
+  try { const r = await fetch(API + path); if (!r.ok) return null; return r.json(); } catch { return null; }
+}
+async function POST(path, data, _retry=0) {
+  const ctrl = new AbortController();
+  const tid = setTimeout(() => ctrl.abort(), 20000);
+  try {
+    const r = await fetch(API + path, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data),signal:ctrl.signal});
+    clearTimeout(tid);
+    if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error || 'Server error'); }
+    return r.json();
+  } catch(e) {
+    clearTimeout(tid);
+    const timedOut = e.name === 'AbortError' || e.name === 'TypeError';
+    if (timedOut && _retry < 2) {
+      toast(`Server waking up... retrying (${_retry+1}/2)`, 'warn');
+      await new Promise(res => setTimeout(res, 5000));
+      return POST(path, data, _retry + 1);
+    }
+    if (timedOut) throw new Error('Server not responding — check connection');
+    throw e;
+  }
+}
+function toB64(file) {
+  return new Promise((res,rej) => { const rd = new FileReader(); rd.onload = e => res(e.target.result); rd.onerror = rej; rd.readAsDataURL(file); });
+}
 
-  const rec = new SR();
-  rec.continuous      = true;
-  rec.interimResults  = true;
-  rec.lang            = 'en-IN';
-  rec.maxAlternatives = 1;
-  spRec = rec;
-  _spStarting = false;
+// Safe image src — handles data URL or plain base64
+function safeImgSrc(data, type='image') {
+  if (!data) return '';
+  if (data.startsWith('data:') || data.startsWith('http') || data.startsWith('blob:')) return data;
+  try {
+    const head = data.substring(0, 8);
+    if (type === 'image') {
+      let mime = 'image/jpeg';
+      if (head.startsWith('/9j/')) mime = 'image/jpeg';
+      else if (head.startsWith('iVBOR')) mime = 'image/png';
+      else if (head.startsWith('R0lGOD')) mime = 'image/gif';
+      else if (head.startsWith('UklGR')) mime = 'image/webp';
+      return `data:${mime};base64,${data}`;
+    } else {
+      // Detect audio MIME from base64 magic bytes
+      const bytes = atob(data.substring(0, 12));
+      const hex = Array.from(bytes).map(c => c.charCodeAt(0).toString(16).padStart(2,'0')).join('');
+      let mime = 'audio/mpeg';
+      if (hex.startsWith('52494646')) mime = 'audio/wav';
+      else if (hex.startsWith('4f676753')) mime = 'audio/ogg';
+      else if (hex.startsWith('664c6143')) mime = 'audio/flac';
+      else if (hex.includes('66747970')) mime = 'audio/mp4';
+      return `data:${mime};base64,${data}`;
+    }
+  } catch { return data; }
+}
 
-  rec.onresult = e => {
-    if(!spIsRec || spRec !== rec) return;
-    // Build full display text from ALL results every time (safe — single SR instance, no restart)
-    let finals = '';
-    let interim = '';
-    for(let i = 0; i < e.results.length; i++){
-      if(e.results[i].isFinal){
-        finals += (finals ? ' ' : '') + e.results[i][0].transcript.trim();
+// Convert data URL to Blob URL for reliable audio playback
+function getAudioSrc(data) {
+  if (!data) return '';
+  const src = safeImgSrc(data, 'audio');
+  if (!src.startsWith('data:')) return src;
+  try {
+    const [hdr, b64] = src.split(',');
+    const mime = hdr.match(/:(.*?);/)[1];
+    const bin = atob(b64), arr = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return URL.createObjectURL(new Blob([arr], {type: mime}));
+  } catch { return src; }
+}
+
+// ═══════════════════════════════════════════════════
+// PIN HELPERS
+// ═══════════════════════════════════════════════════
+function pinFilter(inp) {
+  const pos = inp.selectionStart;
+  inp.value = inp.value.toUpperCase().replace(/[^A-Z0-9\-]/g,'');
+  try { inp.setSelectionRange(pos,pos); } catch(e) {}
+}
+function pinKey(e) {
+  const ctrl = ['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Enter','Home','End','Shift','Control','Meta','CapsLock'];
+  if (ctrl.includes(e.key)) return;
+  if (!/^[a-zA-Z0-9\-]$/.test(e.key)) e.preventDefault();
+}
+
+// ═══════════════════════════════════════════════════
+// LOGIN / LOGOUT
+// ═══════════════════════════════════════════════════
+function doLogin() {
+  const name = document.getElementById('lName').value.trim();
+  const phone = document.getElementById('lPhone').value.trim();
+  const pin = document.getElementById('lPin').value.trim().toUpperCase();
+  if (!name) return toast('Enter your name!','error');
+  if (!/^\d{10}$/.test(phone)) return toast('Enter valid 10-digit phone!','error');
+  if (!pin) return toast('Enter your PIN!','error');
+  const OK = /^[0-9]{5}-(CS|EE|ME|EI|CE|EC|ETC|DAEC|DAUT|DAU|DCHE|DCSE|DECE|DEIE|DEVE|DEMB|DWT|DFT|DGT|DHMCT|DSC|DLT|DMNG|DMET|DPKT|DPT|DTXT)-[0-9]{3}$/;
+  if (!OK.test(pin)) return toast('Invalid PIN! e.g. 25007-CS-007','error');
+  ME = pin; MY_NAME = name;
+  localStorage.setItem('pin',pin); localStorage.setItem('uname',name);
+  POST('/phones',{pin,name,phone}).catch(()=>{});
+  enterHome();
+}
+function doTLogin() {
+  const pw = document.getElementById('tPw').value;
+  if (pw !== T_PW) return toast('Wrong password!','error');
+  IS_T = true; localStorage.setItem('teacher','1'); enterTeacher();
+}
+function doLogout() {
+  ME = null; MY_NAME = null;
+  localStorage.removeItem('pin'); localStorage.removeItem('uname');
+  go('s-login'); loadLoginFaf();
+}
+function doTLogout() {
+  IS_T = false; localStorage.removeItem('teacher');
+  [gkInterval, wInterval, affInterval, spAutoInterval].forEach(iv => { if(iv){clearInterval(iv);} });
+  gkInterval = wInterval = affInterval = spAutoInterval = null;
+  go('s-login'); loadLoginFaf();
+}
+
+// ═══════════════════════════════════════════════════
+// SIDEBAR / BOTTOM NAV BUILDERS
+// ═══════════════════════════════════════════════════
+function buildStudentSidebar() {
+  const navItems = [
+    {target:'s-home',icon:'🏠',label:'Home'},
+    {target:'s-speak',icon:'🎙️',label:'Speaking'},
+    {target:'s-quiz',icon:'🧠',label:'GK Quiz'},
+    {target:'s-word',icon:'📖',label:'Word of Day'},
+    {target:'s-affairs',icon:'📰',label:'Current Affairs'},
+    {target:'s-media',icon:'🎵',label:'Media Question'},
+    {target:'s-rank',icon:'🏆',label:'Leaderboard'},
+  ];
+  document.getElementById('appSidebar').innerHTML = `
+    <div class="nav-section">
+      <div class="nav-lbl">Student</div>
+      ${navItems.map(i=>`<div class="nav-item${i.target==='s-home'?' active':''}" data-target="${i.target}" onclick="go('${i.target}')"><span class="ni">${i.icon}</span><span class="nt">${i.label}</span></div>`).join('')}
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-section"><div class="nav-item danger" onclick="doLogout()"><span class="ni">↩️</span><span class="nt">Logout</span></div></div>`;
+  // Mobile bottom nav — 5 items
+  const bnItems = [{target:'s-home',icon:'🏠',label:'Home'},{target:'s-quiz',icon:'🧠',label:'Quiz'},{target:'s-speak',icon:'🎙️',label:'Speak'},{target:'s-rank',icon:'🏆',label:'Rank'},{target:'s-media',icon:'🎵',label:'Media'}];
+  document.getElementById('bnavInner').innerHTML = bnItems.map(i=>`<button class="bnav-btn" data-target="${i.target}" onclick="go('${i.target}')"><span>${i.icon}</span><span>${i.label}</span></button>`).join('');
+}
+function buildTopbarStudent() {
+  document.getElementById('topbarRight').innerHTML = `
+    <div class="topbar-stats">
+      <div class="topbar-stat"><div class="v" id="hScore" style="color:#7b9fff">0</div><div class="l">Score</div></div>
+      <div class="topbar-stat"><div class="v" id="hRank" style="color:#4ade80">#—</div><div class="l">Rank</div></div>
+      <div class="topbar-stat"><div class="v" id="hStreak" style="color:#f97316">🔥0</div><div class="l">Streak</div></div>
+    </div>
+    <div class="topbar-user" onclick="showProfileModal()" title="My Profile" style="cursor:pointer">
+      <div class="topbar-avatar" id="topAvatar">?</div>
+      <div>
+        <div class="topbar-uname" id="topName"></div>
+        <div style="font-size:9px;color:#64748b;letter-spacing:0.5px" id="topPin"></div>
+      </div>
+    </div>`;
+}
+function buildTeacherSidebar() {
+  document.getElementById('appSidebar').innerHTML = `
+    <div class="nav-section">
+      <div class="nav-lbl" style="color:#a78bfa">Teacher</div>
+      <div class="nav-item teacher-item active" data-target="s-teacher" onclick="go('s-teacher')"><span class="ni">👨‍🏫</span><span class="nt">Dashboard</span></div>
+    </div>
+    <div class="nav-divider"></div>
+    <div class="nav-section"><div class="nav-item danger" onclick="doTLogout()"><span class="ni">↩️</span><span class="nt">Logout</span></div></div>`;
+  document.getElementById('bnavInner').innerHTML = `<button class="bnav-btn active" onclick="go('s-teacher')"><span>👨‍🏫</span><span>Dashboard</span></button><button class="bnav-btn danger" onclick="doTLogout()"><span>↩️</span><span>Logout</span></button>`;
+}
+
+function enterHome() {
+  buildStudentSidebar(); buildTopbarStudent(); go('s-home');
+  const av = document.getElementById('topAvatar'); if (av) av.textContent = (MY_NAME||'?')[0].toUpperCase();
+  const tn = document.getElementById('topName'); if (tn) tn.textContent = MY_NAME;
+  const tp = document.getElementById('topPin'); if (tp) tp.textContent = ME;
+  document.getElementById('hWelcome').textContent = 'Welcome, ' + MY_NAME + '!';
+  document.getElementById('hPin').textContent = 'PIN: ' + ME;
+  loadLoginFaf(); loadHomeFaf(); loadStats();
+}
+function enterTeacher() {
+  buildTeacherSidebar();
+  document.getElementById('topbarRight').innerHTML = `
+    <div class="topbar-user"><div class="topbar-avatar" style="background:linear-gradient(135deg,#7c3aed,#4f46e5)">👨‍🏫</div><div class="topbar-uname">Teacher</div></div>`;
+  document.getElementById('appLayout').style.display = 'grid';
+  document.querySelectorAll('#s-login,#s-teacher-login').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('#appMain .screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s-teacher').classList.add('active');
+  loadGKList(); startGKMachine(); startWMachine(); startAffMachine(); startSpAutoMachine(); startMdAutoMachine();
+  loadSpStudentAnswers();
+  const savedTopic = localStorage.getItem('spTopic');
+  if (savedTopic) {
+    const el = document.getElementById('spTopicList');
+    if (el) el.innerHTML = `<div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:7px;padding:9px 12px;font-size:12px;color:#6d28d9"><strong>${savedTopic}</strong> <span style="color:#64748b;font-size:10px">(active)</span></div>`;
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// FAF & STATS
+// ═══════════════════════════════════════════════════
+async function loadLoginFaf() {
+  const el = document.getElementById('loginFaf'); if (!el) return;
+  const [qs,ans] = await Promise.all([GET('/questions'),GET('/answers')]);
+  if (!qs || qs.length < 2) { el.textContent = 'No previous data yet'; return; }
+  const prev = qs[qs.length-2];
+  const pAns = (ans||[]).filter(a=>a.questionId===prev.id&&(!a.type||a.type==='question')).sort((a,b)=>new Date(a.submittedAt||0)-new Date(b.submittedAt||0));
+  if (!pAns.length) { el.textContent = 'No answers yet'; return; }
+  const medals=['🥇','🥈','🥉'],colors=['#FFD700','#C0C0C0','#cd7f32'];
+  el.innerHTML = pAns.slice(0,3).map((a,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #1e2535">
+      <span style="font-size:14px">${medals[i]}</span>
+      <span style="flex:1;font-weight:700;color:${colors[i]};font-size:12px">${a.studentName||'?'}</span>
+      <span style="font-size:10px;color:#64748b">${a.studentPin}</span>
+      ${i===0?'<span style="background:rgba(255,215,0,0.1);color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:1px 7px;font-size:9px;font-weight:700">⚡FIRST</span>':''}
+    </div>`).join('');
+}
+async function loadHomeFaf() {
+  const el = document.getElementById('homeFaf'); if (!el) return;
+  const [qs,ans] = await Promise.all([GET('/questions'),GET('/answers')]);
+  if (!qs||!qs.length) { el.textContent = 'No data yet'; return; }
+  const prev = qs.length>=2 ? qs[qs.length-2] : qs[0];
+  const pAns = (ans||[]).filter(a=>a.questionId===prev.id).sort((a,b)=>new Date(a.submittedAt||0)-new Date(b.submittedAt||0));
+  const medals=['🥇','🥈','🥉'];
+  el.innerHTML = pAns.length ? pAns.slice(0,3).map((a,i)=>`<span style="margin-right:8px">${medals[i]} ${a.studentName||'?'}</span>`).join('') : 'No answers yet';
+}
+async function loadStats() {
+  const data = await GET('/scores'); if (!data||!ME) return;
+  const {scores,streaks} = data;
+  const my = scores[ME];
+  const myTotal = my ? my.scores.reduce((s,e)=>s+e.points,0) : 0;
+  const myStreak = streaks[ME]?.count || 0;
+  const all = Object.entries(scores).map(([p,d])=>({p,t:d.scores.reduce((s,e)=>s+e.points,0)})).sort((a,b)=>b.t-a.t);
+  const rank = all.findIndex(e=>e.p===ME)+1;
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  set('hScore',myTotal); set('hRank',rank>0?'#'+rank:'#—'); set('hStreak','🔥'+myStreak);
+  set('hScoreHome',myTotal); set('hRankHome',rank>0?'#'+rank:'#—'); set('hStreakHome','🔥'+myStreak);
+  // render top 3
+  const medals=['🥇','🥈','🥉'],golds=['#FFD700','#C0C0C0','#cd7f32'];
+  const top3=all.slice(0,3);
+  const el=document.getElementById('homeTop3');
+  if(el){
+    if(!top3.length){el.innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:8px">No data yet</div>';}
+    else{
+      el.innerHTML=top3.map((s,i)=>{
+        const isMe=s.p===ME;
+        const name=(scores[s.p]?.name)||s.p;
+        return`<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;margin-bottom:6px;background:${isMe?'rgba(255,215,0,0.06)':'rgba(248,250,252,0.6)'};border:1px solid ${isMe?'rgba(255,215,0,0.25)':'rgba(219,234,254,0.8)'}">
+          <span style="font-size:18px">${medals[i]}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:700;color:${golds[i]};overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${name}${isMe?' (You)':''}</div>
+            <div style="font-size:10px;color:#64748b">${s.p}</div>
+          </div>
+          <div style="font-size:14px;font-weight:800;color:#7b9fff">${s.t}pts</div>
+        </div>`;
+      }).join('');
+    }
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// PROFILE MODAL
+// ═══════════════════════════════════════════════════
+function closeProfileModal(){const m=document.getElementById('profileModal');if(m)m.style.display='none';}
+async function showProfileModal(){
+  if(!ME)return;
+  const modal=document.getElementById('profileModal');if(!modal)return;
+  modal.style.display='flex';
+  const g=id=>document.getElementById(id);
+  const letter=(MY_NAME||'?')[0].toUpperCase();
+  if(g('pmAvatar'))g('pmAvatar').textContent=letter;
+  if(g('pmName'))g('pmName').textContent=MY_NAME||'—';
+  if(g('pmPin'))g('pmPin').textContent='PIN: '+(ME||'—');
+  if(g('pmPhone'))g('pmPhone').textContent='Loading...';
+  if(g('pmScore'))g('pmScore').textContent='...';
+  if(g('pmRank'))g('pmRank').textContent='...';
+  if(g('pmStreak'))g('pmStreak').textContent='...';
+  if(g('pmAnswers'))g('pmAnswers').textContent='...';
+  if(g('pmBreakdown'))g('pmBreakdown').innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:6px">Loading...</div>';
+  try{
+    const [scoreData,phones,answers]=await Promise.all([GET('/scores'),GET('/phones'),GET('/answers')]);
+    if(g('pmPhone'))g('pmPhone').textContent=phones?.[ME]?.phone||'—';
+    const scores=scoreData?.scores||{},streaks=scoreData?.streaks||{};
+    const myObj=scores[ME];
+    const myTotal=myObj?myObj.scores.reduce((s,e)=>s+e.points,0):0;
+    const myStreak=streaks[ME]?.count||0;
+    const all=Object.entries(scores).map(([p,d])=>({p,t:d.scores.reduce((s,e)=>s+e.points,0)})).sort((a,b)=>b.t-a.t);
+    const rank=all.findIndex(e=>e.p===ME)+1;
+    const myAns=(answers||[]).filter(a=>a.studentPin===ME);
+    if(g('pmScore'))g('pmScore').textContent=myTotal;
+    if(g('pmRank'))g('pmRank').textContent=rank>0?'#'+rank:'#—';
+    if(g('pmStreak'))g('pmStreak').textContent='🔥'+myStreak;
+    if(g('pmAnswers'))g('pmAnswers').textContent=myAns.length;
+    const gkN=myAns.filter(a=>!a.type||a.type==='question').length;
+    const spN=myAns.filter(a=>a.type==='speak').length;
+    const wdN=myAns.filter(a=>a.type==='word').length;
+    const afN=myAns.filter(a=>a.type==='affairs').length;
+    const mdN=myAns.filter(a=>a.type==='media').length;
+    const row=(ic,lbl,n,pts,col)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9"><span style="font-size:13px;color:#1e293b;font-weight:600">${ic} ${lbl} <span style="color:#94a3b8;font-size:11px">(×${n})</span></span><span style="font-size:13px;font-weight:800;color:${col}">+${n*pts} pts</span></div>`;
+    if(g('pmBreakdown'))g('pmBreakdown').innerHTML=
+      row('🧠','GK Quiz',gkN,5,'#1E5BFF')+
+      row('🎙️','Speaking',spN,20,'#A84DFF')+
+      row('📖','Word of Day',wdN,5,'#16a34a')+
+      row('📰','Current Affairs',afN,5,'#ea580c')+
+      row('🎵','Media',mdN,5,'#d97706')+
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 2px"><span style="font-size:14px;font-weight:700;color:#1e293b">🏆 Total</span><span style="font-size:18px;font-weight:800;color:#d97706">${myTotal} pts</span></div>`;
+  }catch(e){
+    if(g('pmPhone'))g('pmPhone').textContent='—';
+    if(g('pmBreakdown'))g('pmBreakdown').innerHTML='<div style="color:#dc2626;font-size:12px;text-align:center;padding:6px">Could not load data</div>';
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// QUIZ
+// ═══════════════════════════════════════════════════
+async function loadQuiz() {
+  const body = document.getElementById('quizBody');
+  body.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><br>Loading...</div>';
+  const [qs,ans] = await Promise.all([GET('/questions'),GET('/answers')]);
+  const realQs=(qs||[]).filter(q=>!q.question||!q.question.startsWith('__SPEAK_TOPIC__:'));
+  if (!realQs.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">📭 No question posted yet</div>'; return; }
+  const q = realQs[realQs.length-1];
+  const myAns = (ans||[]).find(a=>a.questionId===q.id&&a.studentPin===ME&&(!a.type||a.type==='question'));
+  let h = `<div class="card bl"><div class="card-lbl">📅 ${q.date}</div><div class="card-ttl">📌 Today's Question</div>
+    <p style="font-size:15px;color:var(--text);line-height:1.7;margin-top:8px">${q.question}</p>
+    ${q.questionFile?(q.questionFileType==='image'?`<div style="margin:12px 0"><img src="${safeImgSrc(q.questionFile,'image')}" class="media-img" onerror="this.parentNode.style.display='none'"></div>`:`<div style="margin:12px 0"><audio controls class="media-aud" src="${getAudioSrc(q.questionFile)}"></audio></div>`):''}
+  </div>`;
+  if (myAns) {
+    h += `<div class="ok">✅ Your answer: <strong>${myAns.answer}</strong></div>`;
+    if (q.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Correct Answer</div><p style="font-size:15px;color:#86efac;font-weight:700;margin-top:4px">${q.answer}</p>${q.answerOpinion?`<div style="margin-top:10px;padding:10px;background:rgba(167,139,250,0.06);border-left:3px solid #a78bfa;border-radius:7px;color:#d4b8ff;font-size:13px;line-height:1.6">💬 ${q.answerOpinion}</div>`:''}</div>`;
+    else h += `<div class="inf">⏳ Teacher hasn't revealed the answer yet</div>`;
+    const total = (ans||[]).filter(a=>a.questionId===q.id&&(!a.type||a.type==='question')).length;
+    h += `<div class="inf">👥 ${total} student${total!==1?'s':''} answered</div>`;
+  } else {
+    h += `<div class="card"><div class="card-lbl">📝 Your Answer</div><div class="fg" style="margin-top:8px"><textarea id="qAns" placeholder="Type your answer..."></textarea></div><button class="btn pri block" onclick="submitQ(${q.id})">📤 Submit Answer</button></div>`;
+  }
+  body.innerHTML = h;
+}
+async function submitQ(qId) {
+  const ans = document.getElementById('qAns').value.trim();
+  if (!ans) return toast('Write your answer!','error');
+  try {
+    await POST('/answers',{questionId:qId,studentPin:ME,studentName:MY_NAME,answer:ans});
+    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today()}).catch(()=>{});
+    toast('✅ Submitted! +5 points','success'); loadQuiz(); loadStats();
+  } catch(e) { toast(e.message,'error'); }
+}
+
+// ═══════════════════════════════════════════════════
+// MEDIA (Student)
+// ═══════════════════════════════════════════════════
+async function loadMediaStudent() {
+  const body = document.getElementById('mediaBody');
+  body.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><br>Loading...</div>';
+  const [media,ans] = await Promise.all([GET('/media'),GET('/answers')]);
+  const list = Array.isArray(media)?media:[];
+  if (!list.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">🎵 No media posted yet</div>'; return; }
+  const m = list[list.length-1];
+  const myAns = (ans||[]).find(a=>a.questionId===m.id&&a.studentPin===ME&&a.type==='media');
+  let h = `<div class="card or"><div class="card-lbl">📅 ${m.date||''}</div><div class="card-ttl">🎵 Media Question</div>`;
+
+  // Detect type from data if type field is wrong
+  let mediaType = m.type;
+  const d = m.data || '';
+  if (!mediaType || mediaType === 'text') {
+    if (d.startsWith('data:image') || d.startsWith('/uploads/') && d.match(/\.(jpg|jpeg|png|gif|webp)$/i)) mediaType = 'image';
+    else if (d.startsWith('data:audio') || d.startsWith('/uploads/') && d.match(/\.(mp3|wav|ogg|m4a)$/i)) mediaType = 'audio';
+    else if (m.fileName && m.fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i)) mediaType = 'image';
+    else if (m.fileName && m.fileName.match(/\.(mp3|wav|ogg|m4a)$/i)) mediaType = 'audio';
+    else if (d.length > 1000) mediaType = (m.fileName||'').match(/\.(mp3|wav|ogg|m4a)/i) ? 'audio' : 'image';
+  }
+
+  const isUrl = d.startsWith('/uploads/') || d.startsWith('http');
+
+  if (mediaType === 'image') {
+    const src = isUrl ? d : (d.startsWith('data:') ? d : safeImgSrc(d,'image'));
+    h += `<div style="margin:12px 0"><img src="${src}" style="max-width:100%;border-radius:10px" onerror="this.outerHTML='<p style=color:#f87171>⚠ Image could not load</p>'"></div>`;
+  } else if (mediaType === 'audio') {
+    const src = isUrl ? d : (d.startsWith('data:') ? d : '');
+    if (src) {
+      h += `<div style="margin:12px 0">
+        <audio controls style="width:100%" src="${src}"></audio>
+        <div style="margin-top:6px"><a href="${src}" target="_blank" style="color:#60a5fa;font-size:13px;font-weight:700">🎵 Tap here to play audio</a></div>
+      </div>`;
+    } else {
+      h += `<div style="background:#fef3c7;border-radius:8px;padding:10px;margin:10px 0;color:#92400e;font-size:13px">
+        ⚠️ This audio was uploaded before the fix. <strong>Teacher please delete and re-upload.</strong>
+      </div>`;
+    }
+  }
+
+  if (m.opinion) h += `<p style="font-size:14px;color:var(--text);margin-top:10px;line-height:1.6">${m.opinion}</p>`;
+  h += '</div>';
+  if (myAns) {
+    h += `<div class="ok">✅ Your answer: ${myAns.answer}</div>`;
+    if (m.expectedAnswer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="color:#86efac;font-weight:700;margin-top:4px">${m.expectedAnswer}</p></div>`;
+    else h += `<div class="inf">⏳ Answer not revealed yet</div>`;
+  } else {
+    h += `<div class="card"><div class="card-lbl">📝 Your Answer</div><div class="fg" style="margin-top:8px"><textarea id="mAns" placeholder="Your answer..."></textarea></div><button class="btn org block" onclick="submitMedia(${m.id})">📤 Submit</button></div>`;
+  }
+  body.innerHTML = h;
+}
+async function submitMedia(mId) {
+  const ans = document.getElementById('mAns').value.trim();
+  if (!ans) return toast('Write your answer!','error');
+  try {
+    await POST('/answers',{questionId:mId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'media'});
+    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today()}).catch(()=>{});
+    toast('✅ Submitted! +5 points','success'); loadMediaStudent();
+  } catch(e) { toast(e.message,'error'); }
+}
+
+// ═══════════════════════════════════════════════════
+// WORD (Student)
+// ═══════════════════════════════════════════════════
+async function loadWordStudent() {
+  const body = document.getElementById('wordBody');
+  body.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><br>Loading...</div>';
+  const [words,ans] = await Promise.all([GET('/word'),GET('/answers')]);
+  const list = Array.isArray(words)?words:[];
+  if (!list.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">📖 No word posted yet</div>'; return; }
+  const w = list[list.length-1];
+  const myAns = (ans||[]).find(a=>a.questionId===w.id&&a.studentPin===ME&&a.type==='word');
+  let h = `<div class="card pu"><div class="card-lbl">📅 ${w.date}</div><div style="font-size:30px;font-weight:800;color:#c4b5fd;margin-bottom:7px;font-family:'Syne',sans-serif">${w.word}</div><p style="font-size:14px;color:var(--text);line-height:1.6">${w.question}</p></div>`;
+  if (myAns) {
+    h += `<div class="ok">✅ Your answer: ${myAns.answer}</div>`;
+    if (w.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="font-size:14px;color:#86efac;line-height:1.6;margin-top:4px">${w.answer}</p></div>`;
+    else h += `<div class="inf">⏳ Answer not revealed yet</div>`;
+  } else {
+    h += `<div class="card"><div class="card-lbl">📝 Your Answer</div><div class="fg" style="margin-top:8px"><textarea id="wAns" placeholder="Your answer..."></textarea></div><button class="btn pur block" onclick="submitWord(${w.id})">📤 Submit</button></div>`;
+  }
+  body.innerHTML = h;
+}
+async function submitWord(wId) {
+  const ans = document.getElementById('wAns').value.trim();
+  if (!ans) return toast('Write your answer!','error');
+  try {
+    await POST('/answers',{questionId:wId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'word'});
+    await POST('/scores',{pin:ME,name:MY_NAME,points:3,date:today()}).catch(()=>{});
+    toast('✅ Submitted! +3 points','success'); loadWordStudent();
+  } catch(e) { toast(e.message,'error'); }
+}
+
+// ═══════════════════════════════════════════════════
+// AFFAIRS (Student)
+// ═══════════════════════════════════════════════════
+async function loadAffairsStudent() {
+  const body = document.getElementById('affairsBody');
+  body.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><br>Loading...</div>';
+  const [affairs,ans] = await Promise.all([GET('/affairs'),GET('/answers')]);
+  const list = Array.isArray(affairs)?affairs:[];
+  if (!list.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">📰 No affairs posted yet</div>'; return; }
+  const a = list[list.length-1];
+  const myAns = (ans||[]).find(x=>x.questionId===a.id&&x.studentPin===ME&&x.type==='affairs');
+  let h = `<div class="card am"><div class="card-lbl">📅 ${a.date}</div><div class="card-ttl" style="color:#fbbf24">📰 Current Affairs</div><p style="font-size:15px;color:var(--text);line-height:1.6;margin-top:8px">${a.question}</p></div>`;
+  if (myAns) {
+    h += `<div class="ok">✅ Your answer: ${myAns.answer}</div>`;
+    if (a.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="font-size:14px;color:#86efac;font-weight:700;margin-top:4px">${a.answer}</p></div>`;
+    else h += `<div class="inf">⏳ Answer not revealed yet</div>`;
+  } else {
+    h += `<div class="card"><div class="card-lbl">📝 Your Answer</div><div class="fg" style="margin-top:8px"><textarea id="affAns" placeholder="Your answer..."></textarea></div><button class="btn amb block" onclick="submitAffairs(${a.id})">📤 Submit</button></div>`;
+  }
+  body.innerHTML = h;
+}
+async function submitAffairs(aId) {
+  const ans = document.getElementById('affAns').value.trim();
+  if (!ans) return toast('Write your answer!','error');
+  try {
+    await POST('/answers',{questionId:aId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'affairs'});
+    await POST('/scores',{pin:ME,name:MY_NAME,points:3,date:today()}).catch(()=>{});
+    toast('✅ Submitted! +3 points','success'); loadAffairsStudent();
+  } catch(e) { toast(e.message,'error'); }
+}
+
+// ═══════════════════════════════════════════════════
+// RANK
+// ═══════════════════════════════════════════════════
+async function loadRank() {
+  const body = document.getElementById('rankBody');
+  body.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><br>Loading...</div>';
+  const [scoreData,qs,ans] = await Promise.all([GET('/scores'),GET('/questions'),GET('/answers')]);
+  const questions=Array.isArray(qs)?qs:[], answers=Array.isArray(ans)?ans:[];
+  let h='';
+  const prev=questions.length>=2?questions[questions.length-2]:(questions.length?questions[0]:null);
+  h+=`<div class="rank-hero" style="background:linear-gradient(135deg,rgba(255,215,0,0.05),rgba(255,215,0,0.01));border:1.5px solid rgba(255,215,0,0.25)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:22px">⚡</span>
+    <div><div style="color:#FFD700;font-weight:700;font-size:13px;letter-spacing:1px">FASTEST FINGER FIRST</div><div style="color:#64748b;font-size:11px">Yesterday's quickest answers</div></div></div>`;
+  if (prev) {
+    const pAns=answers.filter(a=>a.questionId===prev.id&&(!a.type||a.type==='question')).sort((a,b)=>new Date(a.submittedAt||0)-new Date(b.submittedAt||0));
+    const medals=['🥇','🥈','🥉'],golds=['#FFD700','#C0C0C0','#cd7f32'];
+    h+=pAns.length?pAns.slice(0,3).map((a,i)=>{const isMe=a.studentPin===ME;return`<div class="rank-item" style="${isMe?'background:rgba(255,215,0,0.05);border-color:rgba(255,215,0,0.25);':''}"><div class="ri-rank">${medals[i]}</div><div style="flex:1"><div class="ri-name" style="color:${golds[i]}">${a.studentName||'?'}${isMe?' (You)':''}</div><div class="ri-pin">${a.studentPin}</div></div>${i===0?'<span style="background:rgba(255,215,0,0.1);color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:2px 8px;font-size:9px;font-weight:700">⚡FIRST</span>':''}</div>`}).join(''):'<div class="inf">No answers yet</div>';
+  } else h+='<div class="inf">No questions yet</div>';
+  h+='</div>';
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-15);
+  const recent=answers.filter(a=>new Date(a.submittedAt||a.date||0)>=cutoff);
+  const actMap={};recent.forEach(a=>{if(!actMap[a.studentPin])actMap[a.studentPin]={name:a.studentName||'?',count:0};actMap[a.studentPin].count++;});
+  const actSorted=Object.entries(actMap).sort((a,b)=>b[1].count-a[1].count);
+  const maxAct=actSorted[0]?.[1]?.count||1;
+  h+=`<div class="rank-hero" style="background:linear-gradient(135deg,rgba(22,163,74,0.05),rgba(22,163,74,0.01));border:1.5px solid rgba(34,197,94,0.2)">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px"><span style="font-size:22px">🔥</span>
+    <div><div style="color:#22c55e;font-weight:700;font-size:13px;letter-spacing:1px">MOST ACTIVE</div><div style="color:#64748b;font-size:11px">Last 15 days</div></div></div>`;
+  const actMedals=['🥇','🥈','🥉','4','5'];
+  h+=actSorted.length?actSorted.slice(0,5).map(([pin,d],i)=>{const isMe=pin===ME;return`<div class="rank-item" style="${isMe?'background:rgba(34,197,94,0.05);border-color:rgba(34,197,94,0.2);':''}"><div class="ri-rank">${actMedals[i]||i+1}</div><div style="flex:1"><div class="ri-name">${d.name}${isMe?' (You)':''}</div><div class="ri-pin">${pin}</div><div class="lb-bar"><div class="lb-fill" style="width:${Math.round(d.count/maxAct*100)}%;background:linear-gradient(90deg,#16a34a,#4ade80)"></div></div></div><div class="ri-pts">${d.count} ans</div></div>`}).join(''):'<div class="inf">No activity</div>';
+  h+='</div>';
+  if (scoreData?.scores) {
+    const all=Object.entries(scoreData.scores).map(([pin,d])=>({pin,name:d.name,total:d.scores.reduce((s,e)=>s+e.points,0),streak:(scoreData.streaks||{})[pin]?.count||0})).sort((a,b)=>b.total-a.total);
+    const maxS=all[0]?.total||1;const medals2=['🥇','🥈','🥉'];
+    h+=`<div class="card" style="border-color:rgba(123,159,255,0.25)"><div class="card-lbl">🏅 Score Leaderboard</div>`;
+    h+=all.slice(0,10).map((s,i)=>{const isMe=s.pin===ME;return`<div class="rank-item" style="${isMe?'background:rgba(37,99,235,0.07);border-color:rgba(37,99,235,0.25);':''}"><div class="ri-rank">${medals2[i]||i+1}</div><div style="flex:1"><div class="ri-name">${s.name}${isMe?' (You)':''}</div><div class="ri-pin">${s.pin}</div><div class="lb-bar"><div class="lb-fill" style="width:${Math.round(s.total/maxS*100)}%;background:linear-gradient(90deg,#2563eb,#7c3aed)"></div></div></div><div style="text-align:right"><div class="ri-pts">${s.total}pts</div>${s.streak>1?`<div style="font-size:11px;color:#f97316">🔥${s.streak}</div>`:''}</div></div>`}).join('');
+    h+='</div>';
+  }
+  body.innerHTML=h;
+}
+
+// ═══════════════════════════════════════════════════
+// AI GRAMMAR CORRECTION — backend first, then direct API fallback
+// ═══════════════════════════════════════════════════
+async function aiCorrectSpeech(text) {
+  if (!text || text.trim().length < 5) return null;
+  const prompt = `You are a strict English grammar teacher. Carefully analyze this spoken English text and find EVERY single mistake — grammar, tense, articles, subject-verb agreement, word choice, prepositions, plurals, spelling (as spoken).
+
+Student's spoken text:
+"${text.trim()}"
+
+Reply ONLY with a valid JSON object — no markdown, no explanation, no extra text. Use this exact format:
+{
+  "corrected": "the fully corrected version of the text",
+  "score": 78,
+  "errors": [
+    {
+      "wrong": "exact phrase from student text",
+      "right": "corrected phrase",
+      "rule": "clear explanation of the error",
+      "type": "Tense|Article|Agreement|Vocabulary|Preposition|Plural|Word Order"
+    }
+  ],
+  "suggestions": ["specific improvement tip 1", "specific improvement tip 2"],
+  "pronunciation_tips": ["pronunciation tip if relevant"]
+}
+
+Important rules:
+- "wrong" must be copied EXACTLY as it appears in the student's text (case-insensitive match)
+- score 100 = perfect, 0 = very poor
+- Find EVERY mistake — do not skip even small errors
+- If text is perfect, return empty errors array and score 95-100`;
+
+  // 1️⃣ Try backend /ai/grammar first
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 30000);
+      const r = await fetch(API + '/ai/grammar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: text.trim() }),
+        signal: ctrl.signal
+      });
+      clearTimeout(timer);
+      if (r.ok) {
+        const res = await r.json();
+        if (res && typeof res.corrected === 'string') return res;
       } else {
-        interim = e.results[i][0].transcript.trim();
+        console.warn('AI grammar backend HTTP:', r.status);
+        if (r.status >= 400 && r.status < 500) break;
       }
+    } catch(e) {
+      console.warn('AI grammar backend attempt', attempt, e.message);
     }
-    spDisplayText = finals;
-    const tr = document.getElementById('spTranscript');
-    if(tr) tr.innerHTML = spHL(finals) + (interim ? '<span class="sp-interim"> '+interim+'</span>' : '');
-    const wc = finals.trim().split(/\s+/).filter(Boolean).length;
-    const ew = document.getElementById('spWords'); if(ew) ew.textContent = wc;
-    const ec = spCountErr(finals);
-    const errEl = document.getElementById('spErrs'); if(errEl) errEl.textContent = ec;
-    const eb = document.getElementById('errBadge');
-    if(eb){ eb.textContent=ec+' error'+(ec!==1?'s':''); eb.style.display=ec>0?'block':'none'; }
-  };
+    if (attempt < 2) await new Promise(r => setTimeout(r, 1500));
+  }
 
-  rec.onerror = e => {
-    if(e.error==='not-allowed'){ toast('Mic access denied','error'); spStop(); return; }
-    // other errors: SR just stops showing live text. MediaRecorder still recording. No restart.
-  };
-
-  rec.onend = () => {
-    _spStarting = false;
-    // NO RESTART — this is the key fix.
-    // Restarting causes the browser to replay the last result, duplicating words.
-    // MediaRecorder is still capturing audio — final text will come from that.
-    if(spIsRec){
-      const st = document.getElementById('spStatus');
-      if(st && st.textContent.includes('Recording'))
-        st.textContent = '🔴 Recording (audio active)...';
+  // 2️⃣ Fallback: direct Anthropic API call
+  try {
+    const ctrl2 = new AbortController();
+    const timer2 = setTimeout(() => ctrl2.abort(), 40000);
+    const r2 = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: ctrl2.signal,
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    clearTimeout(timer2);
+    if (r2.ok) {
+      const data = await r2.json();
+      const raw = data.content?.find(b => b.type === 'text')?.text || '';
+      const clean = raw.replace(/```json|```/g, '').trim();
+      const parsed = JSON.parse(clean);
+      if (parsed && typeof parsed.corrected === 'string') return parsed;
     }
-  };
-
-  try{ rec.start(); } catch(e){ _spStarting=false; }
+  } catch(e) {
+    console.warn('AI grammar direct API fallback failed:', e.message);
+  }
+  return null;
 }
 
-
-
-
-
-
-
-
-
-function spToggle(){ if(spIsRec) spPause(); else spStart(); }
-function spUpdateTimer(){
-  const disp=document.getElementById('tDisp'),arc=document.getElementById('tArc'),tm=document.getElementById('spTime');
-  if(!disp||!arc)return;
-  const rem=Math.max(0,spDuration-spElapsed);
-  disp.textContent=String(Math.floor(rem/60)).padStart(2,'0')+':'+String(rem%60).padStart(2,'0');
-  const prog=spDuration>0?spElapsed/spDuration:0;
-  arc.style.strokeDashoffset=239*(1-prog);
-  arc.style.stroke=prog>.8?'#ef4444':prog>.5?'#f97316':'#2563eb';
-  if(tm)tm.textContent=spElapsed+'s';
+// Fallback local grammar check (when AI is unavailable)
+const GERRS = {
+  'goed':{fix:'went',rule:'Irregular past tense of "go"',type:'Tense'},
+  'buyed':{fix:'bought',rule:'Irregular past tense of "buy"',type:'Tense'},
+  'cutted':{fix:'cut',rule:'"Cut" doesn\'t change in past tense',type:'Tense'},
+  'falled':{fix:'fell',rule:'Irregular past tense of "fall"',type:'Tense'},
+  'thinked':{fix:'thought',rule:'Irregular past tense of "think"',type:'Tense'},
+  'speaked':{fix:'spoke',rule:'Irregular past tense of "speak"',type:'Tense'},
+  'writed':{fix:'wrote',rule:'Irregular past tense of "write"',type:'Tense'},
+  'catched':{fix:'caught',rule:'Irregular past tense of "catch"',type:'Tense'},
+  'runned':{fix:'ran',rule:'Irregular past tense of "run"',type:'Tense'},
+  'tooked':{fix:'took',rule:'Irregular past tense of "take"',type:'Tense'},
+  'bringed':{fix:'brought',rule:'Irregular past tense of "bring"',type:'Tense'},
+  'more better':{fix:'better',rule:'"More" + comparative is wrong',type:'Comparison'},
+  'more worse':{fix:'worse',rule:'"More" + comparative is wrong',type:'Comparison'},
+  "he don't":{fix:"he doesn't",rule:'Use "doesn\'t" with he/she/it',type:'Agreement'},
+  "she don't":{fix:"she doesn't",rule:'Use "doesn\'t" with he/she/it',type:'Agreement'},
+  "it don't":{fix:"it doesn't",rule:'Use "doesn\'t" with he/she/it',type:'Agreement'},
+  'they was':{fix:'they were',rule:'Use "were" with plural subjects',type:'Agreement'},
+  'we was':{fix:'we were',rule:'Use "were" with "we"',type:'Agreement'},
+  'you was':{fix:'you were',rule:'Use "were" with "you"',type:'Agreement'},
+  'i is':{fix:'I am',rule:'Use "am" with "I"',type:'Agreement'},
+  'a apple':{fix:'an apple',rule:'Use "an" before vowel sounds',type:'Article'},
+  'a orange':{fix:'an orange',rule:'Use "an" before vowel sounds',type:'Article'},
+  'a umbrella':{fix:'an umbrella',rule:'Use "an" before vowel sounds',type:'Article'},
+  'a hour':{fix:'an hour',rule:'"Hour" starts with a vowel sound',type:'Article'},
+  'a honest':{fix:'an honest',rule:'"Honest" starts with a vowel sound',type:'Article'},
+  'informations':{fix:'information',rule:'"Information" is uncountable',type:'Noun'},
+  'advices':{fix:'advice',rule:'"Advice" is uncountable',type:'Noun'},
+  'furnitures':{fix:'furniture',rule:'"Furniture" is uncountable',type:'Noun'},
+  'staffs':{fix:'staff',rule:'"Staff" is uncountable',type:'Noun'},
+  'peoples':{fix:'people',rule:'"People" is already plural',type:'Noun'},
+};
+function spEscape(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/'/g,"['']?");}
+function spHL(text){
+  let r=text;
+  Object.entries(GERRS).sort((a,b)=>b[0].length-a[0].length).forEach(([bad,info])=>{
+    r=r.replace(new RegExp('(?<![\\w])'+spEscape(bad)+'(?![\\w])','gi'),m=>`<span class="sp-eword" data-fix="→ ${info.fix}" title="${info.rule}">${m}</span>`);
+  });
+  return r||'<span style="color:#4a5568">Keep speaking...</span>';
 }
-function spReset(){
-  spIsRec=false; _spStarting=false; spElapsed=0; spFinalText=''; spDisplayText='';
-  clearInterval(spTimer); clearTimeout(spRestartTimer);
-  if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
-  if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}} spMediaRec=null; spAudioChunks=[];
-  const btn=document.getElementById('spBtn');if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
-  const st=document.getElementById('spStatus');if(st){st.textContent='Press 🎙️ to start recording';st.className='sp-status';}
-  const sub=document.getElementById('tSub');if(sub)sub.textContent='READY';
-  const tr=document.getElementById('spTranscript');if(tr)tr.innerHTML='<span style="color:#4a5568">Start speaking — words appear here live...</span>';
-  ['spCorrectBox','spAnalysisBox','spSuggestBox'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('show');});
-  const eb=document.getElementById('errBadge');if(eb)eb.style.display='none';
-  ['aiLoadingCorrect','aiLoadingAnalysis'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
-  ['spTime','spWords','spErrs'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='0'+(id==='spTime'?'s':'');});
-  const sc=document.getElementById('spScore');if(sc)sc.textContent='—';
-  spUpdateTimer();
+function spFixLocal(text){
+  let r=text;
+  Object.entries(GERRS).sort((a,b)=>b[0].length-a[0].length).forEach(([bad,info])=>{
+    r=r.replace(new RegExp('(?<![\\w])'+spEscape(bad)+'(?![\\w])','gi'),`<span class="sp-cword">${info.fix}</span>`);
+  });
+  return r;
 }
-async function loadSpeak(){
+function spCountErr(text){
+  let n=0;
+  Object.keys(GERRS).forEach(bad=>{const m=text.match(new RegExp('(?<![\\w])'+spEscape(bad)+'(?![\\w])','gi'));if(m)n+=m.length;});
+  return n;
+}
+
+// ═══════════════════════════════════════════════════
+// SPEAKING — FULLY REBUILT
+// ═══════════════════════════════════════════════════
+async function loadSpeak() {
   spReset();
   loadSpSubmissions();
   try{
@@ -1047,57 +1613,219 @@ async function loadSpeak(){
       if(st){
         const t=st.question.replace('__SPEAK_TOPIC__:','');
         const dur=parseInt(st.answer)||120;
-        localStorage.setItem('spTopic',t); localStorage.setItem('spDur',String(dur));
+        localStorage.setItem('spTopic',t);localStorage.setItem('spDur',String(dur));
         spDuration=dur;
-        const el=document.getElementById('spTopic');if(el){el.textContent=t;el.style.color='#1e293b';}
-        const hel=document.getElementById('spHint');if(hel)hel.textContent='Speak for '+Math.round(dur/60)+' min · AI corrects grammar & pronunciation';
+        const el=document.getElementById('spTopic');
+        if(el){el.textContent=t;el.style.color='#1e293b';}
+        const hel=document.getElementById('spHint');
+        if(hel)hel.textContent=`Speak for ${dur/60} min · AI corrects grammar & pronunciation`;
         return;
       }
     }
   }catch(e){}
+  // fallback to localStorage
   const topic=localStorage.getItem('spTopic'),dur=parseInt(localStorage.getItem('spDur')||'120');
   spDuration=dur;
-  const el=document.getElementById('spTopic');if(el){el.textContent=topic||'Waiting for teacher to set a topic...';el.style.color='#1e293b';}
+  const el=document.getElementById('spTopic');
+  if(el){el.textContent=topic||'Waiting for teacher to set a topic...';el.style.color='#1e293b';}
+  const hel=document.getElementById('spHint');
+  if(hel&&topic)hel.textContent=`Speak for ${dur/60} min · AI corrects grammar & pronunciation`;
+}
+
+function spReset() {
+  _spSessionId++;
+  spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spIsRec=false; spRestartCount=0;
+  clearInterval(spTimer); clearTimeout(spRestartTimer);
+  if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+  if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
+  spMediaRec=null; spAudioChunks=[];
+  const btn=document.getElementById('spBtn');
+  if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
+  const st=document.getElementById('spStatus');
+  if(st){st.textContent='Press 🎙️ to start recording';st.className='sp-status';}
+  const sub=document.getElementById('tSub');if(sub)sub.textContent='READY';
+  const tr=document.getElementById('spTranscript');
+  if(tr)tr.innerHTML='<span style="color:#4a5568">Start speaking — words appear here live...</span>';
+  ['spCorrectBox','spAnalysisBox','spSuggestBox'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('show');});
+  const eb=document.getElementById('errBadge');if(eb)eb.style.display='none';
+  ['aiLoadingCorrect','aiLoadingAnalysis'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  ['spTime','spWords','spErrs'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent=id==='spErrs'?'0':'0'+(id==='spTime'?'s':'');});
+  const sc=document.getElementById('spScore');if(sc)sc.textContent='—';
+  spUpdateTimer();
+}
+
+function spUpdateTimer() {
+  const disp=document.getElementById('tDisp'),arc=document.getElementById('tArc'),tm=document.getElementById('spTime');
+  if(!disp||!arc)return;
+  const rem=Math.max(0,spDuration-spElapsed);
+  disp.textContent=String(Math.floor(rem/60)).padStart(2,'0')+':'+String(rem%60).padStart(2,'0');
+  const prog=spDuration>0?spElapsed/spDuration:0;
+  arc.style.strokeDashoffset=239*(1-prog);
+  arc.style.stroke=prog>.8?'#ef4444':prog>.5?'#f97316':'#2563eb';
+  if(tm)tm.textContent=spElapsed+'s';
+}
+
+function spToggle() {
+  if(!localStorage.getItem('spTopic'))return toast('⚠ Teacher has not set a topic yet!','warn');
+  if(spIsRec)spPause();else spStart();
+}
+
+function spStart() {
+  clearTimeout(spRestartTimer);
+  if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+  if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
+  spMediaRec=null; spAudioChunks=[];
+  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spRestartCount=0;
+  const btn=document.getElementById('spBtn');
+  if(btn){btn.classList.add('rec');btn.textContent='⏸';}
+  const st=document.getElementById('spStatus');
+  if(st){st.textContent='🔴 Recording — speak now...';st.className='sp-status live';}
+  const sub=document.getElementById('tSub');if(sub)sub.textContent='SPEAKING';
+  const tr=document.getElementById('spTranscript');if(tr)tr.innerHTML='';
+  ['spCorrectBox','spAnalysisBox','spSuggestBox'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('show');});
+  const eb=document.getElementById('errBadge');if(eb)eb.style.display='none';
+  document.getElementById('spErrs').textContent='0';
+  document.getElementById('spScore').textContent='—';
+  document.getElementById('spWords').textContent='0';
+  spStartSR();
+  spStartMediaRecorder();
+  clearInterval(spTimer);
+  spTimer=setInterval(()=>{
+    if(!spIsRec)return;
+    spElapsed++;spUpdateTimer();
+    if(spElapsed>=spDuration){spStop();toast('⏱ Time is up!','warn');}
+  },1000);
+}
+
+function spPause() {
+  _spSessionId++;
+  spIsRec=false; clearInterval(spTimer);
+  if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+  if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
+  const btn=document.getElementById('spBtn');
+  if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
+  const st=document.getElementById('spStatus');
+  if(st){st.textContent='⏸ Paused — press 🎙️ to continue';st.className='sp-status';}
+}
+
+let _spSessionId = 0;
+
+// ── MediaRecorder: records REAL audio → sent to /transcribe for clean text ──
+function spStartMediaRecorder() {
+  spAudioChunks = [];
+  if(spMediaStream && spMediaStream.active){
+    _doStartMR(spMediaStream);
+    return;
+  }
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    spMediaStream = stream;
+    _doStartMR(stream);
+  }).catch(e=>{ console.warn('MediaRecorder mic denied:', e.message); });
+}
+function _doStartMR(stream){
+  const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4',''];
+  let mime = '';
+  for(const t of types){ if(t===''||MediaRecorder.isTypeSupported(t)){mime=t;break;} }
+  try{ spMediaRec = mime ? new MediaRecorder(stream,{mimeType:mime}) : new MediaRecorder(stream); }
+  catch(e){ spMediaRec = new MediaRecorder(stream); }
+  spMediaRec.ondataavailable = e=>{ if(e.data&&e.data.size>0) spAudioChunks.push(e.data); };
+  spMediaRec.start(500);
+}
+
+// ── SR: DISPLAY ONLY — shows live words on screen while student speaks ──
+function spStartSR() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR || !spIsRec) return;
+  if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+  const rec = new SR();
+  rec.continuous = true; rec.interimResults = true; rec.lang='en-IN'; rec.maxAlternatives=1;
+  spRec = rec;
+  rec.onresult = e => {
+    if(!spIsRec || spRec !== rec) return;
+    // Rebuild full display from ALL results in this single SR instance.
+    // Safe because we never restart — one instance, one e.results[] array, no replay.
+    let finals = '', interim = '';
+    for(let i = 0; i < e.results.length; i++){
+      if(e.results[i].isFinal){
+        const t = e.results[i][0].transcript.trim();
+        if(t) finals += (finals ? ' ' : '') + t;
+      } else {
+        interim = e.results[i][0].transcript.trim();
+      }
+    }
+    spDisplayText = finals;
+    const wc = finals.trim().split(/\s+/).filter(Boolean).length;
+    const ew = document.getElementById('spWords'); if(ew) ew.textContent = wc;
+    const ec = spCountErr(finals);
+    const errEl = document.getElementById('spErrs'); if(errEl) errEl.textContent = ec;
+    const eb = document.getElementById('errBadge');
+    if(eb){eb.textContent=ec+' error'+(ec!==1?'s':'');eb.style.display=ec>0?'block':'none';}
+    const tr = document.getElementById('spTranscript');
+    if(tr) tr.innerHTML = spHL(finals) + (interim ? '<span class="sp-interim"> '+interim+'</span>' : '');
+  };
+  rec.onerror = e => {
+    if(spRec !== rec) return;
+    if(e.error==='not-allowed'){toast('❌ Mic denied','error');spStop();}
+    // other errors: SR stops but MediaRecorder keeps capturing audio — no restart needed
+  };
+  rec.onend = () => {
+    // KEY FIX: NO RESTART.
+    // Every previous restart caused the browser to replay the last result
+    // into the new SR instance, making words appear 2-3 times.
+    // SR is display-only. MediaRecorder has the real audio. No restart = no duplication.
+    spRec = null;
+  };
+  try{ rec.start(); }catch(e){}
 }
 
 async function spStop() {
-  spIsRec=false; _spStarting=false; clearInterval(spTimer); clearTimeout(spRestartTimer);
-  if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
-  const btn=document.getElementById('spBtn');if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
+  _spSessionId++;
+  spIsRec=false; clearInterval(spTimer); clearTimeout(spRestartTimer);
+  if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+  const btn=document.getElementById('spBtn');
+  if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
   const st=document.getElementById('spStatus');
-  if(st){st.textContent='⏳ Getting your transcript...';st.className='sp-status done';}
+  if(st){st.textContent='⏳ Transcribing your speech...';st.className='sp-status done';}
   const sub=document.getElementById('tSub');if(sub)sub.textContent='DONE';
 
-  // ── Stop MediaRecorder, get audio blob, send to server for transcription ──
-  let fullText = '';
-  if(spMediaRec && spAudioChunks.length > 0){
-    await new Promise(resolve=>{
-      if(spMediaRec.state==='inactive'){resolve();return;}
-      spMediaRec.onstop = resolve;
-      try{spMediaRec.stop();}catch(e){resolve();}
-    });
+  // Stop MediaRecorder and collect all audio
+  await new Promise(resolve=>{
+    if(!spMediaRec||spMediaRec.state==='inactive'){resolve();return;}
+    spMediaRec.onstop=resolve;
+    try{spMediaRec.stop();}catch(e){resolve();}
+  });
+
+  // ── Send audio to /transcribe for clean text ──────────────────────────────
+  let fullText='';
+  if(spAudioChunks.length>0){
     try{
-      const mimeType = spMediaRec.mimeType || 'audio/webm';
-      const blob = new Blob(spAudioChunks, {type: mimeType});
+      const mimeType=spMediaRec?(spMediaRec.mimeType||'audio/webm'):'audio/webm';
+      const blob=new Blob(spAudioChunks,{type:mimeType});
+      // Convert blob to base64
       const base64 = await new Promise((res,rej)=>{
-        const reader = new FileReader();
-        reader.onload = ()=>res(reader.result);
-        reader.onerror = rej;
+        const reader=new FileReader();
+        reader.onload=()=>res(reader.result);
+        reader.onerror=rej;
         reader.readAsDataURL(blob);
       });
-      if(st)st.textContent='⏳ Transcribing audio...';
-      const resp = await fetch(API+'/transcribe',{
+      if(st)st.textContent='⏳ Transcribing... please wait';
+      const resp=await fetch(API+'/transcribe',{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({audio:base64, mimeType})
+        body:JSON.stringify({audio:base64, mimeType:mimeType})
       });
-      if(resp.ok){ const d=await resp.json(); fullText=(d.text||'').trim(); }
-    }catch(e){ console.warn('Transcription error:',e.message); }
+      if(resp.ok){
+        const data=await resp.json();
+        fullText=(data.text||'').trim();
+        console.log('[Transcribe] Got:', fullText);
+      } else {
+        console.error('[Transcribe] HTTP', resp.status);
+      }
+    }catch(e){console.error('[Transcribe] Error:',e.message);}
   }
-  spMediaRec=null; spAudioChunks=[];
 
-  // ── Fallback: use SR display text if transcription failed/unavailable ──
-  if(!fullText) fullText = spDisplayText.trim();
+  // ── Fallback to SR accumulated text if transcription failed ──────────────
+  if(!fullText) fullText=spFinalText.trim()||spText.trim();
 
   if(!fullText){
     if(st)st.textContent='No speech detected. Try again.';
@@ -1200,32 +1928,25 @@ function _spSetAudioPlaying(on){
 function spStopAudio(){
   if('speechSynthesis' in window)window.speechSynthesis.cancel();
   _spSetAudioPlaying(false);
-  _spListenActive = false;
   toast('⏹ Audio stopped','info');
 }
-let _spListenActive = false;
 function spListen() {
-  if(_spListenActive) return; // prevent double-tap firing two speaks
   const ct=document.getElementById('spCorrectTxt');
   const raw=ct?.innerText?.trim();
-  const text=raw||spFinalText.trim()||spText.trim()||spDisplayText.trim();
+  const text=raw||spFinalText.trim()||spText.trim();
   if(!text)return toast('Record your speech first!','warn');
   if(!('speechSynthesis' in window))return toast('Text-to-speech not supported','warn');
-  _spListenActive = true;
   window.speechSynthesis.cancel();
-  // Delay after cancel — Chrome/Android bug: cancel() is async, speaking immediately
-  // after causes the utterance to play 2-3 times
-  setTimeout(() => {
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang='en-IN'; u.rate=0.85; u.pitch=1;
-    const voices = window.speechSynthesis.getVoices();
-    const eng = voices.find(v=>v.lang.startsWith('en')&&!v.lang.includes('IN'))||voices.find(v=>v.lang.startsWith('en'));
-    if(eng) u.voice = eng;
-    u.onstart = ()=>{ _spSetAudioPlaying(true); toast('🔊 Playing corrected version...','info'); };
-    u.onend = ()=>{ _spSetAudioPlaying(false); _spListenActive=false; };
-    u.onerror = ()=>{ _spSetAudioPlaying(false); _spListenActive=false; toast('Could not play audio','error'); };
-    window.speechSynthesis.speak(u);
-  }, 300);
+  const u=new SpeechSynthesisUtterance(text);
+  u.lang='en-IN'; u.rate=0.85; u.pitch=1;
+  // Try to find a good English voice
+  const voices=window.speechSynthesis.getVoices();
+  const eng=voices.find(v=>v.lang.startsWith('en')&&!v.lang.includes('IN'))||voices.find(v=>v.lang.startsWith('en'));
+  if(eng)u.voice=eng;
+  u.onstart=()=>{_spSetAudioPlaying(true);toast('🔊 Playing corrected version...','info');};
+  u.onend=()=>_spSetAudioPlaying(false);
+  u.onerror=()=>{_spSetAudioPlaying(false);toast('Could not play audio','error');};
+  window.speechSynthesis.speak(u);
 }
 
 async function spSubmit() {
