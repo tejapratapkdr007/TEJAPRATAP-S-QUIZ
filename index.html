@@ -941,50 +941,67 @@ function spStartMediaRec() {
   });
 }
 
-// ── SR: LIVE DISPLAY ONLY — interim words on screen ──
-// This may show duplicates visually during recording — that is OK.
-// The submitted text comes from MediaRecorder + server transcription, not from SR.
+// ── SR: LIVE DISPLAY ONLY — shows interim words while student speaks ──
+// SR is NOT used for final transcript. MediaRecorder captures real audio.
+// No restarts — if SR stops, it stops. MediaRecorder still has everything.
 function spStartSR() {
   if(_spStarting) return;
   _spStarting = true;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){ _spStarting=false; return; } // SR not available — MediaRecorder still works
+  if(!SR){ _spStarting=false; return; }
   if(spRec){ spRec.onresult=null; spRec.onend=null; spRec.onerror=null; try{spRec.abort();}catch(e){} spRec=null; }
+
   const rec = new SR();
-  rec.continuous=true; rec.interimResults=true; rec.lang='en-IN'; rec.maxAlternatives=1;
+  rec.continuous      = true;
+  rec.interimResults  = true;
+  rec.lang            = 'en-IN';
+  rec.maxAlternatives = 1;
   spRec = rec;
   _spStarting = false;
 
   rec.onresult = e => {
-    if(!spIsRec || spRec!==rec) return;
-    // Display only — read just the new result at e.resultIndex
-    const res = e.results[e.resultIndex];
-    const interim = res.isFinal ? '' : res[0].transcript.trim();
-    // For finals, append to displayText for visual only
-    if(res.isFinal){
-      const t = res[0].transcript.trim();
-      if(t) spDisplayText += (spDisplayText ? ' ' : '') + t;
+    if(!spIsRec || spRec !== rec) return;
+    // Build full display text from ALL results every time (safe — single SR instance, no restart)
+    let finals = '';
+    let interim = '';
+    for(let i = 0; i < e.results.length; i++){
+      if(e.results[i].isFinal){
+        finals += (finals ? ' ' : '') + e.results[i][0].transcript.trim();
+      } else {
+        interim = e.results[i][0].transcript.trim();
+      }
     }
+    spDisplayText = finals;
     const tr = document.getElementById('spTranscript');
-    if(tr) tr.innerHTML = spHL(spDisplayText) + (interim ? '<span class="sp-interim"> '+interim+'</span>' : '');
-    const wc = spDisplayText.trim().split(/\s+/).filter(Boolean).length;
+    if(tr) tr.innerHTML = spHL(finals) + (interim ? '<span class="sp-interim"> '+interim+'</span>' : '');
+    const wc = finals.trim().split(/\s+/).filter(Boolean).length;
     const ew = document.getElementById('spWords'); if(ew) ew.textContent = wc;
-    const ec = spCountErr(spDisplayText);
+    const ec = spCountErr(finals);
     const errEl = document.getElementById('spErrs'); if(errEl) errEl.textContent = ec;
     const eb = document.getElementById('errBadge');
     if(eb){ eb.textContent=ec+' error'+(ec!==1?'s':''); eb.style.display=ec>0?'block':'none'; }
   };
+
   rec.onerror = e => {
-    if(e.error==='not-allowed'){ toast('Mic access denied','error'); spStop(); }
+    if(e.error==='not-allowed'){ toast('Mic access denied','error'); spStop(); return; }
+    // other errors: SR just stops showing live text. MediaRecorder still recording. No restart.
   };
+
   rec.onend = () => {
     _spStarting = false;
-    if(!spIsRec || spRec!==rec) return;
-    clearTimeout(spRestartTimer);
-    spRestartTimer = setTimeout(()=>{ if(spIsRec && spRec===rec){ _spStarting=false; spStartSR(); } }, 200);
+    // NO RESTART — this is the key fix.
+    // Restarting causes the browser to replay the last result, duplicating words.
+    // MediaRecorder is still capturing audio — final text will come from that.
+    if(spIsRec){
+      const st = document.getElementById('spStatus');
+      if(st && st.textContent.includes('Recording'))
+        st.textContent = '🔴 Recording (audio active)...';
+    }
   };
+
   try{ rec.start(); } catch(e){ _spStarting=false; }
 }
+
 
 
 
