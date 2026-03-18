@@ -431,19 +431,14 @@ app.post("/schedule/affairs/mark-posted", (req, res) => {
 });
 
 // =====================================================
-// TRANSCRIBE AUDIO via OpenAI Whisper
-// Requires OPENAI_API_KEY environment variable.
-// If not set, returns empty text and frontend falls back to SR display text.
+// TRANSCRIBE AUDIO (Speech-to-Text via Anthropic)
 // =====================================================
 app.post("/transcribe", async (req, res) => {
     const { audio, mimeType } = req.body;
-    if (!audio) return res.status(400).json({ error: "No audio" });
+    if (!audio) return res.status(400).json({ error: "No audio data" });
 
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (!apiKey) {
-        // No key set — tell frontend to use SR fallback
-        return res.json({ text: "" });
-    }
+    const apiKey = process.env.ANTHROPIC_API_KEY;
+    if (!apiKey) return res.status(500).json({ error: "ANTHROPIC_API_KEY not set" });
 
     let fetchFn = typeof fetch !== "undefined" ? fetch : null;
     if (!fetchFn) {
@@ -451,55 +446,51 @@ app.post("/transcribe", async (req, res) => {
         catch { return res.status(500).json({ error: "HTTP client unavailable" }); }
     }
 
+    // Strip data URL prefix if present, keep only base64
+    const base64Data = audio.includes(",") ? audio.split(",")[1] : audio;
+    const mime = mimeType || "audio/webm";
+
     try {
-        // Convert base64 to Buffer
-        const base64Data = audio.includes(",") ? audio.split(",")[1] : audio;
-        const audioBuffer = Buffer.from(base64Data, "base64");
-        const ext = (mimeType || "audio/webm").includes("mp4") ? "mp4"
-                  : (mimeType || "").includes("ogg") ? "ogg" : "webm";
-
-        // Build multipart form — Whisper requires a file upload
-        const boundary = "----FormBoundary" + Math.random().toString(36).slice(2);
-        const CRLF = "\r\n";
-        const pre = Buffer.from(
-            "--" + boundary + CRLF +
-            "Content-Disposition: form-data; name=\"file\"; filename=\"audio." + ext + "\"" + CRLF +
-            "Content-Type: " + (mimeType || "audio/webm") + CRLF + CRLF
-        );
-        const model = Buffer.from(
-            CRLF + "--" + boundary + CRLF +
-            "Content-Disposition: form-data; name=\"model\"" + CRLF + CRLF +
-            "whisper-1" + CRLF +
-            "--" + boundary + CRLF +
-            "Content-Disposition: form-data; name=\"language\"" + CRLF + CRLF +
-            "en" + CRLF +
-            "--" + boundary + "--" + CRLF
-        );
-        const body = Buffer.concat([pre, audioBuffer, model]);
-
-        const response = await fetchFn("https://api.openai.com/v1/audio/transcriptions", {
+        const response = await fetchFn("https://api.anthropic.com/v1/messages", {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${apiKey}`,
-                "Content-Type": `multipart/form-data; boundary=${boundary}`
+                "Content-Type": "application/json",
+                "x-api-key": apiKey,
+                "anthropic-version": "2023-06-01"
             },
-            body
+            body: JSON.stringify({
+                model: "claude-haiku-4-5-20251001",
+                max_tokens: 1024,
+                messages: [{
+                    role: "user",
+                    content: [
+                        {
+                            type: "document",
+                            source: { type: "base64", media_type: mime, data: base64Data }
+                        },
+                        {
+                            type: "text",
+                            text: "Transcribe this audio exactly as spoken. Return ONLY the spoken words — no punctuation changes, no corrections, no commentary. Just the raw transcript."
+                        }
+                    ]
+                }]
+            })
         });
 
         if (!response.ok) {
             const err = await response.text();
-            console.error("[Whisper] Error:", response.status, err.substring(0, 200));
-            return res.json({ text: "" }); // fall back to SR
+            console.error("[Transcribe] API error:", response.status, err.substring(0, 200));
+            return res.status(500).json({ error: "Transcription failed" });
         }
 
         const data = await response.json();
-        const text = (data.text || "").trim();
-        console.log("[Whisper] Transcript:", text.substring(0, 100));
+        const text = (data?.content?.[0]?.text || "").trim();
+        console.log("[Transcribe] Result:", text.substring(0, 100));
         return res.json({ text });
 
     } catch (e) {
-        console.error("[Whisper] Exception:", e.message);
-        return res.json({ text: "" }); // fall back to SR
+        console.error("[Transcribe] Error:", e.message);
+        return res.status(500).json({ error: e.message });
     }
 });
 
