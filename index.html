@@ -144,8 +144,13 @@ body{overflow-x:hidden;overflow-y:hidden;-webkit-text-size-adjust:100%;text-size
 .wrn{background:#fff7ed;border:1.5px solid #fb923c;border-radius:9px;padding:11px 14px;color:#c2410c;font-size:13px;margin:10px 0;font-weight:500}
 
 /* ══ SPINNER ══ */
-.spin-wrap{text-align:center;padding:36px;color:var(--muted)}
-.spinner{display:inline-block;width:28px;height:28px;border:3px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin 0.75s linear infinite}
+.spin-wrap{padding:20px 0}
+.spinner{display:none}
+.skel{background:linear-gradient(90deg,#e8f0fe 25%,#dbeafe 50%,#e8f0fe 75%);background-size:200% 100%;animation:skelShimmer 1.4s ease infinite;border-radius:10px}
+@keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-line{height:14px;margin-bottom:10px;border-radius:7px}
+.skel-card{height:90px;margin-bottom:12px;border-radius:13px}
+.skel-title{height:20px;width:60%;margin-bottom:14px;border-radius:7px}
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 
@@ -594,8 +599,8 @@ audio{width:100%;min-width:0;border-radius:8px}
 
     <!-- QUIZ -->
     <div class="screen" id="s-quiz">
-      <div class="page-hdr"><div><h1>Today's GK Quiz</h1><p>Answer to earn +5 points</p></div><button onclick="go('s-home')" class="page-back-btn">← Back</button></div>
-      <div style="max-width:660px"><div id="quizBody"><div class="spin-wrap"><div class="spinner"></div><br>Loading...</div></div></div>
+      <div class="page-hdr"><div><h1>PolyVocal- Speak &amp; Spark</h1><p>Today's GK Quiz · Answer to earn +5 points</p></div><button onclick="go('s-home')" class="page-back-btn">← Back</button></div>
+      <div style="max-width:660px"><div id="quizBody"><div class="spin-wrap"><div class="skel skel-title"></div><div class="skel skel-card"></div><div class="skel skel-card" style="opacity:0.6"></div></div></div></div>
     </div>
 
     <!-- SPEAKING -->
@@ -687,25 +692,25 @@ audio{width:100%;min-width:0;border-radius:8px}
     <!-- MEDIA -->
     <div class="screen" id="s-media">
       <div class="page-hdr"><div><h1>Media Question</h1><p>Image &amp; Audio · +5 pts</p></div><button onclick="go('s-home')" class="page-back-btn">← Back</button></div>
-      <div style="max-width:660px"><div id="mediaBody"><div class="spin-wrap"><div class="spinner"></div><br>Loading...</div></div></div>
+      <div style="max-width:660px"><div id="mediaBody"><div class="spin-wrap"><div class="skel skel-title"></div><div class="skel skel-card"></div><div class="skel skel-card" style="opacity:0.6"></div></div></div></div>
     </div>
 
     <!-- WORD -->
     <div class="screen" id="s-word">
       <div class="page-hdr"><div><h1>Word of the Day</h1><p>Vocabulary · +5 pts</p></div><button onclick="go('s-home')" class="page-back-btn">← Back</button></div>
-      <div style="max-width:660px"><div id="wordBody"><div class="spin-wrap"><div class="spinner"></div><br>Loading...</div></div></div>
+      <div style="max-width:660px"><div id="wordBody"><div class="spin-wrap"><div class="skel skel-title"></div><div class="skel skel-card"></div><div class="skel skel-card" style="opacity:0.6"></div></div></div></div>
     </div>
 
     <!-- AFFAIRS -->
     <div class="screen" id="s-affairs">
       <div class="page-hdr"><div><h1>Current Affairs</h1><p>Daily GK · +5 pts</p></div><button onclick="go('s-home')" class="page-back-btn">← Back</button></div>
-      <div style="max-width:660px"><div id="affairsBody"><div class="spin-wrap"><div class="spinner"></div><br>Loading...</div></div></div>
+      <div style="max-width:660px"><div id="affairsBody"><div class="spin-wrap"><div class="skel skel-title"></div><div class="skel skel-card"></div><div class="skel skel-card" style="opacity:0.6"></div></div></div></div>
     </div>
 
     <!-- RANK -->
     <div class="screen" id="s-rank">
       <div class="page-hdr"><div><h1>Leaderboard</h1><p>Rankings &amp; Top Students</p></div><button onclick="go('s-home')" class="page-back-btn">← Back</button></div>
-      <div style="max-width:760px"><div id="rankBody"><div class="spin-wrap"><div class="spinner"></div><br>Loading...</div></div></div>
+      <div style="max-width:760px"><div id="rankBody"><div class="spin-wrap"><div class="skel skel-title"></div><div class="skel skel-card"></div><div class="skel skel-card" style="opacity:0.6"></div></div></div></div>
     </div>
 
     <!-- TEACHER -->
@@ -1162,16 +1167,30 @@ function safeImgSrc(data, type='image') {
 }
 
 // Convert data URL to Blob URL for reliable audio playback
+// Cache blob URLs to prevent memory leaks (revoke old ones on re-render)
+const _audioBlobCache = new Map();
 function getAudioSrc(data) {
   if (!data) return '';
+  // If it's already a URL (file path or http), return directly — no blob needed
+  if (data.startsWith('/uploads/') || data.startsWith('http') || data.startsWith('blob:')) return data;
   const src = safeImgSrc(data, 'audio');
   if (!src.startsWith('data:')) return src;
+  // Return cached blob URL if already created for this data
+  if (_audioBlobCache.has(data)) return _audioBlobCache.get(data);
   try {
     const [hdr, b64] = src.split(',');
     const mime = hdr.match(/:(.*?);/)[1];
     const bin = atob(b64), arr = new Uint8Array(bin.length);
     for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
-    return URL.createObjectURL(new Blob([arr], {type: mime}));
+    const blobUrl = URL.createObjectURL(new Blob([arr], {type: mime}));
+    _audioBlobCache.set(data, blobUrl);
+    // Limit cache size — revoke oldest if over 20 entries
+    if (_audioBlobCache.size > 20) {
+      const firstKey = _audioBlobCache.keys().next().value;
+      URL.revokeObjectURL(_audioBlobCache.get(firstKey));
+      _audioBlobCache.delete(firstKey);
+    }
+    return blobUrl;
   } catch { return src; }
 }
 
@@ -1426,7 +1445,7 @@ async function showProfileModal(){
 // ═══════════════════════════════════════════════════
 async function loadQuiz() {
   const body = document.getElementById('quizBody');
-  body.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><br>Loading...</div>';
+  body.innerHTML = '<div class=\"spin-wrap\"><div class=\"skel skel-title\"></div><div class=\"skel skel-card\"></div><div class=\"skel skel-card\" style=\"opacity:0.6\"></div></div>';
   const [qs,ans] = await Promise.all([GET('/questions'),GET('/answers')]);
   const realQs=(qs||[]).filter(q=>!q.question||!q.question.startsWith('__SPEAK_TOPIC__:'));
   if (!realQs.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">📭 No question posted yet</div>'; return; }
@@ -1452,7 +1471,7 @@ async function submitQ(qId) {
   if (!ans) return toast('Write your answer!','error');
   try {
     await POST('/answers',{questionId:qId,studentPin:ME,studentName:MY_NAME,answer:ans});
-    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today()}).catch(()=>{});
+    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'quiz'}).catch(()=>{});
     toast('✅ Submitted! +5 points','success'); loadQuiz(); loadStats();
   } catch(e) { toast(e.message,'error'); }
 }
@@ -1462,7 +1481,7 @@ async function submitQ(qId) {
 // ═══════════════════════════════════════════════════
 async function loadMediaStudent() {
   const body = document.getElementById('mediaBody');
-  body.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><br>Loading...</div>';
+  body.innerHTML = '<div class=\"spin-wrap\"><div class=\"skel skel-title\"></div><div class=\"skel skel-card\"></div><div class=\"skel skel-card\" style=\"opacity:0.6\"></div></div>';
   const [media,ans] = await Promise.all([GET('/media'),GET('/answers')]);
   const list = Array.isArray(media)?media:[];
   if (!list.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">🎵 No media posted yet</div>'; return; }
@@ -1484,18 +1503,26 @@ async function loadMediaStudent() {
   const isUrl = d.startsWith('/uploads/') || d.startsWith('http');
 
   if (mediaType === 'image') {
-    const src = isUrl ? d : (d.startsWith('data:') ? d : safeImgSrc(d,'image'));
+    const src = isUrl ? d : safeImgSrc(d, 'image');
     h += `<div style="margin:12px 0"><img src="${src}" style="max-width:100%;border-radius:10px" onerror="this.outerHTML='<p style=color:#f87171>⚠ Image could not load</p>'"></div>`;
   } else if (mediaType === 'audio') {
-    const src = isUrl ? d : (d.startsWith('data:') ? d : '');
+    // Always use getAudioSrc — handles raw base64, data URLs, and blob URLs correctly
+    const src = isUrl ? d : getAudioSrc(d);
     if (src) {
-      h += `<div style="margin:12px 0">
-        <audio controls style="width:100%" src="${src}"></audio>
-        <div style="margin-top:6px"><a href="${src}" target="_blank" style="color:#60a5fa;font-size:13px;font-weight:700">🎵 Tap here to play audio</a></div>
+      h += `<div style="margin:12px 0;background:#f0f9ff;border:1.5px solid #93c5fd;border-radius:12px;padding:14px">
+        <div style="font-size:12px;color:#475569;margin-bottom:8px;font-weight:600">🎵 Listen to the audio, then answer below</div>
+        <audio controls style="width:100%;border-radius:8px" src="${src}" preload="auto">
+          Your browser does not support audio playback.
+        </audio>
+        <div style="margin-top:8px;text-align:center">
+          <a href="${src}" target="_blank" download style="color:#2563eb;font-size:12px;font-weight:700;text-decoration:none;background:#dbeafe;padding:6px 14px;border-radius:20px;display:inline-block">
+            ⬇️ Download audio if player doesn't work
+          </a>
+        </div>
       </div>`;
     } else {
       h += `<div style="background:#fef3c7;border-radius:8px;padding:10px;margin:10px 0;color:#92400e;font-size:13px">
-        ⚠️ This audio was uploaded before the fix. <strong>Teacher please delete and re-upload.</strong>
+        ⚠️ Audio could not be loaded. Teacher please delete and re-upload.
       </div>`;
     }
   }
@@ -1516,7 +1543,7 @@ async function submitMedia(mId) {
   if (!ans) return toast('Write your answer!','error');
   try {
     await POST('/answers',{questionId:mId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'media'});
-    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today()}).catch(()=>{});
+    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'media'}).catch(()=>{});
     toast('✅ Submitted! +5 points','success'); loadMediaStudent();
   } catch(e) { toast(e.message,'error'); }
 }
@@ -1526,7 +1553,7 @@ async function submitMedia(mId) {
 // ═══════════════════════════════════════════════════
 async function loadWordStudent() {
   const body = document.getElementById('wordBody');
-  body.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><br>Loading...</div>';
+  body.innerHTML = '<div class=\"spin-wrap\"><div class=\"skel skel-title\"></div><div class=\"skel skel-card\"></div><div class=\"skel skel-card\" style=\"opacity:0.6\"></div></div>';
   const [words,ans] = await Promise.all([GET('/word'),GET('/answers')]);
   const list = Array.isArray(words)?words:[];
   if (!list.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">📖 No word posted yet</div>'; return; }
@@ -1547,8 +1574,8 @@ async function submitWord(wId) {
   if (!ans) return toast('Write your answer!','error');
   try {
     await POST('/answers',{questionId:wId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'word'});
-    await POST('/scores',{pin:ME,name:MY_NAME,points:3,date:today()}).catch(()=>{});
-    toast('✅ Submitted! +3 points','success'); loadWordStudent();
+    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'word'}).catch(()=>{});
+    toast('✅ Submitted! +5 points','success'); loadWordStudent();
   } catch(e) { toast(e.message,'error'); }
 }
 
@@ -1557,7 +1584,7 @@ async function submitWord(wId) {
 // ═══════════════════════════════════════════════════
 async function loadAffairsStudent() {
   const body = document.getElementById('affairsBody');
-  body.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><br>Loading...</div>';
+  body.innerHTML = '<div class=\"spin-wrap\"><div class=\"skel skel-title\"></div><div class=\"skel skel-card\"></div><div class=\"skel skel-card\" style=\"opacity:0.6\"></div></div>';
   const [affairs,ans] = await Promise.all([GET('/affairs'),GET('/answers')]);
   const list = Array.isArray(affairs)?affairs:[];
   if (!list.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">📰 No affairs posted yet</div>'; return; }
@@ -1578,8 +1605,8 @@ async function submitAffairs(aId) {
   if (!ans) return toast('Write your answer!','error');
   try {
     await POST('/answers',{questionId:aId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'affairs'});
-    await POST('/scores',{pin:ME,name:MY_NAME,points:3,date:today()}).catch(()=>{});
-    toast('✅ Submitted! +3 points','success'); loadAffairsStudent();
+    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'affairs'}).catch(()=>{});
+    toast('✅ Submitted! +5 points','success'); loadAffairsStudent();
   } catch(e) { toast(e.message,'error'); }
 }
 
@@ -1588,7 +1615,7 @@ async function submitAffairs(aId) {
 // ═══════════════════════════════════════════════════
 async function loadRank() {
   const body = document.getElementById('rankBody');
-  body.innerHTML = '<div class="spin-wrap"><div class="spinner"></div><br>Loading...</div>';
+  body.innerHTML = '<div class=\"spin-wrap\"><div class=\"skel skel-title\"></div><div class=\"skel skel-card\"></div><div class=\"skel skel-card\" style=\"opacity:0.6\"></div></div>';
   const [scoreData,qs,ans] = await Promise.all([GET('/scores'),GET('/questions'),GET('/answers')]);
   const questions=Array.isArray(qs)?qs:[], answers=Array.isArray(ans)?ans:[];
   let h='';
@@ -2118,8 +2145,8 @@ async function spSubmit() {
     const qId=st?st.id:0;
     await POST('/answers',{questionId:qId,studentPin:ME,studentName:MY_NAME,answer:text,type:'speak'});
   }catch(e){}
-  if(ME)await POST('/scores',{pin:ME,name:MY_NAME,points:10,date:today()}).catch(()=>{});
-  toast('✅ Submitted! +10 points 🎉','success');
+  if(ME)await POST('/scores',{pin:ME,name:MY_NAME,points:20,date:today(),activityType:'speak'}).catch(()=>{});
+  toast('✅ Submitted! +20 points 🎉','success');
   loadSpSubmissions();
   spReset();
 }
@@ -2207,8 +2234,20 @@ async function loadGKList(){
         <input type="text" id="ga_${q.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
         <button onclick="setGKAns(${q.id})" style="background:#16a34a;border:none;border-radius:7px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Set</button>
       </div>`}
+      <div style="margin-top:8px;text-align:right">
+        <button onclick="deleteQuestion(${q.id})" style="background:rgba(220,38,38,0.1);border:1px solid rgba(220,38,38,0.3);border-radius:6px;padding:3px 10px;color:#f87171;font-size:11px;font-weight:700;cursor:pointer">🗑 Delete</button>
+      </div>
     </div>`;
   }).join('');
+}
+async function deleteQuestion(id){
+  if(!confirm('Delete this question and all its student answers?'))return;
+  try{
+    const r=await fetch(API+'/questions/'+id,{method:'DELETE'});
+    if(!r.ok)throw new Error('Delete failed');
+    toast('🗑️ Question deleted','success');
+    loadGKList();
+  }catch(e){ toast('Delete failed: '+e.message,'error'); }
 }
 async function setGKAns(id){
   const ans=document.getElementById('ga_'+id)?.value.trim();
