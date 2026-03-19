@@ -112,8 +112,13 @@ app.post("/scores", (req, res) => {
     if (!pin || !name || !points || !date) return res.status(400).json({ error: "All fields required" });
     if (!studentScores[pin]) studentScores[pin] = { name, scores: [] };
     studentScores[pin].name = name;
-    if (!studentScores[pin].scores.find(s => s.date === date)) {
-        studentScores[pin].scores.push({ date, points });
+    // Allow one score entry per date PER activity type — not just per date
+    const activityType = req.body.activityType || 'general';
+    const alreadyScored = studentScores[pin].scores.find(
+        s => s.date === date && (s.activityType || 'general') === activityType
+    );
+    if (!alreadyScored) {
+        studentScores[pin].scores.push({ date, points, activityType });
     }
     if (!studentStreaks[pin]) {
         studentStreaks[pin] = { count: 1, lastDate: date };
@@ -164,6 +169,17 @@ app.put("/questions/:id/answer", setAnswer);
 app.post("/questions/:id/answer", setAnswer);
 
 app.delete("/questions/reset", (req, res) => { questions = []; saveData(); res.json({ success: true }); });
+
+app.delete("/questions/:id", (req, res) => {
+    const id = parseInt(req.params.id);
+    const idx = questions.findIndex(q => q.id === id);
+    if (idx === -1) return res.status(404).json({ error: "Question not found" });
+    questions.splice(idx, 1);
+    // Also remove associated answers
+    studentAnswers = studentAnswers.filter(a => a.questionId !== id);
+    saveData();
+    res.json({ success: true });
+});
 
 // =====================================================
 // ANSWERS
@@ -344,7 +360,7 @@ app.post("/media/text", (req, res) => {
 
     const newMedia = {
         id: Date.now(), type,
-        data: urlOrText || '',   // keep full base64 — always works even after redeploy
+        data: fileUrl || urlOrText || '',  // prefer file URL — avoid storing huge base64 in data.json
         fileUrl,
         fileName: caption || 'Media Item',
         opinion: question, expectedAnswer: answer || null, explanation: null,
