@@ -477,7 +477,7 @@ input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-
 ::-webkit-scrollbar-thumb:hover{background:#93c5fd}
 
 /* ══ FOOTER ══ */
-.app-footer{text-align:center;padding:18px 0 24px;font-size:11px;color:#334155;letter-spacing:1.5px;font-weight:600;text-transform:uppercase}
+.app-footer{text-align:center;padding:14px 0 4px;font-size:12px;color:rgba(255,255,255,0.6);letter-spacing:0.5px;font-weight:500}.app-footer .footer-inner{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.25);border-radius:30px;padding:7px 18px}.app-footer .footer-icon{font-size:13px;color:rgba(255,255,255,0.5)}.app-footer .footer-by{color:rgba(255,255,255,0.7);font-size:11px;font-weight:500}.app-footer .footer-name{background:linear-gradient(135deg,#FFD700,#FFA500);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800;font-size:13px;font-family:'Syne',sans-serif;letter-spacing:0.5px}
 
 /* ══ AUDIO ELEMENT STYLING ══ */
 audio{width:100%;min-width:0;border-radius:8px}
@@ -520,6 +520,14 @@ audio{width:100%;min-width:0;border-radius:8px}
     <button class="btn pri block" onclick="doLogin()">🚀 Login as Student</button>
     <p style="text-align:center;margin-top:14px;color:#475569;font-size:13px">Teacher? <button class="lbtn" onclick="go('s-teacher-login')">Login here →</button></p>
     </div>
+  <div class="app-footer">
+    <div class="footer-inner">
+      <span class="footer-icon">✦</span>
+      <span class="footer-by">Designed &amp; Built by</span>
+      <span class="footer-name">SATHWIK</span>
+      <span class="footer-icon">✦</span>
+    </div>
+  </div>
   </div>
 </div>
 
@@ -1612,38 +1620,12 @@ async function loadRank() {
 // ═══════════════════════════════════════════════════
 async function aiCorrectSpeech(text) {
   if (!text || text.trim().length < 5) return null;
-  const prompt = `You are a strict English grammar teacher. Carefully analyze this spoken English text and find EVERY single mistake — grammar, tense, articles, subject-verb agreement, word choice, prepositions, plurals, spelling (as spoken).
 
-Student's spoken text:
-"${text.trim()}"
-
-Reply ONLY with a valid JSON object — no markdown, no explanation, no extra text. Use this exact format:
-{
-  "corrected": "the fully corrected version of the text",
-  "score": 78,
-  "errors": [
-    {
-      "wrong": "exact phrase from student text",
-      "right": "corrected phrase",
-      "rule": "clear explanation of the error",
-      "type": "Tense|Article|Agreement|Vocabulary|Preposition|Plural|Word Order"
-    }
-  ],
-  "suggestions": ["specific improvement tip 1", "specific improvement tip 2"],
-  "pronunciation_tips": ["pronunciation tip if relevant"]
-}
-
-Important rules:
-- "wrong" must be copied EXACTLY as it appears in the student's text (case-insensitive match)
-- score 100 = perfect, 0 = very poor
-- Find EVERY mistake — do not skip even small errors
-- If text is perfect, return empty errors array and score 95-100`;
-
-  // 1️⃣ Try backend /ai/grammar first
+  // Try backend /ai/grammar — allow 75s because server now does two AI passes
   for (let attempt = 1; attempt <= 2; attempt++) {
     try {
       const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 30000);
+      const timer = setTimeout(() => ctrl.abort(), 75000);
       const r = await fetch(API + '/ai/grammar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1661,40 +1643,16 @@ Important rules:
     } catch(e) {
       console.warn('AI grammar backend attempt', attempt, e.message);
     }
-    if (attempt < 2) await new Promise(r => setTimeout(r, 1500));
+    if (attempt < 2) await new Promise(r => setTimeout(r, 2000));
   }
 
-  // 2️⃣ Fallback: direct Anthropic API call
-  try {
-    const ctrl2 = new AbortController();
-    const timer2 = setTimeout(() => ctrl2.abort(), 40000);
-    const r2 = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'anthropic-dangerous-direct-browser-access': 'true' },
-      signal: ctrl2.signal,
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        messages: [{ role: 'user', content: prompt }]
-      })
-    });
-    clearTimeout(timer2);
-    if (r2.ok) {
-      const data = await r2.json();
-      const raw = data.content?.find(b => b.type === 'text')?.text || '';
-      const clean = raw.replace(/```json|```/g, '').trim();
-      const parsed = JSON.parse(clean);
-      if (parsed && typeof parsed.corrected === 'string') return parsed;
-    }
-  } catch(e) {
-    console.warn('AI grammar direct API fallback failed:', e.message);
-  }
+  // Server unreachable — local rule-based fallback will handle it
+  console.warn('AI grammar: server unavailable, falling back to local check');
   return null;
 }
 
 // Fallback local grammar check (when AI is unavailable)
 const GERRS = {
-  // ── Irregular past tense ──
   'goed':{fix:'went',rule:'Irregular past tense of "go"',type:'Tense'},
   'buyed':{fix:'bought',rule:'Irregular past tense of "buy"',type:'Tense'},
   'cutted':{fix:'cut',rule:'"Cut" doesn\'t change in past tense',type:'Tense'},
@@ -1706,55 +1664,8 @@ const GERRS = {
   'runned':{fix:'ran',rule:'Irregular past tense of "run"',type:'Tense'},
   'tooked':{fix:'took',rule:'Irregular past tense of "take"',type:'Tense'},
   'bringed':{fix:'brought',rule:'Irregular past tense of "bring"',type:'Tense'},
-  'sitted':{fix:'sat',rule:'Irregular past tense of "sit"',type:'Tense'},
-  'standed':{fix:'stood',rule:'Irregular past tense of "stand"',type:'Tense'},
-  'fighted':{fix:'fought',rule:'Irregular past tense of "fight"',type:'Tense'},
-  'teached':{fix:'taught',rule:'Irregular past tense of "teach"',type:'Tense'},
-  'readed':{fix:'read',rule:'"Read" stays the same in past tense',type:'Tense'},
-  'heared':{fix:'heard',rule:'Irregular past tense of "hear"',type:'Tense'},
-  'seed':{fix:'saw',rule:'Irregular past tense of "see"',type:'Tense'},
-  'drived':{fix:'drove',rule:'Irregular past tense of "drive"',type:'Tense'},
-  'swimmed':{fix:'swam',rule:'Irregular past tense of "swim"',type:'Tense'},
-  'sleeped':{fix:'slept',rule:'Irregular past tense of "sleep"',type:'Tense'},
-  'keeped':{fix:'kept',rule:'Irregular past tense of "keep"',type:'Tense'},
-  'meeted':{fix:'met',rule:'"Meet" → "met" in past tense',type:'Tense'},
-  'sended':{fix:'sent',rule:'Irregular past tense of "send"',type:'Tense'},
-  'spended':{fix:'spent',rule:'Irregular past tense of "spend"',type:'Tense'},
-  'finded':{fix:'found',rule:'Irregular past tense of "find"',type:'Tense'},
-  'leaved':{fix:'left',rule:'Irregular past tense of "leave"',type:'Tense'},
-  'growed':{fix:'grew',rule:'Irregular past tense of "grow"',type:'Tense'},
-  'knowed':{fix:'knew',rule:'Irregular past tense of "know"',type:'Tense'},
-  'throwed':{fix:'threw',rule:'Irregular past tense of "throw"',type:'Tense'},
-  'hitted':{fix:'hit',rule:'"Hit" stays the same in past tense',type:'Tense'},
-  'putted':{fix:'put',rule:'"Put" stays the same in past tense',type:'Tense'},
-  'letted':{fix:'let',rule:'"Let" stays the same in past tense',type:'Tense'},
-  'hurted':{fix:'hurt',rule:'"Hurt" stays the same in past tense',type:'Tense'},
-  'costed':{fix:'cost',rule:'"Cost" stays the same in past tense',type:'Tense'},
-  'builded':{fix:'built',rule:'Irregular past tense of "build"',type:'Tense'},
-  'breaked':{fix:'broke',rule:'Irregular past tense of "break"',type:'Tense'},
-  'choosed':{fix:'chose',rule:'Irregular past tense of "choose"',type:'Tense'},
-  'weared':{fix:'wore',rule:'Irregular past tense of "wear"',type:'Tense'},
-  'winned':{fix:'won',rule:'Irregular past tense of "win"',type:'Tense'},
-  'losted':{fix:'lost',rule:'"Lose" → "lost" in past tense',type:'Tense'},
-  'holded':{fix:'held',rule:'Irregular past tense of "hold"',type:'Tense'},
-  'bended':{fix:'bent',rule:'Irregular past tense of "bend"',type:'Tense'},
-  'lended':{fix:'lent',rule:'Irregular past tense of "lend"',type:'Tense'},
-  'understanded':{fix:'understood',rule:'Irregular past tense of "understand"',type:'Tense'},
-  // ── Comparatives ──
-  'more better':{fix:'better',rule:'"More" + comparative is redundant',type:'Comparison'},
-  'more worse':{fix:'worse',rule:'"More" + comparative is redundant',type:'Comparison'},
-  'more faster':{fix:'faster',rule:'"More" + comparative is redundant',type:'Comparison'},
-  'more slower':{fix:'slower',rule:'"More" + comparative is redundant',type:'Comparison'},
-  'more easier':{fix:'easier',rule:'"More" + comparative is redundant',type:'Comparison'},
-  'more harder':{fix:'harder',rule:'"More" + comparative is redundant',type:'Comparison'},
-  'more bigger':{fix:'bigger',rule:'"More" + comparative is redundant',type:'Comparison'},
-  'more smaller':{fix:'smaller',rule:'"More" + comparative is redundant',type:'Comparison'},
-  'gooder':{fix:'better',rule:'Comparative of "good" is "better"',type:'Comparison'},
-  'badder':{fix:'worse',rule:'Comparative of "bad" is "worse"',type:'Comparison'},
-  'importanter':{fix:'more important',rule:'Use "more" for multi-syllable adjectives',type:'Comparison'},
-  'beautifuler':{fix:'more beautiful',rule:'Use "more" for multi-syllable adjectives',type:'Comparison'},
-  'intelligenter':{fix:'more intelligent',rule:'Use "more" for multi-syllable adjectives',type:'Comparison'},
-  // ── Subject-verb agreement ──
+  'more better':{fix:'better',rule:'"More" + comparative is wrong',type:'Comparison'},
+  'more worse':{fix:'worse',rule:'"More" + comparative is wrong',type:'Comparison'},
   "he don't":{fix:"he doesn't",rule:'Use "doesn\'t" with he/she/it',type:'Agreement'},
   "she don't":{fix:"she doesn't",rule:'Use "doesn\'t" with he/she/it',type:'Agreement'},
   "it don't":{fix:"it doesn't",rule:'Use "doesn\'t" with he/she/it',type:'Agreement'},
@@ -1762,128 +1673,35 @@ const GERRS = {
   'we was':{fix:'we were',rule:'Use "were" with "we"',type:'Agreement'},
   'you was':{fix:'you were',rule:'Use "were" with "you"',type:'Agreement'},
   'i is':{fix:'I am',rule:'Use "am" with "I"',type:'Agreement'},
-  'i are':{fix:'I am',rule:'Use "am" with "I"',type:'Agreement'},
-  'he are':{fix:'he is',rule:'Use "is" with he/she/it',type:'Agreement'},
-  'she are':{fix:'she is',rule:'Use "is" with he/she/it',type:'Agreement'},
-  'it are':{fix:'it is',rule:'Use "is" with he/she/it',type:'Agreement'},
-  'he have':{fix:'he has',rule:'Use "has" with he/she/it',type:'Agreement'},
-  'she have':{fix:'she has',rule:'Use "has" with he/she/it',type:'Agreement'},
-  'it have':{fix:'it has',rule:'Use "has" with he/she/it',type:'Agreement'},
-  'they is':{fix:'they are',rule:'Use "are" with plural subjects',type:'Agreement'},
-  'we is':{fix:'we are',rule:'Use "are" with "we"',type:'Agreement'},
-  'i was not knowing':{fix:'I did not know',rule:'Use simple past, not past continuous for states',type:'Tense'},
-  'i am having':{fix:'I have',rule:'Stative verbs don\'t use continuous form',type:'Tense'},
-  'he is having':{fix:'he has',rule:'Stative verbs don\'t use continuous form',type:'Tense'},
-  'she is having':{fix:'she has',rule:'Stative verbs don\'t use continuous form',type:'Tense'},
-  'i am knowing':{fix:'I know',rule:'Stative verbs don\'t use continuous form',type:'Tense'},
-  'i am wanting':{fix:'I want',rule:'Stative verbs don\'t use continuous form',type:'Tense'},
-  'i am liking':{fix:'I like',rule:'Stative verbs don\'t use continuous form',type:'Tense'},
-  'i am loving':{fix:'I love',rule:'Stative verbs don\'t use continuous form',type:'Tense'},
-  'i am needing':{fix:'I need',rule:'Stative verbs don\'t use continuous form',type:'Tense'},
-  // ── Articles ──
   'a apple':{fix:'an apple',rule:'Use "an" before vowel sounds',type:'Article'},
   'a orange':{fix:'an orange',rule:'Use "an" before vowel sounds',type:'Article'},
   'a umbrella':{fix:'an umbrella',rule:'Use "an" before vowel sounds',type:'Article'},
   'a hour':{fix:'an hour',rule:'"Hour" starts with a vowel sound',type:'Article'},
   'a honest':{fix:'an honest',rule:'"Honest" starts with a vowel sound',type:'Article'},
-  'a egg':{fix:'an egg',rule:'Use "an" before vowel sounds',type:'Article'},
-  'a elephant':{fix:'an elephant',rule:'Use "an" before vowel sounds',type:'Article'},
-  'a ice':{fix:'an ice',rule:'Use "an" before vowel sounds',type:'Article'},
-  'a idea':{fix:'an idea',rule:'Use "an" before vowel sounds',type:'Article'},
-  'a error':{fix:'an error',rule:'Use "an" before vowel sounds',type:'Article'},
-  'a engineer':{fix:'an engineer',rule:'Use "an" before vowel sounds',type:'Article'},
-  'a exam':{fix:'an exam',rule:'Use "an" before vowel sounds',type:'Article'},
-  'a answer':{fix:'an answer',rule:'Use "an" before vowel sounds',type:'Article'},
-  'a actor':{fix:'an actor',rule:'Use "an" before vowel sounds',type:'Article'},
-  'a accident':{fix:'an accident',rule:'Use "an" before vowel sounds',type:'Article'},
-  'an university':{fix:'a university',rule:'"University" starts with a "you" sound',type:'Article'},
-  'an european':{fix:'a European',rule:'"European" starts with a "you" sound',type:'Article'},
-  'an useful':{fix:'a useful',rule:'"Useful" starts with a "you" sound',type:'Article'},
-  'an unit':{fix:'a unit',rule:'"Unit" starts with a "you" sound',type:'Article'},
-  // ── Uncountable nouns ──
-  'informations':{fix:'information',rule:'"Information" is uncountable — no plural',type:'Noun'},
-  'advices':{fix:'advice',rule:'"Advice" is uncountable — no plural',type:'Noun'},
-  'furnitures':{fix:'furniture',rule:'"Furniture" is uncountable — no plural',type:'Noun'},
-  'staffs':{fix:'staff',rule:'"Staff" is uncountable — no plural',type:'Noun'},
+  'informations':{fix:'information',rule:'"Information" is uncountable',type:'Noun'},
+  'advices':{fix:'advice',rule:'"Advice" is uncountable',type:'Noun'},
+  'furnitures':{fix:'furniture',rule:'"Furniture" is uncountable',type:'Noun'},
+  'staffs':{fix:'staff',rule:'"Staff" is uncountable',type:'Noun'},
   'peoples':{fix:'people',rule:'"People" is already plural',type:'Noun'},
-  'equipments':{fix:'equipment',rule:'"Equipment" is uncountable — no plural',type:'Noun'},
-  'knowledges':{fix:'knowledge',rule:'"Knowledge" is uncountable — no plural',type:'Noun'},
-  'homeworks':{fix:'homework',rule:'"Homework" is uncountable — no plural',type:'Noun'},
-  'moneys':{fix:'money',rule:'"Money" is uncountable — no plural',type:'Noun'},
-  'luggages':{fix:'luggage',rule:'"Luggage" is uncountable — no plural',type:'Noun'},
-  'baggages':{fix:'baggage',rule:'"Baggage" is uncountable — no plural',type:'Noun'},
-  'traffics':{fix:'traffic',rule:'"Traffic" is uncountable — no plural',type:'Noun'},
-  'weathers':{fix:'weather',rule:'"Weather" is uncountable — no plural',type:'Noun'},
-  'researches':{fix:'research',rule:'"Research" is uncountable — no plural',type:'Noun'},
-  'progresses':{fix:'progress',rule:'"Progress" is uncountable — no plural',type:'Noun'},
-  // ── Prepositions ──
-  'discuss about':{fix:'discuss',rule:'"Discuss" does not need "about"',type:'Preposition'},
-  'return back':{fix:'return',rule:'"Return" already means "come back"',type:'Preposition'},
-  'revert back':{fix:'revert',rule:'"Revert" already means "go back"',type:'Preposition'},
-  'repeat again':{fix:'repeat',rule:'"Repeat" already means "do again"',type:'Preposition'},
-  'married with':{fix:'married to',rule:'Use "married to", not "married with"',type:'Preposition'},
-  'good in':{fix:'good at',rule:'Use "good at" for skills',type:'Preposition'},
-  'interested on':{fix:'interested in',rule:'Use "interested in"',type:'Preposition'},
-  'depend of':{fix:'depend on',rule:'Use "depend on"',type:'Preposition'},
-  'arrived to':{fix:'arrived at/in',rule:'Use "arrived at" (place) or "arrived in" (city)',type:'Preposition'},
-  'bored of':{fix:'bored with/by',rule:'Use "bored with" or "bored by"',type:'Preposition'},
-  // ── Word choice ──
-  'do a mistake':{fix:'make a mistake',rule:'Use "make a mistake", not "do a mistake"',type:'Vocabulary'},
-  'do shopping':{fix:'go shopping',rule:'Use "go shopping", not "do shopping"',type:'Vocabulary'},
-  'make shopping':{fix:'go shopping',rule:'Use "go shopping", not "make shopping"',type:'Vocabulary'},
-  'do a party':{fix:'have a party',rule:'Use "have a party", not "do a party"',type:'Vocabulary'},
-  'make a party':{fix:'throw a party',rule:'Use "throw/have a party"',type:'Vocabulary'},
-  'i think that we should to':{fix:'I think we should',rule:'No "to" after modal verbs',type:'Tense'},
-  'he can to':{fix:'he can',rule:'No "to" after modal verbs',type:'Tense'},
-  'she can to':{fix:'she can',rule:'No "to" after modal verbs',type:'Tense'},
-  'i can to':{fix:'I can',rule:'No "to" after modal verbs',type:'Tense'},
-  'we can to':{fix:'we can',rule:'No "to" after modal verbs',type:'Tense'},
-  'should to':{fix:'should',rule:'No "to" after modal verbs',type:'Tense'},
-  'must to':{fix:'must',rule:'No "to" after modal verbs',type:'Tense'},
-  'will to':{fix:'will',rule:'No "to" after modal verbs',type:'Tense'},
-  'would to':{fix:'would',rule:'No "to" after modal verbs',type:'Tense'},
-  'might to':{fix:'might',rule:'No "to" after modal verbs',type:'Tense'},
-  // ── Double negatives ──
-  "don't have no":{fix:"don't have any",rule:'Avoid double negatives',type:'Agreement'},
-  "didn't do nothing":{fix:"didn't do anything",rule:'Avoid double negatives',type:'Agreement'},
-  "can't do nothing":{fix:"can't do anything",rule:'Avoid double negatives',type:'Agreement'},
-  "never don't":{fix:'never',rule:'Avoid double negatives',type:'Agreement'},
-  // ── Pronoun errors ──
-  'me and my friend':{fix:'my friend and I',rule:'Put "I" last and use "I" as subject',type:'Pronoun'},
-  'me and he':{fix:'he and I',rule:'Use "I" as subject, not "me"',type:'Pronoun'},
-  'me and she':{fix:'she and I',rule:'Use "I" as subject, not "me"',type:'Pronoun'},
-  'me and they':{fix:'they and I',rule:'Use "I" as subject, not "me"',type:'Pronoun'},
-  'myself went':{fix:'I went',rule:'Use "I" not "myself" as subject',type:'Pronoun'},
-  'theirselves':{fix:'themselves',rule:'Correct form is "themselves"',type:'Pronoun'},
-  'hisself':{fix:'himself',rule:'Correct form is "himself"',type:'Pronoun'},
-  'ourself':{fix:'ourselves',rule:'Correct form is "ourselves"',type:'Pronoun'},
 };
 function spEscape(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/'/g,"['']?");}
-function _spBoundRx(bad){
-  // For multi-word patterns use lookahead/lookbehind at start/end only
-  const esc=spEscape(bad);
-  const first=bad[0];const last=bad[bad.length-1];
-  const lb=(/\w/.test(first))?'(?<![\\w])':'';
-  const rb=(/\w/.test(last))?'(?![\\w])':'';
-  return new RegExp(lb+esc+rb,'gi');
-}
 function spHL(text){
   let r=text;
   Object.entries(GERRS).sort((a,b)=>b[0].length-a[0].length).forEach(([bad,info])=>{
-    r=r.replace(_spBoundRx(bad),m=>`<span class="sp-eword" data-fix="→ ${info.fix}" title="${info.rule}">${m}</span>`);
+    r=r.replace(new RegExp('(?<![\\w])'+spEscape(bad)+'(?![\\w])','gi'),m=>`<span class="sp-eword" data-fix="→ ${info.fix}" title="${info.rule}">${m}</span>`);
   });
   return r||'<span style="color:#4a5568">Keep speaking...</span>';
 }
 function spFixLocal(text){
   let r=text;
   Object.entries(GERRS).sort((a,b)=>b[0].length-a[0].length).forEach(([bad,info])=>{
-    r=r.replace(_spBoundRx(bad),`<span class="sp-cword">${info.fix}</span>`);
+    r=r.replace(new RegExp('(?<![\\w])'+spEscape(bad)+'(?![\\w])','gi'),`<span class="sp-cword">${info.fix}</span>`);
   });
   return r;
 }
 function spCountErr(text){
   let n=0;
-  Object.keys(GERRS).forEach(bad=>{const m=text.match(_spBoundRx(bad));if(m)n+=m.length;});
+  Object.keys(GERRS).forEach(bad=>{const m=text.match(new RegExp('(?<![\\w])'+spEscape(bad)+'(?![\\w])','gi'));if(m)n+=m.length;});
   return n;
 }
 
@@ -2159,8 +1977,8 @@ async function spStop() {
       if(errCount){
         const errs=[];
         Object.entries(GERRS).sort((a,b)=>b[0].length-a[0].length).forEach(([bad,info])=>{
-          const m=fullText.match(_spBoundRx(bad));
-          if(m){const rx=new RegExp('[^.!?]*'+spEscape(bad)+'[^.!?]*','gi');const ctx=(fullText.match(rx)||[m[0]])[0].trim();errs.push({wrong:bad,right:info.fix,rule:info.rule,type:info.type,ctx});}
+          const m=fullText.match(new RegExp('(?<![\\w])'+spEscape(bad)+'(?![\\w])','gi'));
+          if(m){const rx=new RegExp('[^.!?]*(?<![\\w])'+spEscape(bad)+'(?![\\w])[^.!?]*','gi');const ctx=(fullText.match(rx)||[m[0]])[0].trim();errs.push({wrong:bad,right:info.fix,rule:info.rule,type:info.type,ctx});}
         });
         ac.innerHTML=errs.map(e=>'<div class="sp-err-card"><div class="sp-err-wrong">❌ You said: <strong>"'+e.ctx+'"</strong></div><div class="sp-err-right">✅ Correct: <strong>"'+e.ctx.replace(new RegExp('(?<![\\w])'+spEscape(e.wrong)+'(?![\\w])','gi'),e.right)+'"</strong></div><div class="sp-err-rule">📌 '+e.rule+' <span style="background:#1a0a2e;color:#a78bfa;border-radius:10px;padding:1px 6px;font-size:9px;margin-left:4px">'+e.type+'</span></div></div>').join('');
       } else {
@@ -3179,8 +2997,6 @@ function startSpAutoMachine(){
   },60000);updateSpUI();
 }
 </script>
-<div class="app-footer">
-  Designed by <span style="background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">SATHWIK</span>
-</div>
+
 </body>
 </html>
