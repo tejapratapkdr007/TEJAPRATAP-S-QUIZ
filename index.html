@@ -1506,19 +1506,37 @@ async function loadMediaStudent() {
     const src = isUrl ? d : safeImgSrc(d, 'image');
     h += `<div style="margin:12px 0"><img src="${src}" style="max-width:100%;border-radius:10px" onerror="this.outerHTML='<p style=color:#f87171>⚠ Image could not load</p>'"></div>`;
   } else if (mediaType === 'audio') {
-    // Always use getAudioSrc — handles raw base64, data URLs, and blob URLs correctly
-    const src = isUrl ? d : getAudioSrc(d);
+    // Build full absolute src — /uploads/ paths need the API base URL
+    let src = isUrl ? (d.startsWith('/') ? API + d : d) : getAudioSrc(d);
+    const pid = 'ap_' + m.id;
     if (src) {
-      h += `<div style="margin:12px 0;background:#f0f9ff;border:1.5px solid #93c5fd;border-radius:12px;padding:14px">
-        <div style="font-size:12px;color:#475569;margin-bottom:8px;font-weight:600">🎵 Listen to the audio, then answer below</div>
-        <audio controls style="width:100%;border-radius:8px" src="${src}" preload="auto">
-          Your browser does not support audio playback.
-        </audio>
-        <div style="margin-top:8px;text-align:center">
-          <a href="${src}" target="_blank" download style="color:#2563eb;font-size:12px;font-weight:700;text-decoration:none;background:#dbeafe;padding:6px 14px;border-radius:20px;display:inline-block">
-            ⬇️ Download audio if player doesn't work
-          </a>
+      h += `<div style="margin:12px 0;background:linear-gradient(135deg,#1e3a5f,#1e1b4b);border-radius:16px;padding:18px" id="player_${pid}">
+        <div style="font-size:11px;color:rgba(255,255,255,0.6);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;font-weight:700">🎵 Audio Question — Listen carefully</div>
+
+        <!-- Loading bar shown while audio loads -->
+        <div id="ald_${pid}" style="height:4px;background:rgba(255,255,255,0.1);border-radius:4px;margin-bottom:14px;overflow:hidden">
+          <div style="height:4px;width:40%;background:linear-gradient(90deg,#3b82f6,#8b5cf6);border-radius:4px;animation:skelShimmer 1.4s ease infinite;background-size:200% 100%"></div>
         </div>
+
+        <!-- Custom play/pause button + progress -->
+        <div style="display:flex;align-items:center;gap:14px">
+          <button id="pb_${pid}" onclick="toggleAudio('${pid}')"
+            style="width:52px;height:52px;border-radius:50%;border:none;cursor:pointer;font-size:22px;flex-shrink:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#3b82f6,#8b5cf6);box-shadow:0 4px 16px rgba(59,130,246,0.5);transition:transform 0.15s"
+            onmousedown="this.style.transform='scale(0.93)'" onmouseup="this.style.transform='scale(1)'">▶️</button>
+          <div style="flex:1">
+            <div id="pt_${pid}" style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:6px">0:00 / 0:00</div>
+            <div style="height:6px;background:rgba(255,255,255,0.15);border-radius:6px;cursor:pointer;position:relative" onclick="seekAudio('${pid}',event,this)">
+              <div id="pp_${pid}" style="height:6px;width:0%;background:linear-gradient(90deg,#3b82f6,#8b5cf6);border-radius:6px;transition:width 0.1s"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Hidden native audio element -->
+        <audio id="aud_${pid}" src="${src}" preload="auto"
+          oncanplay="document.getElementById('ald_${pid}').style.display='none'"
+          ontimeupdate="updateAudioUI('${pid}')"
+          onended="document.getElementById('pb_${pid}').textContent='▶️';document.getElementById('pp_${pid}').style.width='0%'">
+        </audio>
       </div>`;
     } else {
       h += `<div style="background:#fef3c7;border-radius:8px;padding:10px;margin:10px 0;color:#92400e;font-size:13px">
@@ -2092,6 +2110,43 @@ function spStopAudio(){
   _spSetAudioPlaying(false);
   toast('⏹ Audio stopped','info');
 }
+// ═══════════════════════════════════════════════════
+// CUSTOM AUDIO PLAYER HELPERS
+// ═══════════════════════════════════════════════════
+function toggleAudio(pid) {
+  const aud = document.getElementById('aud_'+pid);
+  const btn = document.getElementById('pb_'+pid);
+  if (!aud) return;
+  if (aud.paused) {
+    // Pause all other audio players on the page first
+    document.querySelectorAll('audio').forEach(a => { if(a !== aud){ a.pause(); } });
+    document.querySelectorAll('[id^="pb_"]').forEach(b => { b.textContent = '▶️'; });
+    aud.play().then(() => { btn.textContent = '⏸'; }).catch(() => { btn.textContent = '▶️'; });
+  } else {
+    aud.pause();
+    btn.textContent = '▶️';
+  }
+}
+function updateAudioUI(pid) {
+  const aud = document.getElementById('aud_'+pid);
+  const bar = document.getElementById('pp_'+pid);
+  const time = document.getElementById('pt_'+pid);
+  if (!aud) return;
+  const cur = aud.currentTime, dur = aud.duration || 0;
+  if (bar) bar.style.width = (dur > 0 ? (cur/dur*100) : 0) + '%';
+  if (time) {
+    const fmt = s => String(Math.floor(s/60)).padStart(1,'0') + ':' + String(Math.floor(s%60)).padStart(2,'0');
+    time.textContent = fmt(cur) + ' / ' + (dur > 0 ? fmt(dur) : '0:00');
+  }
+}
+function seekAudio(pid, e, bar) {
+  const aud = document.getElementById('aud_'+pid);
+  if (!aud || !aud.duration) return;
+  const rect = bar.getBoundingClientRect();
+  const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  aud.currentTime = ratio * aud.duration;
+}
+
 function spListen() {
   const ct=document.getElementById('spCorrectTxt');
   const raw=ct?.innerText?.trim();
