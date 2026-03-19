@@ -54,6 +54,17 @@ let affairsSchedule = saved.affairsSchedule || null;
 console.log(`✅ Data loaded: ${questions.length} questions, ${studentAnswers.length} answers, ${Object.keys(studentPhones).length} students`);
 
 // =====================================================
+// TEACHER AUTH (server-side password check)
+// =====================================================
+const TEACHER_PASSWORD = process.env.TEACHER_PASSWORD || "11223344@Ttp";
+app.post("/auth/teacher", (req, res) => {
+    const { password } = req.body;
+    if (!password) return res.status(400).json({ error: "Password required" });
+    if (password !== TEACHER_PASSWORD) return res.status(401).json({ error: "Wrong password" });
+    res.json({ success: true });
+});
+
+// =====================================================
 // BULK SCHEDULE
 // =====================================================
 app.get("/schedule", (req, res) => {
