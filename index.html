@@ -1028,7 +1028,7 @@ audio{width:100%;min-width:0;border-radius:8px}
 // ═══════════════════════════════════════════════════
 const API = 'https://tejapratap-s-quiz.onrender.com';
 let ME = null, MY_NAME = null, IS_T = false;
-let T_PW = localStorage.getItem('tpw') || '11223344@Ttp';
+const T_PW = '11223344@Ttp'; // fallback only — real check is server-side via /auth/teacher
 let _gkCache = null, gkInterval = null;
 let spRec = null, spIsRec = false, spTimer = null, spElapsed = 0, spDuration = 120, spText = '', spFinalText = '';
 let spRestartCount = 0, spRestartTimer = null;
@@ -1206,10 +1206,18 @@ function doLogin() {
   POST('/phones',{pin,name,phone}).catch(()=>{});
   enterHome();
 }
-function doTLogin() {
+async function doTLogin() {
   const pw = document.getElementById('tPw').value;
-  if (pw !== T_PW) return toast('Wrong password!','error');
-  IS_T = true; localStorage.setItem('teacher','1'); enterTeacher();
+  if (!pw) return toast('Enter password!','error');
+  try {
+    const r = await fetch(API+'/auth/teacher',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
+    if(!r.ok){ toast('Wrong password!','error'); return; }
+    IS_T = true; localStorage.setItem('teacher','1'); enterTeacher();
+  } catch(e){
+    // Fallback to local check if server is unreachable
+    if(pw !== T_PW) return toast('Wrong password!','error');
+    IS_T = true; localStorage.setItem('teacher','1'); enterTeacher();
+  }
 }
 function doLogout() {
   ME = null; MY_NAME = null;
@@ -1768,9 +1776,31 @@ function spUpdateTimer() {
   if(tm)tm.textContent=spElapsed+'s';
 }
 
+function spResume() {
+  // Resume after pause — do NOT reset spDisplayText
+  clearTimeout(spRestartTimer);
+  if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+  spAudioChunks=[];
+  spIsRec=true; spRestartCount=0;
+  const btn=document.getElementById('spBtn');
+  if(btn){btn.classList.add('rec');btn.textContent='⏸';}
+  const st=document.getElementById('spStatus');
+  if(st){st.textContent='🔴 Recording — speak now...';st.className='sp-status live';}
+  const sub=document.getElementById('tSub');if(sub)sub.textContent='SPEAKING';
+  spStartMediaRecorder();
+  spStartSR();
+  clearInterval(spTimer);
+  spTimer=setInterval(()=>{
+    if(!spIsRec)return;
+    spElapsed++;spUpdateTimer();
+    if(spElapsed>=spDuration){spStop();toast('⏱ Time is up!','warn');}
+  },1000);
+}
 function spToggle() {
   if(!localStorage.getItem('spTopic'))return toast('⚠ Teacher has not set a topic yet!','warn');
-  if(spIsRec)spPause();else spStart();
+  if(spIsRec) spPause();
+  else if(spFinalText||spDisplayText) spResume(); // was paused mid-session
+  else spStart(); // fresh start
 }
 
 function spStart() {
@@ -1790,6 +1820,7 @@ function spStart() {
   document.getElementById('spErrs').textContent='0';
   document.getElementById('spScore').textContent='—';
   document.getElementById('spWords').textContent='0';
+  spStartMediaRecorder();
   spStartSR();
   clearInterval(spTimer);
   spTimer=setInterval(()=>{
@@ -1804,6 +1835,8 @@ function spPause() {
   spIsRec=false; clearInterval(spTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
+  spMediaRec=null;
+  // NOTE: spDisplayText is intentionally NOT reset — preserve what student spoke before pause
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
   const st=document.getElementById('spStatus');
@@ -1822,7 +1855,7 @@ function spStartMediaRecorder() {
   navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
     spMediaStream = stream;
     _doStartMR(stream);
-  }).catch(e=>{ console.warn('MediaRecorder mic denied:', e.message); });
+  }).catch(e=>{ console.warn('MediaRecorder mic denied:', e.message); toast('❌ Mic access denied — enable mic in browser settings','error'); });
 }
 function _doStartMR(stream){
   const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4',''];
@@ -1898,13 +1931,36 @@ function spStartSR() {
 async function spStop() {
   spIsRec=false; clearInterval(spTimer); clearTimeout(spRestartTimer);
   if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+
+  // Stop MediaRecorder and collect final audio chunk before proceeding
+  if(spMediaRec && spMediaRec.state !== 'inactive'){
+    await new Promise(resolve => {
+      spMediaRec.onstop = resolve;
+      try{ spMediaRec.stop(); } catch(e){ resolve(); }
+    });
+  }
+  spMediaRec = null;
+
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
   const st=document.getElementById('spStatus');
   if(st){st.textContent='⏳ Analysing your speech...';st.className='sp-status done';}
   const sub=document.getElementById('tSub');if(sub)sub.textContent='DONE';
 
-  const fullText = spDisplayText.trim();
+  let fullText = spDisplayText.trim();
+
+  // If SpeechRecognition gave no text but we have audio, try /transcribe fallback
+  if(!fullText && spAudioChunks.length > 0){
+    if(st)st.textContent='⏳ Transcribing audio...';
+    try{
+      const blob = new Blob(spAudioChunks, {type: spAudioChunks[0]?.type || 'audio/webm'});
+      const b64 = await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(blob);});
+      const resp = await fetch(API+'/transcribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audio:b64,mimeType:blob.type})});
+      if(resp.ok){ const d=await resp.json(); if(d.text) fullText=d.text.trim(); }
+    } catch(e){ console.warn('Transcribe fallback failed:',e.message); }
+  }
+  spAudioChunks = [];
+
   if(!fullText){
     if(st)st.textContent='No speech detected. Try again.';
     return;
@@ -2012,24 +2068,47 @@ function spStopAudio(){
 function spListen() {
   const ct=document.getElementById('spCorrectTxt');
   const raw=ct?.innerText?.trim();
-  const text=raw||spFinalText.trim()||spText.trim();
+  const text=raw||spFinalText.trim()||spDisplayText.trim();
   if(!text)return toast('Record your speech first!','warn');
-  if(!('speechSynthesis' in window))return toast('Text-to-speech not supported','warn');
+  if(!('speechSynthesis' in window))return toast('Text-to-speech not supported on this browser','warn');
+
   window.speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);
-  u.lang='en-IN'; u.rate=0.85; u.pitch=1;
-  // Try to find a good English voice
+
+  function _doSpeak(voices){
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='en-IN'; u.rate=0.85; u.pitch=1;
+    // Prefer a non-Indian English voice for clearer playback
+    const eng=voices.find(v=>v.lang==='en-GB')||voices.find(v=>v.lang==='en-US')||voices.find(v=>v.lang.startsWith('en')&&!v.lang.includes('IN'))||voices.find(v=>v.lang.startsWith('en'));
+    if(eng)u.voice=eng;
+    u.onstart=()=>{_spSetAudioPlaying(true);toast('🔊 Playing corrected version...','info');};
+    u.onend=()=>_spSetAudioPlaying(false);
+    u.onerror=(e)=>{_spSetAudioPlaying(false);console.warn('TTS error:',e.error);toast('Could not play audio — try again','error');};
+    // iOS Safari fix: keep speech synthesis alive with a periodic resume
+    const resumeTimer=setInterval(()=>{
+      if(window.speechSynthesis.paused)window.speechSynthesis.resume();
+    },5000);
+    u.onend=()=>{clearInterval(resumeTimer);_spSetAudioPlaying(false);};
+    u.onerror=()=>{clearInterval(resumeTimer);_spSetAudioPlaying(false);toast('Could not play audio — try again','error');};
+    window.speechSynthesis.speak(u);
+    _spSetAudioPlaying(true);
+  }
+
+  // Android/Chrome fix: voices may not be loaded yet — wait for them
   const voices=window.speechSynthesis.getVoices();
-  const eng=voices.find(v=>v.lang.startsWith('en')&&!v.lang.includes('IN'))||voices.find(v=>v.lang.startsWith('en'));
-  if(eng)u.voice=eng;
-  u.onstart=()=>{_spSetAudioPlaying(true);toast('🔊 Playing corrected version...','info');};
-  u.onend=()=>_spSetAudioPlaying(false);
-  u.onerror=()=>{_spSetAudioPlaying(false);toast('Could not play audio','error');};
-  window.speechSynthesis.speak(u);
+  if(voices.length>0){
+    _doSpeak(voices);
+  } else {
+    window.speechSynthesis.onvoiceschanged=()=>{
+      window.speechSynthesis.onvoiceschanged=null;
+      _doSpeak(window.speechSynthesis.getVoices());
+    };
+    // Fallback: if onvoiceschanged never fires (some browsers), speak after short delay
+    setTimeout(()=>{ if(window.speechSynthesis.getVoices().length===0){ _doSpeak([]); } },500);
+  }
 }
 
 async function spSubmit() {
-  const text=spFinalText.trim()||spText.trim()||spDisplayText.trim();
+  const text=spFinalText.trim()||spDisplayText.trim();
   if(!text)return toast('Record your speech first!','warn');
   const topic=localStorage.getItem('spTopic')||'Speaking Practice';
   // find the speak-topic question id to attach answer to
@@ -2140,7 +2219,18 @@ async function setGKAns(id){
 
 // GK Bulk Auto-Post
 function today(){return new Date().toISOString().split('T')[0];}
-function is5am(){return new Date().getHours()===5;}
+function is5am(){
+  const h=new Date().getHours();
+  return h===5; // runs at 5 AM
+}
+function shouldPostToday(items){
+  // Catch-up: also post if today's item was never posted and it's past 5 AM
+  const td=today();
+  const idx=items.findIndex(i=>!i.posted&&i.date===td);
+  if(idx===-1)return false;
+  const h=new Date().getHours();
+  return h>=5; // post any time after 5 AM if today's item is pending
+}
 async function getGKSched(){
   try{const r=await GET('/schedule');if(r&&r.empty){_gkCache=null;return null;}_gkCache=r;return r;}
   catch{return _gkCache;}
@@ -2230,8 +2320,8 @@ async function resetGKBulk(){
 function startGKMachine(){
   if(gkInterval)clearInterval(gkInterval);
   gkInterval=setInterval(async()=>{
-    if(!is5am())return;
     const s=await getGKSched();if(!s)return;
+    if(!shouldPostToday(s.questions))return;
     const td=today();const idx=s.questions.findIndex(q=>!q.posted&&q.date===td);
     if(idx===-1)return;
     const q=s.questions[idx];
@@ -2537,7 +2627,7 @@ function resetMdBulk() {
 function startMdAutoMachine() {
   if (mdAutoInterval) clearInterval(mdAutoInterval);
   mdAutoInterval = setInterval(async () => {
-    if (!is5am()) return;
+    if (!shouldPostToday(s.items || s.media || [])) return;
     const s=getMdSchedLocal(); if(!s) return;
     const td=today(); const idx=s.items.findIndex(i=>!i.posted&&i.date===td); if(idx===-1) return;
     const item=s.items[idx];
@@ -2822,7 +2912,8 @@ function resetWBulk(){if(!confirm('Reset word schedule?'))return;localStorage.re
 function startWMachine(){
   if(wInterval)clearInterval(wInterval);
   wInterval=setInterval(async()=>{
-    if(!is5am())return;const s=getWSchedLocal();if(!s)return;
+    const s=getWSchedLocal();if(!s)return;
+    if(!shouldPostToday(s.items))return;
     const td=today();const idx=s.items.findIndex(i=>!i.posted&&i.date===td);if(idx===-1)return;
     const item=s.items[idx];
     try{await POST('/word',{word:item.word,question:item.question,answer:item.answer});s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost=`Day ${idx+1} — ${s.items[idx].postedAt}`;saveWSchedLocal(s);toast("🤖 Auto-Posted today's word!",'success');loadWordList();}catch(e){}
@@ -2900,7 +2991,8 @@ function resetAffBulk(){if(!confirm('Reset affairs schedule?'))return;localStora
 function startAffMachine(){
   if(affInterval)clearInterval(affInterval);
   affInterval=setInterval(async()=>{
-    if(!is5am())return;const s=getAffSchedLocal();if(!s)return;
+    const s=getAffSchedLocal();if(!s)return;
+    if(!shouldPostToday(s.items))return;
     const td=today();const idx=s.items.findIndex(i=>!i.posted&&i.date===td);if(idx===-1)return;
     const item=s.items[idx];
     try{await POST('/affairs',{question:item.question,answer:item.answer});s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost=`Day ${idx+1} — ${s.items[idx].postedAt}`;saveAffSchedLocal(s);toast("🤖 Auto-Posted today's affairs!",'success');loadAffList();}catch(e){}
@@ -2986,7 +3078,8 @@ function resetSpBulk(){if(!confirm('Reset speaking schedule?'))return;localStora
 function startSpAutoMachine(){
   if(spAutoInterval)clearInterval(spAutoInterval);
   spAutoInterval=setInterval(()=>{
-    if(!is5am())return;const s=getSpSchedLocal();if(!s)return;
+    const s=getSpSchedLocal();if(!s)return;
+    if(!shouldPostToday(s.items))return;
     const td=today();const idx=s.items.findIndex(i=>!i.posted&&i.date===td);if(idx===-1)return;
     const item=s.items[idx];
     POST('/questions',{question:'__SPEAK_TOPIC__:'+item.topic,answer:String(item.duration),type:'speak-topic'}).catch(()=>{});
