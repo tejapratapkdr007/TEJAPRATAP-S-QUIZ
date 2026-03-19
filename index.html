@@ -1931,22 +1931,24 @@ function spStartSR() {
   }
 
   const rec = new SR();
-  // continuous:false — browser captures one utterance, fires final result, fires onend.
-  // We create a BRAND NEW instance on every onend restart.
-  // Each new instance has a completely empty e.results[] — zero replay possible.
-  rec.continuous     = false;
-  rec.interimResults = true;
-  rec.lang           = 'en-IN';
+  // continuous:true — SR never stops by itself, captures all speech without gaps
+  rec.continuous      = true;
+  rec.interimResults  = true;
+  rec.lang            = 'en-IN';
   rec.maxAlternatives = 1;
   spRec = rec;
+
+  let lastResultIndex = 0; // track which results we've already processed as final
 
   rec.onresult = e => {
     if(!spIsRec || spRec !== rec) return;
     let interim = '';
-    for(let i = 0; i < e.results.length; i++){
+    // Only process new results starting from lastResultIndex
+    for(let i = lastResultIndex; i < e.results.length; i++){
       if(e.results[i].isFinal){
         const t = e.results[i][0].transcript.trim();
-        if(t) spDisplayText = spDisplayText ? spDisplayText+' '+t : t;
+        if(t){ spDisplayText = spDisplayText ? spDisplayText+' '+t : t; }
+        lastResultIndex = i + 1;
       } else {
         interim = e.results[i][0].transcript.trim();
       }
@@ -1964,24 +1966,52 @@ function spStartSR() {
   rec.onerror = e => {
     if(spRec !== rec) return;
     if(e.error==='not-allowed'||e.error==='audio-capture'){
-      toast('❌ Mic denied','error'); spStop(); return;
+      toast('❌ Mic denied — please allow microphone access','error'); spStop(); return;
     }
-    // no-speech / network — non-fatal, onend will fire and create new instance
+    if(e.error==='no-speech') return; // normal — student paused, just keep listening
+    // For other errors restart SR
+    if(spIsRec){
+      spRec = null;
+      clearTimeout(spRestartTimer);
+      spRestartTimer = setTimeout(()=>{ if(spIsRec) spStartSR(); }, 300);
+    }
   };
 
   rec.onend = () => {
+    // continuous:true should not fire onend unless we called abort/stop
     if(spRec === rec) spRec = null;
     if(!spIsRec) return;
+    // Unexpected stop — restart immediately
     clearTimeout(spRestartTimer);
-    spRestartTimer = setTimeout(()=>{ if(spIsRec && !spRec) spStartSR(); }, 100);
+    spRestartTimer = setTimeout(()=>{ if(spIsRec && !spRec) spStartSR(); }, 200);
   };
 
-  try{ rec.start(); }catch(e){ console.warn('SR start:',e.message); }
+  try{ rec.start(); }catch(e){ console.warn('SR start:',e.message); spRec=null; }
 }
 
 async function spStop() {
   spIsRec=false; clearInterval(spTimer); clearTimeout(spRestartTimer);
-  if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+  if(spRec){
+    // Give SR 400ms to finalize any last words before we abort
+    await new Promise(resolve=>{
+      const timeout=setTimeout(()=>{ resolve(); },400);
+      const oldEnd=spRec.onend;
+      spRec.onresult=e=>{
+        // Capture any last final results
+        for(let i=0;i<e.results.length;i++){
+          if(e.results[i].isFinal){
+            const t=e.results[i][0].transcript.trim();
+            if(t) spDisplayText=spDisplayText?spDisplayText+' '+t:t;
+          }
+        }
+        clearTimeout(timeout); resolve();
+      };
+      spRec.onend=()=>{ clearTimeout(timeout); resolve(); };
+      spRec.onerror=()=>{ clearTimeout(timeout); resolve(); };
+      try{ spRec.stop(); }catch(e){ clearTimeout(timeout); resolve(); }
+    });
+    spRec=null;
+  }
 
   // Stop MediaRecorder and collect final audio chunk before proceeding
   if(spMediaRec && spMediaRec.state !== 'inactive'){
