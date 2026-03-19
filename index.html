@@ -1842,7 +1842,7 @@ function spResume() {
   },1000);
 }
 function spToggle() {
-  if(!localStorage.getItem('spTopic'))return toast('⚠ Teacher has not set a topic yet!','warn');
+  // Allow recording even if teacher has not set a topic yet
   if(spIsRec) spPause();
   else if(spFinalText||spDisplayText) spResume(); // was paused mid-session
   else spStart(); // fresh start
@@ -1915,7 +1915,13 @@ function _doStartMR(stream){
 // ── SR: live display ──
 function spStartSR() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR || !spIsRec) return;
+  if(!spIsRec) return;
+  if(!SR){
+    // SR not supported (Firefox, Samsung Browser etc.) — audio will be transcribed via /transcribe on stop
+    const st=document.getElementById('spStatus');
+    if(st){st.textContent='🔴 Recording audio... (will transcribe on stop)';st.className='sp-status live';}
+    return;
+  }
 
   // Kill any existing instance cleanly
   if(spRec){
@@ -1993,21 +1999,34 @@ async function spStop() {
   const sub=document.getElementById('tSub');if(sub)sub.textContent='DONE';
 
   let fullText = spDisplayText.trim();
+  const wordCount = fullText.split(/\s+/).filter(Boolean).length;
 
-  // If SpeechRecognition gave no text but we have audio, try /transcribe fallback
-  if(!fullText && spAudioChunks.length > 0){
-    if(st)st.textContent='⏳ Transcribing audio...';
+  // Always transcribe from audio when:
+  // - SR gave nothing at all, OR
+  // - SR gave very few words (< 5) — likely missed speech
+  // Audio transcription is more reliable than browser SR
+  if(spAudioChunks.length > 0 && wordCount < 5){
+    if(st)st.textContent='⏳ Transcribing your speech...';
     try{
       const blob = new Blob(spAudioChunks, {type: spAudioChunks[0]?.type || 'audio/webm'});
       const b64 = await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(blob);});
       const resp = await fetch(API+'/transcribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audio:b64,mimeType:blob.type})});
-      if(resp.ok){ const d=await resp.json(); if(d.text) fullText=d.text.trim(); }
-    } catch(e){ console.warn('Transcribe fallback failed:',e.message); }
+      if(resp.ok){
+        const d=await resp.json();
+        if(d.text && d.text.trim()){
+          // Use audio transcript if it's longer/more complete than SR result
+          const audioText = d.text.trim();
+          const audioWords = audioText.split(/\s+/).filter(Boolean).length;
+          if(audioWords > wordCount) fullText = audioText;
+        }
+      }
+    } catch(e){ console.warn('Transcribe failed:',e.message); }
   }
   spAudioChunks = [];
 
   if(!fullText){
-    if(st)st.textContent='No speech detected. Try again.';
+    if(st){st.textContent='⚠️ No speech detected — check mic permissions and try again';st.className='sp-status';}
+    toast('No speech detected. Make sure mic is allowed in your browser.','warn');
     return;
   }
 
