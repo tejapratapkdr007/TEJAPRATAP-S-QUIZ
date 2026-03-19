@@ -506,76 +506,205 @@ app.post("/ai/grammar", async (req, res) => {
     if (!apiKey)
         return res.status(500).json({ error: "ANTHROPIC_API_KEY not set. Add it in Render → Environment Variables." });
 
-    // Node 14/16 don't have fetch built-in — try dynamic import of node-fetch
     let fetchFn = typeof fetch !== "undefined" ? fetch : null;
     if (!fetchFn) {
         try { const nf = await import("node-fetch"); fetchFn = nf.default || nf; }
         catch { return res.status(500).json({ error: "HTTP client unavailable. Run: npm install node-fetch" }); }
     }
 
-    const SYSTEM = `You are an English grammar expert for Indian polytechnic students. Analyze spoken English and find ALL mistakes.
-Respond ONLY with valid JSON, no markdown fences: {"corrected":"corrected text","errors":[{"wrong":"wrong phrase","right":"correct phrase","rule":"explanation","type":"Tense|Agreement|Article|Preposition|Noun|Other"}],"score":0-100,"suggestions":["tip1","tip2"],"pronunciation_tips":["tip"]}`;
+    const studentText = text.trim();
+
+    // ─── PASS 1: Think deeply, find every error (free-form reasoning) ───────────
+    const PASS1_SYSTEM = `You are the strictest English grammar examiner in India, checking spoken English from polytechnic students. Your reputation depends on finding EVERY single mistake — missing even one error is unacceptable.
+
+Go through the student's text WORD BY WORD and check each of the following categories:
+
+TENSE ERRORS
+- Wrong past tense: "I goed" → "I went", "he catched" → "he caught", "she cooked" ✓
+- Present continuous misuse: "I am knowing", "she is having", "we are understanding", "I am wanting"
+- Present perfect errors: "I have went", "he has came", "they have ate"
+- Simple present for ongoing: "yesterday I go to market" → "I went to market"
+
+ARTICLE ERRORS (a / an / the / missing)
+- "I went to market" → "I went to the market"
+- "she is good girl" → "she is a good girl"
+- "I have suggestion" → "I have a suggestion"
+- Wrong article: "a honest man" → "an honest man", "an university" → "a university"
+
+SUBJECT-VERB AGREEMENT
+- "he don't know" → "he doesn't know"
+- "they was playing" → "they were playing"
+- "she have two books" → "she has two books"
+- "we goes to school" → "we go to school"
+
+PREPOSITION ERRORS
+- "discuss about" → "discuss" (no 'about')
+- "cope up with" → "cope with"
+- "return back" → "return"
+- "reach to the station" → "reach the station"
+- "married with" → "married to"
+- "superior than" → "superior to"
+
+REDUNDANCY / WRONG WORDS
+- "revert back" → "revert"
+- "repeat again" → "repeat"
+- "prepone" (not a word) → "reschedule to an earlier time"
+- "do the needful" → "do what is needed"
+- "today morning" → "this morning"
+- "off" instead of "turn off": "off the light" → "turn off the light"
+
+PLURAL ERRORS
+- "furnitures" → "furniture"
+- "informations" → "information"
+- "advices" → "advice"
+- "equipments" → "equipment"
+- "staffs" → "staff"
+
+WORD ORDER
+- "I daily go to college" → "I go to college daily"
+- "she always is late" → "she is always late"
+- "I too want it" → "I want it too"
+
+VOCABULARY / WORD CHOICE
+- "He expired" → "He passed away" (expired is for food/documents)
+- "I told to him" → "I told him"
+- "very much interested" → "very interested"
+- "kind-heartedly" (awkward) → "kindly"
+
+List EVERY mistake you find. Be thorough. Do not excuse any error, even if the meaning is still clear.`;
+
+    const PASS1_USER = `Student's spoken text:
+"${studentText}"
+
+Go through this text word by word. List every single grammar mistake you find. For each mistake write:
+- WRONG: [exact words from student text]
+- RIGHT: [corrected version]
+- RULE: [why it is wrong, explained simply]
+- TYPE: [Tense / Article / Agreement / Preposition / Redundancy / Plural / WordOrder / Vocabulary / Other]
+
+After listing all mistakes, write the fully corrected version of the entire text.
+Then give a grammar score from 0–100 (100 = perfect English, 0 = very poor).
+Then give 2 practical improvement tips for this student.
+Then give 1–2 pronunciation tips relevant to Indian English speakers.`;
+
+    // ─── PASS 2: Convert Pass 1 analysis into strict JSON ───────────────────────
+    const PASS2_SYSTEM = `You convert English grammar analysis reports into clean JSON. You output ONLY raw JSON — no markdown, no backticks, no explanation, nothing outside the JSON object.`;
+
+    const PASS2_USER_TEMPLATE = (analysis, original) => `Here is a grammar analysis of a student's spoken text.
+
+Original student text:
+"${original}"
+
+Grammar analysis:
+${analysis}
+
+Convert this into EXACTLY this JSON format. Copy the "wrong" phrases EXACTLY as they appear in the original student text (do not paraphrase):
+
+{
+  "corrected": "the fully corrected version of the entire student text",
+  "score": <number 0-100>,
+  "errors": [
+    {
+      "wrong": "exact phrase from student text",
+      "right": "corrected phrase",
+      "rule": "simple explanation",
+      "type": "Tense|Article|Agreement|Preposition|Redundancy|Plural|WordOrder|Vocabulary|Other"
+    }
+  ],
+  "suggestions": ["tip 1", "tip 2"],
+  "pronunciation_tips": ["tip 1"]
+}
+
+Rules:
+- Include ALL errors from the analysis above — do not drop any
+- "wrong" must be copied character-for-character from the original student text
+- If no errors were found, return an empty errors array and score 95–100
+- Output ONLY the JSON object, nothing else`;
 
     let lastErr = "";
-    for (let attempt = 1; attempt <= 2; attempt++) {
-        try {
-            console.log(`[AI] Attempt ${attempt} for ${text.length} chars`);
-            const ctrl = new AbortController();
-            const timer = setTimeout(() => ctrl.abort(), 25000);
 
-            const response = await fetchFn("https://api.anthropic.com/v1/messages", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-api-key": apiKey,
-                    "anthropic-version": "2023-06-01"
-                },
-                body: JSON.stringify({
-                    model: "claude-haiku-4-5-20251001",
-                    max_tokens: 1200,
-                    system: SYSTEM,
-                    messages: [{ role: "user", content: `Student spoke: "${text.trim()}"\n\nAnalyze and correct ALL mistakes. Return JSON only.` }]
-                }),
-                signal: ctrl.signal
-            });
-            clearTimeout(timer);
+    try {
+        // ── Pass 1: Deep analysis ──────────────────────────────────────────────
+        console.log(`[AI-P1] Analyzing ${studentText.length} chars`);
+        const ctrl1 = new AbortController();
+        const t1 = setTimeout(() => ctrl1.abort(), 35000);
 
-            if (!response.ok) {
-                const errBody = await response.text();
-                lastErr = `API HTTP ${response.status}: ${errBody.substring(0, 200)}`;
-                console.error("[AI]", lastErr);
-                if (response.status >= 400 && response.status < 500) break;
-                if (attempt < 2) await new Promise(r => setTimeout(r, 1000));
-                continue;
-            }
+        const r1 = await fetchFn("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+            body: JSON.stringify({
+                model: "claude-haiku-4-5-20251001",
+                max_tokens: 2500,
+                system: PASS1_SYSTEM,
+                messages: [{ role: "user", content: PASS1_USER }]
+            }),
+            signal: ctrl1.signal
+        });
+        clearTimeout(t1);
 
-            const data = await response.json();
-            const raw = data?.content?.[0]?.text || "";
-            console.log(`[AI] Raw (${raw.length} chars):`, raw.substring(0, 150));
-
-            // Safe JSON extraction — strip markdown fences, find first { ... }
-            const cleaned = raw.replace(/```json|```/g, "").trim();
-            const match = cleaned.match(/\{[\s\S]*\}/);
-            if (!match) { lastErr = "No JSON in response: " + raw.substring(0, 100); if (attempt < 2) { await new Promise(r => setTimeout(r, 1000)); continue; } break; }
-
-            const parsed = JSON.parse(match[0]);
-            return res.json({
-                corrected:          typeof parsed.corrected === "string" ? parsed.corrected : text,
-                errors:             Array.isArray(parsed.errors) ? parsed.errors.filter(e => e && e.wrong && e.right) : [],
-                score:              typeof parsed.score === "number" ? Math.min(100, Math.max(0, parsed.score)) : 70,
-                suggestions:        Array.isArray(parsed.suggestions) ? parsed.suggestions.filter(Boolean) : [],
-                pronunciation_tips: Array.isArray(parsed.pronunciation_tips) ? parsed.pronunciation_tips.filter(Boolean) : []
-            });
-
-        } catch (e) {
-            lastErr = e.name === "AbortError" ? "Timed out (25s)" : e.message;
-            console.error(`[AI] Attempt ${attempt} error:`, lastErr);
-            if (attempt < 2) await new Promise(r => setTimeout(r, 1000));
+        if (!r1.ok) {
+            const errBody = await r1.text();
+            lastErr = `Pass1 API HTTP ${r1.status}: ${errBody.substring(0, 200)}`;
+            console.error("[AI-P1]", lastErr);
+            throw new Error(lastErr);
         }
-    }
 
-    console.error("[AI] All attempts failed:", lastErr);
-    return res.status(500).json({ error: lastErr });
+        const d1 = await r1.json();
+        const analysis = d1?.content?.[0]?.text || "";
+        console.log(`[AI-P1] Analysis (${analysis.length} chars):`, analysis.substring(0, 200));
+
+        if (!analysis || analysis.length < 10) throw new Error("Pass 1 returned empty analysis");
+
+        // ── Pass 2: Convert analysis to JSON ───────────────────────────────────
+        console.log(`[AI-P2] Converting analysis to JSON`);
+        const ctrl2 = new AbortController();
+        const t2 = setTimeout(() => ctrl2.abort(), 25000);
+
+        const r2 = await fetchFn("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "x-api-key": apiKey, "anthropic-version": "2023-06-01" },
+            body: JSON.stringify({
+                model: "claude-haiku-4-5-20251001",
+                max_tokens: 2000,
+                system: PASS2_SYSTEM,
+                messages: [{ role: "user", content: PASS2_USER_TEMPLATE(analysis, studentText) }]
+            }),
+            signal: ctrl2.signal
+        });
+        clearTimeout(t2);
+
+        if (!r2.ok) {
+            const errBody = await r2.text();
+            lastErr = `Pass2 API HTTP ${r2.status}: ${errBody.substring(0, 200)}`;
+            console.error("[AI-P2]", lastErr);
+            throw new Error(lastErr);
+        }
+
+        const d2 = await r2.json();
+        const raw2 = d2?.content?.[0]?.text || "";
+        console.log(`[AI-P2] Raw JSON (${raw2.length} chars):`, raw2.substring(0, 150));
+
+        // Robust JSON extraction
+        const cleaned = raw2.replace(/```json|```/g, "").trim();
+        const match = cleaned.match(/\{[\s\S]*\}/);
+        if (!match) throw new Error("Pass 2 returned no JSON: " + raw2.substring(0, 100));
+
+        const parsed = JSON.parse(match[0]);
+
+        return res.json({
+            corrected:          typeof parsed.corrected === "string" ? parsed.corrected : studentText,
+            errors:             Array.isArray(parsed.errors) ? parsed.errors.filter(e => e && e.wrong && e.right) : [],
+            score:              typeof parsed.score === "number" ? Math.min(100, Math.max(0, parsed.score)) : 70,
+            suggestions:        Array.isArray(parsed.suggestions) ? parsed.suggestions.filter(Boolean) : [],
+            pronunciation_tips: Array.isArray(parsed.pronunciation_tips) ? parsed.pronunciation_tips.filter(Boolean) : [],
+            _analysis:          analysis  // kept for server-side debugging (not shown to student)
+        });
+
+    } catch (e) {
+        lastErr = e.name === "AbortError" ? "Timed out" : e.message;
+        console.error("[AI-GRAMMAR] Failed:", lastErr);
+        return res.status(500).json({ error: lastErr });
+    }
 });
 
 app.use(express.static(__dirname));
