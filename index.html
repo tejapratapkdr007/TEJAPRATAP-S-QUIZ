@@ -578,22 +578,28 @@ audio{width:100%;min-width:0;border-radius:8px}
         <div class="stat-tile"><div class="st-icon">🔥</div><div class="st-val" id="hStreakHome" style="color:#f97316">0</div><div class="st-lbl">Streak</div></div>
         <div class="stat-tile rk-tile" onclick="go('s-rank')"><div class="st-icon">🏅</div><div class="st-val" style="color:#b45309;font-size:16px">Board</div><div class="st-lbl" style="color:#64748b">Leaderboard</div></div>
       </div>
-      <div class="grid2">
-        <div class="stat-tile gk-tile" onclick="go('s-quiz')"><div class="st-icon">🧠</div><div class="st-val" style="color:#ffffff;font-size:17px">GK Quiz</div><div class="st-lbl" style="color:rgba(255,255,255,0.85)">Today's Q · +5 pts</div></div>
-        <div class="stat-tile sp-tile" onclick="go('s-speak')"><div class="st-icon">🎙️</div><div class="st-val" style="color:#ffffff;font-size:17px">Speaking</div><div class="st-lbl" style="color:rgba(255,255,255,0.85)">AI Practice · +20 pts</div></div>
-        <div class="stat-tile wd-tile" onclick="go('s-word')"><div class="st-icon">📖</div><div class="st-val" style="color:#ffffff;font-size:17px">Word of Day</div><div class="st-lbl" style="color:rgba(255,255,255,0.85)">Vocabulary · +5 pts</div></div>
-        <div class="stat-tile af-tile" onclick="go('s-affairs')"><div class="st-icon">📰</div><div class="st-val" style="color:#ffffff;font-size:17px">Current Affairs</div><div class="st-lbl" style="color:rgba(255,255,255,0.85)">Daily GK · +5 pts</div></div>
-      </div>
-      <div class="stat-tile md-tile" onclick="go('s-media')" style="margin-bottom:14px">
-        <div style="display:flex;align-items:center;gap:12px"><div class="st-icon" style="margin-bottom:0;font-size:32px">🎵</div><div><div class="st-val" style="color:#ffffff;font-size:17px">Media Question</div><div class="st-lbl" style="color:rgba(255,255,255,0.85)">Image / Audio from teacher · +5 pts</div></div></div>
-      </div>
-      <!-- Top 3 Students -->
-      <div style="background:#ffffff;border:1.5px solid rgba(255,215,0,0.3);border-radius:13px;padding:16px;margin-bottom:0">
+      <!-- Top 3 Students — right below Streak/Board -->
+      <div style="background:#ffffff;border:1.5px solid rgba(255,215,0,0.3);border-radius:13px;padding:16px;margin-bottom:14px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
           <span style="font-size:18px">🏆</span>
           <div style="font-size:11px;font-weight:700;color:#FFD700;letter-spacing:1.5px;text-transform:uppercase">Top 3 Students</div>
         </div>
         <div id="homeTop3"><div style="color:#64748b;font-size:12px;text-align:center;padding:8px">Loading...</div></div>
+      </div>
+      <div class="stat-tile sp-tile" onclick="go('s-speak')" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:12px"><div class="st-icon" style="margin-bottom:0;font-size:32px">🎙️</div><div><div class="st-val" style="color:#ffffff;font-size:17px">Speaking</div><div class="st-lbl" style="color:rgba(255,255,255,0.85)">AI Practice · +20 pts</div></div></div>
+      </div>
+      <div class="stat-tile md-tile" onclick="go('s-media')" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:12px"><div class="st-icon" style="margin-bottom:0;font-size:32px">🎵</div><div><div class="st-val" style="color:#ffffff;font-size:17px">Media Question</div><div class="st-lbl" style="color:rgba(255,255,255,0.85)">Image / Audio from teacher · +5 pts</div></div></div>
+      </div>
+      <div class="stat-tile gk-tile" onclick="go('s-quiz')" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:12px"><div class="st-icon" style="margin-bottom:0;font-size:32px">🧠</div><div><div class="st-val" style="color:#ffffff;font-size:17px">GK Quiz</div><div class="st-lbl" style="color:rgba(255,255,255,0.85)">Today's Q · +5 pts</div></div></div>
+      </div>
+      <div class="stat-tile af-tile" onclick="go('s-affairs')" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:12px"><div class="st-icon" style="margin-bottom:0;font-size:32px">📰</div><div><div class="st-val" style="color:#ffffff;font-size:17px">Current Affairs</div><div class="st-lbl" style="color:rgba(255,255,255,0.85)">Daily GK · +5 pts</div></div></div>
+      </div>
+      <div class="stat-tile wd-tile" onclick="go('s-word')" style="margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:12px"><div class="st-icon" style="margin-bottom:0;font-size:32px">📖</div><div><div class="st-val" style="color:#ffffff;font-size:17px">Word of the Day</div><div class="st-lbl" style="color:rgba(255,255,255,0.85)">Vocabulary · +5 pts</div></div></div>
       </div>
     </div>
 
@@ -1033,13 +1039,15 @@ audio{width:100%;min-width:0;border-radius:8px}
 // ═══════════════════════════════════════════════════
 const API = 'https://tejapratap-s-quiz.onrender.com';
 let ME = null, MY_NAME = null, IS_T = false;
-const T_PW = '11223344@Ttp'; // fallback only — real check is server-side via /auth/teacher
+// Teacher password is validated server-side only (/auth/teacher endpoint).
+// No client-side fallback — if server is unreachable, login is blocked for security.
 let _gkCache = null, gkInterval = null;
 let spRec = null, spIsRec = false, spTimer = null, spElapsed = 0, spDuration = 120, spText = '', spFinalText = '';
 let spRestartCount = 0, spRestartTimer = null;
 // Audio recording globals
 let spMediaRec = null, spAudioChunks = [], spMediaStream = null;
 let spDisplayText = ''; // SR display only — not submitted
+let spLastResultIndex = 0; // FIX: global so spStop can read it without duplicating results
 
 // ═══════════════════════════════════════════════════
 // INIT
@@ -1233,9 +1241,8 @@ async function doTLogin() {
     if(!r.ok){ toast('Wrong password!','error'); return; }
     IS_T = true; localStorage.setItem('teacher','1'); enterTeacher();
   } catch(e){
-    // Fallback to local check if server is unreachable
-    if(pw !== T_PW) return toast('Wrong password!','error');
-    IS_T = true; localStorage.setItem('teacher','1'); enterTeacher();
+    // Server unreachable — block login for security (no client-side password fallback)
+    toast('Cannot reach server. Check your connection and try again.','error');
   }
 }
 function doLogout() {
@@ -1245,8 +1252,9 @@ function doLogout() {
 }
 function doTLogout() {
   IS_T = false; localStorage.removeItem('teacher');
-  [gkInterval, wInterval, affInterval, spAutoInterval].forEach(iv => { if(iv){clearInterval(iv);} });
-  gkInterval = wInterval = affInterval = spAutoInterval = null;
+  // FIX: also clear mdAutoInterval on teacher logout
+  [gkInterval, wInterval, affInterval, spAutoInterval, mdAutoInterval].forEach(iv => { if(iv) clearInterval(iv); });
+  gkInterval = wInterval = affInterval = spAutoInterval = mdAutoInterval = null;
   go('s-login'); loadLoginFaf();
 }
 
@@ -1317,13 +1325,33 @@ function enterTeacher() {
   document.querySelectorAll('#s-login,#s-teacher-login').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('#appMain .screen').forEach(s=>s.classList.remove('active'));
   document.getElementById('s-teacher').classList.add('active');
-  loadGKList(); startGKMachine(); startWMachine(); startAffMachine(); startSpAutoMachine(); startMdAutoMachine();
+  // Sync server schedules into localStorage if local copies are missing (new device / cleared browser)
+  _syncServerSchedulesToLocal().then(() => {
+    loadGKList(); startGKMachine(); startWMachine(); startAffMachine(); startSpAutoMachine(); startMdAutoMachine();
+  });
   loadSpStudentAnswers();
   const savedTopic = localStorage.getItem('spTopic');
   if (savedTopic) {
     const el = document.getElementById('spTopicList');
     if (el) el.innerHTML = `<div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:7px;padding:9px 12px;font-size:12px;color:#6d28d9"><strong>${savedTopic}</strong> <span style="color:#64748b;font-size:10px">(active)</span></div>`;
   }
+}
+
+// Pull server-side schedules into localStorage when local copies are absent.
+// This ensures schedules survive browser cache clears and new devices.
+// Note: GK schedule already reads directly from server, so it's not synced here.
+async function _syncServerSchedulesToLocal() {
+  try {
+    const [wSrv, affSrv] = await Promise.all([
+      GET('/schedule/word'), GET('/schedule/affairs')
+    ]);
+    if (wSrv && !wSrv.empty && !localStorage.getItem(W_SCHED_KEY))
+      localStorage.setItem(W_SCHED_KEY, JSON.stringify(wSrv));
+    if (affSrv && !affSrv.empty && !localStorage.getItem(AFF_SCHED_KEY))
+      localStorage.setItem(AFF_SCHED_KEY, JSON.stringify(affSrv));
+    // NOTE: Speaking schedule (SP_SCHED_KEY) is stored only in localStorage.
+    // GK schedule is fetched directly from /schedule by getGKSched() — no sync needed here.
+  } catch(e) { console.warn('Schedule sync from server failed:', e.message); }
 }
 
 // ═══════════════════════════════════════════════════
@@ -1350,7 +1378,7 @@ async function loadHomeFaf() {
   const [qs,ans] = await Promise.all([GET('/questions'),GET('/answers')]);
   if (!qs||!qs.length) { el.textContent = 'No data yet'; return; }
   const prev = qs.length>=2 ? qs[qs.length-2] : qs[0];
-  const pAns = (ans||[]).filter(a=>a.questionId===prev.id).sort((a,b)=>new Date(a.submittedAt||0)-new Date(b.submittedAt||0));
+  const pAns = (ans||[]).filter(a=>a.questionId===prev.id&&(!a.type||a.type==='question')).sort((a,b)=>new Date(a.submittedAt||0)-new Date(b.submittedAt||0));
   const medals=['🥇','🥈','🥉'];
   el.innerHTML = pAns.length ? pAns.slice(0,3).map((a,i)=>`<span style="margin-right:10px;white-space:nowrap">${medals[i]} <strong>${a.studentName||'?'}</strong></span>`).join('') : 'No answers yet';
 }
@@ -1471,7 +1499,9 @@ async function submitQ(qId) {
   if (!ans) return toast('Write your answer!','error');
   try {
     await POST('/answers',{questionId:qId,studentPin:ME,studentName:MY_NAME,answer:ans});
-    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'quiz'}).catch(()=>{});
+    try {
+      await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'quiz'});
+    } catch(e) { toast('Answer saved but score update failed — try refreshing','warn'); }
     toast('✅ Submitted! +5 points','success'); loadQuiz(); loadStats();
   } catch(e) { toast(e.message,'error'); }
 }
@@ -1489,12 +1519,19 @@ async function loadMediaStudent() {
   const myAns = (ans||[]).find(a=>a.questionId===m.id&&a.studentPin===ME&&a.type==='media');
   let h = `<div class="card or"><div class="card-lbl">📅 ${m.date||''}</div><div class="card-ttl">🎵 Media Question</div>`;
 
+  // If fileUrl is set but file may be gone after Render restart, fall back to base64Backup
+  const effectiveData = (m.fileUrl && m.base64Backup) ? m.fileUrl : (m.data || m.base64Backup || '');
+  if (m.base64Backup && m.fileUrl) {
+    // patch: replace data with base64Backup if fileUrl fetch fails later
+    m._resolvedData = m.fileUrl;
+    m._fallback = m.base64Backup;
+  }
   // Detect type from data if type field is wrong
   let mediaType = m.type;
-  const d = m.data || '';
+  const d = effectiveData;
   if (!mediaType || mediaType === 'text') {
-    if (d.startsWith('data:image') || d.startsWith('/uploads/') && d.match(/\.(jpg|jpeg|png|gif|webp)$/i)) mediaType = 'image';
-    else if (d.startsWith('data:audio') || d.startsWith('/uploads/') && d.match(/\.(mp3|wav|ogg|m4a)$/i)) mediaType = 'audio';
+    if (d.startsWith('data:image') || (d.startsWith('/uploads/') && d.match(/\.(jpg|jpeg|png|gif|webp)$/i))) mediaType = 'image';
+    else if (d.startsWith('data:audio') || (d.startsWith('/uploads/') && d.match(/\.(mp3|wav|ogg|m4a)$/i))) mediaType = 'audio';
     else if (m.fileName && m.fileName.match(/\.(jpg|jpeg|png|gif|webp)$/i)) mediaType = 'image';
     else if (m.fileName && m.fileName.match(/\.(mp3|wav|ogg|m4a)$/i)) mediaType = 'audio';
     else if (d.length > 1000) mediaType = (m.fileName||'').match(/\.(mp3|wav|ogg|m4a)/i) ? 'audio' : 'image';
@@ -1504,10 +1541,16 @@ async function loadMediaStudent() {
 
   if (mediaType === 'image') {
     const src = isUrl ? d : safeImgSrc(d, 'image');
-    h += `<div style="margin:12px 0"><img src="${src}" style="max-width:100%;border-radius:10px" onerror="this.outerHTML='<p style=color:#f87171>⚠ Image could not load</p>'"></div>`;
+    const fallbackSrc = m.base64Backup ? safeImgSrc(m.base64Backup, 'image') : '';
+    const onerr = fallbackSrc
+      ? `this.onerror=null;this.src='${fallbackSrc}'`
+      : `this.outerHTML='<p style=color:#f87171>⚠ Image could not load</p>'`;
+    h += `<div style="margin:12px 0"><img src="${src}" style="max-width:100%;border-radius:10px" onerror="${onerr}"></div>`;
   } else if (mediaType === 'audio') {
     // Build full absolute src — /uploads/ paths need the API base URL
+    // If the file was wiped from Render disk, fall back to base64Backup
     let src = isUrl ? (d.startsWith('/') ? API + d : d) : getAudioSrc(d);
+    const audioFallbackSrc = (!isUrl && m.base64Backup) ? getAudioSrc(m.base64Backup) : (m.base64Backup ? getAudioSrc(m.base64Backup) : null);
     const pid = 'ap_' + m.id;
     if (src) {
       h += `<div style="margin:12px 0;background:linear-gradient(135deg,#1e3a5f,#1e1b4b);border-radius:16px;padding:18px" id="player_${pid}">
@@ -1535,7 +1578,8 @@ async function loadMediaStudent() {
         <audio id="aud_${pid}" src="${src}" preload="auto"
           oncanplay="document.getElementById('ald_${pid}').style.display='none'"
           ontimeupdate="updateAudioUI('${pid}')"
-          onended="document.getElementById('pb_${pid}').textContent='▶️';document.getElementById('pp_${pid}').style.width='0%'">
+          onended="document.getElementById('pb_${pid}').textContent='▶️';document.getElementById('pp_${pid}').style.width='0%'"
+          onerror="${audioFallbackSrc ? `this.onerror=null;this.src='`+audioFallbackSrc+`'` : ''}">
         </audio>
       </div>`;
     } else {
@@ -1561,7 +1605,9 @@ async function submitMedia(mId) {
   if (!ans) return toast('Write your answer!','error');
   try {
     await POST('/answers',{questionId:mId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'media'});
-    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'media'}).catch(()=>{});
+    try {
+      await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'media'});
+    } catch(e) { toast('Answer saved but score update failed — try refreshing','warn'); }
     toast('✅ Submitted! +5 points','success'); loadMediaStudent();
   } catch(e) { toast(e.message,'error'); }
 }
@@ -1592,7 +1638,9 @@ async function submitWord(wId) {
   if (!ans) return toast('Write your answer!','error');
   try {
     await POST('/answers',{questionId:wId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'word'});
-    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'word'}).catch(()=>{});
+    try {
+      await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'word'});
+    } catch(e) { toast('Answer saved but score update failed — try refreshing','warn'); }
     toast('✅ Submitted! +5 points','success'); loadWordStudent();
   } catch(e) { toast(e.message,'error'); }
 }
@@ -1623,7 +1671,9 @@ async function submitAffairs(aId) {
   if (!ans) return toast('Write your answer!','error');
   try {
     await POST('/answers',{questionId:aId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'affairs'});
-    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'affairs'}).catch(()=>{});
+    try {
+      await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'affairs'});
+    } catch(e) { toast('Answer saved but score update failed — try refreshing','warn'); }
     toast('✅ Submitted! +5 points','success'); loadAffairsStudent();
   } catch(e) { toast(e.message,'error'); }
 }
@@ -1740,21 +1790,38 @@ const GERRS = {
 function spEscape(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/'/g,"['']?");}
 function spHL(text){
   let r=text;
-  Object.entries(GERRS).sort((a,b)=>b[0].length-a[0].length).forEach(([bad,info])=>{
-    r=r.replace(new RegExp('(?<![\\w])'+spEscape(bad)+'(?![\\w])','gi'),m=>`<span class="sp-eword" data-fix="→ ${info.fix}" title="${info.rule}">${m}</span>`);
-  });
+  try {
+    Object.entries(GERRS).sort((a,b)=>b[0].length-a[0].length).forEach(([bad,info])=>{
+      r=r.replace(new RegExp('(?<![\\w])'+spEscape(bad)+'(?![\\w])','gi'),m=>`<span class="sp-eword" data-fix="→ ${info.fix}" title="${info.rule}">${m}</span>`);
+    });
+  } catch(e) {
+    // Lookbehind not supported (old Android) — fall back to simple word-boundary match
+    Object.entries(GERRS).sort((a,b)=>b[0].length-a[0].length).forEach(([bad,info])=>{
+      r=r.replace(new RegExp('\\b'+spEscape(bad)+'\\b','gi'),m=>`<span class="sp-eword" data-fix="→ ${info.fix}" title="${info.rule}">${m}</span>`);
+    });
+  }
   return r||'<span style="color:#4a5568">Keep speaking...</span>';
 }
 function spFixLocal(text){
   let r=text;
-  Object.entries(GERRS).sort((a,b)=>b[0].length-a[0].length).forEach(([bad,info])=>{
-    r=r.replace(new RegExp('(?<![\\w])'+spEscape(bad)+'(?![\\w])','gi'),`<span class="sp-cword">${info.fix}</span>`);
-  });
+  try {
+    Object.entries(GERRS).sort((a,b)=>b[0].length-a[0].length).forEach(([bad,info])=>{
+      r=r.replace(new RegExp('(?<![\\w])'+spEscape(bad)+'(?![\\w])','gi'),`<span class="sp-cword">${info.fix}</span>`);
+    });
+  } catch(e) {
+    Object.entries(GERRS).sort((a,b)=>b[0].length-a[0].length).forEach(([bad,info])=>{
+      r=r.replace(new RegExp('\\b'+spEscape(bad)+'\\b','gi'),`<span class="sp-cword">${info.fix}</span>`);
+    });
+  }
   return r;
 }
 function spCountErr(text){
   let n=0;
-  Object.keys(GERRS).forEach(bad=>{const m=text.match(new RegExp('(?<![\\w])'+spEscape(bad)+'(?![\\w])','gi'));if(m)n+=m.length;});
+  try {
+    Object.keys(GERRS).forEach(bad=>{const m=text.match(new RegExp('(?<![\\w])'+spEscape(bad)+'(?![\\w])','gi'));if(m)n+=m.length;});
+  } catch(e) {
+    Object.keys(GERRS).forEach(bad=>{const m=text.match(new RegExp('\\b'+spEscape(bad)+'\\b','gi'));if(m)n+=m.length;});
+  }
   return n;
 }
 
@@ -1853,7 +1920,7 @@ function spStart() {
   if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
   spMediaRec=null; spAudioChunks=[];
-  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spRestartCount=0
+  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spRestartCount=0; spLastResultIndex=0;
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.add('rec');btn.textContent='⏸';}
   const st=document.getElementById('spStatus');
@@ -1949,6 +2016,7 @@ function spStartSR() {
         const t = e.results[i][0].transcript.trim();
         if(t){ spDisplayText = spDisplayText ? spDisplayText+' '+t : t; }
         lastResultIndex = i + 1;
+        spLastResultIndex = lastResultIndex; // FIX: keep global in sync for spStop
       } else {
         interim = e.results[i][0].transcript.trim();
       }
@@ -1993,12 +2061,13 @@ async function spStop() {
   spIsRec=false; clearInterval(spTimer); clearTimeout(spRestartTimer);
   if(spRec){
     // Give SR 400ms to finalize any last words before we abort
+    // FIX: use global spLastResultIndex so we only capture NEW final results (no duplicates)
+    const _lastIdx = spLastResultIndex;
     await new Promise(resolve=>{
       const timeout=setTimeout(()=>{ resolve(); },400);
-      const oldEnd=spRec.onend;
       spRec.onresult=e=>{
-        // Capture any last final results
-        for(let i=0;i<e.results.length;i++){
+        // Only process results we haven't seen yet (from _lastIdx onward)
+        for(let i=_lastIdx;i<e.results.length;i++){
           if(e.results[i].isFinal){
             const t=e.results[i][0].transcript.trim();
             if(t) spDisplayText=spDisplayText?spDisplayText+' '+t:t;
@@ -2241,15 +2310,30 @@ function spListen() {
 async function spSubmit() {
   const text=spFinalText.trim()||spDisplayText.trim();
   if(!text)return toast('Record your speech first!','warn');
-  const topic=localStorage.getItem('spTopic')||'Speaking Practice';
   // find the speak-topic question id to attach answer to
+  let qId=0;
   try{
     const qs=await GET('/questions');
     const st=Array.isArray(qs)?qs.slice().reverse().find(q=>q.question&&q.question.startsWith('__SPEAK_TOPIC__:')):null;
-    const qId=st?st.id:0;
-    await POST('/answers',{questionId:qId,studentPin:ME,studentName:MY_NAME,answer:text,type:'speak'});
+    qId=st?st.id:parseInt(today().replace(/-/g,""));  // date-based fallback avoids clustering all no-topic answers under id=0
   }catch(e){}
-  if(ME)await POST('/scores',{pin:ME,name:MY_NAME,points:20,date:today(),activityType:'speak'}).catch(()=>{});
+  // Submit answer — server returns 400 "already answered" on duplicates
+  try{
+    await POST('/answers',{questionId:qId,studentPin:ME,studentName:MY_NAME,answer:text,type:'speak'});
+  }catch(e){
+    if(e.message&&e.message.toLowerCase().includes('already')){
+      toast('You already submitted speaking for this topic!','warn');
+      return;
+    }
+    toast('Submission failed: '+e.message,'error');
+    return;
+  }
+  // Only award points if answer was freshly accepted
+  if(ME){
+    try{
+      await POST('/scores',{pin:ME,name:MY_NAME,points:20,date:today(),activityType:'speak'});
+    }catch(e){ toast('Speech saved but score update failed — try refreshing','warn'); }
+  }
   toast('✅ Submitted! +20 points 🎉','success');
   loadSpSubmissions();
   spReset();
@@ -2259,12 +2343,13 @@ async function loadSpSubmissions(){
   const el=document.getElementById('spSubmissions');if(!el)return;
   try{
     const ans=await GET('/answers');
-    const list=(ans||[]).filter(a=>a.type==='speak').sort((a,b)=>new Date(b.submittedAt||0)-new Date(a.submittedAt||0));
-    if(!list.length){el.innerHTML='<div style="color:#4a5568;font-size:12px;text-align:center;padding:16px">No submissions yet</div>';return;}
+    // BUG FIX: only show the current student's own submissions (not all students)
+    const list=(ans||[]).filter(a=>a.type==='speak'&&a.studentPin===ME).sort((a,b)=>new Date(b.submittedAt||0)-new Date(a.submittedAt||0));
+    if(!list.length){el.innerHTML='<div style="color:#4a5568;font-size:12px;text-align:center;padding:16px">No submissions yet — record and submit your speech above!</div>';return;}
     el.innerHTML=list.map(a=>`
       <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:11px;padding:14px;margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:13px;font-weight:700;color:#2563eb;font-family:'Bookman Old Style','Bookman',Georgia,serif">${a.studentName||'Student'}</span>
+          <span style="font-size:13px;font-weight:700;color:#2563eb;font-family:'Bookman Old Style','Bookman',Georgia,serif">Your Submission</span>
           <span style="font-size:10px;color:#64748b">${a.submittedAt?new Date(a.submittedAt).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</span>
         </div>
         <div style="font-size:14px;color:#1e293b;line-height:1.8;font-family:'Bookman Old Style','Bookman',Georgia,serif;font-weight:500">${a.answer}</div>
@@ -2533,7 +2618,7 @@ async function postMedia(){
     const b64=await toB64(f);
     if(bar)bar.style.width='85%';
     const type=f.type.startsWith('image/')?'image':'audio';
-    await POST('/media/text',{question:q,answer:a,caption:f.name,urlOrText:b64,type:type});
+    await POST('/media',{type:type,data:b64,fileName:f.name,opinion:q,expectedAnswer:a||null});
     if(bar)bar.style.width='100%';
     toast('✅ Media posted!','success');
     document.getElementById('mediaQ').value='';document.getElementById('mediaA').value='';
@@ -2745,6 +2830,11 @@ async function manualMdPost() {
   const td = today(); const idx = s.items.findIndex(i=>!i.posted&&i.date===td);
   if (idx===-1) return toast('No media for today or already posted.', 'info');
   const item = s.items[idx];
+  // Warn if this day requires a file but it's no longer in memory (lost after page reload/server restart)
+  if (item.fileName && !_mdFiles[idx]) {
+    toast(`⚠️ File for Day ${idx+1} was lost after page reload. Please re-select the file in the schedule below before posting.`, 'warn');
+    return;
+  }
   try {
     let fileData = '', fileType = 'text';
     if (_mdFiles[idx]) {
@@ -2770,10 +2860,15 @@ function resetMdBulk() {
 function startMdAutoMachine() {
   if (mdAutoInterval) clearInterval(mdAutoInterval);
   mdAutoInterval = setInterval(async () => {
-    if (!shouldPostToday(s.items || s.media || [])) return;
     const s=getMdSchedLocal(); if(!s) return;
+    if (!shouldPostToday(s.items || [])) return;
     const td=today(); const idx=s.items.findIndex(i=>!i.posted&&i.date===td); if(idx===-1) return;
     const item=s.items[idx];
+    // Skip auto-post if a file was required but is no longer in memory (page reload wipes _mdFiles)
+    if (item.fileName && !_mdFiles[idx]) {
+      toast(`⚠️ Day ${idx+1} needs a file re-upload before it can auto-post.`, 'warn');
+      return;
+    }
     try {
       let fileData='', fileType='text';
       if (_mdFiles[idx]) { fileData=await toB64(_mdFiles[idx]); fileType=_mdFiles[idx].type.startsWith('image/')?'image':'audio'; }
