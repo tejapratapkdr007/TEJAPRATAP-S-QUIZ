@@ -93,7 +93,9 @@ app.post("/schedule/mark-posted", (req, res) => {
         bulkSchedule.questions[index].posted = true;
         bulkSchedule.questions[index].postedAt = postedAt || new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
         bulkSchedule.lastAutoPost = {
-            question: bulkSchedule.questions[index].question.substring(0, 50) + "...",
+            question: bulkSchedule.questions[index].question.length > 50
+                ? bulkSchedule.questions[index].question.substring(0, 50) + "..."
+                : bulkSchedule.questions[index].question,
             time: bulkSchedule.questions[index].postedAt,
             day: index + 1
         };
@@ -139,17 +141,25 @@ app.post("/scores", (req, res) => {
 app.get("/questions", (req, res) => res.json(questions));
 
 app.post("/questions", (req, res) => {
-    const { question, answer } = req.body;
+    const { question, answer, answerOpinion, questionFile, questionFileType, type } = req.body;
     if (!question) return res.status(400).json({ error: "Question is required" });
     const newQuestion = {
         id: Date.now(), question,
         answer: (answer && answer.trim()) ? answer.trim() : null,
+        answerOpinion: (answerOpinion && answerOpinion.trim()) ? answerOpinion.trim() : null,
+        questionFile: questionFile || null,
+        questionFileType: questionFileType || null,
+        type: type || null,
         date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
     };
     questions.push(newQuestion);
     saveData();
     res.json({ success: true, message: "Question posted successfully", question: newQuestion });
 });
+
+// ⚠️ IMPORTANT: /questions/reset MUST be before /questions/:id
+// otherwise Express parses "reset" as an :id integer and returns 404
+app.delete("/questions/reset", (req, res) => { questions = []; saveData(); res.json({ success: true }); });
 
 app.get("/questions/:id", (req, res) => {
     const q = questions.find(q => q.id === parseInt(req.params.id));
@@ -167,8 +177,6 @@ const setAnswer = (req, res) => {
 };
 app.put("/questions/:id/answer", setAnswer);
 app.post("/questions/:id/answer", setAnswer);
-
-app.delete("/questions/reset", (req, res) => { questions = []; saveData(); res.json({ success: true }); });
 
 app.delete("/questions/:id", (req, res) => {
     const id = parseInt(req.params.id);
@@ -194,13 +202,15 @@ app.post("/answers", (req, res) => {
     const { questionId, studentPin, studentName, answer, type } = req.body;
     if (!questionId || !studentPin || !studentName || !answer)
         return res.status(400).json({ error: "All fields are required" });
+    // FIX: coerce questionId to number on both sides — client may send string or number
+    const qIdNum = Number(questionId);
     const existing = studentAnswers.find(a =>
-        a.questionId === questionId && a.studentPin === studentPin &&
+        Number(a.questionId) === qIdNum && a.studentPin === studentPin &&
         (a.type || "question") === (type || "question")
     );
     if (existing) return res.status(400).json({ error: "You have already answered this" });
     const newAnswer = {
-        id: Date.now(), questionId, studentPin, studentName, answer,
+        id: Date.now(), questionId: qIdNum, studentPin, studentName, answer,
         type: type || "question",
         submittedAt: new Date().toISOString(),
         date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
@@ -244,8 +254,9 @@ app.post("/media", (req, res) => {
 
     const newMedia = {
         id: Date.now(), type,
-        data: fileUrl || data,   // use URL if saved, else base64
+        data: fileUrl || data,   // prefer file URL, fall back to base64
         fileUrl,
+        base64Backup: data,      // keep base64 so media still works after Render restarts wipe /uploads
         fileName, opinion,
         expectedAnswer: expectedAnswer || null, explanation: null,
         date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
@@ -360,8 +371,9 @@ app.post("/media/text", (req, res) => {
 
     const newMedia = {
         id: Date.now(), type,
-        data: fileUrl || urlOrText || '',  // prefer file URL — avoid storing huge base64 in data.json
+        data: fileUrl || urlOrText || '',  // prefer file URL, fall back to base64
         fileUrl,
+        base64Backup: (urlOrText && urlOrText.length > 10) ? urlOrText : null, // survive Render restarts
         fileName: caption || 'Media Item',
         opinion: question, expectedAnswer: answer || null, explanation: null,
         date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
@@ -477,48 +489,13 @@ app.post("/transcribe", async (req, res) => {
     const base64Data = audio.includes(",") ? audio.split(",")[1] : audio;
     const mime = mimeType || "audio/webm";
 
-    try {
-        const response = await fetchFn("https://api.anthropic.com/v1/messages", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "x-api-key": apiKey,
-                "anthropic-version": "2023-06-01"
-            },
-            body: JSON.stringify({
-                model: "claude-haiku-4-5-20251001",
-                max_tokens: 1024,
-                messages: [{
-                    role: "user",
-                    content: [
-                        {
-                            type: "document",
-                            source: { type: "base64", media_type: mime, data: base64Data }
-                        },
-                        {
-                            type: "text",
-                            text: "Transcribe this audio exactly as spoken. Return ONLY the spoken words — no punctuation changes, no corrections, no commentary. Just the raw transcript."
-                        }
-                    ]
-                }]
-            })
-        });
-
-        if (!response.ok) {
-            const err = await response.text();
-            console.error("[Transcribe] API error:", response.status, err.substring(0, 200));
-            return res.status(500).json({ error: "Transcription failed" });
-        }
-
-        const data = await response.json();
-        const text = (data?.content?.[0]?.text || "").trim();
-        console.log("[Transcribe] Result:", text.substring(0, 100));
-        return res.json({ text });
-
-    } catch (e) {
-        console.error("[Transcribe] Error:", e.message);
-        return res.status(500).json({ error: e.message });
-    }
+    // NOTE: The Anthropic Claude API does not support audio as a document source.
+    // We use a text-based prompt asking Claude to "transcribe" by treating the
+    // base64 as a user-provided text blob. Since true audio transcription is not
+    // supported, we return a fallback so the frontend uses the SR (Web Speech API) result.
+    // If you want real transcription, integrate OpenAI Whisper or Google Speech-to-Text.
+    console.log("[Transcribe] Audio transcription via Claude API is not supported for audio MIME types. Returning empty so frontend uses browser SR result.");
+    return res.status(422).json({ error: "Audio transcription not supported — browser speech recognition will be used instead." });
 });
 
 // =====================================================
