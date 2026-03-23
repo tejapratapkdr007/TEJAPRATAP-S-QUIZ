@@ -1097,6 +1097,7 @@ function go(id) {
   document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
   const bn = document.querySelector(`.bnav-btn[data-target="${id}"]`); if (bn) bn.classList.add('active');
   // Load data
+  if (id === 's-home')    { loadStats(); loadHomeFaf(); }
   if (id === 's-quiz')    loadQuiz();
   if (id === 's-media')   loadMediaStudent();
   if (id === 's-word')    loadWordStudent();
@@ -1133,13 +1134,14 @@ async function POST(path, data, _retry=0) {
     return r.json();
   } catch(e) {
     clearTimeout(tid);
-    const timedOut = e.name === 'AbortError' || e.name === 'TypeError';
-    if (timedOut && _retry < 2) {
-      toast(`Server waking up... retrying (${_retry+1}/2)`, 'warn');
+    const timedOut = e.name === 'AbortError';
+    const noNetwork = e.name === 'TypeError';
+    if ((timedOut || noNetwork) && _retry < 2) {
+      toast(noNetwork ? `No connection — retrying (${_retry+1}/2)` : `Server waking up... retrying (${_retry+1}/2)`, 'warn');
       await new Promise(res => setTimeout(res, 5000));
       return POST(path, data, _retry + 1);
     }
-    if (timedOut) throw new Error('Server not responding — check connection');
+    if (timedOut || noNetwork) throw new Error(noNetwork ? 'No internet connection' : 'Server not responding — check connection');
     throw e;
   }
 }
@@ -1241,7 +1243,7 @@ async function doTLogin() {
   if (!pw) return toast('Enter password!','error');
   try {
     const r = await fetch(API+'/auth/teacher',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})});
-    if(!r.ok){ toast('Wrong password!','error'); return; }
+    if(!r.ok){ document.getElementById('tPw').value=''; toast('Wrong password!','error'); return; }
     IS_T = true; localStorage.setItem('teacher','1'); enterTeacher();
   } catch(e){
     // Server unreachable — block login for security (no client-side password fallback)
@@ -1505,7 +1507,7 @@ async function submitQ(qId) {
   try {
     await POST('/answers',{questionId:qId,studentPin:ME,studentName:MY_NAME,answer:ans});
     try {
-      await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'quiz'});
+      await POST('/scores',{pin:ME,name:MY_NAME,points:5,activityType:'quiz'});
     } catch(e) { toast('Answer saved but score update failed — try refreshing','warn'); }
     toast('✅ Submitted! +5 points','success'); loadQuiz(); loadStats();
   } catch(e) { toast(e.message,'error'); }
@@ -1611,7 +1613,7 @@ async function submitMedia(mId) {
   try {
     await POST('/answers',{questionId:mId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'media'});
     try {
-      await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'media'});
+      await POST('/scores',{pin:ME,name:MY_NAME,points:5,activityType:'media'});
     } catch(e) { toast('Answer saved but score update failed — try refreshing','warn'); }
     toast('✅ Submitted! +5 points','success'); loadMediaStudent(); loadStats();
   } catch(e) { toast(e.message,'error'); }
@@ -1644,7 +1646,7 @@ async function submitWord(wId) {
   try {
     await POST('/answers',{questionId:wId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'word'});
     try {
-      await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'word'});
+      await POST('/scores',{pin:ME,name:MY_NAME,points:5,activityType:'word'});
     } catch(e) { toast('Answer saved but score update failed — try refreshing','warn'); }
     toast('✅ Submitted! +5 points','success'); loadWordStudent(); loadStats();
   } catch(e) { toast(e.message,'error'); }
@@ -1677,7 +1679,7 @@ async function submitAffairs(aId) {
   try {
     await POST('/answers',{questionId:aId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'affairs'});
     try {
-      await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today(),activityType:'affairs'});
+      await POST('/scores',{pin:ME,name:MY_NAME,points:5,activityType:'affairs'});
     } catch(e) { toast('Answer saved but score update failed — try refreshing','warn'); }
     toast('✅ Submitted! +5 points','success'); loadAffairsStudent(); loadStats();
   } catch(e) { toast(e.message,'error'); }
@@ -1913,6 +1915,7 @@ function spResume() {
   const sub=document.getElementById('tSub');if(sub)sub.textContent='SPEAKING';
   spGetMicStream().then(stream=>{
     if(!spIsRec) return;
+    if(!stream){ spIsRec=false; clearInterval(spTimer); const b=document.getElementById('spBtn');if(b){b.classList.remove('rec');b.textContent='🎙️';} const s=document.getElementById('spStatus');if(s){s.textContent='❌ Mic not available — check permissions';s.className='sp-status';} return; }
     spStartMediaRecorder(stream);
     spStartSR();
   });
@@ -1951,6 +1954,7 @@ function spStart() {
   // where MediaRecorder and SR compete for the mic on Android
   spGetMicStream().then(stream=>{
     if(!spIsRec) return; // user cancelled before mic was ready
+    if(!stream){ spIsRec=false; clearInterval(spTimer); const b=document.getElementById('spBtn');if(b){b.classList.remove('rec');b.textContent='🎙️';} const s=document.getElementById('spStatus');if(s){s.textContent='❌ Mic not available — check permissions';s.className='sp-status';} return; }
     spStartMediaRecorder(stream);
     spStartSR();
   });
@@ -1994,20 +1998,23 @@ async function spGetMicStream() {
   }
 }
 function spStartMediaRecorder(stream) {
-  // On mobile, MediaRecorder conflicts with SpeechRecognition for the mic.
-  // Skip MediaRecorder entirely — SR is sufficient for text capture on mobile.
-  if(spIsMobile()) return;
+  // MediaRecorder is now enabled on ALL devices including mobile.
+  // On Android, we share the same mic stream with SpeechRecognition — this works
+  // fine on Android Chrome 90+ which handles shared stream access correctly.
+  // It is the audio fallback if SR gives < 5 words.
   spAudioChunks = [];
   if(stream) { _doStartMR(stream); return; }
   if(spMediaStream && spMediaStream.active){ _doStartMR(spMediaStream); return; }
 }
 function _doStartMR(stream){
-  const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4',''];
+  // iOS Safari ONLY supports audio/mp4 — put it first so it's picked before audio/webm
+  const types = ['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus',''];
   let mime = '';
   for(const t of types){ if(t===''||MediaRecorder.isTypeSupported(t)){mime=t;break;} }
   try{ spMediaRec = mime ? new MediaRecorder(stream,{mimeType:mime}) : new MediaRecorder(stream); }
-  catch(e){ spMediaRec = new MediaRecorder(stream); }
+  catch(e){ try{ spMediaRec = new MediaRecorder(stream); } catch(e2){ console.warn('MediaRecorder not supported:',e2.message); spMediaRec=null; return; } }
   spMediaRec.ondataavailable = e=>{ if(e.data&&e.data.size>0) spAudioChunks.push(e.data); };
+  spMediaRec.onerror = e=>{ console.warn('MediaRecorder error:',e.error||e.message); };
   spMediaRec.start(500);
 }
 
@@ -2030,12 +2037,12 @@ function spStartSR() {
   }
 
   const rec = new SR();
-  // continuous:true — SR never stops by itself, captures all speech without gaps
+  // iOS Safari ignores continuous:true and stops after ~5s — we handle this in onend.
+  // Keep continuous:true for Android/Desktop Chrome where it works correctly.
   rec.continuous      = true;
   rec.interimResults  = true;
-  // Use device language if available — many Indian Android phones don't have en-IN
-  // installed so en-IN causes silent failure; en-US or '' works on all devices
-  rec.lang            = navigator.language && navigator.language.startsWith('en') ? navigator.language : 'en-US';
+  // Always use en-US — works on ALL Android/iOS devices (en-IN often missing on device)
+  rec.lang            = 'en-US';
   rec.maxAlternatives = 1;
   spRec = rec;
 
@@ -2050,7 +2057,7 @@ function spStartSR() {
         const t = e.results[i][0].transcript.trim();
         if(t){ spDisplayText = spDisplayText ? spDisplayText+' '+t : t; }
         lastResultIndex = i + 1;
-        spLastResultIndex = lastResultIndex; // FIX: keep global in sync for spStop
+        spLastResultIndex = lastResultIndex; // keep global in sync for spStop
       } else {
         interim = e.results[i][0].transcript.trim();
       }
@@ -2072,29 +2079,31 @@ function spStartSR() {
     }
     if(e.error==='no-speech'){
       // On some Android devices, repeated no-speech errors stop SR permanently.
-      // Restart SR gently to keep it alive.
+      // Restart SR gently to keep it alive — but ONLY if still recording.
       if(spIsRec && spRec===rec){
         spRec=null;
         clearTimeout(spRestartTimer);
-        spRestartTimer=setTimeout(()=>{ if(spIsRec && !spRec) spStartSR(); },500);
+        // Use 0ms to restart immediately — avoids word gap on iOS
+        spRestartTimer=setTimeout(()=>{ if(spIsRec && !spRec) spStartSR(); },0);
       }
       return;
     }
-    // For other errors restart SR
+    // For other errors restart SR with minimal delay
     if(spIsRec){
       spRec = null;
       clearTimeout(spRestartTimer);
-      spRestartTimer = setTimeout(()=>{ if(spIsRec) spStartSR(); }, 300);
+      spRestartTimer = setTimeout(()=>{ if(spIsRec) spStartSR(); }, 0);
     }
   };
 
   rec.onend = () => {
-    // continuous:true should not fire onend unless we called abort/stop
+    // continuous:true should not fire onend unless we called abort/stop.
+    // iOS Safari DOES fire it after ~5s regardless — restart immediately to avoid word gaps.
     if(spRec === rec) spRec = null;
     if(!spIsRec) return;
-    // Unexpected stop — restart immediately
+    // Restart with 0ms delay — any longer and iOS drops words spoken in the gap
     clearTimeout(spRestartTimer);
-    spRestartTimer = setTimeout(()=>{ if(spIsRec && !spRec) spStartSR(); }, 200);
+    spRestartTimer = setTimeout(()=>{ if(spIsRec && !spRec) spStartSR(); }, 0);
   };
 
   try{ rec.start(); }catch(e){ console.warn('SR start:',e.message); spRec=null; }
@@ -2125,7 +2134,7 @@ async function spStop() {
     spRec=null;
   }
 
-  // Stop MediaRecorder and collect final audio chunk (desktop only — skipped on mobile)
+  // Stop MediaRecorder and collect final audio chunk
   if(spMediaRec && spMediaRec.state !== 'inactive'){
     await new Promise(resolve => {
       spMediaRec.onstop = resolve;
@@ -2133,7 +2142,7 @@ async function spStop() {
     });
   }
   spMediaRec = null;
-  spAudioChunks = spIsMobile() ? [] : spAudioChunks; // clear on mobile — no audio chunks expected
+  // Keep spAudioChunks — used as transcription fallback on ALL devices including mobile
 
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
@@ -2144,16 +2153,17 @@ async function spStop() {
   let fullText = spDisplayText.trim();
   const wordCount = fullText.split(/\s+/).filter(Boolean).length;
 
-  // Always transcribe from audio when:
-  // - SR gave nothing at all, OR
-  // - SR gave very few words (< 5) — likely missed speech
-  // Audio transcription is more reliable than browser SR
+  // Transcribe from audio when SR gave nothing OR gave very few words (< 5).
+  // This is the primary recovery path on iOS Safari and Firefox where SR is absent/unreliable.
+  // Also fires when SR gave 0 words even if no audio chunks exist — nothing can be done then.
   if(spAudioChunks.length > 0 && wordCount < 5){
     if(st)st.textContent='⏳ Transcribing your speech...';
     try{
-      const blob = new Blob(spAudioChunks, {type: spAudioChunks[0]?.type || 'audio/webm'});
+      // Use the actual recorded MIME type from the first chunk — critical for iOS (audio/mp4)
+      const recordedType = spAudioChunks[0].type || 'audio/mp4';
+      const blob = new Blob(spAudioChunks, {type: recordedType});
       const b64 = await new Promise((res,rej)=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.onerror=rej;r.readAsDataURL(blob);});
-      const resp = await fetch(API+'/transcribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audio:b64,mimeType:blob.type})});
+      const resp = await fetch(API+'/transcribe',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({audio:b64,mimeType:recordedType})});
       if(resp.ok){
         const d=await resp.json();
         if(d.text && d.text.trim()){
@@ -2258,6 +2268,13 @@ async function spStop() {
       sb.classList.add('show');
     }
   }
+
+  // ── AUTO-SUBMIT (Bug #4 fix) ──────────────────────────────────────────────
+  // Automatically submit answer + score immediately after analysis completes.
+  // This prevents mobile users from losing their score when they close the browser
+  // before pressing the manual Submit button.
+  if(st)st.textContent='⏳ Saving your speech...';
+  await spSubmit(true); // autoCall=true — keeps analysis UI visible, skips reset
 }
 
 
@@ -2305,7 +2322,11 @@ function seekAudio(pid, e, bar) {
   const aud = document.getElementById('aud_'+pid);
   if (!aud || !aud.duration) return;
   const rect = bar.getBoundingClientRect();
-  const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  // Support both mouse (clientX) and touch events (touches[0].clientX)
+  const clientX = (e.touches && e.touches.length) ? e.touches[0].clientX
+                : (e.changedTouches && e.changedTouches.length) ? e.changedTouches[0].clientX
+                : e.clientX;
+  const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / rect.width));
   aud.currentTime = ratio * aud.duration;
 }
 
@@ -2351,37 +2372,43 @@ function spListen() {
   }
 }
 
-async function spSubmit() {
+async function spSubmit(autoCall) {
   const text=spFinalText.trim()||spDisplayText.trim();
-  if(!text)return toast('Record your speech first!','warn');
-  // find the speak-topic question id to attach answer to
-  // Default to date-based number (never 0) — server rejects questionId=0
-  let qId=parseInt(today().replace(/-/g,""));
+  if(!text){ if(!autoCall) toast('Record your speech first!','warn'); return; }
+  // Find the most recent speak-topic question id posted by teacher.
+  // NEVER use a date-integer fallback — it causes orphaned answers that can't be
+  // matched to a real question and allows students to submit again when a real topic is posted.
+  let qId=null;
   try{
     const qs=await GET('/questions');
     const st=Array.isArray(qs)?qs.slice().reverse().find(q=>q.question&&q.question.startsWith('__SPEAK_TOPIC__:')):null;
     if(st)qId=st.id;
   }catch(e){}
+  if(!qId){
+    if(!autoCall) toast('No speaking topic set by teacher yet — please wait!','warn');
+    return;
+  }
   // Submit answer — server returns 400 "already answered" on duplicates
   try{
     await POST('/answers',{questionId:qId,studentPin:ME,studentName:MY_NAME,answer:text,type:'speak'});
   }catch(e){
     if(e.message&&e.message.toLowerCase().includes('already')){
-      toast('You already submitted speaking for this topic!','warn');
+      if(!autoCall) toast('You already submitted speaking for this topic!','warn');
       return;
     }
-    toast('Submission failed: '+e.message,'error');
+    if(!autoCall) toast('Submission failed: '+e.message,'error');
     return;
   }
   // Only award points if answer was freshly accepted
   if(ME){
     try{
-      await POST('/scores',{pin:ME,name:MY_NAME,points:20,date:today(),activityType:'speak'});
+      await POST('/scores',{pin:ME,name:MY_NAME,points:20,activityType:'speak'});
     }catch(e){ toast('Speech saved but score update failed — try refreshing','warn'); }
   }
   toast('✅ Submitted! +20 points 🎉','success');
   loadSpSubmissions(); loadStats();
-  spReset();
+  // Only reset UI if manually submitted (don't wipe analysis the student is reading)
+  if(!autoCall) spReset();
 }
 
 async function loadSpSubmissions(){
@@ -2491,7 +2518,10 @@ async function setGKAns(id){
 }
 
 // GK Bulk Auto-Post
-function today(){return new Date().toISOString().split('T')[0];}
+function today(){
+  // Always return IST date (YYYY-MM-DD) regardless of device timezone
+  return new Date(new Date().toLocaleString('en-US',{timeZone:'Asia/Kolkata'})).toISOString().split('T')[0];
+}
 function is5am(){
   const h=new Date().getHours();
   return h===5; // runs at 5 AM
@@ -3125,10 +3155,12 @@ async function loadTRank(){
 // ═══════════════════════════════════════════════════
 // FILE PREVIEW (GK attachment)
 // ═══════════════════════════════════════════════════
+let _prevFileBlobUrl = null;
 function prevFile(inputId,prevId){
   const f=document.getElementById(inputId).files[0];const p=document.getElementById(prevId);
+  if(_prevFileBlobUrl){try{URL.revokeObjectURL(_prevFileBlobUrl);}catch(e){}  _prevFileBlobUrl=null;}
   if(!f){if(p)p.innerHTML='';return;}
-  const url=URL.createObjectURL(f);
+  const url=URL.createObjectURL(f);_prevFileBlobUrl=url;
   if(f.type.startsWith('image/'))p.innerHTML=`<img src="${url}" class="media-img" style="margin-top:8px">`;
   else if(f.type.startsWith('audio/'))p.innerHTML=`<audio controls class="media-aud" src="${url}"></audio>`;
   else p.innerHTML=`<div class="inf" style="margin-top:8px">📎 ${f.name}</div>`;
