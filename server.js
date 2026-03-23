@@ -200,7 +200,7 @@ app.get("/answers/question/:questionId", (req, res) => {
 
 app.post("/answers", (req, res) => {
     const { questionId, studentPin, studentName, answer, type } = req.body;
-    if (!questionId || !studentPin || !studentName || !answer)
+    if (questionId == null || !studentPin || !studentName || !answer)
         return res.status(400).json({ error: "All fields are required" });
     // FIX: coerce questionId to number on both sides — client may send string or number
     const qIdNum = Number(questionId);
