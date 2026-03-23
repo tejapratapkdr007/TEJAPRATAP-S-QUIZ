@@ -1977,8 +1977,10 @@ function spPause() {
 
 let _spSessionId = 0;
 
-// ── Get mic permission once, then share stream with both SR and MediaRecorder ──
-// Returns a Promise that resolves when the mic stream is ready
+// ── Detect mobile — Android Chrome SR cannot share mic with MediaRecorder ──
+function spIsMobile(){return/Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);}
+
+// ── Get mic permission once, share stream with both SR and MediaRecorder ──
 async function spGetMicStream() {
   if(spMediaStream && spMediaStream.active) return spMediaStream;
   try {
@@ -1992,6 +1994,9 @@ async function spGetMicStream() {
   }
 }
 function spStartMediaRecorder(stream) {
+  // On mobile, MediaRecorder conflicts with SpeechRecognition for the mic.
+  // Skip MediaRecorder entirely — SR is sufficient for text capture on mobile.
+  if(spIsMobile()) return;
   spAudioChunks = [];
   if(stream) { _doStartMR(stream); return; }
   if(spMediaStream && spMediaStream.active){ _doStartMR(spMediaStream); return; }
@@ -2120,7 +2125,7 @@ async function spStop() {
     spRec=null;
   }
 
-  // Stop MediaRecorder and collect final audio chunk before proceeding
+  // Stop MediaRecorder and collect final audio chunk (desktop only — skipped on mobile)
   if(spMediaRec && spMediaRec.state !== 'inactive'){
     await new Promise(resolve => {
       spMediaRec.onstop = resolve;
@@ -2128,6 +2133,7 @@ async function spStop() {
     });
   }
   spMediaRec = null;
+  spAudioChunks = spIsMobile() ? [] : spAudioChunks; // clear on mobile — no audio chunks expected
 
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
