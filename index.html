@@ -1911,8 +1911,11 @@ function spResume() {
   const st=document.getElementById('spStatus');
   if(st){st.textContent='🔴 Recording — speak now...';st.className='sp-status live';}
   const sub=document.getElementById('tSub');if(sub)sub.textContent='SPEAKING';
-  spStartMediaRecorder();
-  spStartSR();
+  spGetMicStream().then(stream=>{
+    if(!spIsRec) return;
+    spStartMediaRecorder(stream);
+    spStartSR();
+  });
   clearInterval(spTimer);
   spTimer=setInterval(()=>{
     if(!spIsRec)return;
@@ -1944,8 +1947,13 @@ function spStart() {
   document.getElementById('spErrs').textContent='0';
   document.getElementById('spScore').textContent='—';
   document.getElementById('spWords').textContent='0';
-  spStartMediaRecorder();
-  spStartSR();
+  // Get mic permission first, then start both together — prevents race condition
+  // where MediaRecorder and SR compete for the mic on Android
+  spGetMicStream().then(stream=>{
+    if(!spIsRec) return; // user cancelled before mic was ready
+    spStartMediaRecorder(stream);
+    spStartSR();
+  });
   clearInterval(spTimer);
   spTimer=setInterval(()=>{
     if(!spIsRec)return;
@@ -1969,17 +1977,24 @@ function spPause() {
 
 let _spSessionId = 0;
 
-// ── MediaRecorder: records REAL audio → sent to /transcribe for clean text ──
-function spStartMediaRecorder() {
-  spAudioChunks = [];
-  if(spMediaStream && spMediaStream.active){
-    _doStartMR(spMediaStream);
-    return;
-  }
-  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+// ── Get mic permission once, then share stream with both SR and MediaRecorder ──
+// Returns a Promise that resolves when the mic stream is ready
+async function spGetMicStream() {
+  if(spMediaStream && spMediaStream.active) return spMediaStream;
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
     spMediaStream = stream;
-    _doStartMR(stream);
-  }).catch(e=>{ console.warn('MediaRecorder mic denied:', e.message); toast('❌ Mic access denied — enable mic in browser settings','error'); });
+    return stream;
+  } catch(e) {
+    console.warn('Mic denied:', e.message);
+    toast('❌ Mic access denied — enable mic in browser settings','error');
+    return null;
+  }
+}
+function spStartMediaRecorder(stream) {
+  spAudioChunks = [];
+  if(stream) { _doStartMR(stream); return; }
+  if(spMediaStream && spMediaStream.active){ _doStartMR(spMediaStream); return; }
 }
 function _doStartMR(stream){
   const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4',''];
