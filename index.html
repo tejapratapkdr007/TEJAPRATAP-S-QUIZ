@@ -1249,14 +1249,14 @@ async function doTLogin() {
   }
 }
 function doLogout() {
-  spReset(); // stop mic/SR if student was on speaking screen
+  spReset(); spReleaseMic(); // stop mic/SR and release mic on logout
   ME = null; MY_NAME = null;
   localStorage.removeItem('pin'); localStorage.removeItem('uname');
   go('s-login'); loadLoginFaf();
 }
 function doTLogout() {
   IS_T = false; localStorage.removeItem('teacher');
-  spReset(); // stop mic/SR if teacher accidentally started recording
+  spReset(); spReleaseMic(); // stop mic/SR and release mic on logout
   [gkInterval, wInterval, affInterval, spAutoInterval, mdAutoInterval].forEach(iv => { if(iv) clearInterval(iv); });
   gkInterval = wInterval = affInterval = spAutoInterval = mdAutoInterval = null;
   go('s-login'); loadLoginFaf();
@@ -1862,13 +1862,18 @@ async function loadSpeak() {
   if(hel&&topic)hel.textContent=`Speak for ${dur/60} min · AI corrects grammar & pronunciation`;
 }
 
+// Fully release the microphone — called only on logout, not on normal reset
+function spReleaseMic(){
+  if(spMediaStream){try{spMediaStream.getTracks().forEach(t=>t.stop());}catch(e){}}spMediaStream=null;
+}
 function spReset() {
   _spSessionId++;
   spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spIsRec=false; spRestartCount=0; spLastResultIndex=0;
   clearInterval(spTimer); clearTimeout(spRestartTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}spMediaRec=null;spAudioChunks=[];
-  if(spMediaStream){try{spMediaStream.getTracks().forEach(t=>t.stop());}catch(e){}}spMediaStream=null;
+  // NOTE: spMediaStream is intentionally NOT released here so the browser doesn't
+  // show a new mic permission prompt when the student starts recording again.
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
   const st=document.getElementById('spStatus');
@@ -2008,7 +2013,9 @@ function spStartSR() {
   // continuous:true — SR never stops by itself, captures all speech without gaps
   rec.continuous      = true;
   rec.interimResults  = true;
-  rec.lang            = 'en-IN';
+  // Use device language if available — many Indian Android phones don't have en-IN
+  // installed so en-IN causes silent failure; en-US or '' works on all devices
+  rec.lang            = navigator.language && navigator.language.startsWith('en') ? navigator.language : 'en-US';
   rec.maxAlternatives = 1;
   spRec = rec;
 
@@ -2043,7 +2050,16 @@ function spStartSR() {
     if(e.error==='not-allowed'||e.error==='audio-capture'){
       toast('❌ Mic denied — please allow microphone access','error'); spStop(); return;
     }
-    if(e.error==='no-speech') return; // normal — student paused, just keep listening
+    if(e.error==='no-speech'){
+      // On some Android devices, repeated no-speech errors stop SR permanently.
+      // Restart SR gently to keep it alive.
+      if(spIsRec && spRec===rec){
+        spRec=null;
+        clearTimeout(spRestartTimer);
+        spRestartTimer=setTimeout(()=>{ if(spIsRec && !spRec) spStartSR(); },500);
+      }
+      return;
+    }
     // For other errors restart SR
     if(spIsRec){
       spRec = null;
