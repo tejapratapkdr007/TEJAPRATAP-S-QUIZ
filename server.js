@@ -29,6 +29,7 @@ function saveData() {
             questions, studentAnswers, mediaFiles, studentPhones,
             bulkSchedule, studentScores, studentStreaks,
             wordItems, affairsItems,
+            speakSchedule,
             mediaSchedule, wordSchedule, affairsSchedule
         }, null, 2));
     } catch (e) { console.error("Save data error:", e.message); }
@@ -50,6 +51,7 @@ let affairsItems   = saved.affairsItems   || [];  // Current Affairs
 let mediaSchedule  = saved.mediaSchedule  || null;
 let wordSchedule   = saved.wordSchedule   || null;
 let affairsSchedule = saved.affairsSchedule || null;
+let speakSchedule  = saved.speakSchedule  || null;
 
 console.log(`✅ Data loaded: ${questions.length} questions, ${studentAnswers.length} answers, ${Object.keys(studentPhones).length} students`);
 
@@ -111,7 +113,7 @@ app.get("/scores", (req, res) => res.json({ scores: studentScores, streaks: stud
 
 app.post("/scores", (req, res) => {
     const { pin, name, points, date } = req.body;
-    if (!pin || !name || !points || !date) return res.status(400).json({ error: "All fields required" });
+    if (!pin || !name || points == null || !date) return res.status(400).json({ error: "All fields required" });
     if (!studentScores[pin]) studentScores[pin] = { name, scores: [] };
     studentScores[pin].name = name;
     // Allow one score entry per date PER activity type — not just per date
@@ -318,7 +320,7 @@ app.post("/admin/reset-all", (req, res) => {
     if (req.body.confirmPassword !== "RESET_ALL_DATA_TEJAPRATAP") return res.status(403).json({ error: "Wrong password" });
     questions = []; studentAnswers = []; mediaFiles = []; studentPhones = {};
     bulkSchedule = null; studentScores = {}; studentStreaks = {};
-    wordItems = []; affairsItems = []; mediaSchedule = null; wordSchedule = null; affairsSchedule = null;
+    wordItems = []; affairsItems = []; mediaSchedule = null; wordSchedule = null; affairsSchedule = null; speakSchedule = null;
     saveData();
     res.json({ success: true, message: "All data reset" });
 });
@@ -422,11 +424,11 @@ app.post("/schedule/word", (req, res) => { const { schedule } = req.body; if (!s
 app.delete("/schedule/word", (req, res) => { wordSchedule = null; saveData(); res.json({ success: true }); });
 app.post("/schedule/word/mark-posted", (req, res) => {
     const { index, postedAt } = req.body;
-    if (!wordSchedule || !wordSchedule.words || index === undefined) return res.status(400).json({ error: "Invalid" });
-    if (wordSchedule.words[index]) {
-        wordSchedule.words[index].posted = true;
-        wordSchedule.words[index].postedAt = postedAt || new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-        wordSchedule.lastAutoPost = { day: index + 1, time: wordSchedule.words[index].postedAt };
+    if (!wordSchedule || !wordSchedule.items || index === undefined) return res.status(400).json({ error: "Invalid" });
+    if (wordSchedule.items[index]) {
+        wordSchedule.items[index].posted = true;
+        wordSchedule.items[index].postedAt = postedAt || new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        wordSchedule.lastAutoPost = { day: index + 1, time: wordSchedule.items[index].postedAt };
     }
     saveData(); res.json({ success: true });
 });
@@ -460,11 +462,29 @@ app.post("/schedule/affairs", (req, res) => { const { schedule } = req.body; if 
 app.delete("/schedule/affairs", (req, res) => { affairsSchedule = null; saveData(); res.json({ success: true }); });
 app.post("/schedule/affairs/mark-posted", (req, res) => {
     const { index, postedAt } = req.body;
-    if (!affairsSchedule || !affairsSchedule.questions || index === undefined) return res.status(400).json({ error: "Invalid" });
-    if (affairsSchedule.questions[index]) {
-        affairsSchedule.questions[index].posted = true;
-        affairsSchedule.questions[index].postedAt = postedAt || new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
-        affairsSchedule.lastAutoPost = { day: index + 1, time: affairsSchedule.questions[index].postedAt };
+    if (!affairsSchedule || !affairsSchedule.items || index === undefined) return res.status(400).json({ error: "Invalid" });
+    if (affairsSchedule.items[index]) {
+        affairsSchedule.items[index].posted = true;
+        affairsSchedule.items[index].postedAt = postedAt || new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        affairsSchedule.lastAutoPost = { day: index + 1, time: affairsSchedule.items[index].postedAt };
+    }
+    saveData(); res.json({ success: true });
+});
+
+
+// =====================================================
+// SPEAK SCHEDULE
+// =====================================================
+app.get("/schedule/speak", (req, res) => res.json(speakSchedule || { empty: true }));
+app.post("/schedule/speak", (req, res) => { const { schedule } = req.body; if (!schedule) return res.status(400).json({ error: "Required" }); speakSchedule = schedule; saveData(); res.json({ success: true }); });
+app.delete("/schedule/speak", (req, res) => { speakSchedule = null; saveData(); res.json({ success: true }); });
+app.post("/schedule/speak/mark-posted", (req, res) => {
+    const { index, postedAt } = req.body;
+    if (!speakSchedule || !speakSchedule.items || index === undefined) return res.status(400).json({ error: "Invalid" });
+    if (speakSchedule.items[index]) {
+        speakSchedule.items[index].posted = true;
+        speakSchedule.items[index].postedAt = postedAt || new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" });
+        speakSchedule.lastPost = "Day " + (index + 1) + " — " + speakSchedule.items[index].postedAt;
     }
     saveData(); res.json({ success: true });
 });
