@@ -1636,7 +1636,7 @@ async function loadSpeak() {
 }
 
 function spReset() {
-  _spSessionId++;
+  _spSess++;
   spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spIsRec=false; spRestartCount=0
   clearInterval(spTimer); clearTimeout(spRestartTimer);
   if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
@@ -1675,17 +1675,31 @@ function spToggle() {
   if(spIsRec)spPause();else spStart();
 }
 
+// ── Single session token — incremented on every pause/stop/reset ──
+// Used by onresult to discard results from a previous session.
+let _spSess = 0;
+
 function spStart() {
+  _spSess++;
+  const sess = _spSess;
   clearTimeout(spRestartTimer);
-  if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+
+  // Kill any live SR instance
+  if(spRec){
+    try{spRec.onresult=null;spRec.onend=null;spRec.onerror=null;spRec.onstart=null;spRec.abort();}catch(e){}
+    spRec=null;
+  }
+  // Kill MediaRecorder and release mic — SR grabs mic itself, no competition
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
   spMediaRec=null; spAudioChunks=[];
   if(spMediaStream){try{spMediaStream.getTracks().forEach(t=>t.stop());}catch(e){}spMediaStream=null;}
+
   spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spRestartCount=0;
+
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.add('rec');btn.textContent='⏸';}
   const st=document.getElementById('spStatus');
-  if(st){st.textContent='🎙️ Starting mic...';st.className='sp-status live';}
+  if(st){st.textContent='🎙️ Starting...';st.className='sp-status live';}
   const sub=document.getElementById('tSub');if(sub)sub.textContent='SPEAKING';
   const tr=document.getElementById('spTranscript');if(tr)tr.innerHTML='';
   ['spCorrectBox','spAnalysisBox','spSuggestBox'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('show');});
@@ -1693,7 +1707,9 @@ function spStart() {
   document.getElementById('spErrs').textContent='0';
   document.getElementById('spScore').textContent='—';
   document.getElementById('spWords').textContent='0';
-  spStartSR();
+
+  spStartSR(sess);
+
   clearInterval(spTimer);
   spTimer=setInterval(()=>{
     if(!spIsRec)return;
@@ -1703,9 +1719,9 @@ function spStart() {
 }
 
 function spPause() {
-  _spSessionId++;
+  _spSess++;
   spIsRec=false; clearInterval(spTimer); clearTimeout(spRestartTimer);
-  if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;spRec.onstart=null;try{spRec.abort();}catch(e){}spRec=null;}
+  if(spRec){try{spRec.onresult=null;spRec.onend=null;spRec.onerror=null;spRec.onstart=null;spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
   spMediaRec=null;
   if(spMediaStream){try{spMediaStream.getTracks().forEach(t=>t.stop());}catch(e){}spMediaStream=null;}
@@ -1715,128 +1731,110 @@ function spPause() {
   if(st){st.textContent='⏸ Paused — press 🎙️ to continue';st.className='sp-status';}
 }
 
-let _spSessionId = 0;
-
-// ── Get mic stream once, share between SR and MediaRecorder ──
-// CRITICAL: On Android, only ONE thing can call getUserMedia at a time.
-// SR already grabs the mic internally. If MediaRecorder calls getUserMedia
-// separately and simultaneously, it can BLOCK or KILL the SR mic access.
-// Solution: request mic ONCE, feed that stream to both SR and MediaRecorder.
-async function spGetMicStream() {
-  if(spMediaStream && spMediaStream.active) return spMediaStream;
-  try {
-    spMediaStream = await navigator.mediaDevices.getUserMedia({audio:true});
-    return spMediaStream;
-  } catch(e) {
-    console.warn('Mic denied:', e.message);
-    return null;
-  }
-}
-
-// ── MediaRecorder: backup audio recording for /transcribe ──
+// MediaRecorder kept for /transcribe fallback — started AFTER SR confirms mic
 function spStartMediaRecorder(stream) {
   if(!stream) return;
-  spAudioChunks = [];
-  if(spMediaRec && spMediaRec.state !== 'inactive'){
-    try{spMediaRec.stop();}catch(e){}
-  }
-  spMediaRec = null;
-  const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4',''];
-  let mime = '';
-  for(const t of types){ if(t===''||MediaRecorder.isTypeSupported(t)){mime=t;break;} }
-  try{ spMediaRec = mime ? new MediaRecorder(stream,{mimeType:mime}) : new MediaRecorder(stream); }
-  catch(e){ try{ spMediaRec = new MediaRecorder(stream); }catch(e2){ return; } }
-  spMediaRec.ondataavailable = e=>{ if(e.data&&e.data.size>0) spAudioChunks.push(e.data); };
-  spMediaRec.onerror = e=>{ console.warn('MediaRecorder error:', e); };
+  spAudioChunks=[];
+  if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
+  spMediaRec=null;
+  const types=['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4',''];
+  let mime='';
+  for(const t of types){if(t===''||MediaRecorder.isTypeSupported(t)){mime=t;break;}}
+  try{spMediaRec=mime?new MediaRecorder(stream,{mimeType:mime}):new MediaRecorder(stream);}
+  catch(e){try{spMediaRec=new MediaRecorder(stream);}catch(e2){return;}}
+  spMediaRec.ondataavailable=e=>{if(e.data&&e.data.size>0)spAudioChunks.push(e.data);};
+  spMediaRec.onerror=e=>{console.warn('MediaRecorder error:',e);};
   spMediaRec.start(500);
 }
 
-// ── SR: live speech-to-text display ──
-// KEY FIXES:
-// 1. continuous=true — SR never auto-stops; no gap where student is speaking but not heard
-// 2. Single long-lived instance instead of create-new-on-every-onend
-// 3. Aggressive onerror recovery — every error type restarts SR
-// 4. Status indicator shows when SR is actually active vs dead
-function spStartSR() {
+function spStartSR(sess) {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){ toast('❌ Speech not supported. Use Chrome browser.','error'); return; }
-  if(!spIsRec) return;
+  if(!SR){toast('❌ Speech not supported. Use Chrome.','error');return;}
+  // If session changed (paused/stopped), do not start
+  if(sess !== _spSess || !spIsRec) return;
 
   if(spRec){
-    spRec.onresult=null; spRec.onend=null; spRec.onerror=null; spRec.onstart=null;
-    try{spRec.abort();}catch(e){}
+    try{spRec.onresult=null;spRec.onend=null;spRec.onerror=null;spRec.onstart=null;spRec.abort();}catch(e){}
     spRec=null;
   }
 
   const rec = new SR();
-  rec.continuous      = true;
+  rec.continuous      = false; // false = more reliable on Android; we restart manually
   rec.interimResults  = true;
   rec.lang            = 'en-US';
   rec.maxAlternatives = 1;
   spRec = rec;
 
   rec.onstart = () => {
-    if(!spIsRec) return;
-    const st = document.getElementById('spStatus');
-    if(st){ st.textContent = '🔴 Recording — speak now...'; st.className='sp-status live'; }
-    // MediaRecorder starts 500ms AFTER SR confirms it has the mic
-    // This gap prevents mic contention on Android Chrome
+    if(sess !== _spSess) return;
+    const st=document.getElementById('spStatus');
+    if(st){st.textContent='🔴 Recording — speak now...';st.className='sp-status live';}
+    // Start MediaRecorder 300ms after SR has mic — avoids mic contention on Android
     setTimeout(()=>{
-      if(!spIsRec) return;
-      navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
-        if(!spIsRec){ stream.getTracks().forEach(t=>t.stop()); return; }
-        spMediaStream = stream;
-        spStartMediaRecorder(stream);
-      }).catch(()=>{});
-    }, 500);
+      if(sess!==_spSess||!spIsRec) return;
+      if(spMediaStream&&spMediaStream.active){
+        spStartMediaRecorder(spMediaStream);
+      } else {
+        navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
+          if(sess!==_spSess||!spIsRec){s.getTracks().forEach(t=>t.stop());return;}
+          spMediaStream=s; spStartMediaRecorder(s);
+        }).catch(()=>{});
+      }
+    }, 300);
   };
 
   rec.onresult = e => {
-    if(!spIsRec || spRec !== rec) return;
-    let interim = '';
-    for(let i = e.resultIndex; i < e.results.length; i++){
+    // Guard only on session — NOT on spRec===rec, to avoid race condition
+    if(sess !== _spSess || !spIsRec) return;
+    let interim='';
+    for(let i=e.resultIndex;i<e.results.length;i++){
       if(e.results[i].isFinal){
-        const t = e.results[i][0].transcript.trim();
-        if(t) spDisplayText = spDisplayText ? spDisplayText+' '+t : t;
+        const t=e.results[i][0].transcript.trim();
+        if(t) spDisplayText=spDisplayText?spDisplayText+' '+t:t;
       } else {
-        interim += e.results[i][0].transcript.trim();
+        interim+=e.results[i][0].transcript.trim();
       }
     }
-    const tr = document.getElementById('spTranscript');
-    if(tr) tr.innerHTML = spHL(spDisplayText)+(interim?'<span class="sp-interim"> '+interim+'</span>':'');
-    const wc = spDisplayText.trim().split(/\s+/).filter(Boolean).length;
-    const ew = document.getElementById('spWords'); if(ew) ew.textContent = wc;
-    const ec = spCountErr(spDisplayText);
-    const errEl = document.getElementById('spErrs'); if(errEl) errEl.textContent = ec;
-    const eb = document.getElementById('errBadge');
+    const tr=document.getElementById('spTranscript');
+    if(tr) tr.innerHTML=spHL(spDisplayText)+(interim?'<span class="sp-interim"> '+interim+'</span>':'');
+    const wc=spDisplayText.trim().split(/\s+/).filter(Boolean).length;
+    const ew=document.getElementById('spWords');if(ew)ew.textContent=wc;
+    const ec=spCountErr(spDisplayText);
+    const errEl=document.getElementById('spErrs');if(errEl)errEl.textContent=ec;
+    const eb=document.getElementById('errBadge');
     if(eb){eb.textContent=ec+' error'+(ec!==1?'s':'');eb.style.display=ec>0?'block':'none';}
   };
 
   rec.onerror = e => {
-    if(spRec !== rec) return;
-    console.warn('[SR] error:', e.error);
-    if(e.error==='not-allowed' || e.error==='audio-capture'){
-      toast('❌ Mic denied. Allow mic in browser settings.','error');
+    if(sess!==_spSess) return;
+    console.warn('[SR] error:',e.error);
+    if(e.error==='not-allowed'||e.error==='audio-capture'){
+      toast('❌ Mic denied. Allow mic in Chrome settings.','error');
       spStop(); return;
     }
-    const st2 = document.getElementById('spStatus');
-    if(st2 && spIsRec){ st2.textContent = '🟡 Reconnecting mic...'; st2.className='sp-status'; }
+    // All other errors: onend fires next and we restart
+    const st2=document.getElementById('spStatus');
+    if(st2&&spIsRec){st2.textContent='🟡 Reconnecting...';st2.className='sp-status';}
   };
 
   rec.onend = () => {
-    if(spRec === rec) spRec = null;
-    if(!spIsRec) return;
+    if(spRec===rec) spRec=null;
+    if(sess!==_spSess||!spIsRec) return;
+    // Restart after short delay
     clearTimeout(spRestartTimer);
-    spRestartTimer = setTimeout(()=>{ if(spIsRec && !spRec) spStartSR(); }, 100);
+    spRestartTimer=setTimeout(()=>{
+      if(sess===_spSess&&spIsRec) spStartSR(sess);
+    }, 250);
   };
 
   try{
     rec.start();
-    console.log('[SR] start() — continuous=true lang=en-US');
   } catch(e){
-    console.warn('[SR] start() threw:', e.message);
+    console.warn('[SR] start() threw:',e.message);
     clearTimeout(spRestartTimer);
-    spRestartTimer = setTimeout(()=>{ if(spIsRec) spStartSR(); }, 400);
+    spRestartTimer=setTimeout(()=>{
+      if(sess===_spSess&&spIsRec) spStartSR(sess);
+    }, 500);
   }
 }
 
