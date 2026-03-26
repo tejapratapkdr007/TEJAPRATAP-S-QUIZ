@@ -98,7 +98,7 @@ app.get("/scores", (req, res) => res.json({ scores: studentScores, streaks: stud
 
 app.post("/scores", (req, res) => {
     const { pin, name, points, date } = req.body;
-    if (!pin || !name || !points || !date) return res.status(400).json({ error: "All fields required" });
+    if (!pin || !name || points == null || !date) return res.status(400).json({ error: "All fields required" });
     if (!studentScores[pin]) studentScores[pin] = { name, scores: [] };
     studentScores[pin].name = name;
     if (!studentScores[pin].scores.find(s => s.date === date)) {
@@ -123,17 +123,23 @@ app.post("/scores", (req, res) => {
 app.get("/questions", (req, res) => res.json(questions));
 
 app.post("/questions", (req, res) => {
-    const { question, answer } = req.body;
+    const { question, answer, answerOpinion, questionFile, questionFileType } = req.body;
     if (!question) return res.status(400).json({ error: "Question is required" });
     const newQuestion = {
         id: Date.now(), question,
         answer: (answer && answer.trim()) ? answer.trim() : null,
+        answerOpinion: answerOpinion || null,
+        questionFile: questionFile || null,
+        questionFileType: questionFileType || null,
         date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
     };
     questions.push(newQuestion);
     saveData();
     res.json({ success: true, message: "Question posted successfully", question: newQuestion });
 });
+
+// ⚠ MUST be before /questions/:id to prevent "reset" being matched as an id
+app.delete("/questions/reset", (req, res) => { questions = []; saveData(); res.json({ success: true }); });
 
 app.get("/questions/:id", (req, res) => {
     const q = questions.find(q => q.id === parseInt(req.params.id));
@@ -151,8 +157,6 @@ const setAnswer = (req, res) => {
 };
 app.put("/questions/:id/answer", setAnswer);
 app.post("/questions/:id/answer", setAnswer);
-
-app.delete("/questions/reset", (req, res) => { questions = []; saveData(); res.json({ success: true }); });
 
 // =====================================================
 // ANSWERS
