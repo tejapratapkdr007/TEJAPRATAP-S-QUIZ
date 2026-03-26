@@ -1675,12 +1675,11 @@ function spToggle() {
   if(spIsRec)spPause();else spStart();
 }
 
-async function spStart() {
+function spStart() {
   clearTimeout(spRestartTimer);
   if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
   spMediaRec=null; spAudioChunks=[];
-  // Release old mic stream so SR can get a clean fresh mic connection
   if(spMediaStream){try{spMediaStream.getTracks().forEach(t=>t.stop());}catch(e){}spMediaStream=null;}
   spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spRestartCount=0;
   const btn=document.getElementById('spBtn');
@@ -1694,13 +1693,7 @@ async function spStart() {
   document.getElementById('spErrs').textContent='0';
   document.getElementById('spScore').textContent='—';
   document.getElementById('spWords').textContent='0';
-
-  // Start SR first — it grabs the mic internally via its own built-in audio capture.
-  // MediaRecorder is started ONLY after SR fires onstart (confirming mic is live).
-  // Starting both simultaneously on Android causes mic contention and SR gets no audio.
   spStartSR();
-
-  if(st){st.textContent='🔴 Recording — speak now...';st.className='sp-status live';}
   clearInterval(spTimer);
   spTimer=setInterval(()=>{
     if(!spIsRec)return;
@@ -1715,7 +1708,6 @@ function spPause() {
   if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;spRec.onstart=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
   spMediaRec=null;
-  // Release mic stream so the mic indicator clears and SR can re-acquire cleanly on resume
   if(spMediaStream){try{spMediaStream.getTracks().forEach(t=>t.stop());}catch(e){}spMediaStream=null;}
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
@@ -1767,10 +1759,9 @@ function spStartMediaRecorder(stream) {
 // 4. Status indicator shows when SR is actually active vs dead
 function spStartSR() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){ toast('❌ Speech not supported in this browser. Use Chrome.','error'); return; }
+  if(!SR){ toast('❌ Speech not supported. Use Chrome browser.','error'); return; }
   if(!spIsRec) return;
 
-  // Kill any existing instance cleanly before creating a new one
   if(spRec){
     spRec.onresult=null; spRec.onend=null; spRec.onerror=null; spRec.onstart=null;
     try{spRec.abort();}catch(e){}
@@ -1778,33 +1769,31 @@ function spStartSR() {
   }
 
   const rec = new SR();
-  // continuous=true: SR runs indefinitely — no silent gaps, no repeated restarts
   rec.continuous      = true;
   rec.interimResults  = true;
   rec.lang            = 'en-US';
   rec.maxAlternatives = 1;
   spRec = rec;
 
-  // onstart fires when SR has ACTUALLY acquired the mic and begun listening.
-  // Only THEN do we start MediaRecorder — this eliminates mic contention on Android.
-  // (Web Speech API grabs its own mic internally; we cannot share a stream with it.)
   rec.onstart = () => {
-    console.log('[SR] mic acquired — starting MediaRecorder now');
+    if(!spIsRec) return;
     const st = document.getElementById('spStatus');
-    if(st && spIsRec){ st.textContent = '🔴 Recording — speak now...'; st.className='sp-status live'; }
-    // Start MediaRecorder AFTER SR has the mic — avoids Android mic contention
-    if(spIsRec && (!spMediaRec || spMediaRec.state === 'inactive')){
+    if(st){ st.textContent = '🔴 Recording — speak now...'; st.className='sp-status live'; }
+    // MediaRecorder starts 500ms AFTER SR confirms it has the mic
+    // This gap prevents mic contention on Android Chrome
+    setTimeout(()=>{
+      if(!spIsRec) return;
       navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+        if(!spIsRec){ stream.getTracks().forEach(t=>t.stop()); return; }
         spMediaStream = stream;
         spStartMediaRecorder(stream);
-      }).catch(()=>{}); // MediaRecorder is backup only — failure is non-fatal
-    }
+      }).catch(()=>{});
+    }, 500);
   };
 
   rec.onresult = e => {
     if(!spIsRec || spRec !== rec) return;
     let interim = '';
-    // With continuous=true, e.resultIndex points to NEW results only
     for(let i = e.resultIndex; i < e.results.length; i++){
       if(e.results[i].isFinal){
         const t = e.results[i][0].transcript.trim();
@@ -1827,10 +1816,9 @@ function spStartSR() {
     if(spRec !== rec) return;
     console.warn('[SR] error:', e.error);
     if(e.error==='not-allowed' || e.error==='audio-capture'){
-      toast('❌ Mic permission denied. Allow mic in browser settings.','error');
+      toast('❌ Mic denied. Allow mic in browser settings.','error');
       spStop(); return;
     }
-    // For ALL other errors: show warning, SR onend will fire and restart
     const st2 = document.getElementById('spStatus');
     if(st2 && spIsRec){ st2.textContent = '🟡 Reconnecting mic...'; st2.className='sp-status'; }
   };
@@ -1838,20 +1826,17 @@ function spStartSR() {
   rec.onend = () => {
     if(spRec === rec) spRec = null;
     if(!spIsRec) return;
-    // Restart SR — 50ms delay to let browser fully release before re-acquiring
     clearTimeout(spRestartTimer);
-    spRestartTimer = setTimeout(()=>{
-      if(spIsRec && !spRec) spStartSR();
-    }, 50);
+    spRestartTimer = setTimeout(()=>{ if(spIsRec && !spRec) spStartSR(); }, 100);
   };
 
   try{
     rec.start();
-    console.log('[SR] start() called, continuous=true, lang=en-US');
+    console.log('[SR] start() — continuous=true lang=en-US');
   } catch(e){
-    console.warn('[SR] start failed:', e.message);
+    console.warn('[SR] start() threw:', e.message);
     clearTimeout(spRestartTimer);
-    spRestartTimer = setTimeout(()=>{ if(spIsRec) spStartSR(); }, 300);
+    spRestartTimer = setTimeout(()=>{ if(spIsRec) spStartSR(); }, 400);
   }
 }
 
