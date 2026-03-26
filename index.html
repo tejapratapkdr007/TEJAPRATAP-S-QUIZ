@@ -877,6 +877,9 @@ let ME = null, MY_NAME = null, IS_T = false;
 let T_PW = localStorage.getItem('tpw') || '11223344@Ttp';
 let _gkCache = null, gkInterval = null;
 let spRec = null, spIsRec = false, spTimer = null, spElapsed = 0, spDuration = 120, spText = '', spFinalText = '';
+// XSS-safe HTML escape helper
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
 let spRestartCount = 0, spRestartTimer = null;
 // Audio recording globals
 let spMediaRec = null, spAudioChunks = [], spMediaStream = null;
@@ -1159,8 +1162,8 @@ async function loadLoginFaf() {
   el.innerHTML = pAns.slice(0,3).map((a,i)=>`
     <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #1e2535">
       <span style="font-size:14px">${medals[i]}</span>
-      <span style="flex:1;font-weight:700;color:${colors[i]};font-size:12px">${a.studentName||'?'}</span>
-      <span style="font-size:10px;color:#64748b">${a.studentPin}</span>
+      <span style="flex:1;font-weight:700;color:${colors[i]};font-size:12px">${esc(a.studentName||'?')}</span>
+      <span style="font-size:10px;color:#64748b">${esc(a.studentPin)}</span>
       ${i===0?'<span style="background:rgba(255,215,0,0.1);color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:1px 7px;font-size:9px;font-weight:700">⚡FIRST</span>':''}
     </div>`).join('');
 }
@@ -1171,7 +1174,7 @@ async function loadHomeFaf() {
   const prev = qs.length>=2 ? qs[qs.length-2] : qs[0];
   const pAns = (ans||[]).filter(a=>a.questionId===prev.id).sort((a,b)=>new Date(a.submittedAt||0)-new Date(b.submittedAt||0));
   const medals=['🥇','🥈','🥉'];
-  el.innerHTML = pAns.length ? pAns.slice(0,3).map((a,i)=>`<span style="margin-right:8px">${medals[i]} ${a.studentName||'?'}</span>`).join('') : 'No answers yet';
+  el.innerHTML = pAns.length ? pAns.slice(0,3).map((a,i)=>`<span style="margin-right:8px">${medals[i]} ${esc(a.studentName||'?')}</span>`).join('') : 'No answers yet';
 }
 async function loadStats() {
   const data = await GET('/scores'); if (!data||!ME) return;
@@ -1271,12 +1274,12 @@ async function loadQuiz() {
   const q = realQs[realQs.length-1];
   const myAns = (ans||[]).find(a=>a.questionId===q.id&&a.studentPin===ME&&(!a.type||a.type==='question'));
   let h = `<div class="card bl"><div class="card-lbl">📅 ${q.date}</div><div class="card-ttl">📌 Today's Question</div>
-    <p style="font-size:15px;color:var(--text);line-height:1.7;margin-top:8px">${q.question}</p>
+    <p style="font-size:15px;color:var(--text);line-height:1.7;margin-top:8px">${esc(q.question)}</p>
     ${q.questionFile?(q.questionFileType==='image'?`<div style="margin:12px 0"><img src="${safeImgSrc(q.questionFile,'image')}" class="media-img" onerror="this.parentNode.style.display='none'"></div>`:`<div style="margin:12px 0"><audio controls class="media-aud" src="${getAudioSrc(q.questionFile)}"></audio></div>`):''}
   </div>`;
   if (myAns) {
-    h += `<div class="ok">✅ Your answer: <strong>${myAns.answer}</strong></div>`;
-    if (q.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Correct Answer</div><p style="font-size:15px;color:#86efac;font-weight:700;margin-top:4px">${q.answer}</p>${q.answerOpinion?`<div style="margin-top:10px;padding:10px;background:rgba(167,139,250,0.06);border-left:3px solid #a78bfa;border-radius:7px;color:#d4b8ff;font-size:13px;line-height:1.6">💬 ${q.answerOpinion}</div>`:''}</div>`;
+    h += `<div class="ok">✅ Your answer: <strong>${esc(myAns.answer)}</strong></div>`;
+    if (q.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Correct Answer</div><p style="font-size:15px;color:#86efac;font-weight:700;margin-top:4px">${esc(q.answer)}</p>${q.answerOpinion?`<div style="margin-top:10px;padding:10px;background:rgba(167,139,250,0.06);border-left:3px solid #a78bfa;border-radius:7px;color:#d4b8ff;font-size:13px;line-height:1.6">💬 ${esc(q.answerOpinion)}</div>`:''}</div>`;
     else h += `<div class="inf">⏳ Teacher hasn't revealed the answer yet</div>`;
     const total = (ans||[]).filter(a=>a.questionId===q.id&&(!a.type||a.type==='question')).length;
     h += `<div class="inf">👥 ${total} student${total!==1?'s':''} answered</div>`;
@@ -1341,7 +1344,7 @@ async function loadMediaStudent() {
   if (m.opinion) h += `<p style="font-size:14px;color:var(--text);margin-top:10px;line-height:1.6">${m.opinion}</p>`;
   h += '</div>';
   if (myAns) {
-    h += `<div class="ok">✅ Your answer: ${myAns.answer}</div>`;
+    h += `<div class="ok">✅ Your answer: ${esc(myAns.answer)}</div>`;
     if (m.expectedAnswer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="color:#86efac;font-weight:700;margin-top:4px">${m.expectedAnswer}</p></div>`;
     else h += `<div class="inf">⏳ Answer not revealed yet</div>`;
   } else {
@@ -1370,10 +1373,10 @@ async function loadWordStudent() {
   if (!list.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">📖 No word posted yet</div>'; return; }
   const w = list[list.length-1];
   const myAns = (ans||[]).find(a=>a.questionId===w.id&&a.studentPin===ME&&a.type==='word');
-  let h = `<div class="card pu"><div class="card-lbl">📅 ${w.date}</div><div style="font-size:30px;font-weight:800;color:#c4b5fd;margin-bottom:7px;font-family:'Syne',sans-serif">${w.word}</div><p style="font-size:14px;color:var(--text);line-height:1.6">${w.question}</p></div>`;
+  let h = `<div class="card pu"><div class="card-lbl">📅 ${w.date}</div><div style="font-size:30px;font-weight:800;color:#c4b5fd;margin-bottom:7px;font-family:'Syne',sans-serif">${w.word}</div><p style="font-size:14px;color:var(--text);line-height:1.6">${esc(w.question)}</p></div>`;
   if (myAns) {
-    h += `<div class="ok">✅ Your answer: ${myAns.answer}</div>`;
-    if (w.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="font-size:14px;color:#86efac;line-height:1.6;margin-top:4px">${w.answer}</p></div>`;
+    h += `<div class="ok">✅ Your answer: ${esc(myAns.answer)}</div>`;
+    if (w.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="font-size:14px;color:#86efac;line-height:1.6;margin-top:4px">${esc(w.answer)}</p></div>`;
     else h += `<div class="inf">⏳ Answer not revealed yet</div>`;
   } else {
     h += `<div class="card"><div class="card-lbl">📝 Your Answer</div><div class="fg" style="margin-top:8px"><textarea id="wAns" placeholder="Your answer..."></textarea></div><button class="btn pur block" onclick="submitWord(${w.id})">📤 Submit</button></div>`;
@@ -1385,8 +1388,8 @@ async function submitWord(wId) {
   if (!ans) return toast('Write your answer!','error');
   try {
     await POST('/answers',{questionId:wId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'word'});
-    await POST('/scores',{pin:ME,name:MY_NAME,points:3,date:today()}).catch(()=>{});
-    toast('✅ Submitted! +3 points','success'); loadWordStudent();
+    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today()}).catch(()=>{});
+    toast('✅ Submitted! +5 points','success'); loadWordStudent();
   } catch(e) { toast(e.message,'error'); }
 }
 
@@ -1401,10 +1404,10 @@ async function loadAffairsStudent() {
   if (!list.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">📰 No affairs posted yet</div>'; return; }
   const a = list[list.length-1];
   const myAns = (ans||[]).find(x=>x.questionId===a.id&&x.studentPin===ME&&x.type==='affairs');
-  let h = `<div class="card am"><div class="card-lbl">📅 ${a.date}</div><div class="card-ttl" style="color:#fbbf24">📰 Current Affairs</div><p style="font-size:15px;color:var(--text);line-height:1.6;margin-top:8px">${a.question}</p></div>`;
+  let h = `<div class="card am"><div class="card-lbl">📅 ${a.date}</div><div class="card-ttl" style="color:#fbbf24">📰 Current Affairs</div><p style="font-size:15px;color:var(--text);line-height:1.6;margin-top:8px">${esc(a.question)}</p></div>`;
   if (myAns) {
-    h += `<div class="ok">✅ Your answer: ${myAns.answer}</div>`;
-    if (a.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="font-size:14px;color:#86efac;font-weight:700;margin-top:4px">${a.answer}</p></div>`;
+    h += `<div class="ok">✅ Your answer: ${esc(myAns.answer)}</div>`;
+    if (a.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="font-size:14px;color:#86efac;font-weight:700;margin-top:4px">${esc(a.answer)}</p></div>`;
     else h += `<div class="inf">⏳ Answer not revealed yet</div>`;
   } else {
     h += `<div class="card"><div class="card-lbl">📝 Your Answer</div><div class="fg" style="margin-top:8px"><textarea id="affAns" placeholder="Your answer..."></textarea></div><button class="btn amb block" onclick="submitAffairs(${a.id})">📤 Submit</button></div>`;
@@ -1416,8 +1419,8 @@ async function submitAffairs(aId) {
   if (!ans) return toast('Write your answer!','error');
   try {
     await POST('/answers',{questionId:aId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'affairs'});
-    await POST('/scores',{pin:ME,name:MY_NAME,points:3,date:today()}).catch(()=>{});
-    toast('✅ Submitted! +3 points','success'); loadAffairsStudent();
+    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today()}).catch(()=>{});
+    toast('✅ Submitted! +5 points','success'); loadAffairsStudent();
   } catch(e) { toast(e.message,'error'); }
 }
 
@@ -1437,7 +1440,7 @@ async function loadRank() {
   if (prev) {
     const pAns=answers.filter(a=>a.questionId===prev.id&&(!a.type||a.type==='question')).sort((a,b)=>new Date(a.submittedAt||0)-new Date(b.submittedAt||0));
     const medals=['🥇','🥈','🥉'],golds=['#FFD700','#C0C0C0','#cd7f32'];
-    h+=pAns.length?pAns.slice(0,3).map((a,i)=>{const isMe=a.studentPin===ME;return`<div class="rank-item" style="${isMe?'background:rgba(255,215,0,0.05);border-color:rgba(255,215,0,0.25);':''}"><div class="ri-rank">${medals[i]}</div><div style="flex:1"><div class="ri-name" style="color:${golds[i]}">${a.studentName||'?'}${isMe?' (You)':''}</div><div class="ri-pin">${a.studentPin}</div></div>${i===0?'<span style="background:rgba(255,215,0,0.1);color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:2px 8px;font-size:9px;font-weight:700">⚡FIRST</span>':''}</div>`}).join(''):'<div class="inf">No answers yet</div>';
+    h+=pAns.length?pAns.slice(0,3).map((a,i)=>{const isMe=a.studentPin===ME;return`<div class="rank-item" style="${isMe?'background:rgba(255,215,0,0.05);border-color:rgba(255,215,0,0.25);':''}"><div class="ri-rank">${medals[i]}</div><div style="flex:1"><div class="ri-name" style="color:${golds[i]}">${esc(a.studentName||'?')}${isMe?' (You)':''}</div><div class="ri-pin">${a.studentPin}</div></div>${i===0?'<span style="background:rgba(255,215,0,0.1);color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:2px 8px;font-size:9px;font-weight:700">⚡FIRST</span>':''}</div>`}).join(''):'<div class="inf">No answers yet</div>';
   } else h+='<div class="inf">No questions yet</div>';
   h+='</div>';
   const cutoff=new Date();cutoff.setDate(cutoff.getDate()-15);
@@ -1637,6 +1640,8 @@ function spReset() {
   spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spIsRec=false; spRestartCount=0
   clearInterval(spTimer); clearTimeout(spRestartTimer);
   if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
+  if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
+  spMediaRec=null; spAudioChunks=[];
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
   const st=document.getElementById('spStatus');
@@ -1686,6 +1691,7 @@ function spStart() {
   document.getElementById('spScore').textContent='—';
   document.getElementById('spWords').textContent='0';
   spStartSR();
+  spStartMediaRecorder();
   clearInterval(spTimer);
   spTimer=setInterval(()=>{
     if(!spIsRec)return;
@@ -1747,7 +1753,9 @@ function spStartSR() {
   // Each new instance has a completely empty e.results[] — zero replay possible.
   rec.continuous     = false;
   rec.interimResults = true;
-  rec.lang           = 'en-IN';
+  // en-IN not installed on most Indian Android phones — en-US works on all devices
+  // Try en-IN first; if SR fires a language-not-supported error, restart with en-US
+  rec.lang = 'en-US';
   rec.maxAlternatives = 1;
   spRec = rec;
 
@@ -1834,7 +1842,7 @@ async function spStop() {
       aiResult.errors.forEach(err=>{
         if(err.wrong){
           const rx=new RegExp('(?<![\\w])'+err.wrong.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![\\w])','gi');
-          highlighted=highlighted.replace(rx,m=>'<span class="sp-eword" data-fix="→ '+err.right+'" title="'+err.rule+'">'+m+'</span>');
+          const safeRight=(err.right||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');const safeRule=(err.rule||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');highlighted=highlighted.replace(rx,m=>'<span class="sp-eword" data-fix="→ '+safeRight+'" title="'+safeRule+'">'+m+'</span>');
         }
       });
       tr.innerHTML=highlighted;
@@ -1934,8 +1942,8 @@ async function spSubmit() {
     const qId=st?st.id:0;
     await POST('/answers',{questionId:qId,studentPin:ME,studentName:MY_NAME,answer:text,type:'speak'});
   }catch(e){}
-  if(ME)await POST('/scores',{pin:ME,name:MY_NAME,points:10,date:today()}).catch(()=>{});
-  toast('✅ Submitted! +10 points 🎉','success');
+  if(ME)await POST('/scores',{pin:ME,name:MY_NAME,points:20,date:today()}).catch(()=>{});
+  toast('✅ Submitted! +20 points 🎉','success');
   loadSpSubmissions();
   spReset();
 }
@@ -1949,10 +1957,10 @@ async function loadSpSubmissions(){
     el.innerHTML=list.map(a=>`
       <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:11px;padding:14px;margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:13px;font-weight:700;color:#2563eb;font-family:'Bookman Old Style','Bookman',Georgia,serif">${a.studentName||'Student'}</span>
+          <span style="font-size:13px;font-weight:700;color:#2563eb;font-family:'Bookman Old Style','Bookman',Georgia,serif">${esc(a.studentName||'Student')}</span>
           <span style="font-size:10px;color:#64748b">${a.submittedAt?new Date(a.submittedAt).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</span>
         </div>
-        <div style="font-size:14px;color:#1e293b;line-height:1.8;font-family:'Bookman Old Style','Bookman',Georgia,serif;font-weight:500">${a.answer}</div>
+        <div style="font-size:14px;color:#1e293b;line-height:1.8;font-family:'Bookman Old Style','Bookman',Georgia,serif;font-weight:500">${esc(a.answer)}</div>
       </div>`).join('');
   }catch(e){el.innerHTML='<div style="color:#4a5568;font-size:12px;text-align:center;padding:16px">Could not load submissions</div>';}
 }
@@ -2016,7 +2024,7 @@ async function loadGKList(){
     const qAns=(ans||[]).filter(a=>a.questionId===q.id&&(!a.type||a.type==='question'));
     return`<div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
       <div style="font-size:10px;color:#64748b;margin-bottom:4px">📅 ${q.date}</div>
-      <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:6px">${q.question}</div>
+      <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:6px">${esc(q.question)}</div>
       <span style="background:rgba(37,99,235,0.1);color:#60a5fa;border:1px solid rgba(37,99,235,0.25);border-radius:20px;padding:2px 8px;font-size:10px">${qAns.length} answers</span>
       ${q.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-left:5px">✅ Answer set</span>`:
       `<div style="margin-top:8px;display:flex;gap:6px">
@@ -2034,8 +2042,18 @@ async function setGKAns(id){
 }
 
 // GK Bulk Auto-Post
-function today(){return new Date().toISOString().split('T')[0];}
-function is5am(){return new Date().getHours()===5;}
+function today(){
+  // Returns current date in IST (UTC+5:30) as YYYY-MM-DD
+  const now = new Date();
+  const ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  return ist.toISOString().split('T')[0];
+}
+function is5am(){
+  // Returns true at 5 AM IST
+  const now = new Date();
+  const istHour = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)).getUTCHours();
+  return istHour === 5;
+}
 async function getGKSched(){
   try{const r=await GET('/schedule');if(r&&r.empty){_gkCache=null;return null;}_gkCache=r;return r;}
   catch{return _gkCache;}
@@ -2496,12 +2514,12 @@ async function loadSpStudentAnswers(){
       <div style="background:#f8fafc;border:1.5px solid #bfdbfe;border-radius:10px;padding:11px 13px;margin-bottom:9px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
           <span style="font-size:15px">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'👤'}</span>
-          <span style="font-weight:700;color:#1e40af;font-size:13px">${a.studentName||'Unknown'}</span>
-          <span style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700">PIN: ${a.studentPin||'?'}</span>
+          <span style="font-weight:700;color:#1e40af;font-size:13px">${esc(a.studentName||'Unknown')}</span>
+          <span style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700">PIN: ${esc(a.studentPin||'?')}</span>
           <span style="margin-left:auto;font-size:10px;color:#94a3b8">${a.date||''}</span>
         </div>
         <div style="background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:8px 10px;font-size:12px;color:#334155;line-height:1.5">
-          💬 ${a.answer||'(no answer)'}
+          💬 ${esc(a.answer||'(no answer)')}
         </div>
       </div>`).join('');
   }catch(e){el.innerHTML='<div style="color:#ef4444;font-size:12px;text-align:center;padding:12px">Error loading answers</div>';}
@@ -2529,7 +2547,7 @@ async function loadWordList(){
     <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
       <div style="font-size:14px;font-weight:700;color:#c4b5fd">${w.word}</div>
       <div style="font-size:10px;color:#64748b">${w.date}</div>
-      <div style="font-size:12px;color:#64748b;margin-top:3px">${w.question}</div>
+      <div style="font-size:12px;color:#64748b;margin-top:3px">${esc(w.question)}</div>
       ${w.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-top:7px;display:inline-block">✅ ${w.answer.substring(0,40)}</span>`:
       `<div style="margin-top:8px;display:flex;gap:6px">
         <input type="text" id="wsans_${w.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
@@ -2564,8 +2582,8 @@ async function loadAffList(){
   el.innerHTML=list.slice().reverse().slice(0,5).map(a=>`
     <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
       <div style="font-size:10px;color:#64748b">${a.date}</div>
-      <div style="font-size:13px;color:#334155;margin-top:3px;line-height:1.5">${a.question}</div>
-      ${a.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-top:7px;display:inline-block">✅ ${a.answer.substring(0,40)}</span>`:
+      <div style="font-size:13px;color:#334155;margin-top:3px;line-height:1.5">${esc(a.question)}</div>
+      ${a.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-top:7px;display:inline-block">✅ ${esc(a.answer.substring(0,40))}</span>`:
       `<div style="margin-top:8px;display:flex;gap:6px">
         <input type="text" id="affans_${a.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
         <button onclick="setAffAns(${a.id})" style="background:#1d4ed8;border:none;border-radius:7px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Set</button>
@@ -2614,7 +2632,7 @@ async function loadTRank(){
     if(prev){
       const pAns=answers.filter(a=>a.questionId===prev.id&&(!a.type||a.type==='question')).sort((a,b)=>new Date(a.submittedAt||0)-new Date(b.submittedAt||0));
       const medals=['🥇','🥈','🥉'],golds=['#FFD700','#C0C0C0','#cd7f32'];
-      fafEl.innerHTML=pAns.slice(0,3).map((a,i)=>`<div class="rank-item" style="border-color:${golds[i]}22"><div class="ri-rank">${medals[i]}</div><div style="flex:1"><div class="ri-name" style="color:${golds[i]}">${a.studentName||'?'}</div><div class="ri-pin">${a.studentPin}</div></div>${i===0?'<span style="background:rgba(255,215,0,0.1);color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:2px 7px;font-size:9px;font-weight:700">⚡FIRST</span>':''}</div>`).join('')||'<div class="inf">No answers yet</div>';
+      fafEl.innerHTML=pAns.slice(0,3).map((a,i)=>`<div class="rank-item" style="border-color:${golds[i]}22"><div class="ri-rank">${medals[i]}</div><div style="flex:1"><div class="ri-name" style="color:${golds[i]}">${esc(a.studentName||'?')}</div><div class="ri-pin">${esc(a.studentPin)}</div></div>${i===0?'<span style="background:rgba(255,215,0,0.1);color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:2px 7px;font-size:9px;font-weight:700">⚡FIRST</span>':''}</div>`).join('')||'<div class="inf">No answers yet</div>';
     }else fafEl.innerHTML='<div class="inf">No questions yet</div>';
   }
   const actEl=document.getElementById('tActive');
