@@ -538,6 +538,88 @@ body{overflow-x:hidden;overflow-y:hidden}
         <div style="font-size:11px;font-weight:700;color:#60a5fa;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px">🎙️ Student Submissions</div>
         <div id="spSubmissions"><div style="color:#4a5568;font-size:12px;text-align:center;padding:16px">No submissions yet</div></div>
       </div>
+
+      <!-- ══ TEXT GRAMMAR CHECKER ══ -->
+      <div style="margin-top:28px;max-width:800px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+          <div style="width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#2563eb,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0">✍️</div>
+          <div>
+            <div style="font-size:14px;font-weight:800;color:#1e293b;font-family:'Syne',sans-serif">Text Grammar Checker</div>
+            <div style="font-size:11px;color:#64748b">Type or paste any English text — AI finds every mistake instantly</div>
+          </div>
+        </div>
+
+        <div style="background:#ffffff;border:1.5px solid #bfdbfe;border-radius:14px;padding:18px;box-shadow:0 2px 14px rgba(37,99,235,0.07)">
+          <!-- Input -->
+          <div style="margin-bottom:12px">
+            <div style="font-size:11px;font-weight:700;color:#334155;text-transform:uppercase;letter-spacing:1px;margin-bottom:7px">Your Text</div>
+            <textarea id="gcTextInput" placeholder="Type or paste your English text here... e.g. I goes to market yesterday and buyed some things." style="width:100%;min-height:110px;background:#f8faff;border:2px solid #bfdbfe;border-radius:9px;padding:12px 14px;font-size:14px;color:#1e293b;font-family:'DM Sans',sans-serif;resize:vertical;outline:none;transition:border-color 0.2s;box-sizing:border-box" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#bfdbfe'" oninput="gcCountWords()"></textarea>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px">
+              <span id="gcWordCount" style="font-size:11px;color:#94a3b8">0 words</span>
+              <button onclick="document.getElementById('gcTextInput').value='';gcCountWords();gcClearResults()" style="background:none;border:none;color:#94a3b8;font-size:11px;cursor:pointer;font-family:inherit">✕ Clear</button>
+            </div>
+          </div>
+
+          <!-- Check Button -->
+          <button id="gcCheckBtn" onclick="gcCheckGrammar()" style="width:100%;padding:13px;background:linear-gradient(135deg,#2563eb,#7c3aed);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;gap:8px;transition:filter 0.15s;margin-bottom:14px" onmouseover="this.style.filter='brightness(1.12)'" onmouseout="this.style.filter=''">
+            <span id="gcBtnIcon">🔍</span> <span id="gcBtnText">Check My English</span>
+          </button>
+
+          <!-- AI Loading -->
+          <div id="gcLoading" style="display:none;text-align:center;padding:18px 0">
+            <div class="ai-loading" style="justify-content:center"><div class="ai-dot"></div><div class="ai-dot"></div><div class="ai-dot"></div><span style="color:#7c3aed">AI is checking your text...</span></div>
+          </div>
+
+          <!-- Results -->
+          <div id="gcResults" style="display:none">
+
+            <!-- Score Bar -->
+            <div id="gcScoreBar" style="background:linear-gradient(135deg,rgba(37,99,235,0.06),rgba(124,58,237,0.06));border:1.5px solid #ddd6fe;border-radius:11px;padding:14px;margin-bottom:12px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+                <div style="font-size:11px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:1px">Grammar Score</div>
+                <div id="gcScoreNum" style="font-size:26px;font-weight:800;font-family:'Syne',sans-serif;color:#2563eb">—</div>
+              </div>
+              <div style="background:#e0e7ff;border-radius:20px;height:8px;overflow:hidden">
+                <div id="gcScoreFill" style="height:100%;border-radius:20px;background:linear-gradient(90deg,#2563eb,#7c3aed);transition:width 0.8s ease;width:0%"></div>
+              </div>
+              <div id="gcScoreMsg" style="font-size:11px;color:#64748b;margin-top:7px;text-align:center"></div>
+            </div>
+
+            <!-- Corrected Version -->
+            <div id="gcCorrectedBox" style="background:#f0fdf4;border:1.5px solid #86efac;border-radius:11px;padding:14px;margin-bottom:12px;display:none">
+              <div style="font-size:10px;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">✅ AI Corrected Version</div>
+              <div id="gcCorrectedTxt" style="font-size:14px;line-height:1.8;color:#166534"></div>
+            </div>
+
+            <!-- Errors List -->
+            <div id="gcErrorsBox" style="display:none">
+              <div style="font-size:10px;font-weight:700;color:#dc2626;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:6px">
+                ❌ Mistakes Found <span id="gcErrCount" style="background:#fef2f2;border:1px solid #fca5a5;border-radius:20px;padding:1px 8px;font-size:10px;color:#dc2626">0</span>
+              </div>
+              <div id="gcErrorsList"></div>
+            </div>
+
+            <!-- Suggestions -->
+            <div id="gcSuggestBox" style="background:#f5f3ff;border:1.5px solid #ddd6fe;border-radius:11px;padding:14px;margin-bottom:10px;display:none">
+              <div style="font-size:10px;font-weight:700;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">💡 Tips to Improve</div>
+              <div id="gcSuggestList"></div>
+            </div>
+
+            <!-- Pronunciation Tips -->
+            <div id="gcPronBox" style="background:#fffbeb;border:1.5px solid #fde68a;border-radius:11px;padding:14px;display:none">
+              <div style="font-size:10px;font-weight:700;color:#d97706;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">🗣️ Pronunciation Tips</div>
+              <div id="gcPronList"></div>
+            </div>
+
+            <!-- No Errors Message -->
+            <div id="gcPerfect" style="display:none;text-align:center;padding:18px">
+              <div style="font-size:40px;margin-bottom:8px">🎉</div>
+              <div style="font-size:15px;font-weight:700;color:#15803d;margin-bottom:4px">Perfect English!</div>
+              <div style="font-size:12px;color:#64748b">No mistakes found. Keep it up!</div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- MEDIA -->
@@ -1555,7 +1637,7 @@ Respond ONLY with valid JSON, no markdown fences, no text before or after:
       headers: { 'Content-Type': 'application/json' },
       signal: ctrl2.signal,
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-4-5',
         max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }]
       })
@@ -2834,6 +2916,81 @@ function startAffMachine(){
     try{await POST('/affairs',{question:item.question,answer:item.answer});s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost=`Day ${idx+1} — ${s.items[idx].postedAt}`;saveAffSchedLocal(s);toast("🤖 Auto-Posted today's affairs!",'success');loadAffList();}catch(e){}
     updateAffUI(getAffSchedLocal());
   },60000);updateAffUI();
+}
+
+// ═══════════════════════════════════════════════════
+// TEXT GRAMMAR CHECKER
+// ═══════════════════════════════════════════════════
+function gcCountWords(){
+  const v=(document.getElementById('gcTextInput').value||'').trim();
+  const wc=v?v.split(/\s+/).filter(Boolean).length:0;
+  const el=document.getElementById('gcWordCount');
+  if(el)el.textContent=wc+' word'+(wc!==1?'s':'');
+}
+function gcClearResults(){
+  const r=document.getElementById('gcResults');if(r)r.style.display='none';
+}
+async function gcCheckGrammar(){
+  const input=document.getElementById('gcTextInput');
+  const text=(input&&input.value||'').trim();
+  if(!text||text.length<3){toast('Please type some text first!','warn');return;}
+  const btn=document.getElementById('gcCheckBtn');
+  const btnIcon=document.getElementById('gcBtnIcon');
+  const btnTxt=document.getElementById('gcBtnText');
+  const loading=document.getElementById('gcLoading');
+  const results=document.getElementById('gcResults');
+  if(btn)btn.disabled=true;
+  if(btnIcon)btnIcon.textContent='⏳';
+  if(btnTxt)btnTxt.textContent='Checking...';
+  if(loading)loading.style.display='block';
+  if(results)results.style.display='none';
+  try{
+    const res=await fetch(API+'/ai/grammar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})});
+    if(!res.ok){const err=await res.json().catch(()=>({}));throw new Error(err.error||'Server error '+res.status);}
+    const data=await res.json();
+    gcShowResults(data);
+  }catch(e){toast('❌ '+(e.message||'Check failed'),'error');}
+  finally{
+    if(btn)btn.disabled=false;
+    if(btnIcon)btnIcon.textContent='🔍';
+    if(btnTxt)btnTxt.textContent='Check My English';
+    if(loading)loading.style.display='none';
+  }
+}
+function gcEsc(str){if(!str)return '';return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function gcShowResults(data){
+  const results=document.getElementById('gcResults');if(!results)return;
+  results.style.display='block';
+  const score=typeof data.score==='number'?data.score:70;
+  const scoreEl=document.getElementById('gcScoreNum');
+  const fillEl=document.getElementById('gcScoreFill');
+  const msgEl=document.getElementById('gcScoreMsg');
+  if(scoreEl){scoreEl.textContent=score+'/100';scoreEl.style.color=score>=80?'#16a34a':score>=60?'#d97706':'#dc2626';}
+  if(fillEl){fillEl.style.width=score+'%';fillEl.style.background=score>=80?'linear-gradient(90deg,#16a34a,#4ade80)':score>=60?'linear-gradient(90deg,#d97706,#fbbf24)':'linear-gradient(90deg,#dc2626,#f87171)';}
+  if(msgEl){const msgs={90:'🌟 Excellent! Near-perfect English',75:'👍 Good! A few small errors',60:'📝 Average — check the errors below',40:'⚠️ Needs improvement — review grammar basics',0:'❗ Many errors — practice more!'};const key=Object.keys(msgs).reverse().find(k=>score>=+k);msgEl.textContent=msgs[key]||msgs[0];}
+  const corrBox=document.getElementById('gcCorrectedBox');
+  const corrTxt=document.getElementById('gcCorrectedTxt');
+  if(data.corrected&&data.corrected.trim()&&corrBox&&corrTxt){corrBox.style.display='block';corrTxt.textContent=data.corrected;}else if(corrBox)corrBox.style.display='none';
+  const errBox=document.getElementById('gcErrorsBox');
+  const errList=document.getElementById('gcErrorsList');
+  const errCount=document.getElementById('gcErrCount');
+  const perfect=document.getElementById('gcPerfect');
+  const errors=Array.isArray(data.errors)?data.errors:[];
+  const typeColors={Tense:'#2563eb',Agreement:'#7c3aed',Article:'#d97706',Preposition:'#ea580c',Structure:'#dc2626',Pronoun:'#0891b2',Noun:'#16a34a',Auxiliary:'#6d28d9',Conjunction:'#b45309',WordChoice:'#0f766e',Redundancy:'#6b7280',Other:'#475569'};
+  if(errors.length>0&&errBox&&errList){
+    errBox.style.display='block';
+    if(errCount)errCount.textContent=errors.length+' error'+(errors.length!==1?'s':'');
+    errList.innerHTML=errors.map(e=>{const col=typeColors[e.type]||'#475569';return `<div style="background:#fef2f2;border-left:3px solid ${col};border-radius:8px;padding:10px 13px;margin-bottom:8px"><div style="display:flex;align-items:center;gap:6px;margin-bottom:5px"><span style="background:${col};color:#fff;font-size:9px;font-weight:700;padding:2px 7px;border-radius:20px;text-transform:uppercase">${gcEsc(e.type||'Error')}</span></div><div style="font-size:13px;color:#dc2626;margin-bottom:3px">❌ <span style="text-decoration:line-through">${gcEsc(e.wrong)}</span></div><div style="font-size:13px;color:#16a34a;margin-bottom:4px">✅ ${gcEsc(e.right)}</div><div style="font-size:11px;color:#7c3aed;font-style:italic">${gcEsc(e.rule)}</div></div>`;}).join('');
+    if(perfect)perfect.style.display='none';
+  }else{if(errBox)errBox.style.display='none';if(perfect)perfect.style.display=score>=90?'block':'none';}
+  const sugBox=document.getElementById('gcSuggestBox');
+  const sugList=document.getElementById('gcSuggestList');
+  const sugs=Array.isArray(data.suggestions)?data.suggestions.filter(Boolean):[];
+  if(sugs.length>0&&sugBox&&sugList){sugBox.style.display='block';sugList.innerHTML=sugs.map(s=>`<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px solid #ede9fe"><span style="font-size:13px;flex-shrink:0">💡</span><div style="font-size:12px;color:#5b21b6;line-height:1.5">${gcEsc(s)}</div></div>`).join('');}else if(sugBox)sugBox.style.display='none';
+  const pronBox=document.getElementById('gcPronBox');
+  const pronList=document.getElementById('gcPronList');
+  const prons=Array.isArray(data.pronunciation_tips)?data.pronunciation_tips.filter(Boolean):[];
+  if(prons.length>0&&pronBox&&pronList){pronBox.style.display='block';pronList.innerHTML=prons.map(p=>`<div style="display:flex;gap:8px;align-items:flex-start;padding:5px 0;border-bottom:1px solid #fde68a"><span style="font-size:13px;flex-shrink:0">🗣️</span><div style="font-size:12px;color:#92400e;line-height:1.5">${gcEsc(p)}</div></div>`).join('');}else if(pronBox)pronBox.style.display='none';
 }
 
 // ═══════════════════════════════════════════════════
