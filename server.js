@@ -98,7 +98,7 @@ app.get("/scores", (req, res) => res.json({ scores: studentScores, streaks: stud
 
 app.post("/scores", (req, res) => {
     const { pin, name, points, date } = req.body;
-    if (!pin || !name || points == null || !date) return res.status(400).json({ error: "All fields required" });
+    if (!pin || !name || !points || !date) return res.status(400).json({ error: "All fields required" });
     if (!studentScores[pin]) studentScores[pin] = { name, scores: [] };
     studentScores[pin].name = name;
     if (!studentScores[pin].scores.find(s => s.date === date)) {
@@ -123,14 +123,11 @@ app.post("/scores", (req, res) => {
 app.get("/questions", (req, res) => res.json(questions));
 
 app.post("/questions", (req, res) => {
-    const { question, answer, answerOpinion, questionFile, questionFileType } = req.body;
+    const { question, answer } = req.body;
     if (!question) return res.status(400).json({ error: "Question is required" });
     const newQuestion = {
         id: Date.now(), question,
         answer: (answer && answer.trim()) ? answer.trim() : null,
-        answerOpinion: answerOpinion || null,
-        questionFile: questionFile || null,
-        questionFileType: questionFileType || null,
         date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
     };
     questions.push(newQuestion);
@@ -138,7 +135,7 @@ app.post("/questions", (req, res) => {
     res.json({ success: true, message: "Question posted successfully", question: newQuestion });
 });
 
-// ⚠ MUST be before /questions/:id to prevent "reset" being matched as an id
+// Literal routes BEFORE parameterized /:id routes
 app.delete("/questions/reset", (req, res) => { questions = []; saveData(); res.json({ success: true }); });
 
 app.get("/questions/:id", (req, res) => {
@@ -232,8 +229,50 @@ app.post("/media", (req, res) => {
     res.json({ success: true, media: newMedia });
 });
 
+// Literal routes BEFORE parameterized /:id routes
 app.get("/media/latest", (req, res) => {
     mediaFiles.length > 0 ? res.json(mediaFiles[mediaFiles.length - 1]) : res.status(404).json({ error: "No media" });
+});
+
+// Media text post (for bulk media schedule) — must be before /media/:id
+app.post("/media/text", (req, res) => {
+    const { question, answer, caption, urlOrText, type: reqType } = req.body;
+    if (!question) return res.status(400).json({ error: "Question required" });
+
+    // Detect type from passed type field, or caption filename, or data prefix
+    let type = reqType || 'text';
+    if (!reqType) {
+        if (caption && caption.match(/\.(jpg|jpeg|png|gif|webp)$/i)) type = 'image';
+        else if (caption && caption.match(/\.(mp3|wav|ogg|m4a|aac)$/i)) type = 'audio';
+        else if (urlOrText && urlOrText.startsWith('data:image')) type = 'image';
+        else if (urlOrText && urlOrText.startsWith('data:audio')) type = 'audio';
+    }
+
+    let fileUrl = null;
+    // Save base64 to disk if it looks like file data
+    if (urlOrText && (urlOrText.startsWith('data:') || urlOrText.length > 200)) {
+        try {
+            const base64Data = urlOrText.includes(',') ? urlOrText.split(',')[1] : urlOrText;
+            const ext = caption ? caption.split('.').pop().toLowerCase() : (type === 'audio' ? 'mp3' : 'jpg');
+            const uniqueName = `media_${Date.now()}.${ext}`;
+            const filePath = path.join(UPLOADS_DIR, uniqueName);
+            fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+            fileUrl = `/uploads/${uniqueName}`;
+        } catch(e) {
+            console.error('File save error:', e.message);
+        }
+    }
+
+    const newMedia = {
+        id: Date.now(), type,
+        data: urlOrText || '',   // keep full base64 — always works even after redeploy
+        fileUrl,
+        fileName: caption || 'Media Item',
+        opinion: question, expectedAnswer: answer || null, explanation: null,
+        date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
+    };
+    mediaFiles.push(newMedia); saveData();
+    res.json({ success: true, media: newMedia });
 });
 
 app.post("/media/:id/explanation", (req, res) => {
@@ -304,47 +343,6 @@ app.post("/schedule/media/mark-posted", (req, res) => {
         mediaSchedule.lastAutoPost = { day: index + 1, time: mediaSchedule.items[index].postedAt };
     }
     saveData(); res.json({ success: true });
-});
-
-// Media text post (for bulk media schedule)
-app.post("/media/text", (req, res) => {
-    const { question, answer, caption, urlOrText, type: reqType } = req.body;
-    if (!question) return res.status(400).json({ error: "Question required" });
-
-    // Detect type from passed type field, or caption filename, or data prefix
-    let type = reqType || 'text';
-    if (!reqType) {
-        if (caption && caption.match(/\.(jpg|jpeg|png|gif|webp)$/i)) type = 'image';
-        else if (caption && caption.match(/\.(mp3|wav|ogg|m4a|aac)$/i)) type = 'audio';
-        else if (urlOrText && urlOrText.startsWith('data:image')) type = 'image';
-        else if (urlOrText && urlOrText.startsWith('data:audio')) type = 'audio';
-    }
-
-    let fileUrl = null;
-    // Save base64 to disk if it looks like file data
-    if (urlOrText && (urlOrText.startsWith('data:') || urlOrText.length > 200)) {
-        try {
-            const base64Data = urlOrText.includes(',') ? urlOrText.split(',')[1] : urlOrText;
-            const ext = caption ? caption.split('.').pop().toLowerCase() : (type === 'audio' ? 'mp3' : 'jpg');
-            const uniqueName = `media_${Date.now()}.${ext}`;
-            const filePath = path.join(UPLOADS_DIR, uniqueName);
-            fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
-            fileUrl = `/uploads/${uniqueName}`;
-        } catch(e) {
-            console.error('File save error:', e.message);
-        }
-    }
-
-    const newMedia = {
-        id: Date.now(), type,
-        data: urlOrText || '',   // keep full base64 — always works even after redeploy
-        fileUrl,
-        fileName: caption || 'Media Item',
-        opinion: question, expectedAnswer: answer || null, explanation: null,
-        date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
-    };
-    mediaFiles.push(newMedia); saveData();
-    res.json({ success: true, media: newMedia });
 });
 
 // Set/update media expected answer
@@ -517,7 +515,7 @@ app.post("/ai/grammar", async (req, res) => {
         catch { return res.status(500).json({ error: "HTTP client unavailable. Run: npm install node-fetch" }); }
     }
 
-    const SYSTEM = `You are a strict English grammar examiner for Indian polytechnic students who speak Telugu/Kannada as their first language. Your job is to find EVERY single mistake in the student's spoken English — no matter how small. Never skip errors. Never group repeated errors into one — list each occurrence separately.
+    const SYSTEM = `You are a strict English grammar expert for Indian polytechnic students. Analyze spoken English and find EVERY single mistake.
 
 WHAT TO CHECK (check ALL of these every time):
 1. TENSE ERRORS — wrong verb tense, mixing past/present/future, incorrect perfect tense usage
@@ -567,9 +565,9 @@ Respond ONLY with valid JSON, no markdown fences, no text before or after:
                 },
                 body: JSON.stringify({
                     model: "claude-haiku-4-5-20251001",
-                    max_tokens: 2000,
+                    max_tokens: 1200,
                     system: SYSTEM,
-                    messages: [{ role: "user", content: `Student spoke this English: "${text.trim()}"\n\nFind ALL mistakes — tense, articles, prepositions, agreement, structure, repeated errors — list every single one separately. Return ONLY the JSON object.` }]
+                    messages: [{ role: "user", content: `Student spoke: "${text.trim()}"\n\nAnalyze and correct ALL mistakes. Return JSON only.` }]
                 }),
                 signal: ctrl.signal
             });
