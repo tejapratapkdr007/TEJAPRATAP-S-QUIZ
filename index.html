@@ -646,7 +646,7 @@ body{overflow-x:hidden;overflow-y:hidden}
 
     <!-- SITE FOOTER -->
     <div style="text-align:center;padding:18px 0 28px;font-size:11px;color:#334155;letter-spacing:1.5px;font-weight:600;text-transform:uppercase;border-top:1px solid #e0e7ff;margin-top:8px">
-       <span style="background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">S</span>
+      Designed by <span style="background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">SATHWIK</span>
       <span style="margin:0 8px;color:#bfdbfe">·</span>
       <span style="background:linear-gradient(135deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">Design and Built by CSE Student</span>
     </div>
@@ -1079,14 +1079,12 @@ async function showProfileModal(){
       </div>
       <span style="font-size:14px;font-weight:800;color:${col}">+${n*pts} pts</span>
     </div>`;
-    const calcTotal=(mdN+gkN+afN+wdN)*5;
-    if(g('pmScore'))g('pmScore').textContent=calcTotal;
     if(g('pmBreakdown'))g('pmBreakdown').innerHTML=
       row('🎵','Media Question',mdN,5,'#d97706')+
       row('🧠','GK Quiz',gkN,5,'#1E5BFF')+
       row('📰','Current Affairs',afN,5,'#ea580c')+
       row('📖','Word of Day',wdN,5,'#16a34a')+
-      `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 2px;margin-top:2px"><span style="font-size:14px;font-weight:700;color:#1e293b">🏆 Total</span><span style="font-size:20px;font-weight:800;color:#7c3aed">${calcTotal} pts</span></div>`;
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 2px;margin-top:2px"><span style="font-size:14px;font-weight:700;color:#1e293b">🏆 Total</span><span style="font-size:20px;font-weight:800;color:#7c3aed">${myTotal} pts</span></div>`;
   }catch(e){
     if(g('pmPhone'))g('pmPhone').textContent='—';
     if(g('pmBreakdown'))g('pmBreakdown').innerHTML='<div style="color:#dc2626;font-size:12px;text-align:center;padding:6px">Could not load data</div>';
@@ -1299,6 +1297,14 @@ async function loadRank() {
 // ═══════════════════════════════════════════════════
 // UTILITIES
 // ═══════════════════════════════════════════════════
+function fmtDate(dateStr){
+  try{
+    const d=new Date(dateStr+'T00:00:00');
+    const days=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return days[d.getDay()]+', '+d.getDate()+' '+months[d.getMonth()];
+  }catch(e){return dateStr;}
+}
 function today(){
   const now=new Date();
   const ist=new Date(now.getTime()+(5*60+30)*60*1000);
@@ -1726,8 +1732,8 @@ function tTab(id,btn){
   if(btn)btn.classList.add('on');
   if(id==='tGK')loadGKList();
   if(id==='tMedia')loadMediaList();
-  if(id==='tWord'){loadWordList();updateWUI();}
-  if(id==='tAffairs'){loadAffList();updateAffUI();}
+  if(id==='tWord'){loadWordList();updateWUI();const wb=document.getElementById('wBulk');if(wb&&wb.style.display!=='none')renderWBulk();}
+  if(id==='tAffairs'){loadAffList();updateAffUI();const ab=document.getElementById('affBulk');if(ab&&ab.style.display!=='none')renderAffBulk();}
   if(id==='tPhones')loadPhones();
   if(id==='tRank')loadTRank();
 }
@@ -1870,162 +1876,245 @@ function prevFile(inputId,prevId){
 }
 
 // ═══════════════════════════════════════════════════
-// AUTO-POST MACHINES — WORD
+// AUTO-POST MACHINES — WORD (server-backed)
 // ═══════════════════════════════════════════════════
 let wInterval=null;
-const W_SCHED_KEY='wSchedule';
-function getWSchedLocal(){try{const r=localStorage.getItem(W_SCHED_KEY);return r?JSON.parse(r):null;}catch{return null;}}
-function saveWSchedLocal(s){localStorage.setItem(W_SCHED_KEY,JSON.stringify(s));}
+let _wCache=null;
+let _wCount=10;
+
+async function getWSched(){
+  try{const r=await GET('/schedule/word');if(r&&r.empty){_wCache=null;return null;}_wCache=r;return r;}
+  catch{return _wCache;}
+}
 function updateWUI(s){
-  if(s===undefined)s=getWSchedLocal();
-  const eng=document.getElementById('wApEng'),cnt=document.getElementById('wApCnt'),nxt=document.getElementById('wApNext'),lst=document.getElementById('wApLast'),bar=document.getElementById('wApBar'),lbl=document.getElementById('wApLbl');
+  if(s===undefined)s=_wCache;
+  const eng=document.getElementById('wApEng'),cnt=document.getElementById('wApCnt'),
+    nxt=document.getElementById('wApNext'),lst=document.getElementById('wApLast'),
+    bar=document.getElementById('wApBar'),lbl=document.getElementById('wApLbl');
   if(eng)eng.innerHTML=wInterval?'<span style="color:#69f0ae">● Running ✅</span>':'<span style="color:#ef4444">⚫ Idle</span>';
   if(!s){if(cnt)cnt.textContent='0/0';if(nxt)nxt.textContent='—';if(lst)lst.textContent='—';if(bar)bar.style.width='0%';if(lbl)lbl.textContent='No schedule saved';return;}
-  const total=s.items.length,posted=s.items.filter(i=>i.posted).length;
+  const words=s.words||[];
+  const total=words.length,posted=words.filter(w=>w.posted).length;
   if(cnt){cnt.textContent=`${posted}/${total}`;cnt.style.color=posted===total?'#69f0ae':'#00e5ff';}
-  const nq=s.items.find(i=>!i.posted);
-  if(nxt){if(nq){nxt.textContent=nq.date===today()?'⚡TODAY!':new Date(nq.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});nxt.style.color=nq.date===today()?'#69f0ae':'#ffeb3b';}else{nxt.textContent='All done!🎉';nxt.style.color='#69f0ae';}}
-  if(lst)lst.textContent=s.lastPost||'—';
+  const nq=words.find(w=>!w.posted);
+  if(nxt){if(nq){nxt.textContent=nq.date===today()?'⚡TODAY!':fmtDate(nq.date);nxt.style.color=nq.date===today()?'#69f0ae':'#ffeb3b';}else{nxt.textContent='All done!🎉';nxt.style.color='#69f0ae';}}
+  if(lst)lst.textContent=s.lastAutoPost?`Day ${s.lastAutoPost.day} — ${s.lastAutoPost.time}`:'—';
   if(bar)bar.style.width=total>0?Math.round(posted/total*100)+'%':'0%';
-  if(lbl)lbl.textContent=`${posted} of ${total} posted`;
+  if(lbl)lbl.textContent=total>0?`${posted} of ${total} posted`:'No schedule saved';
 }
-function renderWBulk(){
+async function renderWBulk(){
   const con=document.getElementById('wBulkFields');if(!con)return;
   const selEl=document.getElementById('wCount');
   if(selEl)_wCount=parseInt(selEl.value);
-  const s=getWSchedLocal();const td=today();
+  con.innerHTML='<div class="spin-wrap"><div class="spinner"></div></div>';
+  const s=await getWSched();const td=today();
   const count=_wCount||10;
-  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Words:</label><select id="wCount" onchange="changeWCount()" style="background:#ffffff;color:#1e293b;border:2px solid #93c5fd;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
+  const inpSt='width:100%;background:#ffffff;border:2px solid #93c5fd;border-radius:9px;padding:10px 13px;color:#1e293b;font-size:13px;font-family:inherit;margin:4px 0 10px;outline:none;box-sizing:border-box;box-shadow:0 1px 4px rgba(37,99,235,0.08)';
+  const taSt=inpSt+';resize:vertical;min-height:72px';
+  const taGrn=taSt+';border-color:#22c55e';
+  let h=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;padding:10px 14px;flex-wrap:wrap">
+    <span style="font-size:12px;font-weight:700;color:#1e40af">📅 Number of Days:</span>
+    <select id="wCount" onchange="changeWCount()" style="background:#ffffff;color:#1e293b;border:2px solid #93c5fd;border-radius:7px;padding:7px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">
+      ${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n} days</option>`).join('')}
+    </select>
+    <span style="font-size:11px;color:#64748b">📌 Posts one per day at 5 AM</span>
+  </div>`;
+  const words=s?s.words:[];
   for(let i=0;i<count;i++){
-    const d=new Date();d.setDate(d.getDate()+i+1);const eq=s?s.items[i]:null;
-    const date=eq?eq.date:d.toISOString().split('T')[0];const posted=eq&&eq.posted;const isToday=eq&&eq.date===td&&!posted;
-    const dLabel=new Date(date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+    const d=new Date();d.setDate(d.getDate()+i+1);
+    const eq=words[i]||null;
+    const date=eq?eq.date:d.toISOString().split('T')[0];
+    const posted=eq&&eq.posted;const isToday=eq&&eq.date===td&&!posted;
+    const dLabel=fmtDate(date);
     const cls=posted?'bday posted':isToday?'bday today':'bday';
     const chip=posted?'<span class="chip p">✅ Posted</span>':isToday?'<span class="chip t">⚡ Today</span>':'<span class="chip q">⏳ Pending</span>';
-    h+=`<div class="${cls}"><div class="bday-hdr"><span style="color:${posted?'#22c55e':isToday?'#ea580c':'#a78bfa'}">Day ${i+1} — ${dLabel}</span>${chip}</div>
-      ${posted&&eq.postedAt?`<div style="font-size:10px;color:#22c55e;margin-bottom:5px">Posted: ${eq.postedAt}</div>`:''}
-      <label style="font-size:11px;color:#64748b">Word ${i+1}:</label>
-      <input type="text" id="wbi_${i}" placeholder="e.g. Ephemeral" style="width:100%;background:#ffffff;border:2px solid #93c5fd;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none" ${posted?'readonly':''} value="${eq?eq.word:''}">
-      <label style="font-size:11px;color:#64748b">Question:</label>
-      <textarea id="wbq_${i}" placeholder="What does this word mean?" style="min-height:40px" ${posted?'readonly':''}>${eq?eq.question:''}</textarea>
-      <label style="font-size:11px;color:#4ade80;font-weight:700">✅ Answer:</label>
-      <textarea id="wba_${i}" placeholder="Meaning, usage..." style="min-height:40px;border-color:#22c55e44" ${posted?'readonly':''}>${eq?eq.answer:''}</textarea>
+    h+=`<div class="${cls}">
+      <div class="bday-hdr"><span style="color:${posted?'#22c55e':isToday?'#ea580c':'#7c3aed'};font-weight:700">Day ${i+1} — ${dLabel}</span>${chip}</div>
+      ${posted&&eq.postedAt?`<div style="font-size:10px;color:#22c55e;margin-bottom:6px">✅ Posted: ${eq.postedAt}</div>`:''}
+      <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-top:4px">📝 Word / Phrase</label>
+      <input type="text" id="wbi_${i}" placeholder="e.g. Ephemeral, Serendipity..." style="${inpSt}" ${posted?'readonly':''} value="${eq?eq.word:''}">
+      <label style="display:block;font-size:12px;font-weight:600;color:#475569">❓ Question for Students</label>
+      <textarea id="wbq_${i}" placeholder="e.g. What does this word mean?" style="${taSt}" ${posted?'readonly':''}>${eq?eq.question:''}</textarea>
+      <label style="display:block;font-size:12px;font-weight:700;color:#16a34a">✅ Answer</label>
+      <textarea id="wba_${i}" placeholder="Meaning, usage, example..." style="${taGrn}" ${posted?'readonly':''}>${eq?eq.answer:''}</textarea>
       <input type="hidden" id="wbd_${i}" value="${date}">
     </div>`;
   }
   con.innerHTML=h;updateWUI(s);
 }
 function changeWCount(){renderWBulk();}
-function saveWBulk(){
-  const items=[];let valid=true,i=0;const s=getWSchedLocal();
+async function saveWBulk(){
+  const s=await getWSched();const words=[];let valid=true,i=0;
+  const existing=s?s.words:[];
   while(document.getElementById('wbi_'+i)!==null){
     const we=document.getElementById('wbi_'+i),qe=document.getElementById('wbq_'+i),ae=document.getElementById('wba_'+i),de=document.getElementById('wbd_'+i);
     if(!we||!qe||!ae||!de){i++;continue;}
-    if(s&&s.items[i]&&s.items[i].posted){items.push(s.items[i]);i++;continue;}
+    if(existing[i]&&existing[i].posted){words.push(existing[i]);i++;continue;}
     if(!we.value.trim()){toast('Fill Word '+(i+1),'error');valid=false;break;}
     if(!qe.value.trim()){toast('Fill Question '+(i+1),'error');valid=false;break;}
     if(!ae.value.trim()){toast('Fill Answer '+(i+1),'error');valid=false;break;}
-    items.push({word:we.value.trim(),question:qe.value.trim(),answer:ae.value.trim(),date:de.value,posted:false,postedAt:null});i++;
+    words.push({word:we.value.trim(),question:qe.value.trim(),answer:ae.value.trim(),date:de.value,posted:false,postedAt:null});
+    i++;
   }
   if(!valid)return;
-  saveWSchedLocal({savedOn:new Date().toISOString(),items,lastPost:s?s.lastPost:null});
-  startWMachine();toast(`✅ ${items.length} words saved!`,'success');renderWBulk();
+  try{
+    await fetch(API+'/schedule/word',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({schedule:{savedOn:new Date().toISOString(),words,lastAutoPost:s?s.lastAutoPost:null}})});
+    _wCache=null;startWMachine();toast(`✅ ${words.length} words saved!`,'success');renderWBulk();
+  }catch(e){toast('Save failed: '+e.message,'error');}
 }
 async function manualWPost(){
-  const s=getWSchedLocal();if(!s)return toast('No schedule saved!','warn');
-  const td=today();const idx=s.items.findIndex(i=>!i.posted&&i.date===td);
+  const s=await getWSched();if(!s)return toast('No schedule saved!','warn');
+  const td=today();const words=s.words||[];
+  const idx=words.findIndex(w=>!w.posted&&w.date===td);
   if(idx===-1)return toast('No word for today or already posted.','info');
-  const item=s.items[idx];
-  try{await POST('/word',{word:item.word,question:item.question,answer:item.answer});s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost=`Day ${idx+1} — ${s.items[idx].postedAt}`;saveWSchedLocal(s);toast("✅ Today's word posted!",'success');renderWBulk();loadWordList();}catch(e){toast('Failed: '+e.message,'error');}
+  const item=words[idx];
+  try{
+    await POST('/word',{word:item.word,question:item.question,answer:item.answer});
+    await fetch(API+'/schedule/word/mark-posted',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({index:idx,postedAt:new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})})});
+    _wCache=null;toast("✅ Today's word posted!",'success');renderWBulk();loadWordList();
+  }catch(e){toast('Failed: '+e.message,'error');}
 }
-function resetWBulk(){if(!confirm('Reset word schedule?'))return;localStorage.removeItem(W_SCHED_KEY);if(wInterval){clearInterval(wInterval);wInterval=null;}toast('🗑️ Word schedule reset.','warn');renderWBulk();}
+async function resetWBulk(){
+  if(!confirm('Reset word schedule?'))return;
+  await fetch(API+'/schedule/word',{method:'DELETE'});_wCache=null;
+  if(wInterval){clearInterval(wInterval);wInterval=null;}
+  toast('🗑️ Word schedule reset.','warn');renderWBulk();
+}
 function startWMachine(){
   if(wInterval)clearInterval(wInterval);
   wInterval=setInterval(async()=>{
-    if(!is5am())return;const s=getWSchedLocal();if(!s)return;
-    const td=today();const idx=s.items.findIndex(i=>!i.posted&&i.date===td);if(idx===-1)return;
-    const item=s.items[idx];
-    try{await POST('/word',{word:item.word,question:item.question,answer:item.answer});s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost=`Day ${idx+1} — ${s.items[idx].postedAt}`;saveWSchedLocal(s);toast("🤖 Auto-Posted today's word!",'success');loadWordList();}catch(e){}
-    updateWUI(getWSchedLocal());
-  },60000);updateWUI();
+    if(!is5am())return;
+    const s=await getWSched();if(!s)return;
+    const td=today();const words=s.words||[];
+    const idx=words.findIndex(w=>!w.posted&&w.date===td);if(idx===-1)return;
+    const item=words[idx];
+    try{
+      await POST('/word',{word:item.word,question:item.question,answer:item.answer});
+      await fetch(API+'/schedule/word/mark-posted',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({index:idx,postedAt:new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})})});
+      _wCache=null;toast("🤖 Auto-Posted today's word!",'success');loadWordList();
+    }catch(e){}
+    updateWUI(await getWSched());
+  },60000);
+  updateWUI();
 }
 
 // ═══════════════════════════════════════════════════
-// AUTO-POST MACHINES — AFFAIRS
+// AUTO-POST MACHINES — AFFAIRS (server-backed)
 // ═══════════════════════════════════════════════════
 let affInterval=null;
-const AFF_SCHED_KEY='affSchedule';
-function getAffSchedLocal(){try{const r=localStorage.getItem(AFF_SCHED_KEY);return r?JSON.parse(r):null;}catch{return null;}}
-function saveAffSchedLocal(s){localStorage.setItem(AFF_SCHED_KEY,JSON.stringify(s));}
+let _affCache=null;
+let _affCount=10;
+
+async function getAffSched(){
+  try{const r=await GET('/schedule/affairs');if(r&&r.empty){_affCache=null;return null;}_affCache=r;return r;}
+  catch{return _affCache;}
+}
 function updateAffUI(s){
-  if(s===undefined)s=getAffSchedLocal();
-  const eng=document.getElementById('affApEng'),cnt=document.getElementById('affApCnt'),nxt=document.getElementById('affApNext'),lst=document.getElementById('affApLast'),bar=document.getElementById('affApBar'),lbl=document.getElementById('affApLbl');
+  if(s===undefined)s=_affCache;
+  const eng=document.getElementById('affApEng'),cnt=document.getElementById('affApCnt'),
+    nxt=document.getElementById('affApNext'),lst=document.getElementById('affApLast'),
+    bar=document.getElementById('affApBar'),lbl=document.getElementById('affApLbl');
   if(eng)eng.innerHTML=affInterval?'<span style="color:#69f0ae">● Running ✅</span>':'<span style="color:#ef4444">⚫ Idle</span>';
   if(!s){if(cnt)cnt.textContent='0/0';if(nxt)nxt.textContent='—';if(lst)lst.textContent='—';if(bar)bar.style.width='0%';if(lbl)lbl.textContent='No schedule saved';return;}
-  const total=s.items.length,posted=s.items.filter(i=>i.posted).length;
+  const questions=s.questions||[];
+  const total=questions.length,posted=questions.filter(q=>q.posted).length;
   if(cnt){cnt.textContent=`${posted}/${total}`;cnt.style.color=posted===total?'#69f0ae':'#00e5ff';}
-  const nq=s.items.find(i=>!i.posted);
-  if(nxt){if(nq){nxt.textContent=nq.date===today()?'⚡TODAY!':new Date(nq.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});nxt.style.color=nq.date===today()?'#69f0ae':'#ffeb3b';}else{nxt.textContent='All done!🎉';nxt.style.color='#69f0ae';}}
-  if(lst)lst.textContent=s.lastPost||'—';
+  const nq=questions.find(q=>!q.posted);
+  if(nxt){if(nq){nxt.textContent=nq.date===today()?'⚡TODAY!':fmtDate(nq.date);nxt.style.color=nq.date===today()?'#69f0ae':'#ffeb3b';}else{nxt.textContent='All done!🎉';nxt.style.color='#69f0ae';}}
+  if(lst)lst.textContent=s.lastAutoPost?`Day ${s.lastAutoPost.day} — ${s.lastAutoPost.time}`:'—';
   if(bar)bar.style.width=total>0?Math.round(posted/total*100)+'%':'0%';
-  if(lbl)lbl.textContent=`${posted} of ${total} posted`;
+  if(lbl)lbl.textContent=total>0?`${posted} of ${total} posted`:'No schedule saved';
 }
-function renderAffBulk(){
+async function renderAffBulk(){
   const con=document.getElementById('affBulkFields');if(!con)return;
   const selEl=document.getElementById('affCount');
   if(selEl)_affCount=parseInt(selEl.value);
-  const s=getAffSchedLocal();const td=today();
+  con.innerHTML='<div class="spin-wrap"><div class="spinner"></div></div>';
+  const s=await getAffSched();const td=today();
   const count=_affCount||10;
-  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><label style="color:#64748b;font-size:12px">Affairs:</label><select id="affCount" onchange="changeAffCount()" style="background:#ffffff;color:#1e293b;border:2px solid #93c5fd;border-radius:7px;padding:7px 10px;font-size:12px;font-family:inherit">${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}</select></div>`;
+  const taSt='width:100%;background:#ffffff;border:2px solid #93c5fd;border-radius:9px;padding:10px 13px;color:#1e293b;font-size:13px;font-family:inherit;margin:4px 0 10px;outline:none;box-sizing:border-box;resize:vertical;min-height:72px;box-shadow:0 1px 4px rgba(37,99,235,0.08)';
+  const taGrn=taSt+';border-color:#22c55e';
+  let h=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:9px;padding:10px 14px;flex-wrap:wrap">
+    <span style="font-size:12px;font-weight:700;color:#1e40af">📅 Number of Days:</span>
+    <select id="affCount" onchange="changeAffCount()" style="background:#ffffff;color:#1e293b;border:2px solid #93c5fd;border-radius:7px;padding:7px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">
+      ${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n} days</option>`).join('')}
+    </select>
+    <span style="font-size:11px;color:#64748b">📌 Posts one per day at 5 AM</span>
+  </div>`;
+  const questions=s?s.questions:[];
   for(let i=0;i<count;i++){
-    const d=new Date();d.setDate(d.getDate()+i+1);const eq=s?s.items[i]:null;
-    const date=eq?eq.date:d.toISOString().split('T')[0];const posted=eq&&eq.posted;const isToday=eq&&eq.date===td&&!posted;
-    const dLabel=new Date(date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+    const d=new Date();d.setDate(d.getDate()+i+1);
+    const eq=questions[i]||null;
+    const date=eq?eq.date:d.toISOString().split('T')[0];
+    const posted=eq&&eq.posted;const isToday=eq&&eq.date===td&&!posted;
+    const dLabel=fmtDate(date);
     const cls=posted?'bday posted':isToday?'bday today':'bday';
     const chip=posted?'<span class="chip p">✅ Posted</span>':isToday?'<span class="chip t">⚡ Today</span>':'<span class="chip q">⏳ Pending</span>';
-    h+=`<div class="${cls}"><div class="bday-hdr"><span style="color:${posted?'#22c55e':isToday?'#ea580c':'#fbbf24'}">Day ${i+1} — ${dLabel}</span>${chip}</div>
-      ${posted&&eq.postedAt?`<div style="font-size:10px;color:#22c55e;margin-bottom:5px">Posted: ${eq.postedAt}</div>`:''}
-      <label style="font-size:11px;color:#64748b">Question ${i+1}:</label>
-      <textarea id="abq_${i}" placeholder="Current affairs question..." style="min-height:50px" ${posted?'readonly':''}>${eq?eq.question:''}</textarea>
-      <label style="font-size:11px;color:#4ade80;font-weight:700">✅ Answer ${i+1}:</label>
-      <textarea id="aba_${i}" placeholder="Answer..." style="min-height:40px;border-color:#22c55e44" ${posted?'readonly':''}>${eq?eq.answer:''}</textarea>
+    h+=`<div class="${cls}">
+      <div class="bday-hdr"><span style="color:${posted?'#22c55e':isToday?'#ea580c':'#d97706'};font-weight:700">Day ${i+1} — ${dLabel}</span>${chip}</div>
+      ${posted&&eq.postedAt?`<div style="font-size:10px;color:#22c55e;margin-bottom:6px">✅ Posted: ${eq.postedAt}</div>`:''}
+      <label style="display:block;font-size:12px;font-weight:600;color:#475569;margin-top:4px">❓ Current Affairs Question</label>
+      <textarea id="abq_${i}" placeholder="e.g. Who became the new PM of...?" style="${taSt}" ${posted?'readonly':''}>${eq?eq.question:''}</textarea>
+      <label style="display:block;font-size:12px;font-weight:700;color:#16a34a">✅ Answer</label>
+      <textarea id="aba_${i}" placeholder="Correct answer..." style="${taGrn}" ${posted?'readonly':''}>${eq?eq.answer:''}</textarea>
       <input type="hidden" id="abd_${i}" value="${date}">
     </div>`;
   }
   con.innerHTML=h;updateAffUI(s);
 }
 function changeAffCount(){renderAffBulk();}
-function saveAffBulk(){
-  const items=[];let valid=true,i=0;const s=getAffSchedLocal();
+async function saveAffBulk(){
+  const s=await getAffSched();const questions=[];let valid=true,i=0;
+  const existing=s?s.questions:[];
   while(document.getElementById('abq_'+i)!==null){
     const qe=document.getElementById('abq_'+i),ae=document.getElementById('aba_'+i),de=document.getElementById('abd_'+i);
     if(!qe||!ae||!de){i++;continue;}
-    if(s&&s.items[i]&&s.items[i].posted){items.push(s.items[i]);i++;continue;}
+    if(existing[i]&&existing[i].posted){questions.push(existing[i]);i++;continue;}
     if(!qe.value.trim()){toast('Fill Question '+(i+1),'error');valid=false;break;}
     if(!ae.value.trim()){toast('Fill Answer '+(i+1),'error');valid=false;break;}
-    items.push({question:qe.value.trim(),answer:ae.value.trim(),date:de.value,posted:false,postedAt:null});i++;
+    questions.push({question:qe.value.trim(),answer:ae.value.trim(),date:de.value,posted:false,postedAt:null});
+    i++;
   }
   if(!valid)return;
-  saveAffSchedLocal({savedOn:new Date().toISOString(),items,lastPost:s?s.lastPost:null});
-  startAffMachine();toast(`✅ ${items.length} affairs saved!`,'success');renderAffBulk();
+  try{
+    await fetch(API+'/schedule/affairs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({schedule:{savedOn:new Date().toISOString(),questions,lastAutoPost:s?s.lastAutoPost:null}})});
+    _affCache=null;startAffMachine();toast(`✅ ${questions.length} affairs saved!`,'success');renderAffBulk();
+  }catch(e){toast('Save failed: '+e.message,'error');}
 }
 async function manualAffPost(){
-  const s=getAffSchedLocal();if(!s)return toast('No schedule saved!','warn');
-  const td=today();const idx=s.items.findIndex(i=>!i.posted&&i.date===td);
+  const s=await getAffSched();if(!s)return toast('No schedule saved!','warn');
+  const td=today();const questions=s.questions||[];
+  const idx=questions.findIndex(q=>!q.posted&&q.date===td);
   if(idx===-1)return toast('No affairs for today or already posted.','info');
-  const item=s.items[idx];
-  try{await POST('/affairs',{question:item.question,answer:item.answer});s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost=`Day ${idx+1} — ${s.items[idx].postedAt}`;saveAffSchedLocal(s);toast("✅ Today's affairs posted!",'success');renderAffBulk();loadAffList();}catch(e){toast('Failed: '+e.message,'error');}
+  const item=questions[idx];
+  try{
+    await POST('/affairs',{question:item.question,answer:item.answer});
+    await fetch(API+'/schedule/affairs/mark-posted',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({index:idx,postedAt:new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})})});
+    _affCache=null;toast("✅ Today's affairs posted!",'success');renderAffBulk();loadAffList();
+  }catch(e){toast('Failed: '+e.message,'error');}
 }
-function resetAffBulk(){if(!confirm('Reset affairs schedule?'))return;localStorage.removeItem(AFF_SCHED_KEY);if(affInterval){clearInterval(affInterval);affInterval=null;}toast('🗑️ Affairs schedule reset.','warn');renderAffBulk();}
+async function resetAffBulk(){
+  if(!confirm('Reset affairs schedule?'))return;
+  await fetch(API+'/schedule/affairs',{method:'DELETE'});_affCache=null;
+  if(affInterval){clearInterval(affInterval);affInterval=null;}
+  toast('🗑️ Affairs schedule reset.','warn');renderAffBulk();
+}
 function startAffMachine(){
   if(affInterval)clearInterval(affInterval);
   affInterval=setInterval(async()=>{
-    if(!is5am())return;const s=getAffSchedLocal();if(!s)return;
-    const td=today();const idx=s.items.findIndex(i=>!i.posted&&i.date===td);if(idx===-1)return;
-    const item=s.items[idx];
-    try{await POST('/affairs',{question:item.question,answer:item.answer});s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');s.lastPost=`Day ${idx+1} — ${s.items[idx].postedAt}`;saveAffSchedLocal(s);toast("🤖 Auto-Posted today's affairs!",'success');loadAffList();}catch(e){}
-    updateAffUI(getAffSchedLocal());
-  },60000);updateAffUI();
+    if(!is5am())return;
+    const s=await getAffSched();if(!s)return;
+    const td=today();const questions=s.questions||[];
+    const idx=questions.findIndex(q=>!q.posted&&q.date===td);if(idx===-1)return;
+    const item=questions[idx];
+    try{
+      await POST('/affairs',{question:item.question,answer:item.answer});
+      await fetch(API+'/schedule/affairs/mark-posted',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({index:idx,postedAt:new Date().toLocaleString('en-IN',{timeZone:'Asia/Kolkata'})})});
+      _affCache=null;toast("🤖 Auto-Posted today's affairs!",'success');loadAffList();
+    }catch(e){}
+    updateAffUI(await getAffSched());
+  },60000);
+  updateAffUI();
 }
 
 
