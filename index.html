@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#1E5BFF">
-<title>Polytechnic Quiz &amp; Speaking Practice</title>
+<title>PolyVocal - Speak &amp; Spark</title>
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -354,8 +354,8 @@ body{overflow-x:hidden;overflow-y:hidden}
     <div class="login-card">
     <div class="login-hero">
       <div class="ico">📚🏫</div>
-      <h1>Polytechnic Quiz &amp; Speaking</h1>
-      <p>Quiz &amp; Speaking Practice for Polytechnic Students</p>
+      <h1>PolyVocal — Speak &amp; Spark</h1>
+      <p>Speaking &amp; Quiz Practice for Polytechnic Students</p>
     </div>
     <div class="faf-box">
       <div class="faf-ttl">⚡ First Answer First — Yesterday's Top 3</div>
@@ -373,6 +373,11 @@ body{overflow-x:hidden;overflow-y:hidden}
     </div>
     <button class="btn pri block" onclick="doLogin()">🚀 Login as Student</button>
     <p style="text-align:center;margin-top:14px;color:#475569;font-size:13px">Teacher? <button class="lbtn" onclick="go('s-teacher-login')">Login here →</button></p>
+    <div style="text-align:center;padding:14px 0 4px;font-size:11px;color:#94a3b8;letter-spacing:1.5px;font-weight:600;text-transform:uppercase;border-top:1px solid #e0e7ff;margin-top:14px">
+       <span style="background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800"></span>
+      <span style="margin:0 6px;color:#bfdbfe">·</span>
+      <span style="background:linear-gradient(135deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">Design and Built by CSE Student</span>
+    </div>
     </div>
   </div>
 </div>
@@ -383,13 +388,18 @@ body{overflow-x:hidden;overflow-y:hidden}
     <div class="login-card">
     <div class="login-hero" style="background:linear-gradient(135deg,rgba(124,58,237,0.08),rgba(30,91,255,0.06));border:2px solid rgba(124,58,237,0.25);">
       <div class="ico">👨‍🏫🔒</div>
-      <h1>Quiz &amp; Speaking</h1>
+      <h1>PolyVocal — Speak &amp; Spark</h1>
       <p>Teacher Access — Authorized Only</p>
     </div>
     <div class="wrn">⚠️ This area is for Teacher only</div>
     <div class="fg"><label>🔐 Password</label><input id="tPw" type="password" placeholder="Enter password" onkeydown="if(event.key==='Enter')doTLogin()"></div>
     <button class="btn pri block" onclick="doTLogin()">🔓 Login</button>
     <button class="btn sec block" style="margin-top:8px" onclick="go('s-login')">← Back to Student Login</button>
+    <div style="text-align:center;padding:14px 0 4px;font-size:11px;color:#94a3b8;letter-spacing:1.5px;font-weight:600;text-transform:uppercase;border-top:1px solid #e0e7ff;margin-top:14px">
+      Designed by <span style="background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">SATHWIK</span>
+      <span style="margin:0 6px;color:#bfdbfe">·</span>
+      <span style="background:linear-gradient(135deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">Design and Built by CSE Student</span>
+    </div>
     </div>
   </div>
 </div>
@@ -400,7 +410,7 @@ body{overflow-x:hidden;overflow-y:hidden}
     <button class="ham" id="hamBtn" onclick="toggleSidebar()">☰</button>
     <div class="topbar-brand">
       <div class="topbar-logo">📚</div>
-      <div><div class="topbar-title" style="font-size:14px">Quiz & Speaking</div><div class="topbar-sub">Polytechnic Students</div></div>
+      <div><div class="topbar-title" style="font-size:14px">PolyVocal</div><div class="topbar-sub">Speak & Spark</div></div>
     </div>
     <div class="topbar-divider"></div>
     <div class="topbar-faf"><div class="topbar-faf-lbl">⚡ FAF</div><div class="topbar-faf-body" id="homeFaf">Loading...</div></div>
@@ -557,7 +567,7 @@ body{overflow-x:hidden;overflow-y:hidden}
     <!-- TEACHER -->
     <div class="screen" id="s-teacher" style="background:linear-gradient(135deg,#1E5BFF,#A84DFF)">
       <div class="page-hdr" style="flex-wrap:wrap;gap:10px">
-        <div><div style="font-size:10px;color:rgba(255,255,255,0.7);letter-spacing:2px;font-weight:700;margin-bottom:3px;text-transform:uppercase">Teacher Dashboard</div><h1 style="color:#ffffff">Quiz & Speaking</h1></div>
+        <div><div style="font-size:10px;color:rgba(255,255,255,0.7);letter-spacing:2px;font-weight:700;margin-bottom:3px;text-transform:uppercase">Teacher Dashboard</div><h1 style="color:#ffffff">PolyVocal</h1></div>
         <button class="btn red" onclick="doTLogout()">↩️ Logout</button>
       </div>
       <div class="ttabs" id="teacherTabs">
@@ -816,6 +826,14 @@ body{overflow-x:hidden;overflow-y:hidden}
       </div>
 
     </div><!-- /s-teacher -->
+
+    <!-- SITE FOOTER -->
+    <div style="text-align:center;padding:18px 0 28px;font-size:11px;color:#334155;letter-spacing:1.5px;font-weight:600;text-transform:uppercase;border-top:1px solid #e0e7ff;margin-top:8px">
+      Designed by <span style="background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">SATHWIK</span>
+      <span style="margin:0 8px;color:#bfdbfe">·</span>
+      <span style="background:linear-gradient(135deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">Design and Built by CSE Student</span>
+    </div>
+
   </div><!-- /appMain -->
 
   <!-- MOBILE BOTTOM NAV -->
@@ -877,9 +895,6 @@ let ME = null, MY_NAME = null, IS_T = false;
 let T_PW = localStorage.getItem('tpw') || '11223344@Ttp';
 let _gkCache = null, gkInterval = null;
 let spRec = null, spIsRec = false, spTimer = null, spElapsed = 0, spDuration = 120, spText = '', spFinalText = '';
-// XSS-safe HTML escape helper
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-
 let spRestartCount = 0, spRestartTimer = null;
 // Audio recording globals
 let spMediaRec = null, spAudioChunks = [], spMediaStream = null;
@@ -1162,8 +1177,8 @@ async function loadLoginFaf() {
   el.innerHTML = pAns.slice(0,3).map((a,i)=>`
     <div style="display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:1px solid #1e2535">
       <span style="font-size:14px">${medals[i]}</span>
-      <span style="flex:1;font-weight:700;color:${colors[i]};font-size:12px">${esc(a.studentName||'?')}</span>
-      <span style="font-size:10px;color:#64748b">${esc(a.studentPin)}</span>
+      <span style="flex:1;font-weight:700;color:${colors[i]};font-size:12px">${a.studentName||'?'}</span>
+      <span style="font-size:10px;color:#64748b">${a.studentPin}</span>
       ${i===0?'<span style="background:rgba(255,215,0,0.1);color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:1px 7px;font-size:9px;font-weight:700">⚡FIRST</span>':''}
     </div>`).join('');
 }
@@ -1174,7 +1189,7 @@ async function loadHomeFaf() {
   const prev = qs.length>=2 ? qs[qs.length-2] : qs[0];
   const pAns = (ans||[]).filter(a=>a.questionId===prev.id).sort((a,b)=>new Date(a.submittedAt||0)-new Date(b.submittedAt||0));
   const medals=['🥇','🥈','🥉'];
-  el.innerHTML = pAns.length ? pAns.slice(0,3).map((a,i)=>`<span style="margin-right:8px">${medals[i]} ${esc(a.studentName||'?')}</span>`).join('') : 'No answers yet';
+  el.innerHTML = pAns.length ? pAns.slice(0,3).map((a,i)=>`<span style="margin-right:8px">${medals[i]} ${a.studentName||'?'}</span>`).join('') : 'No answers yet';
 }
 async function loadStats() {
   const data = await GET('/scores'); if (!data||!ME) return;
@@ -1274,12 +1289,12 @@ async function loadQuiz() {
   const q = realQs[realQs.length-1];
   const myAns = (ans||[]).find(a=>a.questionId===q.id&&a.studentPin===ME&&(!a.type||a.type==='question'));
   let h = `<div class="card bl"><div class="card-lbl">📅 ${q.date}</div><div class="card-ttl">📌 Today's Question</div>
-    <p style="font-size:15px;color:var(--text);line-height:1.7;margin-top:8px">${esc(q.question)}</p>
+    <p style="font-size:15px;color:var(--text);line-height:1.7;margin-top:8px">${q.question}</p>
     ${q.questionFile?(q.questionFileType==='image'?`<div style="margin:12px 0"><img src="${safeImgSrc(q.questionFile,'image')}" class="media-img" onerror="this.parentNode.style.display='none'"></div>`:`<div style="margin:12px 0"><audio controls class="media-aud" src="${getAudioSrc(q.questionFile)}"></audio></div>`):''}
   </div>`;
   if (myAns) {
-    h += `<div class="ok">✅ Your answer: <strong>${esc(myAns.answer)}</strong></div>`;
-    if (q.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Correct Answer</div><p style="font-size:15px;color:#86efac;font-weight:700;margin-top:4px">${esc(q.answer)}</p>${q.answerOpinion?`<div style="margin-top:10px;padding:10px;background:rgba(167,139,250,0.06);border-left:3px solid #a78bfa;border-radius:7px;color:#d4b8ff;font-size:13px;line-height:1.6">💬 ${esc(q.answerOpinion)}</div>`:''}</div>`;
+    h += `<div class="ok">✅ Your answer: <strong>${myAns.answer}</strong></div>`;
+    if (q.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Correct Answer</div><p style="font-size:15px;color:#86efac;font-weight:700;margin-top:4px">${q.answer}</p>${q.answerOpinion?`<div style="margin-top:10px;padding:10px;background:rgba(167,139,250,0.06);border-left:3px solid #a78bfa;border-radius:7px;color:#d4b8ff;font-size:13px;line-height:1.6">💬 ${q.answerOpinion}</div>`:''}</div>`;
     else h += `<div class="inf">⏳ Teacher hasn't revealed the answer yet</div>`;
     const total = (ans||[]).filter(a=>a.questionId===q.id&&(!a.type||a.type==='question')).length;
     h += `<div class="inf">👥 ${total} student${total!==1?'s':''} answered</div>`;
@@ -1344,7 +1359,7 @@ async function loadMediaStudent() {
   if (m.opinion) h += `<p style="font-size:14px;color:var(--text);margin-top:10px;line-height:1.6">${m.opinion}</p>`;
   h += '</div>';
   if (myAns) {
-    h += `<div class="ok">✅ Your answer: ${esc(myAns.answer)}</div>`;
+    h += `<div class="ok">✅ Your answer: ${myAns.answer}</div>`;
     if (m.expectedAnswer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="color:#86efac;font-weight:700;margin-top:4px">${m.expectedAnswer}</p></div>`;
     else h += `<div class="inf">⏳ Answer not revealed yet</div>`;
   } else {
@@ -1373,10 +1388,10 @@ async function loadWordStudent() {
   if (!list.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">📖 No word posted yet</div>'; return; }
   const w = list[list.length-1];
   const myAns = (ans||[]).find(a=>a.questionId===w.id&&a.studentPin===ME&&a.type==='word');
-  let h = `<div class="card pu"><div class="card-lbl">📅 ${w.date}</div><div style="font-size:30px;font-weight:800;color:#c4b5fd;margin-bottom:7px;font-family:'Syne',sans-serif">${w.word}</div><p style="font-size:14px;color:var(--text);line-height:1.6">${esc(w.question)}</p></div>`;
+  let h = `<div class="card pu"><div class="card-lbl">📅 ${w.date}</div><div style="font-size:30px;font-weight:800;color:#c4b5fd;margin-bottom:7px;font-family:'Syne',sans-serif">${w.word}</div><p style="font-size:14px;color:var(--text);line-height:1.6">${w.question}</p></div>`;
   if (myAns) {
-    h += `<div class="ok">✅ Your answer: ${esc(myAns.answer)}</div>`;
-    if (w.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="font-size:14px;color:#86efac;line-height:1.6;margin-top:4px">${esc(w.answer)}</p></div>`;
+    h += `<div class="ok">✅ Your answer: ${myAns.answer}</div>`;
+    if (w.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="font-size:14px;color:#86efac;line-height:1.6;margin-top:4px">${w.answer}</p></div>`;
     else h += `<div class="inf">⏳ Answer not revealed yet</div>`;
   } else {
     h += `<div class="card"><div class="card-lbl">📝 Your Answer</div><div class="fg" style="margin-top:8px"><textarea id="wAns" placeholder="Your answer..."></textarea></div><button class="btn pur block" onclick="submitWord(${w.id})">📤 Submit</button></div>`;
@@ -1388,8 +1403,8 @@ async function submitWord(wId) {
   if (!ans) return toast('Write your answer!','error');
   try {
     await POST('/answers',{questionId:wId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'word'});
-    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today()}).catch(()=>{});
-    toast('✅ Submitted! +5 points','success'); loadWordStudent();
+    await POST('/scores',{pin:ME,name:MY_NAME,points:3,date:today()}).catch(()=>{});
+    toast('✅ Submitted! +3 points','success'); loadWordStudent();
   } catch(e) { toast(e.message,'error'); }
 }
 
@@ -1404,10 +1419,10 @@ async function loadAffairsStudent() {
   if (!list.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">📰 No affairs posted yet</div>'; return; }
   const a = list[list.length-1];
   const myAns = (ans||[]).find(x=>x.questionId===a.id&&x.studentPin===ME&&x.type==='affairs');
-  let h = `<div class="card am"><div class="card-lbl">📅 ${a.date}</div><div class="card-ttl" style="color:#fbbf24">📰 Current Affairs</div><p style="font-size:15px;color:var(--text);line-height:1.6;margin-top:8px">${esc(a.question)}</p></div>`;
+  let h = `<div class="card am"><div class="card-lbl">📅 ${a.date}</div><div class="card-ttl" style="color:#fbbf24">📰 Current Affairs</div><p style="font-size:15px;color:var(--text);line-height:1.6;margin-top:8px">${a.question}</p></div>`;
   if (myAns) {
-    h += `<div class="ok">✅ Your answer: ${esc(myAns.answer)}</div>`;
-    if (a.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="font-size:14px;color:#86efac;font-weight:700;margin-top:4px">${esc(a.answer)}</p></div>`;
+    h += `<div class="ok">✅ Your answer: ${myAns.answer}</div>`;
+    if (a.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="font-size:14px;color:#86efac;font-weight:700;margin-top:4px">${a.answer}</p></div>`;
     else h += `<div class="inf">⏳ Answer not revealed yet</div>`;
   } else {
     h += `<div class="card"><div class="card-lbl">📝 Your Answer</div><div class="fg" style="margin-top:8px"><textarea id="affAns" placeholder="Your answer..."></textarea></div><button class="btn amb block" onclick="submitAffairs(${a.id})">📤 Submit</button></div>`;
@@ -1419,8 +1434,8 @@ async function submitAffairs(aId) {
   if (!ans) return toast('Write your answer!','error');
   try {
     await POST('/answers',{questionId:aId,studentPin:ME,studentName:MY_NAME,answer:ans,type:'affairs'});
-    await POST('/scores',{pin:ME,name:MY_NAME,points:5,date:today()}).catch(()=>{});
-    toast('✅ Submitted! +5 points','success'); loadAffairsStudent();
+    await POST('/scores',{pin:ME,name:MY_NAME,points:3,date:today()}).catch(()=>{});
+    toast('✅ Submitted! +3 points','success'); loadAffairsStudent();
   } catch(e) { toast(e.message,'error'); }
 }
 
@@ -1440,7 +1455,7 @@ async function loadRank() {
   if (prev) {
     const pAns=answers.filter(a=>a.questionId===prev.id&&(!a.type||a.type==='question')).sort((a,b)=>new Date(a.submittedAt||0)-new Date(b.submittedAt||0));
     const medals=['🥇','🥈','🥉'],golds=['#FFD700','#C0C0C0','#cd7f32'];
-    h+=pAns.length?pAns.slice(0,3).map((a,i)=>{const isMe=a.studentPin===ME;return`<div class="rank-item" style="${isMe?'background:rgba(255,215,0,0.05);border-color:rgba(255,215,0,0.25);':''}"><div class="ri-rank">${medals[i]}</div><div style="flex:1"><div class="ri-name" style="color:${golds[i]}">${esc(a.studentName||'?')}${isMe?' (You)':''}</div><div class="ri-pin">${a.studentPin}</div></div>${i===0?'<span style="background:rgba(255,215,0,0.1);color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:2px 8px;font-size:9px;font-weight:700">⚡FIRST</span>':''}</div>`}).join(''):'<div class="inf">No answers yet</div>';
+    h+=pAns.length?pAns.slice(0,3).map((a,i)=>{const isMe=a.studentPin===ME;return`<div class="rank-item" style="${isMe?'background:rgba(255,215,0,0.05);border-color:rgba(255,215,0,0.25);':''}"><div class="ri-rank">${medals[i]}</div><div style="flex:1"><div class="ri-name" style="color:${golds[i]}">${a.studentName||'?'}${isMe?' (You)':''}</div><div class="ri-pin">${a.studentPin}</div></div>${i===0?'<span style="background:rgba(255,215,0,0.1);color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:2px 8px;font-size:9px;font-weight:700">⚡FIRST</span>':''}</div>`}).join(''):'<div class="inf">No answers yet</div>';
   } else h+='<div class="inf">No questions yet</div>';
   h+='</div>';
   const cutoff=new Date();cutoff.setDate(cutoff.getDate()-15);
@@ -1469,32 +1484,42 @@ async function loadRank() {
 // ═══════════════════════════════════════════════════
 async function aiCorrectSpeech(text) {
   if (!text || text.trim().length < 5) return null;
-  const prompt = `You are a strict English grammar teacher. Carefully analyze this spoken English text and find EVERY single mistake — grammar, tense, articles, subject-verb agreement, word choice, prepositions, plurals, spelling (as spoken).
+  const prompt = `You are a strict English grammar expert for Indian polytechnic students. Analyze spoken English and find EVERY single mistake.
+
+WHAT TO CHECK (check ALL of these every time):
+1. TENSE ERRORS — wrong verb tense, mixing past/present/future, incorrect perfect tense usage
+2. SUBJECT-VERB AGREEMENT — singular/plural mismatch (he go, they was, it are, etc.)
+3. ARTICLE ERRORS — missing 'a', 'an', 'the'; wrong article used; extra article where none needed
+4. PREPOSITION ERRORS — wrong preposition (in/on/at/to/for/with/by), missing preposition, extra preposition
+5. REPEATED MISTAKES — if the student makes the same error multiple times, list EACH occurrence as a separate error entry with its exact wrong phrase
+6. SENTENCE STRUCTURE — wrong word order, incomplete sentences, run-on sentences, dangling clauses
+7. PRONOUN ERRORS — wrong pronoun case (him/he, her/she), pronoun-antecedent mismatch
+8. PLURAL/SINGULAR NOUN ERRORS — wrong plural form, uncountable noun used as countable
+9. AUXILIARY VERB ERRORS — missing do/does/did, wrong modal (can/could/will/would/shall/should)
+10. CONJUNCTIONS — missing conjunctions, wrong conjunction, comma splice
+11. SPELLING/WORD CHOICE — wrong word used, incorrect vocabulary for context
+12. DOUBLE NEGATIVES — using two negatives (I don't know nothing)
+13. REDUNDANCY — unnecessary repeated words or phrases
+
+SCORING RULES (be strict):
+- 90-100: Near perfect, max 1 minor error
+- 75-89: Good, 2-4 minor errors
+- 60-74: Average, 5-7 errors or 1-2 major errors
+- 40-59: Below average, many errors or serious structural problems
+- 0-39: Poor, fundamental errors throughout
+
+CRITICAL RULES:
+- NEVER return empty errors array if there are mistakes
+- NEVER merge two different instances of the same error — each wrong phrase is a separate object
+- The "wrong" field must be the EXACT substring from the student's text
+- The "corrected" field must fix ALL errors and be completely natural English
+- If student text has 0 errors, return errors:[] and score:100
 
 Student's spoken text:
 "${text.trim()}"
 
-Reply ONLY with a valid JSON object — no markdown, no explanation, no extra text. Use this exact format:
-{
-  "corrected": "the fully corrected version of the text",
-  "score": 78,
-  "errors": [
-    {
-      "wrong": "exact phrase from student text",
-      "right": "corrected phrase",
-      "rule": "clear explanation of the error",
-      "type": "Tense|Article|Agreement|Vocabulary|Preposition|Plural|Word Order"
-    }
-  ],
-  "suggestions": ["specific improvement tip 1", "specific improvement tip 2"],
-  "pronunciation_tips": ["pronunciation tip if relevant"]
-}
-
-Important rules:
-- "wrong" must be copied EXACTLY as it appears in the student's text (case-insensitive match)
-- score 100 = perfect, 0 = very poor
-- Find EVERY mistake — do not skip even small errors
-- If text is perfect, return empty errors array and score 95-100`;
+Respond ONLY with valid JSON, no markdown fences, no text before or after:
+{"corrected":"fully corrected text","errors":[{"wrong":"exact wrong phrase","right":"correct replacement","rule":"grammar rule explanation","type":"Tense|Agreement|Article|Preposition|Structure|Pronoun|Noun|Auxiliary|Conjunction|WordChoice|Redundancy|Other"}],"score":0-100,"suggestions":["actionable tip 1","actionable tip 2","actionable tip 3"],"pronunciation_tips":["tip for Telugu/Kannada speakers"]}`;
 
   // 1️⃣ Try backend /ai/grammar first
   for (let attempt = 1; attempt <= 2; attempt++) {
@@ -1636,14 +1661,10 @@ async function loadSpeak() {
 }
 
 function spReset() {
-  
-  spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spIsRec=false; 
+  _spSessionId++;
+  spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spIsRec=false; spRestartCount=0
   clearInterval(spTimer); clearTimeout(spRestartTimer);
-  if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
-  if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
-  spMediaRec=null; spAudioChunks=[];
-  // Release mic stream so browser frees the mic indicator
-  if(spMediaStream){try{spMediaStream.getTracks().forEach(t=>t.stop());}catch(e){}spMediaStream=null;}
+  if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   const btn=document.getElementById('spBtn');
   if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
   const st=document.getElementById('spStatus');
@@ -1671,113 +1692,130 @@ function spUpdateTimer() {
 }
 
 function spToggle() {
-  if(!localStorage.getItem('spTopic'))return toast('\u26a0 Teacher has not set a topic yet!','warn');
+  if(!localStorage.getItem('spTopic'))return toast('⚠ Teacher has not set a topic yet!','warn');
   if(spIsRec)spPause();else spStart();
 }
 
 function spStart() {
   clearTimeout(spRestartTimer);
-  if(spRec){try{spRec.abort();}catch(e){}spRec=null;}
+  if(spRec){spRec.onresult=null;spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
   spMediaRec=null; spAudioChunks=[];
-  if(spMediaStream){try{spMediaStream.getTracks().forEach(t=>t.stop());}catch(e){}spMediaStream=null;}
-  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spDisplayText='';
+  spIsRec=true; spElapsed=0; spText=''; spFinalText=''; spDisplayText=''; spRestartCount=0
   const btn=document.getElementById('spBtn');
-  if(btn){btn.classList.add('rec');btn.textContent='\u23f8';}
+  if(btn){btn.classList.add('rec');btn.textContent='⏸';}
   const st=document.getElementById('spStatus');
-  if(st){st.textContent='\ud83c\udf99\ufe0f Starting...';st.className='sp-status live';}
+  if(st){st.textContent='🔴 Recording — speak now...';st.className='sp-status live';}
   const sub=document.getElementById('tSub');if(sub)sub.textContent='SPEAKING';
   const tr=document.getElementById('spTranscript');if(tr)tr.innerHTML='';
   ['spCorrectBox','spAnalysisBox','spSuggestBox'].forEach(id=>{const el=document.getElementById(id);if(el)el.classList.remove('show');});
   const eb=document.getElementById('errBadge');if(eb)eb.style.display='none';
   document.getElementById('spErrs').textContent='0';
-  document.getElementById('spScore').textContent='\u2014';
+  document.getElementById('spScore').textContent='—';
   document.getElementById('spWords').textContent='0';
-  spDoSR();
+  spStartSR();
   clearInterval(spTimer);
   spTimer=setInterval(()=>{
     if(!spIsRec)return;
     spElapsed++;spUpdateTimer();
-    if(spElapsed>=spDuration){spStop();toast('\u23f1 Time is up!','warn');}
+    if(spElapsed>=spDuration){spStop();toast('⏱ Time is up!','warn');}
   },1000);
 }
 
 function spPause() {
-  spIsRec=false; clearInterval(spTimer); clearTimeout(spRestartTimer);
-  if(spRec){try{spRec.abort();}catch(e){}spRec=null;}
+  _spSessionId++;
+  spIsRec=false; clearInterval(spTimer);
+  if(spRec){spRec.onend=null;spRec.onerror=null;try{spRec.abort();}catch(e){}spRec=null;}
   if(spMediaRec&&spMediaRec.state!=='inactive'){try{spMediaRec.stop();}catch(e){}}
-  spMediaRec=null;
-  if(spMediaStream){try{spMediaStream.getTracks().forEach(t=>t.stop());}catch(e){}spMediaStream=null;}
   const btn=document.getElementById('spBtn');
-  if(btn){btn.classList.remove('rec');btn.textContent='\ud83c\udf99\ufe0f';}
+  if(btn){btn.classList.remove('rec');btn.textContent='🎙️';}
   const st=document.getElementById('spStatus');
-  if(st){st.textContent='\u23f8 Paused \u2014 press \ud83c\udf99\ufe0f to continue';st.className='sp-status';}
+  if(st){st.textContent='⏸ Paused — press 🎙️ to continue';st.className='sp-status';}
 }
 
-function spDoSR() {
-  if(!spIsRec) return;
-  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if(!SR){
-    toast('\u274c Speech not supported. Use Chrome.','error');
+let _spSessionId = 0;
+
+// ── MediaRecorder: records REAL audio → sent to /transcribe for clean text ──
+function spStartMediaRecorder() {
+  spAudioChunks = [];
+  if(spMediaStream && spMediaStream.active){
+    _doStartMR(spMediaStream);
     return;
   }
-  if(spRec){try{spRec.abort();}catch(e){}spRec=null;}
+  navigator.mediaDevices.getUserMedia({audio:true}).then(stream=>{
+    spMediaStream = stream;
+    _doStartMR(stream);
+  }).catch(e=>{ console.warn('MediaRecorder mic denied:', e.message); });
+}
+function _doStartMR(stream){
+  const types = ['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/mp4',''];
+  let mime = '';
+  for(const t of types){ if(t===''||MediaRecorder.isTypeSupported(t)){mime=t;break;} }
+  try{ spMediaRec = mime ? new MediaRecorder(stream,{mimeType:mime}) : new MediaRecorder(stream); }
+  catch(e){ spMediaRec = new MediaRecorder(stream); }
+  spMediaRec.ondataavailable = e=>{ if(e.data&&e.data.size>0) spAudioChunks.push(e.data); };
+  spMediaRec.start(500);
+}
 
-  const r = new SR();
-  r.continuous = false;
-  r.interimResults = true;
-  r.lang = 'en-US';
-  spRec = r;
+// ── SR: live display ──
+function spStartSR() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR || !spIsRec) return;
 
-  r.onstart = function(){
-    if(!spIsRec) return;
-    const st=document.getElementById('spStatus');
-    if(st){st.textContent='\ud83d\udd34 Recording \u2014 speak now...';st.className='sp-status live';}
-  };
+  // Kill any existing instance cleanly
+  if(spRec){
+    spRec.onresult=null; spRec.onend=null; spRec.onerror=null;
+    try{spRec.abort();}catch(e){}
+    spRec=null;
+  }
 
-  r.onresult = function(e){
-    if(!spIsRec) return;
-    let interim='';
-    for(let i=e.resultIndex;i<e.results.length;i++){
+  const rec = new SR();
+  // continuous:false — browser captures one utterance, fires final result, fires onend.
+  // We create a BRAND NEW instance on every onend restart.
+  // Each new instance has a completely empty e.results[] — zero replay possible.
+  rec.continuous     = false;
+  rec.interimResults = true;
+  rec.lang           = 'en-IN';
+  rec.maxAlternatives = 1;
+  spRec = rec;
+
+  rec.onresult = e => {
+    if(!spIsRec || spRec !== rec) return;
+    let interim = '';
+    for(let i = 0; i < e.results.length; i++){
       if(e.results[i].isFinal){
-        const t=e.results[i][0].transcript.trim();
-        if(t) spDisplayText=spDisplayText?spDisplayText+' '+t:t;
+        const t = e.results[i][0].transcript.trim();
+        if(t) spDisplayText = spDisplayText ? spDisplayText+' '+t : t;
       } else {
-        interim+=e.results[i][0].transcript;
+        interim = e.results[i][0].transcript.trim();
       }
     }
-    const tr=document.getElementById('spTranscript');
-    if(tr) tr.innerHTML=spHL(spDisplayText)+(interim?'<span class="sp-interim"> '+interim+'</span>':'');
-    const wc=spDisplayText.trim().split(/\s+/).filter(Boolean).length;
-    const ew=document.getElementById('spWords');if(ew)ew.textContent=wc;
-    const ec=spCountErr(spDisplayText);
-    const errEl=document.getElementById('spErrs');if(errEl)errEl.textContent=ec;
-    const eb=document.getElementById('errBadge');
+    const tr = document.getElementById('spTranscript');
+    if(tr) tr.innerHTML = spHL(spDisplayText)+(interim?'<span class="sp-interim"> '+interim+'</span>':'');
+    const wc = spDisplayText.trim().split(/\s+/).filter(Boolean).length;
+    const ew = document.getElementById('spWords'); if(ew) ew.textContent = wc;
+    const ec = spCountErr(spDisplayText);
+    const errEl = document.getElementById('spErrs'); if(errEl) errEl.textContent = ec;
+    const eb = document.getElementById('errBadge');
     if(eb){eb.textContent=ec+' error'+(ec!==1?'s':'');eb.style.display=ec>0?'block':'none';}
   };
 
-  r.onerror = function(e){
+  rec.onerror = e => {
+    if(spRec !== rec) return;
     if(e.error==='not-allowed'||e.error==='audio-capture'){
-      toast('\u274c Mic blocked. Open Chrome Settings > Site Settings > Microphone and allow this site.','error');
-      spIsRec=false; return;
+      toast('❌ Mic denied','error'); spStop(); return;
     }
-    // other errors handled by onend restart
+    // no-speech / network — non-fatal, onend will fire and create new instance
   };
 
-  r.onend = function(){
-    spRec=null;
+  rec.onend = () => {
+    if(spRec === rec) spRec = null;
     if(!spIsRec) return;
     clearTimeout(spRestartTimer);
-    spRestartTimer=setTimeout(spDoSR, 300);
+    spRestartTimer = setTimeout(()=>{ if(spIsRec && !spRec) spStartSR(); }, 100);
   };
 
-  try{
-    r.start();
-  } catch(ex){
-    spRec=null;
-    clearTimeout(spRestartTimer);
-    spRestartTimer=setTimeout(spDoSR, 500);
-  }
+  try{ rec.start(); }catch(e){ console.warn('SR start:',e.message); }
 }
 
 async function spStop() {
@@ -1824,7 +1862,7 @@ async function spStop() {
       aiResult.errors.forEach(err=>{
         if(err.wrong){
           const rx=new RegExp('(?<![\\w])'+err.wrong.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?![\\w])','gi');
-          const safeRight=(err.right||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');const safeRule=(err.rule||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');highlighted=highlighted.replace(rx,m=>'<span class="sp-eword" data-fix="→ '+safeRight+'" title="'+safeRule+'">'+m+'</span>');
+          highlighted=highlighted.replace(rx,m=>'<span class="sp-eword" data-fix="→ '+err.right+'" title="'+err.rule+'">'+m+'</span>');
         }
       });
       tr.innerHTML=highlighted;
@@ -1924,8 +1962,8 @@ async function spSubmit() {
     const qId=st?st.id:0;
     await POST('/answers',{questionId:qId,studentPin:ME,studentName:MY_NAME,answer:text,type:'speak'});
   }catch(e){}
-  if(ME)await POST('/scores',{pin:ME,name:MY_NAME,points:20,date:today()}).catch(()=>{});
-  toast('✅ Submitted! +20 points 🎉','success');
+  if(ME)await POST('/scores',{pin:ME,name:MY_NAME,points:10,date:today()}).catch(()=>{});
+  toast('✅ Submitted! +10 points 🎉','success');
   loadSpSubmissions();
   spReset();
 }
@@ -1939,10 +1977,10 @@ async function loadSpSubmissions(){
     el.innerHTML=list.map(a=>`
       <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:11px;padding:14px;margin-bottom:10px">
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-          <span style="font-size:13px;font-weight:700;color:#2563eb;font-family:'Bookman Old Style','Bookman',Georgia,serif">${esc(a.studentName||'Student')}</span>
+          <span style="font-size:13px;font-weight:700;color:#2563eb;font-family:'Bookman Old Style','Bookman',Georgia,serif">${a.studentName||'Student'}</span>
           <span style="font-size:10px;color:#64748b">${a.submittedAt?new Date(a.submittedAt).toLocaleString('en-IN',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):''}</span>
         </div>
-        <div style="font-size:14px;color:#1e293b;line-height:1.8;font-family:'Bookman Old Style','Bookman',Georgia,serif;font-weight:500">${esc(a.answer)}</div>
+        <div style="font-size:14px;color:#1e293b;line-height:1.8;font-family:'Bookman Old Style','Bookman',Georgia,serif;font-weight:500">${a.answer}</div>
       </div>`).join('');
   }catch(e){el.innerHTML='<div style="color:#4a5568;font-size:12px;text-align:center;padding:16px">Could not load submissions</div>';}
 }
@@ -2006,7 +2044,7 @@ async function loadGKList(){
     const qAns=(ans||[]).filter(a=>a.questionId===q.id&&(!a.type||a.type==='question'));
     return`<div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
       <div style="font-size:10px;color:#64748b;margin-bottom:4px">📅 ${q.date}</div>
-      <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:6px">${esc(q.question)}</div>
+      <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:6px">${q.question}</div>
       <span style="background:rgba(37,99,235,0.1);color:#60a5fa;border:1px solid rgba(37,99,235,0.25);border-radius:20px;padding:2px 8px;font-size:10px">${qAns.length} answers</span>
       ${q.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-left:5px">✅ Answer set</span>`:
       `<div style="margin-top:8px;display:flex;gap:6px">
@@ -2025,17 +2063,12 @@ async function setGKAns(id){
 
 // GK Bulk Auto-Post
 function today(){
-  // Returns current date in IST (UTC+5:30) as YYYY-MM-DD
+  // Use IST (UTC+5:30) — avoids wrong date near midnight on Indian browsers
   const now = new Date();
-  const ist = new Date(now.getTime() + (5.5 * 60 * 60 * 1000));
+  const ist = new Date(now.getTime() + (5*60 + 30)*60*1000);
   return ist.toISOString().split('T')[0];
 }
-function is5am(){
-  // Returns true at 5 AM IST
-  const now = new Date();
-  const istHour = new Date(now.getTime() + (5.5 * 60 * 60 * 1000)).getUTCHours();
-  return istHour === 5;
-}
+function is5am(){return new Date().getHours()===5;}
 async function getGKSched(){
   try{const r=await GET('/schedule');if(r&&r.empty){_gkCache=null;return null;}_gkCache=r;return r;}
   catch{return _gkCache;}
@@ -2496,12 +2529,12 @@ async function loadSpStudentAnswers(){
       <div style="background:#f8fafc;border:1.5px solid #bfdbfe;border-radius:10px;padding:11px 13px;margin-bottom:9px">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
           <span style="font-size:15px">${i===0?'🥇':i===1?'🥈':i===2?'🥉':'👤'}</span>
-          <span style="font-weight:700;color:#1e40af;font-size:13px">${esc(a.studentName||'Unknown')}</span>
-          <span style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700">PIN: ${esc(a.studentPin||'?')}</span>
+          <span style="font-weight:700;color:#1e40af;font-size:13px">${a.studentName||'Unknown'}</span>
+          <span style="background:#eff6ff;color:#2563eb;border:1px solid #bfdbfe;border-radius:20px;padding:1px 8px;font-size:10px;font-weight:700">PIN: ${a.studentPin||'?'}</span>
           <span style="margin-left:auto;font-size:10px;color:#94a3b8">${a.date||''}</span>
         </div>
         <div style="background:#fff;border:1px solid #e2e8f0;border-radius:7px;padding:8px 10px;font-size:12px;color:#334155;line-height:1.5">
-          💬 ${esc(a.answer||'(no answer)')}
+          💬 ${a.answer||'(no answer)'}
         </div>
       </div>`).join('');
   }catch(e){el.innerHTML='<div style="color:#ef4444;font-size:12px;text-align:center;padding:12px">Error loading answers</div>';}
@@ -2529,7 +2562,7 @@ async function loadWordList(){
     <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
       <div style="font-size:14px;font-weight:700;color:#c4b5fd">${w.word}</div>
       <div style="font-size:10px;color:#64748b">${w.date}</div>
-      <div style="font-size:12px;color:#64748b;margin-top:3px">${esc(w.question)}</div>
+      <div style="font-size:12px;color:#64748b;margin-top:3px">${w.question}</div>
       ${w.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-top:7px;display:inline-block">✅ ${w.answer.substring(0,40)}</span>`:
       `<div style="margin-top:8px;display:flex;gap:6px">
         <input type="text" id="wsans_${w.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
@@ -2564,8 +2597,8 @@ async function loadAffList(){
   el.innerHTML=list.slice().reverse().slice(0,5).map(a=>`
     <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
       <div style="font-size:10px;color:#64748b">${a.date}</div>
-      <div style="font-size:13px;color:#334155;margin-top:3px;line-height:1.5">${esc(a.question)}</div>
-      ${a.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-top:7px;display:inline-block">✅ ${esc(a.answer.substring(0,40))}</span>`:
+      <div style="font-size:13px;color:#334155;margin-top:3px;line-height:1.5">${a.question}</div>
+      ${a.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-top:7px;display:inline-block">✅ ${a.answer.substring(0,40)}</span>`:
       `<div style="margin-top:8px;display:flex;gap:6px">
         <input type="text" id="affans_${a.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
         <button onclick="setAffAns(${a.id})" style="background:#1d4ed8;border:none;border-radius:7px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Set</button>
@@ -2614,7 +2647,7 @@ async function loadTRank(){
     if(prev){
       const pAns=answers.filter(a=>a.questionId===prev.id&&(!a.type||a.type==='question')).sort((a,b)=>new Date(a.submittedAt||0)-new Date(b.submittedAt||0));
       const medals=['🥇','🥈','🥉'],golds=['#FFD700','#C0C0C0','#cd7f32'];
-      fafEl.innerHTML=pAns.slice(0,3).map((a,i)=>`<div class="rank-item" style="border-color:${golds[i]}22"><div class="ri-rank">${medals[i]}</div><div style="flex:1"><div class="ri-name" style="color:${golds[i]}">${esc(a.studentName||'?')}</div><div class="ri-pin">${esc(a.studentPin)}</div></div>${i===0?'<span style="background:rgba(255,215,0,0.1);color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:2px 7px;font-size:9px;font-weight:700">⚡FIRST</span>':''}</div>`).join('')||'<div class="inf">No answers yet</div>';
+      fafEl.innerHTML=pAns.slice(0,3).map((a,i)=>`<div class="rank-item" style="border-color:${golds[i]}22"><div class="ri-rank">${medals[i]}</div><div style="flex:1"><div class="ri-name" style="color:${golds[i]}">${a.studentName||'?'}</div><div class="ri-pin">${a.studentPin}</div></div>${i===0?'<span style="background:rgba(255,215,0,0.1);color:#FFD700;border:1px solid #FFD700;border-radius:20px;padding:2px 7px;font-size:9px;font-weight:700">⚡FIRST</span>':''}</div>`).join('')||'<div class="inf">No answers yet</div>';
     }else fafEl.innerHTML='<div class="inf">No questions yet</div>';
   }
   const actEl=document.getElementById('tActive');
@@ -2892,8 +2925,6 @@ function startSpAutoMachine(){
   },60000);updateSpUI();
 }
 </script>
-<div style="text-align:center;padding:18px 0 24px;font-size:11px;color:#334155;letter-spacing:1.5px;font-weight:600;text-transform:uppercase">
-  Designed by <span style="background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">SATHWIK</span>
-</div>
+
 </body>
 </html>
