@@ -748,7 +748,6 @@ function go(id) {
   if (loginScreens.includes(id)) {
     document.getElementById('appLayout').style.display = 'none';
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('#s-login,#s-teacher-login').forEach(s => s.classList.remove('active'));
     const el = document.getElementById(id); if (el) el.classList.add('active');
     return;
   }
@@ -1080,12 +1079,14 @@ async function showProfileModal(){
       </div>
       <span style="font-size:14px;font-weight:800;color:${col}">+${n*pts} pts</span>
     </div>`;
+    const calcTotal=(mdN+gkN+afN+wdN)*5;
+    if(g('pmScore'))g('pmScore').textContent=calcTotal;
     if(g('pmBreakdown'))g('pmBreakdown').innerHTML=
       row('🎵','Media Question',mdN,5,'#d97706')+
       row('🧠','GK Quiz',gkN,5,'#1E5BFF')+
       row('📰','Current Affairs',afN,5,'#ea580c')+
       row('📖','Word of Day',wdN,5,'#16a34a')+
-      `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 2px;margin-top:2px"><span style="font-size:14px;font-weight:700;color:#1e293b">🏆 Total</span><span style="font-size:20px;font-weight:800;color:#7c3aed">${myTotal} pts</span></div>`;
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 2px;margin-top:2px"><span style="font-size:14px;font-weight:700;color:#1e293b">🏆 Total</span><span style="font-size:20px;font-weight:800;color:#7c3aed">${calcTotal} pts</span></div>`;
   }catch(e){
     if(g('pmPhone'))g('pmPhone').textContent='—';
     if(g('pmBreakdown'))g('pmBreakdown').innerHTML='<div style="color:#dc2626;font-size:12px;text-align:center;padding:6px">Could not load data</div>';
