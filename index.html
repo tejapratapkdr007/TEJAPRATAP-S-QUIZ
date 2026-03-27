@@ -318,7 +318,7 @@ body{overflow-x:hidden;overflow-y:hidden}
     <div style="text-align:center;padding:14px 0 4px;font-size:11px;color:#94a3b8;letter-spacing:1.5px;font-weight:600;text-transform:uppercase;border-top:1px solid #e0e7ff;margin-top:14px">
        <span style="background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800"></span>
       <span style="margin:0 6px;color:#bfdbfe">·</span>
-      <span style="background:linear-gradient(135deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">Designed and Built by CSE Student's</span>
+      <span style="background:linear-gradient(135deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">Design and Built by CSE Student's</span>
     </div>
     </div>
   </div>
@@ -340,7 +340,7 @@ body{overflow-x:hidden;overflow-y:hidden}
     <div style="text-align:center;padding:14px 0 4px;font-size:11px;color:#94a3b8;letter-spacing:1.5px;font-weight:600;text-transform:uppercase;border-top:1px solid #e0e7ff;margin-top:14px">
        <span style="background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800"></span>
       <span style="margin:0 6px;color:#bfdbfe">·</span>
-      <span style="background:linear-gradient(135deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">Designed and Built by CSE Student's</span>
+      <span style="background:linear-gradient(135deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">Design and Built by CSE Student's</span>
     </div>
     </div>
   </div>
@@ -646,9 +646,9 @@ body{overflow-x:hidden;overflow-y:hidden}
 
     <!-- SITE FOOTER -->
     <div style="text-align:center;padding:18px 0 28px;font-size:11px;color:#334155;letter-spacing:1.5px;font-weight:600;text-transform:uppercase;border-top:1px solid #e0e7ff;margin-top:8px">
-       <span style="background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800"></span>
+      Designed by <span style="background:linear-gradient(135deg,#7c3aed,#2563eb);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">SATHWIK</span>
       <span style="margin:0 8px;color:#bfdbfe">·</span>
-      <span style="background:linear-gradient(135deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">Designed and Built by CSE Student</span>
+      <span style="background:linear-gradient(135deg,#2563eb,#06b6d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:800">Design and Built by CSE Student</span>
     </div>
 
   </div><!-- /appMain -->
@@ -748,6 +748,7 @@ function go(id) {
   if (loginScreens.includes(id)) {
     document.getElementById('appLayout').style.display = 'none';
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('#s-login,#s-teacher-login').forEach(s => s.classList.remove('active'));
     const el = document.getElementById(id); if (el) el.classList.add('active');
     return;
   }
@@ -1072,13 +1073,19 @@ async function showProfileModal(){
     const gkN=myAns.filter(a=>!a.type||a.type==='question').length;    const wdN=myAns.filter(a=>a.type==='word').length;
     const afN=myAns.filter(a=>a.type==='affairs').length;
     const mdN=myAns.filter(a=>a.type==='media').length;
-    const row=(ic,lbl,n,pts,col)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f1f5f9"><span style="font-size:13px;color:#1e293b;font-weight:600">${ic} ${lbl} <span style="color:#94a3b8;font-size:11px">(×${n})</span></span><span style="font-size:13px;font-weight:800;color:${col}">+${n*pts} pts</span></div>`;
+    const row=(ic,lbl,n,pts,col)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid #f1f5f9">
+      <div>
+        <div style="font-size:13px;color:#1e293b;font-weight:600">${ic} ${lbl}</div>
+        <div style="font-size:10px;color:#94a3b8;margin-top:1px">${n} answered · ${pts} pts each</div>
+      </div>
+      <span style="font-size:14px;font-weight:800;color:${col}">+${n*pts} pts</span>
+    </div>`;
     if(g('pmBreakdown'))g('pmBreakdown').innerHTML=
+      row('🎵','Media Question',mdN,5,'#d97706')+
       row('🧠','GK Quiz',gkN,5,'#1E5BFF')+
-      row('📖','Word of Day',wdN,5,'#16a34a')+
       row('📰','Current Affairs',afN,5,'#ea580c')+
-      row('🎵','Media',mdN,5,'#d97706')+
-      `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0 2px"><span style="font-size:14px;font-weight:700;color:#1e293b">🏆 Total</span><span style="font-size:18px;font-weight:800;color:#d97706">${myTotal} pts</span></div>`;
+      row('📖','Word of Day',wdN,5,'#16a34a')+
+      `<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0 2px;margin-top:2px"><span style="font-size:14px;font-weight:700;color:#1e293b">🏆 Total</span><span style="font-size:20px;font-weight:800;color:#7c3aed">${myTotal} pts</span></div>`;
   }catch(e){
     if(g('pmPhone'))g('pmPhone').textContent='—';
     if(g('pmBreakdown'))g('pmBreakdown').innerHTML='<div style="color:#dc2626;font-size:12px;text-align:center;padding:6px">Could not load data</div>';
@@ -1288,6 +1295,404 @@ async function loadRank() {
 }
 
 
+// ═══════════════════════════════════════════════════
+// UTILITIES
+// ═══════════════════════════════════════════════════
+function today(){
+  const now=new Date();
+  const ist=new Date(now.getTime()+(5*60+30)*60*1000);
+  return ist.toISOString().split('T')[0];
+}
+function is5am(){return new Date().getHours()===5;}
+
+// ═══════════════════════════════════════════════════
+// TEACHER — GK
+// ═══════════════════════════════════════════════════
+function gkMode(m){
+  const sb=document.getElementById('gkSingle'),bb=document.getElementById('gkBulk');
+  const sbtn=document.getElementById('gkSBtn'),bbtn=document.getElementById('gkBBtn');
+  if(m==='single'){
+    sb.style.display='block';bb.style.display='none';
+    sbtn.style.background='linear-gradient(135deg,#2563eb,#7c3aed)';sbtn.style.color='#fff';
+    bbtn.style.background='#ffffff';bbtn.style.color='#475569';
+  }else{
+    sb.style.display='none';bb.style.display='block';
+    bbtn.style.background='linear-gradient(135deg,#2563eb,#7c3aed)';bbtn.style.color='#fff';
+    sbtn.style.background='#ffffff';sbtn.style.color='#475569';
+    renderGKBulk();updateGKUI();
+  }
+}
+async function postGK(){
+  const q=document.getElementById('gkQ').value.trim();
+  const a=document.getElementById('gkA').value.trim();
+  const op=document.getElementById('gkOp').value.trim();
+  if(!q)return toast('Enter a question!','error');
+  try{
+    const file=document.getElementById('gkFile').files[0];
+    let qf=null,qft=null;
+    if(file){qf=await toB64(file);qft=file.type.startsWith('image/')?'image':'audio';}
+    await POST('/questions',{question:q,answer:a,answerOpinion:op,questionFile:qf,questionFileType:qft});
+    toast('✅ Question posted!','success');
+    ['gkQ','gkA','gkOp'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    document.getElementById('gkFile').value='';document.getElementById('gkPrev').innerHTML='';
+    loadGKList();
+  }catch(e){toast(e.message,'error');}
+}
+async function loadGKList(){
+  const el=document.getElementById('gkList');if(!el)return;
+  const [qs,ans]=await Promise.all([GET('/questions'),GET('/answers')]);
+  const list=Array.isArray(qs)?qs:[];
+  if(!list.length){el.innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:14px">No questions posted yet</div>';return;}
+  el.innerHTML=list.slice().reverse().slice(0,5).map(q=>{
+    const qAns=(ans||[]).filter(a=>a.questionId===q.id&&(!a.type||a.type==='question'));
+    return`<div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
+      <div style="font-size:10px;color:#64748b;margin-bottom:4px">📅 ${q.date}</div>
+      <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:6px">${q.question}</div>
+      <span style="background:rgba(37,99,235,0.1);color:#60a5fa;border:1px solid rgba(37,99,235,0.25);border-radius:20px;padding:2px 8px;font-size:10px">${qAns.length} answers</span>
+      ${q.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-left:5px">✅ Answer set</span>`:
+      `<div style="margin-top:8px;display:flex;gap:6px">
+        <input type="text" id="ga_${q.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
+        <button onclick="setGKAns(${q.id})" style="background:#16a34a;border:none;border-radius:7px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Set</button>
+      </div>`}
+    </div>`;
+  }).join('');
+}
+async function setGKAns(id){
+  const ans=document.getElementById('ga_'+id)?.value.trim();
+  if(!ans)return toast('Enter answer!','error');
+  try{await POST('/questions/'+id+'/answer',{answer:ans});toast('✅ Answer set!','success');loadGKList();}
+  catch(e){toast(e.message,'error');}
+}
+async function getGKSched(){
+  try{const r=await GET('/schedule');if(r&&r.empty){_gkCache=null;return null;}_gkCache=r;return r;}
+  catch{return _gkCache;}
+}
+function updateGKUI(s){
+  if(s===undefined)s=_gkCache;
+  const eng=document.getElementById('apEng'),cnt=document.getElementById('apCnt'),
+    nxt=document.getElementById('apNext'),lst=document.getElementById('apLast'),
+    bar=document.getElementById('apBar'),lbl=document.getElementById('apLbl');
+  if(eng)eng.innerHTML=gkInterval?'<span style="color:#69f0ae">● Running ✅</span>':'<span style="color:#ef4444">⚫ Idle</span>';
+  if(!s){if(cnt)cnt.textContent='0/0';if(nxt)nxt.textContent='—';if(lst)lst.textContent='—';if(bar)bar.style.width='0%';if(lbl)lbl.textContent='No schedule saved';return;}
+  const total=s.questions.length,posted=s.questions.filter(q=>q.posted).length;
+  if(cnt){cnt.textContent=`${posted}/${total}`;cnt.style.color=posted===total?'#69f0ae':'#00e5ff';}
+  const nq=s.questions.find(q=>!q.posted);
+  if(nxt){if(nq){nxt.textContent=nq.date===today()?'⚡TODAY!':new Date(nq.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});nxt.style.color=nq.date===today()?'#69f0ae':'#ffeb3b';}else{nxt.textContent='All done!🎉';nxt.style.color='#69f0ae';}}
+  if(lst)lst.textContent=s.lastAutoPost?`Day ${s.lastAutoPost.day} — ${s.lastAutoPost.time}`:'—';
+  if(bar)bar.style.width=total>0?Math.round(posted/total*100)+'%':'0%';
+  if(lbl)lbl.textContent=`${posted} of ${total} posted`;
+}
+async function renderGKBulk(){
+  const con=document.getElementById('gkBulkFields');if(!con)return;
+  const selEl=document.getElementById('gkCount');
+  if(selEl)_gkCount=parseInt(selEl.value);
+  con.innerHTML='<div class="spin-wrap"><div class="spinner"></div></div>';
+  const s=await getGKSched();const td=today();
+  const count=_gkCount||10;
+  let h=`<div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+    <label style="color:#64748b;font-size:12px">Questions:</label>
+    <select id="gkCount" onchange="changeGKCount()" style="background:#ffffff;color:#1e293b;border:1.5px solid #bfdbfe;border-radius:7px;padding:7px 10px;font-size:13px;font-family:inherit">
+      ${[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===count?' selected':''}>${n}</option>`).join('')}
+    </select></div>`;
+  for(let i=0;i<count;i++){
+    const d=new Date();d.setDate(d.getDate()+i+1);
+    const eq=s?s.questions[i]:null;
+    const date=eq?eq.date:d.toISOString().split('T')[0];
+    const posted=eq&&eq.posted;const isToday=eq&&eq.date===td&&!posted;
+    const dLabel=new Date(date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+    const cls=posted?'bday posted':isToday?'bday today':'bday';
+    const chip=posted?'<span class="chip p">✅ Posted</span>':isToday?'<span class="chip t">⚡ Today</span>':'<span class="chip q">⏳ Pending</span>';
+    h+=`<div class="${cls}"><div class="bday-hdr"><span style="color:${posted?'#22c55e':isToday?'#ea580c':'#7b9fff'}">Day ${i+1} — ${dLabel}</span>${chip}</div>
+      ${posted&&eq.postedAt?`<div style="font-size:10px;color:#22c55e;margin-bottom:5px">Posted: ${eq.postedAt}</div>`:''}
+      <label style="font-size:11px;color:#64748b">Question ${i+1}:</label>
+      <textarea id="bq_${i}" placeholder="Question ${i+1}..." style="min-height:50px" ${posted?'readonly':''}>${eq?eq.question:''}</textarea>
+      <label style="font-size:11px;color:#4ade80;font-weight:700">✅ Answer ${i+1}:</label>
+      <textarea id="ba_${i}" placeholder="Answer..." style="min-height:40px;border-color:#22c55e44" ${posted?'readonly':''}>${eq?eq.answer:''}</textarea>
+      <input type="hidden" id="bd_${i}" value="${date}">
+    </div>`;
+  }
+  con.innerHTML=h;updateGKUI(s);
+}
+function changeGKCount(){renderGKBulk();}
+async function saveGKBulk(){
+  const s=await getGKSched();const qs=[];let valid=true,i=0;
+  while(document.getElementById('bq_'+i)!==null){
+    const qe=document.getElementById('bq_'+i),ae=document.getElementById('ba_'+i),de=document.getElementById('bd_'+i);
+    if(!qe||!ae||!de){i++;continue;}
+    if(s&&s.questions[i]&&s.questions[i].posted){qs.push(s.questions[i]);i++;continue;}
+    if(!qe.value.trim()){toast('Fill Question '+(i+1),'error');valid=false;break;}
+    if(!ae.value.trim()){toast('Fill Answer '+(i+1),'error');valid=false;break;}
+    qs.push({question:qe.value.trim(),answer:ae.value.trim(),date:de.value,posted:false,postedAt:null});
+    i++;
+  }
+  if(!valid)return;
+  try{
+    await fetch(API+'/schedule',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({schedule:{savedOn:new Date().toISOString(),questions:qs,lastAutoPost:s?s.lastAutoPost:null}})});
+    _gkCache=null;startGKMachine();toast(`✅ ${qs.length} questions saved!`,'success');renderGKBulk();
+  }catch(e){toast('Save failed: '+e.message,'error');}
+}
+async function manualGKPost(){
+  const s=await getGKSched();if(!s)return toast('No schedule saved!','warn');
+  const td=today();const idx=s.questions.findIndex(q=>!q.posted&&q.date===td);
+  if(idx===-1)return toast('No question for today or already posted.','info');
+  const q=s.questions[idx];
+  try{
+    const res=await POST('/questions',{question:q.question,answer:null});
+    if(res.question?.id&&q.answer)await fetch(API+'/questions/'+res.question.id+'/answer',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({answer:q.answer})});
+    await fetch(API+'/schedule/mark-posted',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({index:idx,postedAt:new Date().toLocaleString('en-IN')})});
+    _gkCache=null;toast("✅ Today's question posted!",'success');renderGKBulk();loadGKList();
+  }catch(e){toast('Failed: '+e.message,'error');}
+}
+async function resetGKBulk(){
+  if(!confirm('Reset schedule?'))return;
+  await fetch(API+'/schedule',{method:'DELETE'});_gkCache=null;
+  if(gkInterval){clearInterval(gkInterval);gkInterval=null;}
+  toast('🗑️ Reset.','warn');renderGKBulk();
+}
+function startGKMachine(){
+  if(gkInterval)clearInterval(gkInterval);
+  gkInterval=setInterval(async()=>{
+    if(!is5am())return;
+    const s=await getGKSched();if(!s)return;
+    const td=today();const idx=s.questions.findIndex(q=>!q.posted&&q.date===td);
+    if(idx===-1)return;
+    const q=s.questions[idx];
+    try{
+      const res=await POST('/questions',{question:q.question,answer:null});
+      if(res.question?.id&&q.answer)await fetch(API+'/questions/'+res.question.id+'/answer',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({answer:q.answer})});
+      await fetch(API+'/schedule/mark-posted',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({index:idx,postedAt:new Date().toLocaleString('en-IN')})});
+      _gkCache=null;toast("🤖 Auto-Posted today's GK!",'success');loadGKList();
+    }catch(e){}
+    updateGKUI(await getGKSched());
+  },60000);
+  updateGKUI();
+}
+
+// ═══════════════════════════════════════════════════
+// TEACHER — MEDIA UPLOAD
+// ═══════════════════════════════════════════════════
+function dzOver(e,id){e.preventDefault();const el=document.getElementById(id);if(el){el.style.borderColor='#fbbf24';el.classList.add('active');}}
+function dzLeave(id){const el=document.getElementById(id);if(el){el.style.borderColor='#ea580c';el.classList.remove('active');}}
+function dzDrop(e,dzId,inId){
+  e.preventDefault();dzLeave(dzId);
+  const f=e.dataTransfer.files[0];if(!f)return;
+  const inp=document.getElementById(inId);
+  try{const dt=new DataTransfer();dt.items.add(f);inp.files=dt.files;}catch{inp.files=e.dataTransfer.files;}
+  prevMediaFile();
+}
+function prevMediaFile(){
+  const f=document.getElementById('mediaFile').files[0];
+  const p=document.getElementById('mediaPrev');
+  const preview=document.getElementById('mediaUploadPreview');
+  const nameEl=document.getElementById('mediaUploadName');
+  const sizeEl=document.getElementById('mediaUploadSize');
+  const lbl=document.getElementById('mediaDZLabel');
+  if(!f){if(p)p.innerHTML='';if(preview)preview.classList.remove('show');return;}
+  const sizeMB=(f.size/1024/1024).toFixed(2);
+  if(nameEl)nameEl.textContent=f.name;
+  if(sizeEl)sizeEl.textContent=sizeMB+' MB';
+  if(preview)preview.classList.add('show');
+  if(lbl)lbl.textContent='✅ '+f.name;
+  const url=URL.createObjectURL(f);
+  if(f.type.startsWith('image/')){
+    if(p)p.innerHTML=`<img src="${url}" class="media-img" style="margin-top:10px">`;
+  }else if(f.type.startsWith('audio/')){
+    if(p)p.innerHTML=`<audio controls class="media-aud" src="${url}"></audio>`;
+  }else{
+    if(p)p.innerHTML=`<div class="inf" style="margin-top:8px">📎 ${f.name}</div>`;
+  }
+}
+async function postMedia(){
+  const f=document.getElementById('mediaFile').files[0];
+  const q=document.getElementById('mediaQ').value.trim();
+  const a=document.getElementById('mediaA').value.trim();
+  if(!f)return toast('Select an image or audio file!','error');
+  if(!q)return toast('Add a question/caption!','error');
+  if(f.size>3.5*1024*1024)return toast('File too large! Max 3.5 MB.','error');
+  const bar=document.getElementById('mediaUploadBar');
+  const progress=document.getElementById('mediaUploadProgress');
+  if(progress)progress.classList.add('show');
+  if(bar)bar.style.width='30%';
+  toast('Uploading...','info');
+  try{
+    if(bar)bar.style.width='60%';
+    const b64=await toB64(f);
+    if(bar)bar.style.width='85%';
+    const type=f.type.startsWith('image/')?'image':'audio';
+    await POST('/media/text',{question:q,answer:a,caption:f.name,urlOrText:b64,type:type});
+    if(bar)bar.style.width='100%';
+    toast('✅ Media posted!','success');
+    document.getElementById('mediaQ').value='';document.getElementById('mediaA').value='';
+    document.getElementById('mediaFile').value='';
+    document.getElementById('mediaPrev').innerHTML='';
+    document.getElementById('mediaUploadPreview').classList.remove('show');
+    const lbl=document.getElementById('mediaDZLabel');if(lbl)lbl.textContent='Click or Drop File Here';
+    setTimeout(()=>{if(progress)progress.classList.remove('show');if(bar)bar.style.width='0%';},800);
+    loadMediaList();
+  }catch(e){
+    if(progress)progress.classList.remove('show');if(bar)bar.style.width='0%';
+    toast('Upload failed: '+e.message,'error');
+  }
+}
+async function loadMediaList(){
+  const el=document.getElementById('mediaList');if(!el)return;
+  const media=await GET('/media');const list=Array.isArray(media)?media:[];
+  if(!list.length){el.innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:14px">No media posted yet</div>';return;}
+  el.innerHTML=list.slice().reverse().slice(0,5).map(m=>`
+    <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:11px;margin-bottom:10px">
+      <div style="background:#eff6ff;padding:9px 13px;display:flex;align-items:center;gap:8px;border-radius:11px 11px 0 0">
+        <span style="font-size:16px">${m.type==='image'?'🖼️':'🎵'}</span>
+        <span style="flex:1;font-size:12px;font-weight:700;color:#7b9fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.fileName||'Media'}</span>
+        <span style="font-size:10px;color:#64748b;flex-shrink:0">${m.date||''}</span>
+      </div>
+      <div style="padding:12px">
+        ${m.type==='image'?`<img src="${safeImgSrc(m.data,'image')}" class="media-img" onerror="this.style.display='none'">`:`<audio controls class="media-aud" src="${getAudioSrc(m.data)}"></audio>`}
+        ${m.opinion?`<div style="font-size:12px;color:#64748b;margin-top:7px">Q: ${m.opinion}</div>`:''}
+        ${m.expectedAnswer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-top:7px;display:inline-block">✅ Answer set</span>`:
+        `<div style="margin-top:9px;display:flex;gap:6px">
+          <input type="text" id="ma_${m.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
+          <button onclick="setMediaAns(${m.id})" style="background:#16a34a;border:none;border-radius:7px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Set</button>
+        </div>`}
+      </div>
+    </div>`).join('');
+}
+async function setMediaAns(id){
+  const ans=document.getElementById('ma_'+id)?.value.trim();
+  if(!ans)return toast('Enter an answer!','error');
+  try{await POST('/media/'+id+'/answer',{expectedAnswer:ans});toast('✅ Set!','success');loadMediaList();}
+  catch(e){toast(e.message,'error');}
+}
+
+// ═══════════════════════════════════════════════════
+// MEDIA AUTO-POST MACHINE
+// ═══════════════════════════════════════════════════
+let mdAutoInterval = null;
+let _mdCount = 10;
+let _gkCount = 10;
+let _mdFiles = {};
+const MD_SCHED_KEY = 'mdSchedule';
+function getMdSchedLocal(){try{const r=localStorage.getItem(MD_SCHED_KEY);return r?JSON.parse(r):null;}catch{return null;}}
+function saveMdSchedLocal(s){
+  const safe=JSON.parse(JSON.stringify(s));
+  safe.items.forEach(item=>{item.fileData=null;});
+  try{localStorage.setItem(MD_SCHED_KEY,JSON.stringify(safe));}catch{toast('Storage full!','warn');}
+}
+function mdMode(m){
+  const ss=document.getElementById('mdSingle'),bb=document.getElementById('mdBulk');
+  const sb=document.getElementById('mdSBtn'),bbtn=document.getElementById('mdBBtn');
+  if(m==='single'){ss.style.display='block';bb.style.display='none';sb.style.background='linear-gradient(135deg,#ea580c,#c2410c)';sb.style.color='#fff';bbtn.style.background='#ffffff';bbtn.style.color='#475569';}
+  else{ss.style.display='none';bb.style.display='block';bbtn.style.background='linear-gradient(135deg,#ea580c,#c2410c)';bbtn.style.color='#fff';sb.style.background='#ffffff';sb.style.color='#475569';renderMdBulk();updateMdUI();}
+}
+function updateMdUI(s){
+  if(s===undefined)s=getMdSchedLocal();
+  const eng=document.getElementById('mdApEng'),cnt=document.getElementById('mdApCnt'),nxt=document.getElementById('mdApNext'),lst=document.getElementById('mdApLast'),bar=document.getElementById('mdApBar'),lbl=document.getElementById('mdApLbl');
+  if(eng)eng.innerHTML=mdAutoInterval?'<span style="color:#16a34a">● Running</span>':'<span style="color:#dc2626">● Idle</span>';
+  if(!s){if(cnt)cnt.textContent='0/0';if(nxt)nxt.textContent='—';if(lst)lst.textContent='—';if(bar)bar.style.width='0%';if(lbl)lbl.textContent='No schedule saved';return;}
+  const total=s.items.length,posted=s.items.filter(i=>i.posted).length;
+  if(cnt){cnt.textContent=posted+'/'+total;cnt.style.color=posted===total?'#16a34a':'#2563eb';}
+  const nq=s.items.find(i=>!i.posted);
+  if(nxt){if(nq){nxt.textContent=nq.date===today()?'TODAY!':new Date(nq.date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});nxt.style.color=nq.date===today()?'#16a34a':'#d97706';}else{nxt.textContent='All done!';nxt.style.color='#16a34a';}}
+  if(lst)lst.textContent=s.lastPost||'—';
+  if(bar)bar.style.width=total>0?Math.round(posted/total*100)+'%':'0%';
+  if(lbl)lbl.textContent=posted+' of '+total+' scheduled';
+}
+function renderMdBulk(){
+  const con=document.getElementById('mdBulkFields');if(!con)return;
+  const s=getMdSchedLocal();const td=today();
+  const selEl=document.getElementById('mdCount');if(selEl)_mdCount=parseInt(selEl.value);
+  const count=_mdCount;
+  const optHtml=[5,10,15,20,30,40,50,60].map(n=>`<option value="${n}"${n===_mdCount?' selected':''}>${n}</option>`).join('');
+  let h=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px"><label style="color:#334155;font-size:13px;font-weight:700">Days:</label><select id="mdCount" onchange="changeMdCount()" style="background:#fff;color:#1e293b;border:2px solid #93c5fd;border-radius:8px;padding:8px 14px;font-size:13px;font-family:inherit;cursor:pointer">${optHtml}</select></div>`;
+  for(let i=0;i<count;i++){
+    const d=new Date();d.setDate(d.getDate()+i+1);
+    const eq=s?s.items[i]:null;
+    const date=eq?eq.date:d.toISOString().split('T')[0];
+    const posted=eq&&eq.posted;const isToday=eq&&eq.date===td&&!posted;
+    const dLabel=new Date(date+'T00:00:00').toLocaleDateString('en-IN',{weekday:'short',day:'numeric',month:'short'});
+    const cls=posted?'bday posted':isToday?'bday today':'bday';
+    const chip=posted?'<span class="chip p">✅ Posted</span>':isToday?'<span class="chip t">⚡ Today</span>':'<span class="chip q">⏳ Pending</span>';
+    const qVal=eq?(eq.question||'').replace(/"/g,'&quot;'):'';
+    const aVal=eq?(eq.answer||'').replace(/"/g,'&quot;'):'';
+    const memFile=_mdFiles[i];
+    const fName=memFile?memFile.name:(eq&&eq.fileName?eq.fileName+' (re-select after reload)':'No file chosen');
+    h+=`<div class="${cls}">
+      <div class="bday-hdr"><span style="color:${posted?'#16a34a':isToday?'#ea580c':'#d97706'}">Day ${i+1} — ${dLabel}</span>${chip}</div>
+      ${posted&&eq.postedAt?`<div style="font-size:10px;color:#16a34a;margin-bottom:5px">Posted: ${eq.postedAt}</div>`:''}
+      <label style="font-size:11px;color:#334155;font-weight:700">Question / Caption:</label>
+      <input type="text" id="mq_${i}" placeholder="e.g. What do you observe?" style="width:100%;background:#fff;border:2px solid #93c5fd;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none" ${posted?'readonly':''} value="${qVal}">
+      <label style="font-size:11px;color:#334155;font-weight:700">Answer (optional):</label>
+      <input type="text" id="ma2_${i}" placeholder="Expected answer..." style="width:100%;background:#fff;border:2px solid #86efac;border-radius:7px;padding:8px 11px;color:#1e293b;font-size:12px;font-family:inherit;margin:3px 0 7px;outline:none" ${posted?'readonly':''} value="${aVal}">
+      ${posted?'':`
+        <label style="font-size:11px;color:#334155;font-weight:700">Image / Audio (optional):</label>
+        <div style="display:flex;align-items:center;gap:8px;margin:4px 0 6px">
+          <label for="mf_${i}" style="background:#eff6ff;border:2px dashed #93c5fd;border-radius:7px;padding:7px 14px;cursor:pointer;font-size:12px;color:#2563eb;font-weight:700;display:inline-block">Choose File</label>
+          <input type="file" id="mf_${i}" accept="image/*,audio/*" style="display:none" onchange="mdFilePreview(${i})">
+          <span id="mfname_${i}" style="font-size:11px;color:#64748b">${fName}</span>
+        </div>
+        <div id="mfprev_${i}"></div>
+      `}
+      <input type="hidden" id="mdt_${i}" value="${date}">
+    </div>`;
+  }
+  con.innerHTML=h;updateMdUI(s);
+  Object.keys(_mdFiles).forEach(idx=>{
+    const prevEl=document.getElementById('mfprev_'+idx);const nameEl=document.getElementById('mfname_'+idx);
+    if(!prevEl)return;const file=_mdFiles[idx];const url=URL.createObjectURL(file);
+    if(nameEl)nameEl.textContent=file.name+' ('+(file.size/1024).toFixed(0)+' KB)';
+    if(file.type.startsWith('image/')){prevEl.innerHTML=`<img src="${url}" style="max-width:100%;max-height:140px;object-fit:contain;border-radius:7px;margin-top:4px;border:1.5px solid #bfdbfe;display:block">`;}
+    else{prevEl.innerHTML=`<audio controls src="${url}" style="width:100%;margin-top:6px;border-radius:7px"></audio>`;}
+  });
+}
+function changeMdCount(){const sel=document.getElementById('mdCount');if(sel)_mdCount=parseInt(sel.value);renderMdBulk();}
+function mdFilePreview(i){
+  const f=document.getElementById('mf_'+i);if(!f||!f.files[0])return;
+  const file=f.files[0];
+  if(file.size>10*1024*1024){toast('File too large! Max 10MB','error');return;}
+  _mdFiles[i]=file;
+  const nameEl=document.getElementById('mfname_'+i);const prevEl=document.getElementById('mfprev_'+i);
+  if(nameEl)nameEl.textContent=file.name+' ('+(file.size/1024).toFixed(0)+' KB)';
+  const url=URL.createObjectURL(file);
+  if(prevEl){if(file.type.startsWith('image/')){prevEl.innerHTML=`<img src="${url}" style="max-width:100%;max-height:140px;object-fit:contain;border-radius:7px;margin-top:4px;border:1.5px solid #bfdbfe;display:block">`;}
+  else{prevEl.innerHTML=`<audio controls src="${url}" style="width:100%;margin-top:6px;border-radius:7px"></audio>`;}}
+}
+async function saveMdBulk(){
+  const items=[];let valid=true,i=0;const s=getMdSchedLocal();
+  while(document.getElementById('mq_'+i)!==null){
+    const qe=document.getElementById('mq_'+i),ae=document.getElementById('ma2_'+i),dte=document.getElementById('mdt_'+i);
+    if(!qe||!dte){i++;continue;}
+    if(s&&s.items[i]&&s.items[i].posted){items.push(s.items[i]);i++;continue;}
+    if(!qe.value.trim()){toast('Fill Question '+(i+1),'error');valid=false;break;}
+    const fileName=_mdFiles[i]?_mdFiles[i].name:(s&&s.items[i]?s.items[i].fileName:null);
+    const fileType=_mdFiles[i]?(_mdFiles[i].type.startsWith('image/')?'image':'audio'):(s&&s.items[i]?s.items[i].fileType:null);
+    items.push({question:qe.value.trim(),answer:ae?ae.value.trim():'',date:dte.value,posted:false,postedAt:null,fileName,fileType,fileData:null});
+    i++;
+  }
+  if(!valid)return;
+  saveMdSchedLocal({savedOn:new Date().toISOString(),items,lastPost:s?s.lastPost:null});
+  startMdAutoMachine();toast('✅ '+items.length+' days scheduled!','success');renderMdBulk();
+}
+async function manualMdPost(){
+  const s=getMdSchedLocal();if(!s)return toast('No schedule saved!','warn');
+  const td=today();const idx=s.items.findIndex(i=>!i.posted&&i.date===td);
+  if(idx===-1)return toast('No media for today or already posted.','info');
+  const item=s.items[idx];
+  try{
+    let fileData='',fileType='text';
+    if(_mdFiles[idx]){toast('Uploading file...','info');fileData=await toB64(_mdFiles[idx]);fileType=_mdFiles[idx].type.startsWith('image/')?'image':'audio';}
+    await POST('/media/text',{question:item.question,answer:item.answer,caption:item.fileName||'Scheduled',urlOrText:fileData,type:fileType});
+    s.items[idx].posted=true;s.items[idx].postedAt=new Date().toLocaleString('en-IN');
+    s.lastPost='Day '+(idx+1)+' - '+s.items[idx].postedAt;
+    saveMdSchedLocal(s);delete _mdFiles[idx];
+    toast('✅ Media posted!','success');renderMdBulk();loadMediaList();
+  }catch(e){toast('Failed: '+e.message,'error');}
+}
+function resetMdBulk(){
+  if(!confirm('Reset media schedule?'))return;
+  localStorage.removeItem(MD_SCHED_KEY);_mdFiles={};
+  if(mdAutoInterval){clearInterval(mdAutoInterval);mdAutoInterval=null;}
+  toast('Media schedule reset.','warn');renderMdBulk();
+}
+
 function startMdAutoMachine() {
   if (mdAutoInterval) clearInterval(mdAutoInterval);
   mdAutoInterval = setInterval(async () => {
@@ -1309,6 +1714,22 @@ function startMdAutoMachine() {
   updateMdUI();
 }
 
+
+// ═══════════════════════════════════════════════════
+// TEACHER — TAB SWITCHER
+// ═══════════════════════════════════════════════════
+function tTab(id,btn){
+  ['tGK','tMedia','tWord','tAffairs','tPhones','tRank'].forEach(t=>{const el=document.getElementById(t);if(el)el.style.display='none';});
+  document.querySelectorAll('.ttab').forEach(b=>b.classList.remove('on'));
+  const el=document.getElementById(id);if(el)el.style.display='block';
+  if(btn)btn.classList.add('on');
+  if(id==='tGK')loadGKList();
+  if(id==='tMedia')loadMediaList();
+  if(id==='tWord'){loadWordList();updateWUI();}
+  if(id==='tAffairs'){loadAffList();updateAffUI();}
+  if(id==='tPhones')loadPhones();
+  if(id==='tRank')loadTRank();
+}
 
 // ═══════════════════════════════════════════════════
 // TEACHER — WORD
