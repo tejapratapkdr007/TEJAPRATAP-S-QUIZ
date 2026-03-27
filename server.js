@@ -461,7 +461,7 @@ app.post("/transcribe", async (req, res) => {
                 "anthropic-version": "2023-06-01"
             },
             body: JSON.stringify({
-                model: "claude-haiku-4-5-20251001",
+                model: "claude-haiku-4-5",
                 max_tokens: 1024,
                 messages: [{
                     role: "user",
@@ -564,7 +564,7 @@ Respond ONLY with valid JSON, no markdown fences, no text before or after:
                     "anthropic-version": "2023-06-01"
                 },
                 body: JSON.stringify({
-                    model: "claude-haiku-4-5-20251001",
+                    model: "claude-haiku-4-5",
                     max_tokens: 1200,
                     system: SYSTEM,
                     messages: [{ role: "user", content: `Student spoke: "${text.trim()}"\n\nAnalyze and correct ALL mistakes. Return JSON only.` }]
