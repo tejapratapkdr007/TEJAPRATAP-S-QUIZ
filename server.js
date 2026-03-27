@@ -101,7 +101,10 @@ app.post("/scores", (req, res) => {
     if (!pin || !name || !points || !date) return res.status(400).json({ error: "All fields required" });
     if (!studentScores[pin]) studentScores[pin] = { name, scores: [] };
     studentScores[pin].name = name;
-    if (!studentScores[pin].scores.find(s => s.date === date)) {
+    const existingScore = studentScores[pin].scores.find(s => s.date === date);
+    if (existingScore) {
+        existingScore.points += points;
+    } else {
         studentScores[pin].scores.push({ date, points });
     }
     if (!studentStreaks[pin]) {
