@@ -377,6 +377,14 @@ body{overflow-x:hidden;overflow-y:hidden}
         <div class="stat-tile"><div class="st-icon">🔥</div><div class="st-val" id="hStreakHome" style="color:#f97316">0</div><div class="st-lbl">Streak</div></div>
         <div class="stat-tile rk-tile" onclick="go('s-rank')"><div class="st-icon">🏅</div><div class="st-val" style="color:#b45309;font-size:16px">Board</div><div class="st-lbl" style="color:#64748b">Leaderboard</div></div>
       </div>
+      <!-- Top 3 Students — moved to top -->
+      <div style="background:#ffffff;border:1.5px solid rgba(255,215,0,0.3);border-radius:13px;padding:16px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span style="font-size:18px">🏆</span>
+          <div style="font-size:11px;font-weight:700;color:#FFD700;letter-spacing:1.5px;text-transform:uppercase">Top 3 Students</div>
+        </div>
+        <div id="homeTop3"><div style="color:#64748b;font-size:12px;text-align:center;padding:8px">Loading...</div></div>
+      </div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
         <div class="stat-tile md-tile" onclick="go('s-media')" style="display:flex;align-items:center;gap:14px;padding:16px 18px">
           <div style="font-size:28px;flex-shrink:0">🎵</div>
@@ -398,14 +406,6 @@ body{overflow-x:hidden;overflow-y:hidden}
           <div><div class="st-val" style="color:#ffffff;font-size:16px;margin-bottom:1px">Word of the Day</div><div class="st-lbl" style="color:rgba(255,255,255,0.85)">Vocabulary · +5 pts</div></div>
           <div style="margin-left:auto;font-size:18px;color:rgba(255,255,255,0.6)">›</div>
         </div>
-      </div>
-      <!-- Top 3 Students -->
-      <div style="background:#ffffff;border:1.5px solid rgba(255,215,0,0.3);border-radius:13px;padding:16px;margin-bottom:0">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
-          <span style="font-size:18px">🏆</span>
-          <div style="font-size:11px;font-weight:700;color:#FFD700;letter-spacing:1.5px;text-transform:uppercase">Top 3 Students</div>
-        </div>
-        <div id="homeTop3"><div style="color:#64748b;font-size:12px;text-align:center;padding:8px">Loading...</div></div>
       </div>
     </div>
 
@@ -1354,15 +1354,18 @@ async function loadGKList(){
   if(!list.length){el.innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:14px">No questions posted yet</div>';return;}
   el.innerHTML=list.slice().reverse().slice(0,5).map(q=>{
     const qAns=(ans||[]).filter(a=>a.questionId===q.id&&(!a.type||a.type==='question'));
+    const mediaHtml=q.questionFile?(q.questionFileType==='image'?`<img src="${safeImgSrc(q.questionFile,'image')}" style="max-width:100%;max-height:160px;object-fit:contain;border-radius:7px;margin:6px 0;display:block;border:1px solid #dbeafe" onerror="this.style.display='none'">`:`<audio controls src="${getAudioSrc(q.questionFile)}" style="width:100%;margin:6px 0;border-radius:7px"></audio>`):'';
+    const respHtml=qAns.length?qAns.map(a=>`<div style="background:#f8faff;border:1px solid #dbeafe;border-radius:7px;padding:7px 10px;margin-bottom:5px"><div style="font-size:11px;font-weight:700;color:#1e293b">${a.studentName} <span style="font-weight:400;color:#64748b">(${a.studentPin})</span></div><div style="font-size:12px;color:#1e40af;margin-top:2px">${a.answer}</div><div style="font-size:9px;color:#94a3b8;margin-top:2px">${a.date||''}</div></div>`).join(''):'<div style="color:#64748b;font-size:12px;padding:6px">No responses yet</div>';
     return`<div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
       <div style="font-size:10px;color:#64748b;margin-bottom:4px">📅 ${q.date}</div>
-      <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:6px">${q.question}</div>
-      <span style="background:rgba(37,99,235,0.1);color:#60a5fa;border:1px solid rgba(37,99,235,0.25);border-radius:20px;padding:2px 8px;font-size:10px">${qAns.length} answers</span>
-      ${q.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-left:5px">✅ Answer set</span>`:
-      `<div style="margin-top:8px;display:flex;gap:6px">
+      <div style="font-size:13px;font-weight:700;color:#1e293b;margin-bottom:4px">${q.question}</div>
+      ${mediaHtml}
+      ${q.answer?`<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:7px;padding:6px 10px;font-size:12px;color:#15803d;font-weight:600;margin-bottom:6px">✅ Answer: ${q.answer}</div>`:
+      `<div style="margin-top:6px;margin-bottom:6px;display:flex;gap:6px">
         <input type="text" id="ga_${q.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
         <button onclick="setGKAns(${q.id})" style="background:#16a34a;border:none;border-radius:7px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Set</button>
       </div>`}
+      <details style="margin-top:4px"><summary style="cursor:pointer;font-size:11px;font-weight:700;color:#2563eb;background:rgba(37,99,235,0.07);border:1px solid rgba(37,99,235,0.2);border-radius:20px;padding:3px 10px;display:inline-block;list-style:none">👥 ${qAns.length} Student Response${qAns.length!==1?'s':''}</summary><div style="margin-top:8px">${respHtml}</div></details>
     </div>`;
   }).join('');
 }
@@ -1417,12 +1420,38 @@ async function renderGKBulk(){
       <textarea id="bq_${i}" placeholder="Question ${i+1}..." style="min-height:50px" ${posted?'readonly':''}>${eq?eq.question:''}</textarea>
       <label style="font-size:11px;color:#4ade80;font-weight:700">✅ Answer ${i+1}:</label>
       <textarea id="ba_${i}" placeholder="Answer..." style="min-height:40px;border-color:#22c55e44" ${posted?'readonly':''}>${eq?eq.answer:''}</textarea>
+      ${posted?'':`<label style="font-size:11px;color:#64748b;font-weight:700">📎 Image/Audio (optional):</label>
+      <div style="display:flex;align-items:center;gap:8px;margin:3px 0 6px">
+        <label for="bgf_${i}" style="background:#eff6ff;border:2px dashed #93c5fd;border-radius:7px;padding:6px 12px;cursor:pointer;font-size:12px;color:#2563eb;font-weight:700;display:inline-block;white-space:nowrap">Choose File</label>
+        <input type="file" id="bgf_${i}" accept="image/*,audio/*" style="display:none" onchange="gkFilePreview(${i})">
+        <span id="bgfname_${i}" style="font-size:11px;color:#64748b">${_gkFiles[i]?_gkFiles[i].name:'No file chosen'}</span>
+      </div>
+      <div id="bgfprev_${i}"></div>`}
       <input type="hidden" id="bd_${i}" value="${date}">
     </div>`;
   }
   con.innerHTML=h;updateGKUI(s);
+  // Restore file previews for already-chosen files
+  Object.keys(_gkFiles).forEach(idx=>{
+    const prevEl=document.getElementById('bgfprev_'+idx);const nameEl=document.getElementById('bgfname_'+idx);
+    if(!prevEl)return;const file=_gkFiles[idx];const url=URL.createObjectURL(file);
+    if(nameEl)nameEl.textContent=file.name+' ('+(file.size/1024).toFixed(0)+' KB)';
+    if(file.type.startsWith('image/')){prevEl.innerHTML=`<img src="${url}" style="max-width:100%;max-height:130px;object-fit:contain;border-radius:7px;margin-top:4px;border:1.5px solid #bfdbfe;display:block">`;}
+    else{prevEl.innerHTML=`<audio controls src="${url}" style="width:100%;margin-top:5px;border-radius:7px"></audio>`;}
+  });
 }
 function changeGKCount(){renderGKBulk();}
+function gkFilePreview(i){
+  const f=document.getElementById('bgf_'+i);if(!f||!f.files[0])return;
+  const file=f.files[0];
+  if(file.size>10*1024*1024){toast('File too large! Max 10MB','error');return;}
+  _gkFiles[i]=file;
+  const nameEl=document.getElementById('bgfname_'+i);const prevEl=document.getElementById('bgfprev_'+i);
+  if(nameEl)nameEl.textContent=file.name+' ('+(file.size/1024).toFixed(0)+' KB)';
+  const url=URL.createObjectURL(file);
+  if(prevEl){if(file.type.startsWith('image/')){prevEl.innerHTML=`<img src="${url}" style="max-width:100%;max-height:130px;object-fit:contain;border-radius:7px;margin-top:4px;border:1.5px solid #bfdbfe;display:block">`;}
+  else{prevEl.innerHTML=`<audio controls src="${url}" style="width:100%;margin-top:5px;border-radius:7px"></audio>`;}}
+}
 async function saveGKBulk(){
   const s=await getGKSched();const qs=[];let valid=true,i=0;
   while(document.getElementById('bq_'+i)!==null){
@@ -1431,7 +1460,7 @@ async function saveGKBulk(){
     if(s&&s.questions[i]&&s.questions[i].posted){qs.push(s.questions[i]);i++;continue;}
     if(!qe.value.trim()){toast('Fill Question '+(i+1),'error');valid=false;break;}
     if(!ae.value.trim()){toast('Fill Answer '+(i+1),'error');valid=false;break;}
-    qs.push({question:qe.value.trim(),answer:ae.value.trim(),date:de.value,posted:false,postedAt:null});
+    qs.push({question:qe.value.trim(),answer:ae.value.trim(),date:de.value,posted:false,postedAt:null,fileName:_gkFiles[i]?_gkFiles[i].name:null,fileType:_gkFiles[i]?(_gkFiles[i].type.startsWith('image/')?'image':'audio'):null});
     i++;
   }
   if(!valid)return;
@@ -1446,10 +1475,12 @@ async function manualGKPost(){
   if(idx===-1)return toast('No question for today or already posted.','info');
   const q=s.questions[idx];
   try{
-    const res=await POST('/questions',{question:q.question,answer:null});
+    let qf=null,qft=null;
+    if(_gkFiles[idx]){toast('Uploading file...','info');qf=await toB64(_gkFiles[idx]);qft=_gkFiles[idx].type.startsWith('image/')?'image':'audio';}
+    const res=await POST('/questions',{question:q.question,answer:null,questionFile:qf,questionFileType:qft});
     if(res.question?.id&&q.answer)await fetch(API+'/questions/'+res.question.id+'/answer',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({answer:q.answer})});
     await fetch(API+'/schedule/mark-posted',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({index:idx,postedAt:new Date().toLocaleString('en-IN')})});
-    _gkCache=null;toast("✅ Today's question posted!",'success');renderGKBulk();loadGKList();
+    _gkCache=null;delete _gkFiles[idx];toast("✅ Today's question posted!",'success');renderGKBulk();loadGKList();
   }catch(e){toast('Failed: '+e.message,'error');}
 }
 async function resetGKBulk(){
@@ -1467,10 +1498,12 @@ function startGKMachine(){
     if(idx===-1)return;
     const q=s.questions[idx];
     try{
-      const res=await POST('/questions',{question:q.question,answer:null});
+      let qf=null,qft=null;
+      if(_gkFiles[idx]){qf=await toB64(_gkFiles[idx]);qft=_gkFiles[idx].type.startsWith('image/')?'image':'audio';}
+      const res=await POST('/questions',{question:q.question,answer:null,questionFile:qf,questionFileType:qft});
       if(res.question?.id&&q.answer)await fetch(API+'/questions/'+res.question.id+'/answer',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({answer:q.answer})});
       await fetch(API+'/schedule/mark-posted',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({index:idx,postedAt:new Date().toLocaleString('en-IN')})});
-      _gkCache=null;toast("🤖 Auto-Posted today's GK!",'success');loadGKList();
+      _gkCache=null;delete _gkFiles[idx];toast("🤖 Auto-Posted today's GK!",'success');loadGKList();
     }catch(e){}
     updateGKUI(await getGKSched());
   },60000);
@@ -1545,10 +1578,12 @@ async function postMedia(){
 }
 async function loadMediaList(){
   const el=document.getElementById('mediaList');if(!el)return;
-  const media=await GET('/media');const list=Array.isArray(media)?media:[];
+  const [media,ans]=await Promise.all([GET('/media'),GET('/answers')]);const list=Array.isArray(media)?media:[];
   if(!list.length){el.innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:14px">No media posted yet</div>';return;}
-  el.innerHTML=list.slice().reverse().slice(0,5).map(m=>`
-    <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:11px;margin-bottom:10px">
+  el.innerHTML=list.slice().reverse().slice(0,5).map(m=>{
+    const mAns=(ans||[]).filter(a=>a.questionId===m.id&&a.type==='media');
+    const respHtml=mAns.length?mAns.map(a=>`<div style="background:#f8faff;border:1px solid #dbeafe;border-radius:7px;padding:7px 10px;margin-bottom:5px"><div style="font-size:11px;font-weight:700;color:#1e293b">${a.studentName} <span style="font-weight:400;color:#64748b">(${a.studentPin})</span></div><div style="font-size:12px;color:#1e40af;margin-top:2px">${a.answer}</div><div style="font-size:9px;color:#94a3b8;margin-top:2px">${a.date||''}</div></div>`).join(''):'<div style="color:#64748b;font-size:12px;padding:6px">No responses yet</div>';
+    return`<div style="background:#ffffff;border:1px solid #dbeafe;border-radius:11px;margin-bottom:10px">
       <div style="background:#eff6ff;padding:9px 13px;display:flex;align-items:center;gap:8px;border-radius:11px 11px 0 0">
         <span style="font-size:16px">${m.type==='image'?'🖼️':'🎵'}</span>
         <span style="flex:1;font-size:12px;font-weight:700;color:#7b9fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${m.fileName||'Media'}</span>
@@ -1556,14 +1591,16 @@ async function loadMediaList(){
       </div>
       <div style="padding:12px">
         ${m.type==='image'?`<img src="${safeImgSrc(m.data,'image')}" class="media-img" onerror="this.style.display='none'">`:`<audio controls class="media-aud" src="${getAudioSrc(m.data)}"></audio>`}
-        ${m.opinion?`<div style="font-size:12px;color:#64748b;margin-top:7px">Q: ${m.opinion}</div>`:''}
-        ${m.expectedAnswer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-top:7px;display:inline-block">✅ Answer set</span>`:
+        ${m.opinion?`<div style="font-size:12px;font-weight:600;color:#1e293b;margin-top:7px">Q: ${m.opinion}</div>`:''}
+        ${m.expectedAnswer?`<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:7px;padding:5px 10px;font-size:12px;color:#15803d;font-weight:600;margin-top:6px">✅ Answer: ${m.expectedAnswer}</div>`:
         `<div style="margin-top:9px;display:flex;gap:6px">
           <input type="text" id="ma_${m.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
           <button onclick="setMediaAns(${m.id})" style="background:#16a34a;border:none;border-radius:7px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Set</button>
         </div>`}
+        <details style="margin-top:8px"><summary style="cursor:pointer;font-size:11px;font-weight:700;color:#ea580c;background:rgba(234,88,12,0.07);border:1px solid rgba(234,88,12,0.2);border-radius:20px;padding:3px 10px;display:inline-block;list-style:none">👥 ${mAns.length} Student Response${mAns.length!==1?'s':''}</summary><div style="margin-top:8px">${respHtml}</div></details>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 async function setMediaAns(id){
   const ans=document.getElementById('ma_'+id)?.value.trim();
@@ -1577,6 +1614,7 @@ async function setMediaAns(id){
 // ═══════════════════════════════════════════════════
 let mdAutoInterval = null;
 let _mdCount = 10;
+let _gkFiles = {};
 let _gkCount = 10;
 let _mdFiles = {};
 const MD_SCHED_KEY = 'mdSchedule';
@@ -1756,19 +1794,23 @@ async function postWord(){
 }
 async function loadWordList(){
   const el=document.getElementById('wordList');if(!el)return;
-  const words=await GET('/word');const list=Array.isArray(words)?words:[];
+  const [words,ans]=await Promise.all([GET('/word'),GET('/answers')]);const list=Array.isArray(words)?words:[];
   if(!list.length){el.innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:14px">No words posted yet</div>';return;}
-  el.innerHTML=list.slice().reverse().slice(0,5).map(w=>`
-    <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
-      <div style="font-size:14px;font-weight:700;color:#c4b5fd">${w.word}</div>
-      <div style="font-size:10px;color:#64748b">${w.date}</div>
-      <div style="font-size:12px;color:#64748b;margin-top:3px">${w.question}</div>
-      ${w.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-top:7px;display:inline-block">✅ ${w.answer.substring(0,40)}</span>`:
+  el.innerHTML=list.slice().reverse().slice(0,5).map(w=>{
+    const wAns=(ans||[]).filter(a=>a.questionId===w.id&&a.type==='word');
+    const respHtml=wAns.length?wAns.map(a=>`<div style="background:#f8faff;border:1px solid #dbeafe;border-radius:7px;padding:7px 10px;margin-bottom:5px"><div style="font-size:11px;font-weight:700;color:#1e293b">${a.studentName} <span style="font-weight:400;color:#64748b">(${a.studentPin})</span></div><div style="font-size:12px;color:#1e40af;margin-top:2px">${a.answer}</div><div style="font-size:9px;color:#94a3b8;margin-top:2px">${a.date||''}</div></div>`).join(''):'<div style="color:#64748b;font-size:12px;padding:6px">No responses yet</div>';
+    return`<div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
+      <div style="font-size:14px;font-weight:700;color:#7c3aed">${w.word}</div>
+      <div style="font-size:10px;color:#334155;font-weight:600">${w.date}</div>
+      <div style="font-size:13px;color:#1e293b;font-weight:600;margin-top:4px;line-height:1.5">${w.question}</div>
+      ${w.answer?`<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:7px;padding:5px 10px;font-size:12px;color:#15803d;font-weight:600;margin-top:6px">✅ Answer: ${w.answer}</div>`:
       `<div style="margin-top:8px;display:flex;gap:6px">
         <input type="text" id="wsans_${w.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
         <button onclick="setWordAns(${w.id})" style="background:#7c3aed;border:none;border-radius:7px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Set</button>
       </div>`}
-    </div>`).join('');
+      <details style="margin-top:8px"><summary style="cursor:pointer;font-size:11px;font-weight:700;color:#7c3aed;background:rgba(124,58,237,0.07);border:1px solid rgba(124,58,237,0.2);border-radius:20px;padding:3px 10px;display:inline-block;list-style:none">👥 ${wAns.length} Student Response${wAns.length!==1?'s':''}</summary><div style="margin-top:8px">${respHtml}</div></details>
+    </div>`;
+  }).join('');
 }
 async function setWordAns(id){
   const ans=document.getElementById('wsans_'+id)?.value.trim();
@@ -1792,18 +1834,22 @@ async function postAffairs(){
 }
 async function loadAffList(){
   const el=document.getElementById('affList');if(!el)return;
-  const aff=await GET('/affairs');const list=Array.isArray(aff)?aff:[];
+  const [aff,ans]=await Promise.all([GET('/affairs'),GET('/answers')]);const list=Array.isArray(aff)?aff:[];
   if(!list.length){el.innerHTML='<div style="color:#64748b;font-size:12px;text-align:center;padding:14px">No affairs posted yet</div>';return;}
-  el.innerHTML=list.slice().reverse().slice(0,5).map(a=>`
-    <div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
-      <div style="font-size:10px;color:#64748b">${a.date}</div>
-      <div style="font-size:13px;color:#334155;margin-top:3px;line-height:1.5">${a.question}</div>
-      ${a.answer?`<span style="background:#0a2f14;color:#22c55e;border:1px solid #22c55e;border-radius:20px;padding:2px 8px;font-size:10px;margin-top:7px;display:inline-block">✅ ${a.answer.substring(0,40)}</span>`:
+  el.innerHTML=list.slice().reverse().slice(0,5).map(a=>{
+    const aAns=(ans||[]).filter(x=>x.questionId===a.id&&x.type==='affairs');
+    const respHtml=aAns.length?aAns.map(x=>`<div style="background:#f8faff;border:1px solid #dbeafe;border-radius:7px;padding:7px 10px;margin-bottom:5px"><div style="font-size:11px;font-weight:700;color:#1e293b">${x.studentName} <span style="font-weight:400;color:#64748b">(${x.studentPin})</span></div><div style="font-size:12px;color:#1e40af;margin-top:2px">${x.answer}</div><div style="font-size:9px;color:#94a3b8;margin-top:2px">${x.date||''}</div></div>`).join(''):'<div style="color:#64748b;font-size:12px;padding:6px">No responses yet</div>';
+    return`<div style="background:#ffffff;border:1px solid #dbeafe;border-radius:9px;padding:12px;margin-bottom:9px">
+      <div style="font-size:10px;color:#64748b;font-weight:600">${a.date}</div>
+      <div style="font-size:13px;font-weight:600;color:#1e293b;margin-top:4px;line-height:1.5">${a.question}</div>
+      ${a.answer?`<div style="background:#f0fdf4;border:1px solid #86efac;border-radius:7px;padding:5px 10px;font-size:12px;color:#15803d;font-weight:600;margin-top:6px">✅ Answer: ${a.answer}</div>`:
       `<div style="margin-top:8px;display:flex;gap:6px">
         <input type="text" id="affans_${a.id}" placeholder="Set answer..." style="flex:1;background:#ffffff;border:1.5px solid #bfdbfe;border-radius:7px;padding:6px 10px;color:#1e293b;font-size:12px;font-family:inherit;outline:none">
         <button onclick="setAffAns(${a.id})" style="background:#1d4ed8;border:none;border-radius:7px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer">Set</button>
       </div>`}
-    </div>`).join('');
+      <details style="margin-top:8px"><summary style="cursor:pointer;font-size:11px;font-weight:700;color:#1d4ed8;background:rgba(29,78,216,0.07);border:1px solid rgba(29,78,216,0.2);border-radius:20px;padding:3px 10px;display:inline-block;list-style:none">👥 ${aAns.length} Student Response${aAns.length!==1?'s':''}</summary><div style="margin-top:8px">${respHtml}</div></details>
+    </div>`;
+  }).join('');
 }
 async function setAffAns(id){
   const ans=document.getElementById('affans_'+id)?.value.trim();
