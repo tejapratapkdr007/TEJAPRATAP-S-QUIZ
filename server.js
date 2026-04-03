@@ -126,11 +126,30 @@ app.post("/scores", (req, res) => {
 app.get("/questions", (req, res) => res.json(questions));
 
 app.post("/questions", (req, res) => {
-    const { question, answer } = req.body;
+    const { question, answer, answerOpinion, questionFile, questionFileType } = req.body;
     if (!question) return res.status(400).json({ error: "Question is required" });
+
+    // Save attached image/audio to disk if provided
+    let fileUrl = null;
+    if (questionFile && questionFileType) {
+        try {
+            const base64Data = questionFile.includes(',') ? questionFile.split(',')[1] : questionFile;
+            const ext = questionFileType === 'audio' ? 'mp3' : 'jpg';
+            const uniqueName = `gk_${Date.now()}.${ext}`;
+            const filePath = path.join(UPLOADS_DIR, uniqueName);
+            fs.writeFileSync(filePath, Buffer.from(base64Data, 'base64'));
+            fileUrl = `/uploads/${uniqueName}`;
+        } catch(e) {
+            console.error('GK file save error:', e.message);
+        }
+    }
+
     const newQuestion = {
         id: Date.now(), question,
         answer: (answer && answer.trim()) ? answer.trim() : null,
+        answerOpinion: answerOpinion || null,
+        questionFile: fileUrl || (questionFile && questionFile.length < 500000 ? questionFile : null),
+        questionFileType: questionFileType || null,
         date: new Date().toLocaleString("en-IN", { timeZone: "Asia/Kolkata" })
     };
     questions.push(newQuestion);
