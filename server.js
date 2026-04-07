@@ -342,7 +342,9 @@ app.get("/health", (req, res) => res.json({ status: "OK", timestamp: new Date().
 app.get("/api", (req, res) => res.json({ message: "TEJAPRATAP QUIZ API v5.0", status: "running" }));
 
 app.post("/admin/reset-all", (req, res) => {
-    if (req.body.confirmPassword !== "RESET_ALL_DATA_TEJAPRATAP") return res.status(403).json({ error: "Wrong password" });
+    const ADMIN_PASSWORD = process.env.ADMIN_RESET_PASSWORD;
+    if (!ADMIN_PASSWORD) return res.status(500).json({ error: "Admin password not configured on server" });
+    if (req.body.confirmPassword !== ADMIN_PASSWORD) return res.status(403).json({ error: "Wrong password" });
     questions = []; studentAnswers = []; mediaFiles = []; studentPhones = {};
     bulkSchedule = null; studentScores = {}; studentStreaks = {};
     wordItems = []; affairsItems = []; mediaSchedule = null; wordSchedule = null; affairsSchedule = null;
