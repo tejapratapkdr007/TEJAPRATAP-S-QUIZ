@@ -341,6 +341,16 @@ app.get("/health", (req, res) => res.json({ status: "OK", timestamp: new Date().
 
 app.get("/api", (req, res) => res.json({ message: "TEJAPRATAP QUIZ API v5.0", status: "running" }));
 
+// =====================================================
+// TEACHER AUTH — password verified server-side only
+// =====================================================
+app.post("/admin/verify-teacher", (req, res) => {
+    const TEACHER_PASSWORD = process.env.TEACHER_PASSWORD || process.env.ADMIN_RESET_PASSWORD;
+    if (!TEACHER_PASSWORD) return res.status(500).json({ error: "Teacher password not configured on server" });
+    if (req.body.password !== TEACHER_PASSWORD) return res.status(403).json({ success: false, error: "Wrong password" });
+    res.json({ success: true });
+});
+
 app.post("/admin/reset-all", (req, res) => {
     const ADMIN_PASSWORD = process.env.ADMIN_RESET_PASSWORD;
     if (!ADMIN_PASSWORD) return res.status(500).json({ error: "Admin password not configured on server" });
