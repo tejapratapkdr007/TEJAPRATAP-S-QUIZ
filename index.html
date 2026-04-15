@@ -711,7 +711,7 @@ body{overflow-x:hidden;overflow-y:hidden}
 // ═══════════════════════════════════════════════════
 const API = 'https://tejapratap-s-quiz.onrender.com';
 let ME = null, MY_NAME = null, IS_T = false;
-let T_PW = localStorage.getItem('tpw') || '11223344@Ttp';
+let T_PW = null; // Password never stored in frontend — verified server-side
 let _gkCache = null, gkInterval = null;
 // Audio recording globals
 let spMediaRec = null, spAudioChunks = [], spMediaStream = null;
@@ -887,8 +887,18 @@ function doLogin() {
 }
 function doTLogin() {
   const pw = document.getElementById('tPw').value;
-  if (pw !== T_PW) return toast('Wrong password!','error');
-  IS_T = true; localStorage.setItem('teacher','1'); enterTeacher();
+  if (!pw) return toast('Enter password!','error');
+  // Verify password server-side — never compare in frontend
+  fetch(API+'/admin/verify-teacher',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password:pw})})
+    .then(r=>r.json())
+    .then(data=>{
+      if(data.success){
+        IS_T = true; localStorage.setItem('teacher','1'); enterTeacher();
+      } else {
+        toast('Wrong password!','error');
+      }
+    })
+    .catch(()=>toast('Login failed. Check connection.','error'));
 }
 function doLogout() {
   ME = null; MY_NAME = null;
@@ -1110,7 +1120,7 @@ async function loadQuiz() {
   </div>`;
   if (myAns) {
     h += `<div class="ok">✅ Your answer: <strong>${myAns.answer}</strong></div>`;
-    if (q.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Correct Answer</div><p style="font-size:15px;color:#86efac;font-weight:700;margin-top:4px">${q.answer}</p>${q.answerOpinion?`<div style="margin-top:10px;padding:10px;background:rgba(167,139,250,0.06);border-left:3px solid #a78bfa;border-radius:7px;color:#d4b8ff;font-size:13px;line-height:1.6">💬 ${q.answerOpinion}</div>`:''}</div>`;
+    if (q.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#15803d">✅ Correct Answer</div><p style="font-size:15px;color:#14532d;font-weight:700;margin-top:4px">${q.answer}</p>${q.answerOpinion?`<div style="margin-top:10px;padding:10px;background:rgba(124,58,237,0.08);border-left:3px solid #7c3aed;border-radius:7px;color:#4c1d95;font-size:13px;line-height:1.6">💬 ${q.answerOpinion}</div>`:''}</div>`;
     else h += `<div class="inf">⏳ Teacher hasn't revealed the answer yet</div>`;
     const total = (ans||[]).filter(a=>a.questionId===q.id&&(!a.type||a.type==='question')).length;
     h += `<div class="inf">👥 ${total} student${total!==1?'s':''} answered</div>`;
@@ -1204,10 +1214,10 @@ async function loadWordStudent() {
   if (!list.length) { body.innerHTML = '<div class="spin-wrap" style="color:#64748b">📖 No word posted yet</div>'; return; }
   const w = list[list.length-1];
   const myAns = (ans||[]).find(a=>a.questionId===w.id&&a.studentPin===ME&&a.type==='word');
-  let h = `<div class="card pu"><div class="card-lbl">📅 ${w.date}</div><div style="font-size:30px;font-weight:800;color:#c4b5fd;margin-bottom:7px;font-family:'Syne',sans-serif">${w.word}</div><p style="font-size:14px;color:var(--text);line-height:1.6">${w.question}</p></div>`;
+  let h = `<div class="card pu"><div class="card-lbl">📅 ${w.date}</div><div style="font-size:30px;font-weight:800;color:#5b21b6;margin-bottom:7px;font-family:'Syne',sans-serif">${w.word}</div><p style="font-size:14px;color:#1e293b;line-height:1.6;font-weight:600">${w.question}</p></div>`;
   if (myAns) {
     h += `<div class="ok">✅ Your answer: ${myAns.answer}</div>`;
-    if (w.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="font-size:14px;color:#86efac;line-height:1.6;margin-top:4px">${w.answer}</p></div>`;
+    if (w.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#15803d">✅ Answer</div><p style="font-size:14px;color:#14532d;line-height:1.6;font-weight:600;margin-top:4px">${w.answer}</p></div>`;
     else h += `<div class="inf">⏳ Answer not revealed yet</div>`;
   } else {
     h += `<div class="card"><div class="card-lbl">📝 Your Answer</div><div class="fg" style="margin-top:8px"><textarea id="wAns" placeholder="Your answer..."></textarea></div><button class="btn pur block" onclick="submitWord(${w.id})">📤 Submit</button></div>`;
@@ -1238,7 +1248,7 @@ async function loadAffairsStudent() {
   let h = `<div class="card am"><div class="card-lbl">📅 ${a.date}</div><div class="card-ttl" style="color:#fbbf24">📰 Current Affairs</div><p style="font-size:15px;color:var(--text);line-height:1.6;margin-top:8px">${a.question}</p></div>`;
   if (myAns) {
     h += `<div class="ok">✅ Your answer: ${myAns.answer}</div>`;
-    if (a.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#4ade80">✅ Answer</div><p style="font-size:14px;color:#86efac;font-weight:700;margin-top:4px">${a.answer}</p></div>`;
+    if (a.answer) h += `<div class="card gr"><div class="card-lbl" style="color:#15803d">✅ Answer</div><p style="font-size:14px;color:#14532d;font-weight:700;margin-top:4px">${a.answer}</p></div>`;
     else h += `<div class="inf">⏳ Answer not revealed yet</div>`;
   } else {
     h += `<div class="card"><div class="card-lbl">📝 Your Answer</div><div class="fg" style="margin-top:8px"><textarea id="affAns" placeholder="Your answer..."></textarea></div><button class="btn amb block" onclick="submitAffairs(${a.id})">📤 Submit</button></div>`;
