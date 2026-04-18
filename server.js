@@ -1,4 +1,4 @@
-const express = require("express");
+ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
@@ -345,15 +345,13 @@ app.get("/api", (req, res) => res.json({ message: "TEJAPRATAP QUIZ API v5.0", st
 // TEACHER AUTH — password verified server-side only
 // =====================================================
 app.post("/admin/verify-teacher", (req, res) => {
-    const TEACHER_PASSWORD = process.env.TEACHER_PASSWORD || process.env.ADMIN_RESET_PASSWORD;
-    if (!TEACHER_PASSWORD) return res.status(500).json({ error: "Teacher password not configured on server" });
+    const TEACHER_PASSWORD = process.env.TEACHER_PASSWORD || process.env.ADMIN_RESET_PASSWORD || "112233@Ttp";
     if (req.body.password !== TEACHER_PASSWORD) return res.status(403).json({ success: false, error: "Wrong password" });
     res.json({ success: true });
 });
 
 app.post("/admin/reset-all", (req, res) => {
-    const ADMIN_PASSWORD = process.env.ADMIN_RESET_PASSWORD;
-    if (!ADMIN_PASSWORD) return res.status(500).json({ error: "Admin password not configured on server" });
+    const ADMIN_PASSWORD = process.env.ADMIN_RESET_PASSWORD || "112233@Ttp";
     if (req.body.confirmPassword !== ADMIN_PASSWORD) return res.status(403).json({ error: "Wrong password" });
     questions = []; studentAnswers = []; mediaFiles = []; studentPhones = {};
     bulkSchedule = null; studentScores = {}; studentStreaks = {};
